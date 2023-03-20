@@ -1,5 +1,4 @@
 # fp-oversikt
-===============
 
 [![Bygg og deploy](https://github.com/navikt/fp-oversikt/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/navikt/fp-oversikt/actions/workflows/build.yml)
 [![Promote](https://github.com/navikt/fp-oversikt/actions/workflows/promote.yml/badge.svg?branch=master)](https://github.com/navikt/fp-oversikt/actions/workflows/promote.yml)
