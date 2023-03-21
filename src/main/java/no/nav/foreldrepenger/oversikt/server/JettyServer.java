@@ -29,8 +29,8 @@ public class JettyServer {
     private static final Environment ENV = Environment.current();
 
     private static final String CONTEXT_PATH = "/fpoversikt";
-    private static final String JETTY_SCAN_LOCATIONS = "^.*jersey-.*\\.jar$|^.*felles-.*\\.jar$|^.*/*oversikt*\\.jar$";
-    private static final String JETTY_LOCAL_CLASSES = "^.*|";
+    private static final String JETTY_SCAN_LOCATIONS = "^.*jersey-.*\\.jar$|^.*felles-.*\\.jar$|^.*oversikt.*\\.jar$";
+    private static final String JETTY_LOCAL_CLASSES = "^.*/target/classes/|";
     private final Integer serverPort;
 
     JettyServer(int serverPort) {
@@ -66,7 +66,6 @@ public class JettyServer {
 
         // Scanns the CLASSPATH for classes and jars.
         ctx.setAttribute(CONTAINER_JAR_PATTERN, String.format("%s%s", ENV.isLocal() ? JETTY_LOCAL_CLASSES : "", JETTY_SCAN_LOCATIONS));
-
         ctx.setThrowUnavailableOnStartupException(true);
 
         return ctx;
