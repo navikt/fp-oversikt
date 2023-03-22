@@ -1,28 +1,34 @@
 package no.nav.foreldrepenger.oversikt.server;
 
+import static javax.servlet.DispatcherType.REQUEST;
+import static no.nav.vedtak.sikkerhet.oidc.config.OpenIDProvider.TOKENX;
 import static org.eclipse.jetty.webapp.MetaInfConfiguration.CONTAINER_JAR_PATTERN;
 
-import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.eclipse.jetty.server.Connector;
-import org.eclipse.jetty.server.HttpConfiguration;
-import org.eclipse.jetty.server.HttpConnectionFactory;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.util.resource.Resource;
+import org.eclipse.jetty.servlet.FilterHolder;
+import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.MDC;
 
 import no.nav.foreldrepenger.konfig.Environment;
+import no.nav.security.token.support.core.configuration.IssuerProperties;
+import no.nav.security.token.support.core.configuration.MultiIssuerConfiguration;
+import no.nav.security.token.support.jaxrs.servlet.JaxrsJwtTokenValidationFilter;
 
 public class JettyServer {
 
@@ -47,36 +53,34 @@ public class JettyServer {
         return new JettyServer(ENV.getProperty("server.port", Integer.class, 8080));
     }
 
-    private static ContextHandler createContext() throws IOException {
+    private static ContextHandler createContext() {
         var ctx = new WebAppContext();
         ctx.setParentLoaderPriority(true);
 
-        // må hoppe litt bukk for å hente web.xml fra classpath i stedet for fra filsystem.
-        String descriptor;
-        try (var resource = Resource.newClassPathResource("/WEB-INF/web.xml")) {
-            descriptor = resource.getURI().toURL().toExternalForm();
-        }
-        ctx.setDescriptor(descriptor);
-
-        ctx.setContextPath("/fpoversikt");
         ctx.setResourceBase(".");
         ctx.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
         ctx.setInitParameter("pathInfoOnly", "true");
 
         // Scanns the CLASSPATH for classes and jars.
         ctx.setAttribute(CONTAINER_JAR_PATTERN, String.format("%s%s", ENV.isLocal() ? JETTY_LOCAL_CLASSES : "", JETTY_SCAN_LOCATIONS));
+
         ctx.setThrowUnavailableOnStartupException(true);
 
+        addTokenValidationFilter(ctx);
         return ctx;
     }
 
-    private static HttpConfiguration createHttpConfiguration() {
-        // Create HTTP Config
-        var httpConfig = new HttpConfiguration();
-        // Add support for X-Forwarded headers
-        httpConfig.addCustomizer(new org.eclipse.jetty.server.ForwardedRequestCustomizer());
-        return httpConfig;
+    private static void addTokenValidationFilter(ServletContextHandler ctx) {
+        ctx.addFilter(new FilterHolder(new JaxrsJwtTokenValidationFilter(config())), "/*", EnumSet.of(REQUEST));
+    }
 
+    private static MultiIssuerConfiguration config() {
+        return new MultiIssuerConfiguration(Map.of(TOKENX.name(), issuerProperties()));
+    }
+
+    private static IssuerProperties issuerProperties() {
+        return new IssuerProperties(ENV.getRequiredProperty("token.x.well.known.url", URL.class),
+            List.of(ENV.getRequiredProperty("token.x.client.id")));
     }
 
     void bootStrap() throws Exception {
@@ -94,7 +98,7 @@ public class JettyServer {
 
     private List<Connector> createConnectors(Server server) {
         List<Connector> connectors = new ArrayList<>();
-        var httpConnector = new ServerConnector(server, new HttpConnectionFactory(createHttpConfiguration()));
+        var httpConnector = new ServerConnector(server);
         httpConnector.setPort(getServerPort());
         connectors.add(httpConnector);
         return connectors;

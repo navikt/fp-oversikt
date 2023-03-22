@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.server;
 
+import no.nav.security.token.support.jaxrs.JwtTokenContainerRequestFilter;
+
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
@@ -14,7 +16,7 @@ public class InternalApiConfig extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return Set.of(Rest.class);
+        return Set.of(HealtCheckRest.class);
     }
 
 }
