@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-class RestTest {
+class HealtCheckRestServiceTest {
 
     @Test
     void test() {
-        assertThat(new Rest().test()).isTrue();
+        assertThat(new HealtCheckRest().isAlive().getStatus()).isEqualTo(200);
     }
 }
