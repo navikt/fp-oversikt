@@ -1,16 +1,12 @@
-package no.nav.foreldrepenger.oversikt.server.konfig;
+package no.nav.foreldrepenger.oversikt.server;
 
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import no.nav.foreldrepenger.oversikt.server.Rest;
-
-@ApplicationPath(InternalApiConfig.API_URL)
+@ApplicationPath("internal")
 public class InternalApiConfig extends Application {
-
-    public static final String API_URL = "internal";
 
     public InternalApiConfig() {
         // CDI

@@ -28,7 +28,6 @@ public class JettyServer {
 
     private static final Environment ENV = Environment.current();
 
-    private static final String CONTEXT_PATH = "/fpoversikt";
     private static final String JETTY_SCAN_LOCATIONS = "^.*jersey-.*\\.jar$|^.*felles-.*\\.jar$|^.*oversikt.*\\.jar$";
     private static final String JETTY_LOCAL_CLASSES = "^.*/target/classes/|";
     private final Integer serverPort;
@@ -59,7 +58,7 @@ public class JettyServer {
         }
         ctx.setDescriptor(descriptor);
 
-        ctx.setContextPath(CONTEXT_PATH);
+        ctx.setContextPath("/fpoversikt");
         ctx.setResourceBase(".");
         ctx.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
         ctx.setInitParameter("pathInfoOnly", "true");
