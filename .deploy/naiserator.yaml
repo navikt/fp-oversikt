@@ -1,0 +1,48 @@
+kind: Application
+apiVersion: nais.io/v1alpha1
+metadata:
+  name: fpoversikt
+  namespace: teamforeldrepenger
+  labels:
+    team: teamforeldrepenger
+spec:
+  image: {{image}}
+  port: 8080
+  ingresses:
+{{#each ingresses as |url|}}
+   - {{url}}
+{{/each}}
+  liveness:
+    path: /internal/health/isAlive
+    initialDelay: 5
+    periodSeconds: 10
+    failureThreshold: 20
+    timeout: 3
+  readiness:
+    path: /internal/health/isReady
+    initialDelay: 5
+    periodSeconds: 10
+    failureThreshold: 20
+    timeout: 3
+  preStopHook:
+    http:
+      path: /internal/health/preStop
+  replicas:
+    min: {{minReplicas}}
+    max: {{maxReplicas}}
+    cpuThresholdPercentage: 80
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 2048Mi
+    requests:
+      cpu: 1050m
+      memory: 1024Mi
+  tokenx:
+    enabled: true
+  accessPolicy:
+    inbound:
+      rules:
+        - application: foreldrepengesoknad-api
+          namespace: teamforeldrepenger
+          cluster: {{cluster}}
