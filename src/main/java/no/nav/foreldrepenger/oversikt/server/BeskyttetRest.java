@@ -1,17 +1,14 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-import no.nav.security.token.support.core.api.Protected;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
-@Protected
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Path("/test")
 @ApplicationScoped
 public class BeskyttetRest {

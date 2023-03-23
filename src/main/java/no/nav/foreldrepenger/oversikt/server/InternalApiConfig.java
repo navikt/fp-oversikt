@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-import no.nav.security.token.support.jaxrs.JwtTokenContainerRequestFilter;
-
 import java.util.Set;
 
 import javax.ws.rs.ApplicationPath;

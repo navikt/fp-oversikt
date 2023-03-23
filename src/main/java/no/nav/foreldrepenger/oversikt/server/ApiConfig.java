@@ -7,21 +7,15 @@ import java.util.Set;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
-import no.nav.security.token.support.jaxrs.JwtTokenContainerRequestFilter;
-
 import org.glassfish.jersey.server.ServerProperties;
 
-@ApplicationPath(ApiConfig.API_URI)
+@ApplicationPath("/api")
 public class ApiConfig extends Application {
-
-    public static final String API_URI = "/api";
-
 
     @Override
     public Set<Class<?>> getClasses() {
         // eksponert grensesnitt bak sikkerhet
         return Set.of(
-            JwtTokenContainerRequestFilter.class,
             BeskyttetRest.class);
     }
 

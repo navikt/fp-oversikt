@@ -6,11 +6,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.core.CacheControl;
 import javax.ws.rs.core.Response;
 
-import no.nav.security.token.support.core.api.Protected;
-import no.nav.security.token.support.core.api.ProtectedWithClaims;
-
-import no.nav.security.token.support.core.api.Unprotected;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

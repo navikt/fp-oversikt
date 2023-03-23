@@ -1,18 +1,22 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-import static javax.servlet.DispatcherType.REQUEST;
-import static no.nav.vedtak.sikkerhet.oidc.config.OpenIDProvider.TOKENX;
 import static org.eclipse.jetty.webapp.MetaInfConfiguration.CONTAINER_JAR_PATTERN;
 
-import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
 
+import javax.security.auth.message.config.AuthConfigFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.eclipse.jetty.jaas.JAASLoginService;
+import org.eclipse.jetty.security.ConstraintSecurityHandler;
+import org.eclipse.jetty.security.DefaultIdentityService;
+import org.eclipse.jetty.security.SecurityHandler;
+import org.eclipse.jetty.security.jaspi.DefaultAuthConfigFactory;
+import org.eclipse.jetty.security.jaspi.JaspiAuthenticatorFactory;
+import org.eclipse.jetty.security.jaspi.provider.JaspiAuthConfigProvider;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -20,21 +24,18 @@ import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
-import org.eclipse.jetty.servlet.FilterHolder;
-import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.slf4j.MDC;
 
 import no.nav.foreldrepenger.konfig.Environment;
-import no.nav.security.token.support.core.configuration.IssuerProperties;
-import no.nav.security.token.support.core.configuration.MultiIssuerConfiguration;
-import no.nav.security.token.support.jaxrs.servlet.JaxrsJwtTokenValidationFilter;
+import no.nav.vedtak.sikkerhet.jaspic.OidcAuthModule;
 
 public class JettyServer {
 
     private static final Environment ENV = Environment.current();
 
-    private static final String JETTY_SCAN_LOCATIONS = "^.*jersey-.*\\.jar$|^.*felles-.*\\.jar$|^.*oversikt.*\\.jar$";
+    private static final String JETTY_SCAN_LOCATIONS = "^.*jersey-.*\\.jar$|^.*felles-.*\\.jar$|^.*app.*\\.jar$";
     private static final String JETTY_LOCAL_CLASSES = "^.*/target/classes/|";
     private final Integer serverPort;
 
@@ -47,13 +48,10 @@ public class JettyServer {
     }
 
     private static JettyServer jettyServer(String[] args) {
-        if (args.length > 0) {
-            return new JettyServer(Integer.parseUnsignedInt(args[0]));
-        }
         return new JettyServer(ENV.getProperty("server.port", Integer.class, 8080));
     }
 
-    private static ContextHandler createContext() {
+    private static ContextHandler createContext() throws MalformedURLException {
         var ctx = new WebAppContext();
         ctx.setParentLoaderPriority(true);
 
@@ -64,26 +62,43 @@ public class JettyServer {
         // Scanns the CLASSPATH for classes and jars.
         ctx.setAttribute(CONTAINER_JAR_PATTERN, String.format("%s%s", ENV.isLocal() ? JETTY_LOCAL_CLASSES : "", JETTY_SCAN_LOCATIONS));
 
+        // WELD init
+        ctx.addEventListener(new org.jboss.weld.environment.servlet.Listener());
+        ctx.addEventListener(new org.jboss.weld.environment.servlet.BeanManagerResourceBindingListener());
+
+        String descriptor;
+        try (var resource = Resource.newClassPathResource("/WEB-INF/web.xml")) {
+            descriptor = resource.getURI().toURL().toExternalForm();
+        }
+        ctx.setDescriptor(descriptor);
+
+        ctx.setSecurityHandler(createSecurityHandler());
         ctx.setThrowUnavailableOnStartupException(true);
 
-        addTokenValidationFilter(ctx);
         return ctx;
     }
 
-    private static void addTokenValidationFilter(ServletContextHandler ctx) {
-        ctx.addFilter(new FilterHolder(new JaxrsJwtTokenValidationFilter(config())), "/*", EnumSet.of(REQUEST));
+    private static void konfigurerSikkerhet() {
+        var factory = new DefaultAuthConfigFactory();
+        factory.registerConfigProvider(new JaspiAuthConfigProvider(new OidcAuthModule()), "HttpServlet", "server /",
+            "OIDC Authentication");
+
+        AuthConfigFactory.setFactory(factory);
     }
 
-    private static MultiIssuerConfiguration config() {
-        return new MultiIssuerConfiguration(Map.of(TOKENX.name(), issuerProperties()));
-    }
-
-    private static IssuerProperties issuerProperties() {
-        return new IssuerProperties(ENV.getRequiredProperty("token.x.well.known.url", URL.class),
-            List.of(ENV.getRequiredProperty("token.x.client.id")));
+    private static SecurityHandler createSecurityHandler() {
+        var securityHandler = new ConstraintSecurityHandler();
+        securityHandler.setAuthenticatorFactory(new JaspiAuthenticatorFactory());
+        var loginService = new JAASLoginService();
+        loginService.setName("jetty-login");
+        loginService.setLoginModuleName("jetty-login");
+        loginService.setIdentityService(new DefaultIdentityService());
+        securityHandler.setLoginService(loginService);
+        return securityHandler;
     }
 
     void bootStrap() throws Exception {
+        konfigurerSikkerhet();
         start();
     }
 
