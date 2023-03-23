@@ -19,8 +19,22 @@ public class HealtCheckRest {
     @GET
     @Path("/isAlive")
     public Response isAlive() {
-        LOG.info("hei på deg");
-        return Response.ok("ok").cacheControl(CC).build();
+        LOG.info("isAlive kalt");
+        return Response.ok().cacheControl(CC).build();
+    }
+
+    @GET
+    @Path("/isReady")
+    public Response isReady() {
+        LOG.info("isReady kalt");
+        return Response.ok().cacheControl(CC).build();
+    }
+
+    @GET
+    @Path("/preStop")
+    public Response preStop() {
+        LOG.info("preStop kalt");
+        return Response.ok().cacheControl(CC).build();
     }
 
     private static CacheControl cacheControl() {

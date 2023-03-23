@@ -1,0 +1,9 @@
+{
+    "environment": "dev",
+    "cluster": "dev-gcp",
+    "minReplicas": "1",
+    "maxReplicas": "2",
+    "ingresses": [
+        "https://fpoversikt.intern.dev.nav.no"
+    ]
+}

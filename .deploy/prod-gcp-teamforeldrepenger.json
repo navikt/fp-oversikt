@@ -1,0 +1,9 @@
+{
+    "environment": "prod",
+    "cluster": "prod-gcp",
+    "minReplicas": "2",
+    "maxReplicas": "3",
+    "ingresses": [
+        "https://fpoversikt.intern.nav.no"
+    ]
+}
