@@ -6,11 +6,14 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.naming.NamingException;
 import javax.security.auth.message.config.AuthConfigFactory;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.sql.DataSource;
 
 import org.eclipse.jetty.jaas.JAASLoginService;
+import org.eclipse.jetty.plus.jndi.EnvEntry;
 import org.eclipse.jetty.security.ConstraintSecurityHandler;
 import org.eclipse.jetty.security.DefaultIdentityService;
 import org.eclipse.jetty.security.SecurityHandler;
@@ -26,7 +29,11 @@ import org.eclipse.jetty.server.handler.ContextHandler;
 import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
+import org.flywaydb.core.Flyway;
 import org.slf4j.MDC;
+
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.vedtak.sikkerhet.jaspic.OidcAuthModule;
@@ -99,7 +106,43 @@ public class JettyServer {
 
     void bootStrap() throws Exception {
         konfigurerSikkerhet();
+        var dataSource = setupDataSource();
+        migrer(dataSource);
         start();
+    }
+
+    void migrer(DataSource dataSource) {
+        var flyway = Flyway.configure().dataSource(dataSource).locations("classpath:/db/migration/defaultDS").baselineOnMigrate(true);
+        flyway.load().migrate();
+    }
+
+    private DataSource setupDataSource() throws NamingException {
+        var dataSource = dataSource();
+        new EnvEntry("jdbc/defaultDS", dataSource);
+        return dataSource;
+    }
+
+    private DataSource dataSource() {
+        var config = new HikariConfig();
+        config.setJdbcUrl(dbUrl());
+        config.setUsername(ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_USERNAME"));
+        config.setPassword(ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PASSWORD"));
+        config.setConnectionTimeout(1000);
+        config.setMinimumIdle(2);
+        config.setMaximumPoolSize(10);
+        config.setConnectionTestQuery("select 1");
+
+        //  var dsProperties = new Properties();
+        //  config.setDataSourceProperties(dsProperties);
+
+        return new HikariDataSource(config);
+    }
+
+    private String dbUrl() {
+        var host = ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_HOST");
+        var port = ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PORT");
+        var databaseName = ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_DATABASE");
+        return "jdbc:postgresql://" + host + ":" + port + "/" + databaseName;
     }
 
     private void start() throws Exception {
