@@ -17,7 +17,7 @@ public class HealtCheckRest {
     @GET
     @Path("/isAlive")
     public Response isAlive() {
-        LOG.info("isAlive kalt {}");
+        LOG.info("isAlive kalt");
         return Response.ok().build();
     }
 
