@@ -1,6 +1,5 @@
 {
     "environment": "prod",
-    "cluster": "prod-gcp",
     "dbtier": "finnriktigsize",
     "minReplicas": "2",
     "maxReplicas": "3",

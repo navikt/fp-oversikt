@@ -52,4 +52,4 @@ spec:
       rules:
         - application: foreldrepengesoknad-api
           namespace: teamforeldrepenger
-          cluster: {{cluster}}
+          cluster: {{environment}}-gcp

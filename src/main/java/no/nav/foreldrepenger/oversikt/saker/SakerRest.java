@@ -47,6 +47,7 @@ public class SakerRest {
     @Produces(MediaType.APPLICATION_JSON)
     public Saker hent() {
         var uid = KontekstHolder.getKontekst().getUid();
+        LOG.info("Kall mot saker endepunkt");
         var fpSakerForBruker = fpSaker.hent();
         return tilDto(fpSakerForBruker);
     }
