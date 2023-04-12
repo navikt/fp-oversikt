@@ -16,8 +16,9 @@ on:
 jobs:
   build-app:
     name: Build
-    uses: navikt/fp-gha-workflows/.github/workflows/build-app-no-db.yml@main
+    uses: navikt/fp-gha-workflows/.github/workflows/build-app-postgres.yml@main
     with:
+      postgres-user: fpoversikt
       sonar-scan: true
       build-image: ${{ github.ref_name == 'master' }} # default: true
       push-image: ${{ github.ref_name == 'master' }} # default: false
