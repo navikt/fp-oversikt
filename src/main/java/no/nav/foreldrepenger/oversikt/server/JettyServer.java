@@ -111,7 +111,7 @@ public class JettyServer {
         start();
     }
 
-    void migrer(DataSource dataSource) {
+    private void migrer(DataSource dataSource) {
         var flyway = Flyway.configure().dataSource(dataSource).locations("classpath:/db/migration/defaultDS").baselineOnMigrate(true);
         flyway.load().migrate();
     }
@@ -122,26 +122,24 @@ public class JettyServer {
         return dataSource;
     }
 
-    private DataSource dataSource() {
+    public static DataSource dataSource() {
         var config = new HikariConfig();
         config.setJdbcUrl(dbUrl());
-        config.setUsername(ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_USERNAME"));
-        config.setPassword(ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PASSWORD"));
+        config.setUsername(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_USERNAME", "fpoversikt"));
+        config.setPassword(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PASSWORD", "fpoversikt"));
         config.setConnectionTimeout(1000);
         config.setMinimumIdle(2);
         config.setMaximumPoolSize(10);
         config.setConnectionTestQuery("select 1");
-
-        //  var dsProperties = new Properties();
-        //  config.setDataSourceProperties(dsProperties);
+        config.setAutoCommit(false);
 
         return new HikariDataSource(config);
     }
 
-    private String dbUrl() {
-        var host = ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_HOST");
-        var port = ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PORT");
-        var databaseName = ENV.getRequiredProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_DATABASE");
+    private static String dbUrl() {
+        var host = ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_HOST", "fpoversikt");
+        var port = ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PORT", "5432");
+        var databaseName = ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_DATABASE", "fpoversikt");
         return "jdbc:postgresql://" + host + ":" + port + "/" + databaseName;
     }
 
