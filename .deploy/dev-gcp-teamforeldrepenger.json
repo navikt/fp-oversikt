@@ -1,5 +1,6 @@
 {
     "environment": "dev",
+    "kafkaPool": "nav-dev",
     "dbtier": "db-f1-micro",
     "minReplicas": "1",
     "maxReplicas": "2",

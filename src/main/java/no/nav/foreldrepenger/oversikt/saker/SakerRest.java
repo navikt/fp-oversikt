@@ -27,9 +27,6 @@ import no.nav.foreldrepenger.common.innsyn.Saker;
 import no.nav.foreldrepenger.common.innsyn.Saksnummer;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
-import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 @Path("/saker")
 @ApplicationScoped
@@ -38,12 +35,10 @@ public class SakerRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SakerRest.class);
     private FpSaker fpSaker;
-    private ProsessTaskTjeneste prosessTaskTjeneste;
 
     @Inject
-    public SakerRest(FpSaker fpSaker, ProsessTaskTjeneste prosessTaskTjeneste) {
+    public SakerRest(FpSaker fpSaker) {
         this.fpSaker = fpSaker;
-        this.prosessTaskTjeneste = prosessTaskTjeneste;
     }
 
     SakerRest() {
@@ -52,19 +47,9 @@ public class SakerRest {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Saker hent() {
-        opprettTestTask();
-        var uid = KontekstHolder.getKontekst().getUid();
         LOG.info("Kall mot saker endepunkt");
         var fpSakerForBruker = fpSaker.hent();
         return tilDto(fpSakerForBruker);
-    }
-
-    private void opprettTestTask() {
-        var task = ProsessTaskData.forProsessTask(TestTask.class);
-        task.setPrioritet(50);
-        task.setCallIdFraEksisterende();
-        prosessTaskTjeneste.lagre(task);
-        LOG.info("Opprettet task");
     }
 
     private Saker tilDto(Object fpSakerForBruker) {
