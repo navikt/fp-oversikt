@@ -20,7 +20,7 @@
         <sonar.projectName>fp-oversikt</sonar.projectName>
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
-        <felles.version>4.2.38</felles.version>
+        <felles.version>4.2.39</felles.version>
         <prosesstask.version>3.1.26</prosesstask.version>
 
         <fpsoknad-felles.version>2.2.0</fpsoknad-felles.version>
@@ -49,6 +49,11 @@
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
+            <dependency>
+                <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
+                <artifactId>person-klient</artifactId>
+                <version>${felles.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -57,6 +62,14 @@
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
             <artifactId>felles-sikkerhet</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
+            <artifactId>felles-integrasjon-rest-klient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
+            <artifactId>person-klient</artifactId>
         </dependency>
 
         <!-- CDI -->
