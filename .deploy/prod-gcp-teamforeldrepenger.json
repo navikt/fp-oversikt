@@ -1,5 +1,6 @@
 {
     "environment": "prod",
+    "kafkaPool": "nav-prod",
     "dbtier": "finnriktigsize",
     "minReplicas": "2",
     "maxReplicas": "3",

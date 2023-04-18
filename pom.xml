@@ -23,7 +23,7 @@
         <felles.version>4.2.38</felles.version>
         <prosesstask.version>3.1.26</prosesstask.version>
 
-        <fpsoknad-felles.version>1.0.1</fpsoknad-felles.version>
+        <fpsoknad-felles.version>2.2.0</fpsoknad-felles.version>
     </properties>
 
     <dependencyManagement>
@@ -90,6 +90,20 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-jaspi</artifactId>
         </dependency>
+
+        <!-- Kafka -->
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-streams</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
+            <artifactId>kafka-properties</artifactId>
+            <version>${felles.version}</version>
+        </dependency>
+
+
+
 
         <dependency>
             <groupId>com.zaxxer</groupId>

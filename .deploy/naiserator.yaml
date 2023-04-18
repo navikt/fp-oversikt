@@ -8,13 +8,6 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
-  gcp:
-    sqlInstances:
-      - type: POSTGRES_14
-        databases:
-          - name: fpoversikt
-        tier: {{dbtier}}
-        collation: nb_NO.UTF8
   ingresses:
 {{#each ingresses as |url|}}
    - {{url}}
@@ -45,6 +38,15 @@ spec:
     requests:
       cpu: 1050m
       memory: 1024Mi
+  kafka:
+    pool: {{kafkaPool}}
+  gcp:
+    sqlInstances:
+      - type: POSTGRES_14
+        databases:
+          - name: fpoversikt
+        tier: {{dbtier}}
+        collation: nb_NO.UTF8
   tokenx:
     enabled: true
   accessPolicy:

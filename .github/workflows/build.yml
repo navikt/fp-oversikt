@@ -24,16 +24,11 @@ jobs:
       push-image: ${{ github.ref_name == 'master' }} # default: false
     secrets: inherit
 
-  codeql:
-    name: CodeQl
-    uses: navikt/fp-gha-workflows/.github/workflows/codeql.yml@main
-    secrets: inherit
-
   deploy-dev:
     name: Deploy dev
     if: github.ref_name == 'master'
     needs: build-app
-    uses: navikt/fp-gha-workflows/.github/workflows/deploy-app.yml@deploy
+    uses: navikt/fp-gha-workflows/.github/workflows/deploy.yml@main
     with:
       image: ghcr.io/${{ github.repository }}:${{ needs.build-app.outputs.build-version }}
       cluster: dev-gcp
