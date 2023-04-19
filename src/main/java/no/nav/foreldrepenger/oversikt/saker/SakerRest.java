@@ -27,6 +27,7 @@ import no.nav.foreldrepenger.common.innsyn.Saker;
 import no.nav.foreldrepenger.common.innsyn.Saksnummer;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
+import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 @Path("/saker")
 @ApplicationScoped
@@ -35,10 +36,12 @@ public class SakerRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SakerRest.class);
     private FpSaker fpSaker;
+    private PdlKlient pdlKlient;
 
     @Inject
-    public SakerRest(FpSaker fpSaker) {
+    public SakerRest(FpSaker fpSaker, PdlKlient pdlKlient) {
         this.fpSaker = fpSaker;
+        this.pdlKlient = pdlKlient;
     }
 
     SakerRest() {
@@ -48,8 +51,16 @@ public class SakerRest {
     @Produces(MediaType.APPLICATION_JSON)
     public Saker hent() {
         LOG.info("Kall mot saker endepunkt");
-        var fpSakerForBruker = fpSaker.hent();
+        var aktørId = aktørIdForBruker();
+        var fpSakerForBruker = fpSaker.hent(aktørId);
         return tilDto(fpSakerForBruker);
+    }
+
+    private String aktørIdForBruker() {
+        var fnr = KontekstHolder.getKontekst().getUid();
+        var aktørId = pdlKlient.hentAktørIdForPersonIdent(fnr).orElseThrow();
+        LOG.info("Mapper fnr {} til aktørId {}", fnr, aktørId);
+        return aktørId;
     }
 
     private Saker tilDto(Object fpSakerForBruker) {
