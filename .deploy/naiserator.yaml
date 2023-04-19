@@ -55,3 +55,7 @@ spec:
         - application: foreldrepengesoknad-api
           namespace: teamforeldrepenger
           cluster: {{environment}}-gcp
+    outbound:
+      external:
+        - host: pdl-api.{{environment}}-fss-pub.nais.io
+        - host: fpsak-api.{{environment}}-fss-pub.nais.io

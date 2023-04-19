@@ -20,7 +20,7 @@
         <sonar.projectName>fp-oversikt</sonar.projectName>
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
-        <felles.version>4.2.39</felles.version>
+        <felles.version>4.2.40</felles.version>
         <prosesstask.version>3.1.26</prosesstask.version>
 
         <fpsoknad-felles.version>2.2.0</fpsoknad-felles.version>
