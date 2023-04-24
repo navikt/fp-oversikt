@@ -32,7 +32,7 @@ class FpSakKlient {
     }
 
     BehandlingDto hentBehandling(UUID id) {
-        var uri = UriBuilder.fromUri(restConfig.fpContextPath())
+        var uri = UriBuilder.fromUri(restConfig.endpoint())
             .path(FPSAK_API)
             .path("/formidling/ressurser")
             .queryParam("behandlingId", id.toString())
