@@ -22,7 +22,7 @@
 
         <felles.version>4.2.40</felles.version>
         <prosesstask.version>3.1.26</prosesstask.version>
-
+        <fp-kontrakter.version>6.2.16</fp-kontrakter.version>
         <fpsoknad-felles.version>2.2.0</fpsoknad-felles.version>
     </properties>
 
@@ -115,8 +115,11 @@
             <version>${felles.version}</version>
         </dependency>
 
-
-
+        <dependency>
+            <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
+            <artifactId>hendelser-behandling</artifactId>
+            <version>${fp-kontrakter.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.zaxxer</groupId>
