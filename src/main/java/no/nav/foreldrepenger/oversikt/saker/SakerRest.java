@@ -59,7 +59,7 @@ public class SakerRest {
     private String aktørIdForBruker() {
         var fnr = KontekstHolder.getKontekst().getUid();
         var aktørId = pdlKlient.hentAktørIdForPersonIdent(fnr).orElseThrow();
-        LOG.info("Mapper fnr {} til aktørId {}", fnr, aktørId);
+        LOG.info("Mapper fnr til aktørId");
         return aktørId;
     }
 
