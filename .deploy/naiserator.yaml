@@ -49,6 +49,9 @@ spec:
         collation: nb_NO.UTF8
   tokenx:
     enabled: true
+  azure:
+    application:
+      enabled: true
   accessPolicy:
     inbound:
       rules:
