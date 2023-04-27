@@ -31,17 +31,17 @@ class FpSakKlient {
         this.restConfig = RestConfig.forClient(this.getClass());
     }
 
-    BehandlingDto hentBehandling(UUID id) {
+    VedtakDto hentVedtak(UUID id) {
         var uri = UriBuilder.fromUri(restConfig.endpoint())
             .path(FPSAK_API)
             .path("/formidling/ressurser")
             .queryParam("behandlingId", id.toString())
             .build();
         var request = RestRequest.newGET(uri, restConfig);
-        return restClient.sendReturnOptional(request, BehandlingDto.class)
+        return restClient.sendReturnOptional(request, VedtakDto.class)
             .orElseThrow(() -> new IllegalStateException("Klarte ikke hente behandling: " + id));
     }
 
-    private record BehandlingDto(UUID uuid, LocalDateTime opprettet) {
+    record VedtakDto(UUID uuid, LocalDateTime opprettet, String behandlendeEnhetNavn) {
     }
 }
