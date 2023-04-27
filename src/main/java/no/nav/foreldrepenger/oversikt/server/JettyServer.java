@@ -31,6 +31,7 @@ import org.eclipse.jetty.server.handler.HandlerList;
 import org.eclipse.jetty.util.resource.Resource;
 import org.eclipse.jetty.webapp.WebAppContext;
 import org.flywaydb.core.Flyway;
+import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.slf4j.MDC;
 
 import com.zaxxer.hikari.HikariConfig;
@@ -133,12 +134,16 @@ public class JettyServer {
         start();
     }
 
-    private void migrer(DataSource dataSource) {
-        var flyway = Flyway.configure().dataSource(dataSource).locations("classpath:/db/migration/defaultDS").baselineOnMigrate(true);
+    private static void migrer(DataSource dataSource) {
+        var flyway = flywayConfig(dataSource);
         flyway.load().migrate();
     }
 
-    private DataSource setupDataSource() throws NamingException {
+    public static FluentConfiguration flywayConfig(DataSource dataSource) {
+        return Flyway.configure().dataSource(dataSource).locations("classpath:/db/migration/defaultDS").baselineOnMigrate(true);
+    }
+
+    public static DataSource setupDataSource() throws NamingException {
         var dataSource = dataSource();
         new EnvEntry("jdbc/defaultDS", dataSource);
         return dataSource;

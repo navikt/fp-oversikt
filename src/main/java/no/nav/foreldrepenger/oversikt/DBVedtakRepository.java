@@ -24,8 +24,9 @@ public class DBVedtakRepository implements VedtakRepository {
 
     @Override
     public List<Vedtak> hentFor(String aktørId) {
-        return entityManager.createQuery("from VedtakEntitet ", VedtakEntitet.class)
-            .getResultList()
+        var query = entityManager.createNativeQuery("select * from vedtak where json->>'aktørId' = :aktørId", VedtakEntitet.class);
+        query.setParameter("aktørId", aktørId);
+        return ((List<VedtakEntitet>) query.getResultList())
             .stream()
             .map(VedtakEntitet::map)
             .toList();

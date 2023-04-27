@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -13,12 +12,7 @@ import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 
 @ApplicationScoped
-@RestClientConfig(
-    tokenConfig = TokenFlow.AZUREAD_CC,
-    endpointProperty = "fpsak.base.url",
-    endpointDefault = "https://fpsak-api.prod-fss-pub.nais.io/fpsak",
-    scopesProperty = "fpsak.scopes",
-    scopesDefault = "api://prod-fss.teamforeldrepenger.fpsak/.default")
+@RestClientConfig(tokenConfig = TokenFlow.AZUREAD_CC, endpointProperty = "fpsak.base.url", endpointDefault = "https://fpsak-api.prod-fss-pub.nais.io/fpsak", scopesProperty = "fpsak.scopes", scopesDefault = "api://prod-fss.teamforeldrepenger.fpsak/.default")
 class FpSakKlient {
 
     private static final String FPSAK_API = "/api";
@@ -31,17 +25,24 @@ class FpSakKlient {
         this.restConfig = RestConfig.forClient(this.getClass());
     }
 
-    VedtakDto hentVedtak(UUID id) {
-        var uri = UriBuilder.fromUri(restConfig.endpoint())
-            .path(FPSAK_API)
-            .path("/formidling/ressurser")
-            .queryParam("behandlingId", id.toString())
-            .build();
+    SakDto hentSak(UUID behandlingId) {
+        var uri = UriBuilder.fromUri(restConfig.endpoint()).path(FPSAK_API).path("/fpoversikt/sak").queryParam("behandlingId", behandlingId.toString()).build();
         var request = RestRequest.newGET(uri, restConfig);
-        return restClient.sendReturnOptional(request, VedtakDto.class)
-            .orElseThrow(() -> new IllegalStateException("Klarte ikke hente behandling: " + id));
+        return restClient.sendReturnOptional(request, SakDto.class)
+            .orElseThrow(() -> new IllegalStateException("Klarte ikke hente sak: " + behandlingId));
     }
 
-    record VedtakDto(UUID uuid, LocalDateTime opprettet, String behandlendeEnhetNavn) {
+    record SakDto(String saksnummer, Status status, YtelseType ytelseType, String aktørId) {
+
+        enum Status {
+            AVSLUTTET,
+            ÅPEN
+        }
+
+        enum YtelseType {
+            FORELDREPENGER,
+            SVANGERSKAPSPENGER,
+            ENGANGSSTØNAD
+        }
     }
 }

@@ -45,9 +45,9 @@ public class BehandlingHendelseHåndterer {
     }
 
     private void opprettHentVedtakTask(BehandlingHendelse hendelse) {
-        var task = ProsessTaskData.forProsessTask(HentVedtakTask.class);
+        var task = ProsessTaskData.forProsessTask(HentSakTask.class);
         task.setCallId(hendelse.getHendelseUuid().toString());
-        task.setProperty(HentVedtakTask.BEHANDLING_UUID, hendelse.getBehandlingUuid().toString());
+        task.setProperty(HentSakTask.BEHANDLING_UUID, hendelse.getBehandlingUuid().toString());
         task.setPrioritet(50);
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
