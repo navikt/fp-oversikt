@@ -1,5 +1,10 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
+import static no.nav.vedtak.hendelser.behandling.Hendelse.AVSLUTTET;
+
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.control.ActivateRequestContext;
 import javax.inject.Inject;
@@ -33,14 +38,18 @@ public class BehandlingHendelseHåndterer {
 
     void handleMessage(String key, String payload) {
         LOG.info("Lest fra teamforeldrepenger.behandling-hendelse-v1: key={} payload={}", key, payload);
-        opprettTestTask(map(payload));
+        var hendelse = map(payload);
+        if (Objects.equals(hendelse.getHendelse(), AVSLUTTET)) {
+            opprettHentVedtakTask(hendelse);
+        }
     }
 
-    private void opprettTestTask(BehandlingHendelse hendelse) {
-        var task = ProsessTaskData.forProsessTask(TestTask.class);
+    private void opprettHentVedtakTask(BehandlingHendelse hendelse) {
+        var task = ProsessTaskData.forProsessTask(HentSakTask.class);
         task.setCallId(hendelse.getHendelseUuid().toString());
-        task.setProperty(TestTask.BEHANDLING_UUID, hendelse.getBehandlingUuid().toString());
+        task.setProperty(HentSakTask.BEHANDLING_UUID, hendelse.getBehandlingUuid().toString());
         task.setPrioritet(50);
+        task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
         taskTjeneste.lagre(task);
         LOG.info("Opprettet task");

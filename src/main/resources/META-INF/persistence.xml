@@ -10,7 +10,7 @@
         <non-jta-data-source>jdbc/defaultDS</non-jta-data-source>
 
         <properties>
-            <property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQL10Dialect"/>
+            <property name="hibernate.dialect" value="no.nav.foreldrepenger.oversikt.server.PostgreSQLDialect"/>
             <property name="hibernate.jdbc.use_get_generated_keys" value="true"/>
 
             <!-- Utsetter flush av statements til db til commit eller manuelt istedet for hibernate heuristisk flush. -->
@@ -33,10 +33,10 @@
 
             <!-- Batcher også inserts av @Versioned data. (krever at executeBatch for database driver returnerer riktig) -->
             <property name="hibernate.jdbc.batch_versioned_data" value="true" />
-          
+
             <!-- ikke lekk sql statements og sensitive verider til logger etc. ved feil -->
             <property name="hibernate.connection.logServerErrorDetail" value="false" />
-          
+
         </properties>
     </persistence-unit>
 

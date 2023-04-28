@@ -1,9 +1,5 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Set;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -15,18 +11,7 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
-import no.nav.foreldrepenger.common.innsyn.Dekningsgrad;
-import no.nav.foreldrepenger.common.innsyn.Familiehendelse;
-import no.nav.foreldrepenger.common.innsyn.FpSak;
-import no.nav.foreldrepenger.common.innsyn.FpVedtak;
-import no.nav.foreldrepenger.common.innsyn.FpÅpenBehandling;
-import no.nav.foreldrepenger.common.innsyn.KontoType;
-import no.nav.foreldrepenger.common.innsyn.RettighetType;
 import no.nav.foreldrepenger.common.innsyn.Saker;
-import no.nav.foreldrepenger.common.innsyn.Saksnummer;
-import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
-import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 @Path("/saker")
@@ -52,8 +37,7 @@ public class SakerRest {
     public Saker hent() {
         LOG.info("Kall mot saker endepunkt");
         var aktørId = aktørIdForBruker();
-        var fpSakerForBruker = fpSaker.hent(aktørId);
-        return tilDto(fpSakerForBruker);
+        return fpSaker.hent(aktørId);
     }
 
     private String aktørIdForBruker() {
@@ -61,14 +45,5 @@ public class SakerRest {
         var aktørId = pdlKlient.hentAktørIdForPersonIdent(fnr).orElseThrow();
         LOG.info("Mapper fnr til aktørId");
         return aktørId;
-    }
-
-    private Saker tilDto(Object fpSakerForBruker) {
-        var uttakPeriode = new UttakPeriode(LocalDate.now(), LocalDate.now().plusWeeks(1), KontoType.MØDREKVOTE,
-            new UttakPeriodeResultat(true, false, true, UttakPeriodeResultat.Årsak.ANNET), null, null, null, null, null, null, false);
-        var sak = new FpSak(new Saksnummer("1"), false, LocalDate.now(), false, true, false, false, false, false, RettighetType.BEGGE_RETT, null,
-            new Familiehendelse(null, LocalDate.now(), 1, null), new FpVedtak(List.of(uttakPeriode)),
-            new FpÅpenBehandling(BehandlingTilstand.VENT_DOKUMENTASJON, List.of(uttakPeriode)), Set.of(), Dekningsgrad.HUNDRE);
-        return new Saker(Set.of(sak), Set.of(), Set.of());
     }
 }
