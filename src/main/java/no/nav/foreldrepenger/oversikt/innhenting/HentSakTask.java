@@ -22,12 +22,12 @@ public class HentSakTask implements ProsessTaskHandler {
     private static final Logger LOG = LoggerFactory.getLogger(HentSakTask.class);
     static final String BEHANDLING_UUID = "behandlingUuid";
 
-    private final FpSakKlient fpSakKlient;
+    private final FpsakTjeneste fpSakKlient;
     private final VedtakRepository vedtakRepository;
 
     @Inject
-    public HentSakTask(FpSakKlient fpSakKlient, VedtakRepository vedtakRepository) {
-        this.fpSakKlient = fpSakKlient;
+    public HentSakTask(FpsakTjeneste fpsakTjeneste, VedtakRepository vedtakRepository) {
+        this.fpSakKlient = fpsakTjeneste;
         this.vedtakRepository = vedtakRepository;
     }
 
@@ -41,7 +41,7 @@ public class HentSakTask implements ProsessTaskHandler {
         vedtakRepository.lagre(map(sakDto));
     }
 
-    private Vedtak map(FpSakKlient.SakDto sakDto) {
+    private Vedtak map(FpsakTjeneste.SakDto sakDto) {
         return new VedtakV0(sakDto.saksnummer(), sakDto.status().name(), sakDto.ytelseType().name(), sakDto.aktørId());
     }
 }

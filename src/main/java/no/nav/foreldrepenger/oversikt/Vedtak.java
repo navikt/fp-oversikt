@@ -10,4 +10,6 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public interface Vedtak {
     String saksnummer();
+
+    String aktørId();
 }
