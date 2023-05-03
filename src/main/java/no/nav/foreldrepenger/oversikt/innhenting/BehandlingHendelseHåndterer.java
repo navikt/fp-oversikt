@@ -4,6 +4,7 @@ import static no.nav.vedtak.hendelser.behandling.Hendelse.AVSLUTTET;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.control.ActivateRequestContext;
@@ -27,32 +28,37 @@ public class BehandlingHendelseHåndterer {
 
     private ProsessTaskTjeneste taskTjeneste;
 
-    public BehandlingHendelseHåndterer() {
-    }
-
     @Inject
     public BehandlingHendelseHåndterer(ProsessTaskTjeneste taskTjeneste) {
         this.taskTjeneste = taskTjeneste;
 
     }
 
+    public BehandlingHendelseHåndterer() {
+    }
+
     void handleMessage(String key, String payload) {
         LOG.info("Lest fra teamforeldrepenger.behandling-hendelse-v1: key={} payload={}", key, payload);
         var hendelse = map(payload);
         if (Objects.equals(hendelse.getHendelse(), AVSLUTTET)) {
-            opprettHentVedtakTask(hendelse);
+            lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid());
         }
     }
 
-    private void opprettHentVedtakTask(BehandlingHendelse hendelse) {
+    private void lagreHentSakTask(UUID behandlingUuid, UUID hendelseUuid) {
+        var task = opprettTask(behandlingUuid, hendelseUuid);
+        taskTjeneste.lagre(task);
+        LOG.info("Opprettet task");
+    }
+
+    public static ProsessTaskData opprettTask(UUID behandlingUuid, UUID hendelseUuid) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
-        task.setCallId(hendelse.getHendelseUuid().toString());
-        task.setProperty(HentSakTask.BEHANDLING_UUID, hendelse.getBehandlingUuid().toString());
+        task.setCallId(hendelseUuid.toString());
+        task.setProperty(HentSakTask.BEHANDLING_UUID, behandlingUuid.toString());
         task.setPrioritet(50);
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
-        taskTjeneste.lagre(task);
-        LOG.info("Opprettet task");
+        return task;
     }
 
     private static BehandlingHendelse map(String payload) {

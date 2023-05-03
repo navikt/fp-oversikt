@@ -12,7 +12,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.common.innsyn.Saker;
-import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 @Path("/saker")
 @ApplicationScoped
@@ -21,12 +20,12 @@ public class SakerRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SakerRest.class);
     private FpSaker fpSaker;
-    private PdlKlient pdlKlient;
+    private InnloggetBruker innloggetBruker;
 
     @Inject
-    public SakerRest(FpSaker fpSaker, PdlKlient pdlKlient) {
+    public SakerRest(FpSaker fpSaker, InnloggetBruker innloggetBruker) {
         this.fpSaker = fpSaker;
-        this.pdlKlient = pdlKlient;
+        this.innloggetBruker = innloggetBruker;
     }
 
     SakerRest() {
@@ -36,14 +35,7 @@ public class SakerRest {
     @Produces(MediaType.APPLICATION_JSON)
     public Saker hent() {
         LOG.info("Kall mot saker endepunkt");
-        var aktørId = aktørIdForBruker();
+        var aktørId = innloggetBruker.aktørId();
         return fpSaker.hent(aktørId);
-    }
-
-    private String aktørIdForBruker() {
-        var fnr = KontekstHolder.getKontekst().getUid();
-        var aktørId = pdlKlient.hentAktørIdForPersonIdent(fnr).orElseThrow();
-        LOG.info("Mapper fnr til aktørId");
-        return aktørId;
     }
 }
