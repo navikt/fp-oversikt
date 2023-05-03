@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt;
+package no.nav.foreldrepenger.oversikt.domene;
 
 import static no.nav.foreldrepenger.oversikt.server.JsonUserType.MAPPER;
 
@@ -22,7 +22,7 @@ import no.nav.foreldrepenger.oversikt.server.JsonUserType;
 @Entity
 @Table(name = "vedtak")
 @TypeDef(name = "jsonb", typeClass = JsonUserType.class)
-public class VedtakEntitet {
+public class SakEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VEDTAK")
@@ -32,16 +32,16 @@ public class VedtakEntitet {
     @Type(type = "jsonb")
     private ObjectNode json;
 
-    public VedtakEntitet(Vedtak vedtak) {
-        this.json = MAPPER.valueToTree(vedtak);
+    public SakEntitet(Sak sak) {
+        this.json = MAPPER.valueToTree(sak);
     }
 
-    protected VedtakEntitet() {
+    protected SakEntitet() {
     }
 
-    Vedtak map() {
+    Sak map() {
         try {
-            return MAPPER.treeToValue(json, Vedtak.class);
+            return MAPPER.treeToValue(json, Sak.class);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
@@ -53,7 +53,7 @@ public class VedtakEntitet {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        VedtakEntitet that = (VedtakEntitet) o;
+        SakEntitet that = (SakEntitet) o;
         return Objects.equals(id, that.id);
     }
 
