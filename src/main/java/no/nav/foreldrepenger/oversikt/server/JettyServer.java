@@ -53,10 +53,10 @@ public class JettyServer {
     }
 
     public static void main(String[] args) throws Exception {
-        jettyServer(args).bootStrap();
+        jettyServer().bootStrap();
     }
 
-    private static JettyServer jettyServer(String[] args) {
+    private static JettyServer jettyServer() {
         return new JettyServer(ENV.getProperty("server.port", Integer.class, 8080));
     }
 
