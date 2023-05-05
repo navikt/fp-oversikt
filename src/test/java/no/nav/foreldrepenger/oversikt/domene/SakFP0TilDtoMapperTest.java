@@ -61,7 +61,7 @@ class SakFP0TilDtoMapperTest {
 
         var vedtakDto = vedtak.tilDto();
 
-        assertThat(vedtakDto).isNull();
+        assertThat(vedtakDto.perioder()).isEmpty();
     }
 
 }
