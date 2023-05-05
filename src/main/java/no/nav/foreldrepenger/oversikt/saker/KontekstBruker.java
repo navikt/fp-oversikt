@@ -6,6 +6,7 @@ import javax.inject.Inject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 @ApplicationScoped
@@ -25,10 +26,10 @@ public class KontekstBruker implements InnloggetBruker {
     }
 
     @Override
-    public String aktørId() {
+    public AktørId aktørId() {
         var fnr = KontekstHolder.getKontekst().getUid();
         var aktørId = pdlKlient.hentAktørIdForPersonIdent(fnr).orElseThrow();
         LOG.info("Mapper fnr til aktørId");
-        return aktørId;
+        return new AktørId(aktørId);
     }
 }

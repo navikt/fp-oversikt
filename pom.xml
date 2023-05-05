@@ -23,7 +23,7 @@
         <felles.version>4.2.41</felles.version>
         <prosesstask.version>3.1.26</prosesstask.version>
         <fp-kontrakter.version>6.2.16</fp-kontrakter.version>
-        <fpsoknad-felles.version>2.2.0</fpsoknad-felles.version>
+        <fpsoknad-felles.version>2.2.1</fpsoknad-felles.version>
     </properties>
 
     <dependencyManagement>
