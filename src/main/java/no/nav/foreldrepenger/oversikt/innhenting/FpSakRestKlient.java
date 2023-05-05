@@ -26,10 +26,10 @@ class FpSakRestKlient implements FpsakTjeneste {
     }
 
     @Override
-    public SakDto hentSak(UUID behandlingId) {
+    public Sak hentSak(UUID behandlingId) {
         var uri = UriBuilder.fromUri(restConfig.endpoint()).path(FPSAK_API).path("/fpoversikt/sak").queryParam("behandlingId", behandlingId.toString()).build();
         var request = RestRequest.newGET(uri, restConfig);
-        return restClient.sendReturnOptional(request, SakDto.class)
+        return restClient.sendReturnOptional(request, Sak.class)
             .orElseThrow(() -> new IllegalStateException("Klarte ikke hente sak: " + behandlingId));
     }
 }

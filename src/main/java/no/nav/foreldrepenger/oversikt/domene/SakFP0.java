@@ -16,7 +16,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto() {
         var gjeldendeVedtak = vedtakene.stream().max(Comparator.comparing(Vedtak::vedtakstidspunkt));
-        var dekningsgrad = gjeldendeVedtak.map(vedtak -> vedtak.uttak().dekningsgrad().tilDto()).orElse(null);
+        var dekningsgrad = gjeldendeVedtak.map(vedtak -> vedtak.dekningsgrad().tilDto()).orElse(null);
         var fpVedtak = gjeldendeVedtak
             .map(Vedtak::tilDto)
             .orElse(null);

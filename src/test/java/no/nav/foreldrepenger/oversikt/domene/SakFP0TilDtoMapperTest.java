@@ -15,12 +15,11 @@ class SakFP0TilDtoMapperTest {
     void verifiser_at_gjeldende_vedtak_er_det_med_senest_vedtakstidspunkt() {
         var uttaksperioderGjeldendeVedtak = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1)));
         var vedtakene = Set.of(
-            new Vedtak(LocalDateTime.now().minusYears(1), new Uttak(Dekningsgrad.HUNDRE, List.of(
+            new Vedtak(LocalDateTime.now().minusYears(1), List.of(
                 new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1)),
                 new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
-            ))),
-            new Vedtak(LocalDateTime.now(), new Uttak(Dekningsgrad.ÅTTI, uttaksperioderGjeldendeVedtak
-            ))
+            ), Dekningsgrad.HUNDRE),
+            new Vedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI)
         );
         var sakFP0 = new SakFP0(new Saksnummer("1"), new AktørId("123"), vedtakene);
 
@@ -48,19 +47,17 @@ class SakFP0TilDtoMapperTest {
             new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1)),
             new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2))
         );
-        var uttak = new Uttak(Dekningsgrad.HUNDRE, uttaksperioder);
-        var vedtak = new Vedtak(LocalDateTime.now(), uttak);
+        var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
 
         var vedtakDto = vedtak.tilDto();
 
-        assertThat(vedtakDto.perioder()).hasSameSizeAs(vedtak.uttak().perioder());
+        assertThat(vedtakDto.perioder()).hasSameSizeAs(vedtak.perioder());
     }
 
 
     @Test
     void sjekk_at_mapping_av_vedtak_til_dto_ikke_kaster_exception_når_uttak_er_null() {
-        var uttak = new Uttak(Dekningsgrad.HUNDRE, null);
-        var vedtak = new Vedtak(LocalDateTime.now(), uttak);
+        var vedtak = new Vedtak(LocalDateTime.now(), null, Dekningsgrad.HUNDRE);
 
         var vedtakDto = vedtak.tilDto();
 

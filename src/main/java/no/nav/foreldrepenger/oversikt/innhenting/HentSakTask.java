@@ -15,11 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
-import no.nav.foreldrepenger.oversikt.domene.Sak;
+import no.nav.foreldrepenger.oversikt.domene.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
+import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.Uttak;
 import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode;
 import no.nav.foreldrepenger.oversikt.domene.Vedtak;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
@@ -52,44 +52,51 @@ public class HentSakTask implements ProsessTaskHandler {
         sakRepository.lagre(map(sakDto));
     }
 
-    static Sak map(FpsakTjeneste.SakDto sakDto) {
-        return new SakFP0(new Saksnummer(sakDto.saksnummer()), new AktørId(sakDto.aktørId()), tilVedtak(sakDto.vedtakene()));
+    static no.nav.foreldrepenger.oversikt.domene.Sak map(Sak sakDto) {
+        if (sakDto == null) {
+            throw new RuntimeException("Hentet sak er null og kan ikke bli mappet!");
+        }
+
+        if (sakDto instanceof FpSak fpsak) {
+            return new SakFP0(new Saksnummer(fpsak.saksnummer()), new AktørId(fpsak.aktørId()), tilVedtak(fpsak.vedtakene()));
+        }
+        if (sakDto instanceof SvpSak svpSak) {
+            return new SakSVP0(new Saksnummer(svpSak.saksnummer()), new AktørId(svpSak.aktørId()));
+        }
+        if (sakDto instanceof EsSak esSak) {
+            return new SakES0(new Saksnummer(esSak.saksnummer()), new AktørId(esSak.aktørId()));
+        }
+
+        throw new RuntimeException("Hentet sak er null og kan ikke bli mappet!");
     }
 
-    private static Set<Vedtak> tilVedtak(Set<FpsakTjeneste.SakDto.VedtakDto> vedtakene) {
+    private static Set<Vedtak> tilVedtak(Set<FpSak.Vedtak> vedtakene) {
         return safeStream(vedtakene)
             .map(HentSakTask::tilVedtak)
             .collect(Collectors.toSet());
     }
 
-    private static Vedtak tilVedtak(FpsakTjeneste.SakDto.VedtakDto vedtakDto) {
+    private static Vedtak tilVedtak(FpSak.Vedtak vedtakDto) {
         if (vedtakDto == null) {
             return null;
         }
-        return new Vedtak(vedtakDto.vedtakstidspunkt(), tilUttak(vedtakDto.uttak()));
+        return new Vedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()), tilDekningsgrad(vedtakDto.dekningsgrad()));
     }
 
-    private static Uttak tilUttak(FpsakTjeneste.SakDto.UttakDto uttakDto) {
-        if (uttakDto == null) {
-            return null;
-        }
-        return new Uttak(tilDekningsgrad(uttakDto.dekningsgrad()), tilUttaksperiode(uttakDto.perioder()));
-    }
-
-    private static List<Uttaksperiode> tilUttaksperiode(List<FpsakTjeneste.SakDto.UttaksperiodeDto> perioder) {
+    private static List<Uttaksperiode> tilUttaksperiode(List<FpSak.Uttaksperiode> perioder) {
         return safeStream(perioder)
             .map(HentSakTask::tilUttaksperiode)
             .toList();
     }
 
-    private static Uttaksperiode tilUttaksperiode(FpsakTjeneste.SakDto.UttaksperiodeDto uttaksperiodeDto) {
+    private static Uttaksperiode tilUttaksperiode(FpSak.Uttaksperiode uttaksperiodeDto) {
         if (uttaksperiodeDto == null) {
             return null;
         }
         return new Uttaksperiode(uttaksperiodeDto.fom(), uttaksperiodeDto.tom());
     }
 
-    private static Dekningsgrad tilDekningsgrad(no.nav.foreldrepenger.common.innsyn.Dekningsgrad dekningsgrad) {
+    private static Dekningsgrad tilDekningsgrad(FpSak.Vedtak.Dekningsgrad dekningsgrad) {
         return switch (dekningsgrad) {
             case HUNDRE -> Dekningsgrad.HUNDRE;
             case ÅTTI -> Dekningsgrad.ÅTTI;
