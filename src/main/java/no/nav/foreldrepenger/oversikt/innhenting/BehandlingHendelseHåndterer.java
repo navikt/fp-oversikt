@@ -13,7 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
-import no.nav.vedtak.hendelser.behandling.BehandlingHendelse;
+import no.nav.vedtak.hendelser.behandling.v1.BehandlingHendelseV1;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 
 @ApplicationScoped
@@ -37,28 +37,28 @@ public class BehandlingHendelseHåndterer {
     void handleMessage(String key, String payload) {
         LOG.info("Lest fra teamforeldrepenger.behandling-hendelse-v1: key={} payload={}", key, payload);
         var hendelse = map(payload);
-        lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid());
+        lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid(), hendelse.getSaksnummer());
     }
 
-    private void lagreHentSakTask(UUID behandlingUuid, UUID hendelseUuid) {
-        var task = opprettTask(behandlingUuid, hendelseUuid);
+    private void lagreHentSakTask(UUID behandlingUuid, UUID hendelseUuid, String saksnummer) {
+        var task = opprettTask(behandlingUuid, hendelseUuid, saksnummer);
         taskTjeneste.lagre(task);
         LOG.info("Opprettet task");
     }
 
-    public static ProsessTaskData opprettTask(UUID behandlingUuid, UUID hendelseUuid) {
+    public static ProsessTaskData opprettTask(UUID behandlingUuid, UUID hendelseUuid, String saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setProperty(HentSakTask.BEHANDLING_UUID, behandlingUuid.toString());
         task.setPrioritet(50);
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
-        task.setGruppe(behandlingUuid.toString());
+        task.setGruppe(saksnummer);
         return task;
     }
 
-    private static BehandlingHendelse map(String payload) {
-        return DefaultJsonMapper.fromJson(payload, BehandlingHendelse.class);
+    private static BehandlingHendelseV1 map(String payload) {
+        return DefaultJsonMapper.fromJson(payload, BehandlingHendelseV1.class);
     }
 
 

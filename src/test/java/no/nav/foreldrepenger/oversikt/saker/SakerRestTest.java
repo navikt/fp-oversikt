@@ -48,7 +48,7 @@ class SakerRestTest {
 
     private static void sendBehandlingHendelse(FpSak fraFpsak, RepositoryStub sakRepository) {
         var behandlingUuid = UUID.randomUUID();
-        var prosessTaskData = opprettTask(behandlingUuid, UUID.randomUUID());
+        var prosessTaskData = opprettTask(behandlingUuid, UUID.randomUUID(), fraFpsak.saksnummer());
         new HentSakTask(new FpsakTjenesteStub(Map.of(behandlingUuid, fraFpsak)), sakRepository).doTask(prosessTaskData);
     }
 
