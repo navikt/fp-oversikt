@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -54,6 +55,7 @@ public class BehandlingHendelseHåndterer {
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
         task.setGruppe(saksnummer);
+        task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
     }
 
