@@ -30,13 +30,36 @@ class DBSakRepositoryTest {
         var aktørId = new AktørId(UUID.randomUUID().toString());
         var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2)));
         var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
-        var originalt = new SakFP0(new Saksnummer("123"), aktørId, Set.of(vedtak));
+        var originalt = new SakFP0(randomSaksnummer(), aktørId, Set.of(vedtak));
         repository.lagre(originalt);
-        repository.lagre(new SakFP0(new Saksnummer("345"), new AktørId(UUID.randomUUID().toString()), null));
+        repository.lagre(new SakFP0(randomSaksnummer(), new AktørId(UUID.randomUUID().toString()), null));
 
         var saker = repository.hentFor(aktørId);
 
         assertThat(saker).hasSize(1);
         assertThat(saker.get(0)).isEqualTo(originalt);
+    }
+
+    @Test
+    void oppdatererJsonPåSak(EntityManager entityManager) {
+        var repository = new DBSakRepository(entityManager);
+        var aktørId = new AktørId(UUID.randomUUID().toString());
+        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2)));
+        var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
+        var saksnummer = randomSaksnummer();
+        var originalt = new SakFP0(saksnummer, aktørId, Set.of(vedtak));
+        repository.lagre(originalt);
+        var oppdatertSak = new SakFP0(saksnummer, aktørId, null);
+        repository.lagre(oppdatertSak);
+
+        var saker = repository.hentFor(aktørId);
+
+        assertThat(saker).hasSize(1);
+        assertThat(saker.get(0)).isNotEqualTo(originalt);
+        assertThat(saker.get(0)).isEqualTo(oppdatertSak);
+    }
+
+    private static Saksnummer randomSaksnummer() {
+        return new Saksnummer(UUID.randomUUID().toString());
     }
 }

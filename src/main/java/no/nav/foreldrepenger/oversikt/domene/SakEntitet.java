@@ -19,24 +19,36 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import no.nav.foreldrepenger.oversikt.server.JsonUserType;
 
-@Entity
-@Table(name = "vedtak")
+@Entity(name = "sak")
+@Table(name = "sak")
 @TypeDef(name = "jsonb", typeClass = JsonUserType.class)
 public class SakEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_VEDTAK")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SAK")
     private Long id;
+
+    @Column(name = "saksnummer")
+    private String saksnummer;
 
     @Column
     @Type(type = "jsonb")
     private ObjectNode json;
 
     public SakEntitet(Sak sak) {
-        this.json = MAPPER.valueToTree(sak);
+        this.json = toObjectNode(sak);
+        this.saksnummer = sak.saksnummer().value();
+    }
+
+    private static ObjectNode toObjectNode(Sak sak) {
+        return MAPPER.valueToTree(sak);
     }
 
     protected SakEntitet() {
+    }
+
+    void setJson(Sak sak) {
+        this.json = toObjectNode(sak);
     }
 
     Sak map() {

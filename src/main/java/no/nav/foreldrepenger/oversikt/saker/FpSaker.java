@@ -34,11 +34,10 @@ public class FpSaker {
     }
 
     public Saker hent(AktørId aktørId) {
-        var saker = this.sakRepository.hentFor(aktørId);
+        var saker = sakRepository.hentFor(aktørId);
         LOG.info("Hentet saker {}", saker);
         return tilDto(saker);
     }
-
 
     static Saker tilDto(List<Sak> saker) {
         var sakerDtoer = saker.stream()
