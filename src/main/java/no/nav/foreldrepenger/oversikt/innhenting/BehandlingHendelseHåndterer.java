@@ -1,9 +1,6 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
-import static no.nav.vedtak.hendelser.behandling.Hendelse.AVSLUTTET;
-
 import java.time.LocalDateTime;
-import java.util.Objects;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -40,9 +37,7 @@ public class BehandlingHendelseHåndterer {
     void handleMessage(String key, String payload) {
         LOG.info("Lest fra teamforeldrepenger.behandling-hendelse-v1: key={} payload={}", key, payload);
         var hendelse = map(payload);
-        if (Objects.equals(hendelse.getHendelse(), AVSLUTTET)) {
-            lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid());
-        }
+        lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid());
     }
 
     private void lagreHentSakTask(UUID behandlingUuid, UUID hendelseUuid) {
@@ -58,6 +53,7 @@ public class BehandlingHendelseHåndterer {
         task.setPrioritet(50);
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
+        task.setGruppe(behandlingUuid.toString());
         return task;
     }
 
