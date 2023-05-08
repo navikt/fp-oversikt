@@ -5,17 +5,18 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
+import no.nav.foreldrepenger.oversikt.innhenting.Sak;
 
 public class FpsakTjenesteStub implements FpsakTjeneste {
 
-    private final Map<UUID, SakDto> saker;
+    private final Map<UUID, Sak> saker;
 
-    public FpsakTjenesteStub(Map<UUID, SakDto> saker) {
+    public FpsakTjenesteStub(Map<UUID, Sak> saker) {
         this.saker = new ConcurrentHashMap<>(saker);
     }
 
     @Override
-    public SakDto hentSak(UUID behandlingUuid) {
+    public Sak hentSak(UUID behandlingUuid) {
         return saker.get(behandlingUuid);
     }
 }
