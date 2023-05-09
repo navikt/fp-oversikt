@@ -6,7 +6,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.persistence.EntityManager;
 
@@ -27,12 +26,13 @@ class DBSakRepositoryTest {
     @Test
     void roundtrip(EntityManager entityManager) {
         var repository = new DBSakRepository(entityManager);
-        var aktørId = new AktørId(UUID.randomUUID().toString());
+        var aktørId = AktørId.dummy();
         var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2)));
         var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
-        var originalt = new SakFP0(randomSaksnummer(), aktørId, Set.of(vedtak));
+        var originalt = new SakFP0(Saksnummer.dummy(), aktørId, Set.of(vedtak), AktørId.dummy());
         repository.lagre(originalt);
-        repository.lagre(new SakFP0(randomSaksnummer(), new AktørId(UUID.randomUUID().toString()), null));
+        var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), null, AktørId.dummy());
+        repository.lagre(annenAktørsSak);
 
         var saker = repository.hentFor(aktørId);
 
@@ -43,13 +43,14 @@ class DBSakRepositoryTest {
     @Test
     void oppdatererJsonPåSak(EntityManager entityManager) {
         var repository = new DBSakRepository(entityManager);
-        var aktørId = new AktørId(UUID.randomUUID().toString());
+        var aktørId = AktørId.dummy();
         var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2)));
         var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
-        var saksnummer = randomSaksnummer();
-        var originalt = new SakFP0(saksnummer, aktørId, Set.of(vedtak));
+        var saksnummer = Saksnummer.dummy();
+        var annenPartAktørId = AktørId.dummy();
+        var originalt = new SakFP0(saksnummer, aktørId, Set.of(vedtak), annenPartAktørId);
         repository.lagre(originalt);
-        var oppdatertSak = new SakFP0(saksnummer, aktørId, null);
+        var oppdatertSak = new SakFP0(saksnummer, aktørId, null, annenPartAktørId);
         repository.lagre(oppdatertSak);
 
         var saker = repository.hentFor(aktørId);
@@ -57,9 +58,5 @@ class DBSakRepositoryTest {
         assertThat(saker).hasSize(1);
         assertThat(saker.get(0)).isNotEqualTo(originalt);
         assertThat(saker.get(0)).isEqualTo(oppdatertSak);
-    }
-
-    private static Saksnummer randomSaksnummer() {
-        return new Saksnummer(UUID.randomUUID().toString());
     }
 }

@@ -13,6 +13,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.FpSak;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
 import no.nav.foreldrepenger.oversikt.stub.FpsakTjenesteStub;
@@ -22,16 +23,17 @@ class SakerRestTest {
 
     @Test
     void hent_foreldrepenge_sak_roundtrip_test() {
-        var aktørId = new AktørId( "aktørId");
+        var aktørId = AktørId.dummy();
         var repository = new RepositoryStub();
-        var tjeneste = new SakerRest(new FpSaker(repository), () -> aktørId);
+        var tjeneste = new SakerRest(new FpSaker(repository, AktørId::value), () -> aktørId);
 
 
         var uttaksperiodeDto1 = new FpSak.Uttaksperiode(LocalDate.now().minusWeeks(4), LocalDate.now().minusWeeks(2));
         var uttaksperioder = List.of(uttaksperiodeDto1);
         var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Vedtak.Dekningsgrad.HUNDRE);
 
-        var sakFraFpsak = new FpSak("123", aktørId.value(), Set.of(vedtak));
+        var aktørIdAnnenPart = AktørId.dummy();
+        var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), Set.of(vedtak), aktørIdAnnenPart.value());
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().foreldrepenger().stream().toList();
@@ -43,6 +45,7 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).fom()).isEqualTo(vedtak.uttaksperioder().get(0).fom());
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).tom()).isEqualTo(vedtak.uttaksperioder().get(0).tom());
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).fom()).isBefore(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).tom());
+        assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());
 
     }
 

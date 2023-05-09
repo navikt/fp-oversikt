@@ -54,11 +54,12 @@ public class HentSakTask implements ProsessTaskHandler {
 
     static no.nav.foreldrepenger.oversikt.domene.Sak map(Sak sakDto) {
         if (sakDto == null) {
-            throw new RuntimeException("Hentet sak er null og kan ikke bli mappet!");
+            throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");
         }
 
         if (sakDto instanceof FpSak fpsak) {
-            return new SakFP0(new Saksnummer(fpsak.saksnummer()), new AktørId(fpsak.aktørId()), tilVedtak(fpsak.vedtakene()));
+            return new SakFP0(new Saksnummer(fpsak.saksnummer()), new AktørId(fpsak.aktørId()), tilVedtak(fpsak.vedtakene()),
+                fpsak.oppgittAnnenPart() == null ? null : new AktørId(fpsak.oppgittAnnenPart()));
         }
         if (sakDto instanceof SvpSak svpSak) {
             return new SakSVP0(new Saksnummer(svpSak.saksnummer()), new AktørId(svpSak.aktørId()));
@@ -67,7 +68,7 @@ public class HentSakTask implements ProsessTaskHandler {
             return new SakES0(new Saksnummer(esSak.saksnummer()), new AktørId(esSak.aktørId()));
         }
 
-        throw new RuntimeException("Hentet sak er null og kan ikke bli mappet!");
+        throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");
     }
 
     private static Set<Vedtak> tilVedtak(Set<FpSak.Vedtak> vedtakene) {

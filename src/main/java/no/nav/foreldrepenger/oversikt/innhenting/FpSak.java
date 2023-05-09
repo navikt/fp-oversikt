@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-public record FpSak(String saksnummer, String aktørId, Set<Vedtak> vedtakene) implements Sak {
+public record FpSak(String saksnummer, String aktørId, Set<Vedtak> vedtakene, String oppgittAnnenPart) implements Sak {
 
     public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, Dekningsgrad dekningsgrad) {
         public enum Dekningsgrad {

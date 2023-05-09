@@ -3,6 +3,8 @@ package no.nav.foreldrepenger.oversikt.domene;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
+
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
     @JsonSubTypes.Type(value = SakFP0.class, name = "FP0"),
@@ -11,7 +13,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public interface Sak {
 
-    no.nav.foreldrepenger.common.innsyn.Sak tilSakDto();
+    no.nav.foreldrepenger.common.innsyn.Sak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag);
 
     Saksnummer saksnummer();
 
