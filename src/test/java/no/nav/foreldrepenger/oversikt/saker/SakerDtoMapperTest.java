@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 
-class FpSakerTest {
+class SakerDtoMapperTest {
 
 
     private static final AktørId AKTØR_ID = AktørId.dummy();
@@ -29,7 +29,7 @@ class FpSakerTest {
             new SakES0(Saksnummer.dummy(), AKTØR_ID)
         );
 
-        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(2);
         assertThat(sakerDto.svangerskapspenger()).hasSize(1);
@@ -43,7 +43,7 @@ class FpSakerTest {
             new SakES0(Saksnummer.dummy(), AKTØR_ID)
         );
 
-        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(1);
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -57,7 +57,7 @@ class FpSakerTest {
             new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null)
         );
 
-        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(2);
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -71,7 +71,7 @@ class FpSakerTest {
             new SakSVP0(Saksnummer.dummy(), AKTØR_ID)
         );
 
-        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).hasSize(2);
@@ -84,7 +84,7 @@ class FpSakerTest {
             new SakES0(Saksnummer.dummy(), AKTØR_ID)
         );
 
-        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -95,7 +95,7 @@ class FpSakerTest {
     void skal_ikke_feile_ved_ingen_saker() {
         List<Sak> saker = List.of();
 
-        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).isEmpty();

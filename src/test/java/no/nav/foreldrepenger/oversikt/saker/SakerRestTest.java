@@ -25,7 +25,7 @@ class SakerRestTest {
     void hent_foreldrepenge_sak_roundtrip_test() {
         var aktørId = AktørId.dummy();
         var repository = new RepositoryStub();
-        var tjeneste = new SakerRest(new FpSaker(repository, AktørId::value), () -> aktørId);
+        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
 
 
         var uttaksperiodeDto1 = new FpSak.Uttaksperiode(LocalDate.now().minusWeeks(4), LocalDate.now().minusWeeks(2));

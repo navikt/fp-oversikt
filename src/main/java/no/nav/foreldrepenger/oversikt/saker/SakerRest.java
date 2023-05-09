@@ -11,20 +11,18 @@ import javax.ws.rs.core.MediaType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.common.innsyn.Saker;
-
 @Path("/saker")
 @ApplicationScoped
 @Transactional
 public class SakerRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SakerRest.class);
-    private FpSaker fpSaker;
+    private Saker saker;
     private InnloggetBruker innloggetBruker;
 
     @Inject
-    public SakerRest(FpSaker fpSaker, InnloggetBruker innloggetBruker) {
-        this.fpSaker = fpSaker;
+    public SakerRest(Saker saker, InnloggetBruker innloggetBruker) {
+        this.saker = saker;
         this.innloggetBruker = innloggetBruker;
     }
 
@@ -33,9 +31,9 @@ public class SakerRest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Saker hent() {
+    public no.nav.foreldrepenger.common.innsyn.Saker hent() {
         LOG.info("Kall mot saker endepunkt");
         var aktørId = innloggetBruker.aktørId();
-        return fpSaker.hent(aktørId);
+        return saker.hent(aktørId);
     }
 }
