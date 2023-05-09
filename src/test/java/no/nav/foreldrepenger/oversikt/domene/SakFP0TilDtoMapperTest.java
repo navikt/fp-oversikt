@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
@@ -21,13 +22,15 @@ class SakFP0TilDtoMapperTest {
             ), Dekningsgrad.HUNDRE),
             new Vedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI)
         );
-        var sakFP0 = new SakFP0(new Saksnummer("1"), new AktørId("123"), vedtakene);
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), vedtakene, AktørId.dummy());
 
-        var fpSakDto = sakFP0.tilSakDto();
+        var fnrAnnenPart = UUID.randomUUID().toString();
+        var fpSakDto = sakFP0.tilSakDto(aktørId -> fnrAnnenPart);
 
         assertThat(fpSakDto.gjeldendeVedtak()).isNotNull();
         assertThat(fpSakDto.gjeldendeVedtak().perioder()).hasSameSizeAs(uttaksperioderGjeldendeVedtak);
         assertThat(fpSakDto.gjeldendeVedtak().perioder().get(0).fom()).isEqualTo(uttaksperioderGjeldendeVedtak.get(0).fom());
+        assertThat(fpSakDto.annenPart().fnr().value()).isEqualTo(fnrAnnenPart);
     }
 
     @Test

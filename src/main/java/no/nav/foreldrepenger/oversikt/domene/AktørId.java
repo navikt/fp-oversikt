@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
 import java.util.Objects;
+import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
@@ -20,5 +21,9 @@ public record AktørId(@JsonValue String value) {
     @Override
     public String toString() {
         return value;
+    }
+
+    public static AktørId dummy() {
+        return new AktørId(UUID.randomUUID().toString());
     }
 }

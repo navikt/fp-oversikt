@@ -18,18 +18,18 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 class FpSakerTest {
 
 
-    private static final AktørId AKTØR_ID = new AktørId("123");
+    private static final AktørId AKTØR_ID = AktørId.dummy();
 
     @Test
     void verifiser_at_fordeles_på_riktig_() {
         List<Sak> saker = List.of(
-            new SakFP0(new Saksnummer("1"), AKTØR_ID, Set.of()),
-            new SakFP0(new Saksnummer("2"), AKTØR_ID, Set.of()),
-            new SakSVP0(new Saksnummer("3"), AKTØR_ID),
-            new SakES0(new Saksnummer("4"), AKTØR_ID)
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), AktørId.dummy()),
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null),
+            new SakSVP0(Saksnummer.dummy(), AKTØR_ID),
+            new SakES0(Saksnummer.dummy(), AKTØR_ID)
         );
 
-        var sakerDto = FpSaker.tilDto(saker);
+        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(2);
         assertThat(sakerDto.svangerskapspenger()).hasSize(1);
@@ -39,11 +39,11 @@ class FpSakerTest {
     @Test
     void skal_ikke_feile_ved_ingen_svp_saker() {
         List<Sak> saker = List.of(
-            new SakFP0(new Saksnummer("1"), AKTØR_ID, Set.of()),
-            new SakES0(new Saksnummer("3"), AKTØR_ID)
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null),
+            new SakES0(Saksnummer.dummy(), AKTØR_ID)
         );
 
-        var sakerDto = FpSaker.tilDto(saker);
+        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(1);
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -53,11 +53,11 @@ class FpSakerTest {
     @Test
     void skal_ikke_feile_ved_bare_fp_saker() {
         List<Sak> saker = List.of(
-            new SakFP0(new Saksnummer("1"), AKTØR_ID, Set.of()),
-            new SakFP0(new Saksnummer("2"), AKTØR_ID, Set.of())
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null),
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null)
         );
 
-        var sakerDto = FpSaker.tilDto(saker);
+        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(2);
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -67,11 +67,11 @@ class FpSakerTest {
     @Test
     void skal_ikke_feile_ved_bare_svp_sak() {
         List<Sak> saker = List.of(
-            new SakSVP0(new Saksnummer("1"), AKTØR_ID),
-            new SakSVP0(new Saksnummer("2"), AKTØR_ID)
+            new SakSVP0(Saksnummer.dummy(), AKTØR_ID),
+            new SakSVP0(Saksnummer.dummy(), AKTØR_ID)
         );
 
-        var sakerDto = FpSaker.tilDto(saker);
+        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).hasSize(2);
@@ -81,10 +81,10 @@ class FpSakerTest {
     @Test
     void skal_ikke_feile_ved_bare_es_sak() {
         List<Sak> saker = List.of(
-            new SakES0(new Saksnummer("3"), AKTØR_ID)
+            new SakES0(Saksnummer.dummy(), AKTØR_ID)
         );
 
-        var sakerDto = FpSaker.tilDto(saker);
+        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -95,11 +95,14 @@ class FpSakerTest {
     void skal_ikke_feile_ved_ingen_saker() {
         List<Sak> saker = List.of();
 
-        var sakerDto = FpSaker.tilDto(saker);
+        var sakerDto = FpSaker.tilDto(saker, fnrOppslag());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
         assertThat(sakerDto.engangsstønad()).isEmpty();
     }
 
+    private static FødselsnummerOppslag fnrOppslag() {
+        return AktørId::value;
+    }
 }

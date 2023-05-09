@@ -7,23 +7,28 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.FpSak;
+import no.nav.foreldrepenger.common.innsyn.Person;
+import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 
 public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("aktørId") AktørId aktørId,
-                     @JsonProperty("vedtakene") Set<Vedtak> vedtakene) implements Sak {
+                     @JsonProperty("vedtakene") Set<Vedtak> vedtakene,
+                     @JsonProperty("annenPartAktørId") AktørId annenPartAktørId) implements Sak {
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto() {
+    public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
         var gjeldendeVedtak = safeStream(vedtakene()).max(Comparator.comparing(Vedtak::vedtakstidspunkt));
         var dekningsgrad = gjeldendeVedtak.map(vedtak -> vedtak.dekningsgrad().tilDto()).orElse(null);
         var fpVedtak = gjeldendeVedtak
             .map(Vedtak::tilDto)
             .orElse(null);
 
+        var annenPart = annenPartAktørId == null ? null : new Person(new Fødselsnummer(fødselsnummerOppslag.forAktørId(annenPartAktørId)), null);
         return new FpSak(saksnummer.tilDto(), false, null, false, false, false,
-            false, false, false, null, null, null,
+            false, false, false, null, annenPart, null,
             fpVedtak, null, null, dekningsgrad);
     }
 }

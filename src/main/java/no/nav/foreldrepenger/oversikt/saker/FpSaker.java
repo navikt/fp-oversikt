@@ -23,10 +23,12 @@ public class FpSaker {
     private static final Logger LOG = LoggerFactory.getLogger(FpSaker.class);
 
     private SakRepository sakRepository;
+    private FødselsnummerOppslag fødselsnummerOppslag;
 
     @Inject
-    public FpSaker(SakRepository sakRepository) {
+    public FpSaker(SakRepository sakRepository, FødselsnummerOppslag fødselsnummerOppslag) {
         this.sakRepository = sakRepository;
+        this.fødselsnummerOppslag = fødselsnummerOppslag;
     }
 
     FpSaker() {
@@ -36,12 +38,12 @@ public class FpSaker {
     public Saker hent(AktørId aktørId) {
         var saker = sakRepository.hentFor(aktørId);
         LOG.info("Hentet saker {}", saker);
-        return tilDto(saker);
+        return tilDto(saker, fødselsnummerOppslag);
     }
 
-    static Saker tilDto(List<Sak> saker) {
+    static Saker tilDto(List<Sak> saker, FødselsnummerOppslag fnrOppslag) {
         var sakerDtoer = saker.stream()
-            .map(Sak::tilSakDto)
+            .map(s -> s.tilSakDto(fnrOppslag))
             .collect(Collectors.toSet());
 
         var foreldrepenger = sakerDtoer.stream()
