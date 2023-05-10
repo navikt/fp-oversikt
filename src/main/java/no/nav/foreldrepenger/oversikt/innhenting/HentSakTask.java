@@ -94,7 +94,14 @@ public class HentSakTask implements ProsessTaskHandler {
         if (uttaksperiodeDto == null) {
             return null;
         }
-        return new Uttaksperiode(uttaksperiodeDto.fom(), uttaksperiodeDto.tom());
+        return new Uttaksperiode(uttaksperiodeDto.fom(), uttaksperiodeDto.tom(), new Uttaksperiode.Resultat(tilResultatType(uttaksperiodeDto.resultat().type())));
+    }
+
+    private static Uttaksperiode.Resultat.Type tilResultatType(FpSak.Uttaksperiode.Resultat.Type type) {
+        return switch (type) {
+            case INNVILGET -> Uttaksperiode.Resultat.Type.INNVILGET;
+            case AVSLÅTT -> Uttaksperiode.Resultat.Type.AVSLÅTT;
+        };
     }
 
     private static Dekningsgrad tilDekningsgrad(FpSak.Vedtak.Dekningsgrad dekningsgrad) {

@@ -28,7 +28,8 @@ class SakerRestTest {
         var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
 
 
-        var uttaksperiodeDto1 = new FpSak.Uttaksperiode(LocalDate.now().minusWeeks(4), LocalDate.now().minusWeeks(2));
+        var uttaksperiodeDto1 = new FpSak.Uttaksperiode(LocalDate.now().minusWeeks(4), LocalDate.now().minusWeeks(2), new FpSak.Uttaksperiode.Resultat(
+            FpSak.Uttaksperiode.Resultat.Type.INNVILGET));
         var uttaksperioder = List.of(uttaksperiodeDto1);
         var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Vedtak.Dekningsgrad.HUNDRE);
 
@@ -44,8 +45,10 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder()).hasSameSizeAs(vedtak.uttaksperioder());
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).fom()).isEqualTo(vedtak.uttaksperioder().get(0).fom());
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).tom()).isEqualTo(vedtak.uttaksperioder().get(0).tom());
+        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).resultat().innvilget()).isTrue();
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).fom()).isBefore(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).tom());
         assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());
+        assertThat(sakFraDbOmgjortTilDto.kanSøkeOmEndring()).isTrue();
 
     }
 
