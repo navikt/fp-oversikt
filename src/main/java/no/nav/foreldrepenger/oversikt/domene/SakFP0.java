@@ -27,7 +27,8 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             .orElse(null);
 
         var annenPart = annenPartAktørId == null ? null : new Person(new Fødselsnummer(fødselsnummerOppslag.forAktørId(annenPartAktørId)), null);
-        return new FpSak(saksnummer.tilDto(), false, null, false, false, false,
+        var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(Vedtak::innvilget);
+        return new FpSak(saksnummer.tilDto(), false, null, kanSøkeOmEndring, false, false,
             false, false, false, null, annenPart, null,
             fpVedtak, null, null, dekningsgrad);
     }

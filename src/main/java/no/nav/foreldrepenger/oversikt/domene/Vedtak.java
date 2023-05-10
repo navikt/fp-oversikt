@@ -19,4 +19,8 @@ public record Vedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstids
             .toList();
         return new FpVedtak(uttaksperioder);
     }
+
+    public boolean innvilget() {
+        return perioder.stream().anyMatch(p -> p.resultat().innvilget());
+    }
 }

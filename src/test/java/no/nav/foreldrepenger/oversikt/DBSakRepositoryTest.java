@@ -27,7 +27,8 @@ class DBSakRepositoryTest {
     void roundtrip(EntityManager entityManager) {
         var repository = new DBSakRepository(entityManager);
         var aktørId = AktørId.dummy();
-        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2)));
+        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2), new Uttaksperiode.Resultat(
+            Uttaksperiode.Resultat.Type.INNVILGET)));
         var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var originalt = new SakFP0(Saksnummer.dummy(), aktørId, Set.of(vedtak), AktørId.dummy());
         repository.lagre(originalt);
@@ -44,7 +45,8 @@ class DBSakRepositoryTest {
     void oppdatererJsonPåSak(EntityManager entityManager) {
         var repository = new DBSakRepository(entityManager);
         var aktørId = AktørId.dummy();
-        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2)));
+        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2), new Uttaksperiode.Resultat(
+            Uttaksperiode.Resultat.Type.AVSLÅTT)));
         var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var saksnummer = Saksnummer.dummy();
         var annenPartAktørId = AktørId.dummy();
