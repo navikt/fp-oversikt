@@ -14,15 +14,18 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.innhenting.EsSak;
 import no.nav.foreldrepenger.oversikt.innhenting.FpSak;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
+import no.nav.foreldrepenger.oversikt.innhenting.Sak;
+import no.nav.foreldrepenger.oversikt.innhenting.SvpSak;
 import no.nav.foreldrepenger.oversikt.stub.FpsakTjenesteStub;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 
 class SakerRestTest {
 
     @Test
-    void hent_foreldrepenge_sak_roundtrip_test() {
+    void hent_fp_sak_roundtrip_test() {
         var aktørId = AktørId.dummy();
         var repository = new RepositoryStub();
         var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
@@ -34,7 +37,8 @@ class SakerRestTest {
         var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Vedtak.Dekningsgrad.HUNDRE);
 
         var aktørIdAnnenPart = AktørId.dummy();
-        var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), Set.of(vedtak), aktørIdAnnenPart.value());
+        var familieHendelse = new Sak.FamilieHendelse(LocalDate.now(), LocalDate.now().minusMonths(1), 1, null);
+        var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Set.of(vedtak), aktørIdAnnenPart.value());
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().foreldrepenger().stream().toList();
@@ -49,10 +53,55 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).fom()).isBefore(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).tom());
         assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());
         assertThat(sakFraDbOmgjortTilDto.kanSøkeOmEndring()).isTrue();
-
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().antallBarn()).isEqualTo(familieHendelse.antallBarn());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
     }
 
-    private static void sendBehandlingHendelse(FpSak fraFpsak, RepositoryStub sakRepository) {
+    @Test
+    void hent_svp_sak_roundtrip_test() {
+        var aktørId = AktørId.dummy();
+        var repository = new RepositoryStub();
+        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
+
+        var familieHendelse = new Sak.FamilieHendelse(LocalDate.now(), LocalDate.now().minusMonths(1), 1, null);
+        var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse);
+        sendBehandlingHendelse(sakFraFpsak, repository);
+
+        var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();
+
+        assertThat(sakerFraDBtilDto).hasSize(1);
+        var sakFraDbOmgjortTilDto = sakerFraDBtilDto.get(0);
+        assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().antallBarn()).isEqualTo(familieHendelse.antallBarn());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
+    }
+
+    @Test
+    void hent_es_sak_roundtrip_test() {
+        var aktørId = AktørId.dummy();
+        var repository = new RepositoryStub();
+        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
+
+        var familieHendelse = new Sak.FamilieHendelse(LocalDate.now(), LocalDate.now().minusMonths(1), 1, null);
+        var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse);
+        sendBehandlingHendelse(sakFraFpsak, repository);
+
+        var sakerFraDBtilDto = tjeneste.hent().engangsstønad().stream().toList();
+
+        assertThat(sakerFraDBtilDto).hasSize(1);
+        var sakFraDbOmgjortTilDto = sakerFraDBtilDto.get(0);
+        assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().antallBarn()).isEqualTo(familieHendelse.antallBarn());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
+        assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
+    }
+
+    private static void sendBehandlingHendelse(Sak fraFpsak, RepositoryStub sakRepository) {
         var behandlingUuid = UUID.randomUUID();
         var prosessTaskData = opprettTask(behandlingUuid, UUID.randomUUID(), fraFpsak.saksnummer());
         new HentSakTask(new FpsakTjenesteStub(Map.of(behandlingUuid, fraFpsak)), sakRepository).doTask(prosessTaskData);

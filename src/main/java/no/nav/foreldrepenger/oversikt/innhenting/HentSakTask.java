@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
@@ -59,16 +60,21 @@ public class HentSakTask implements ProsessTaskHandler {
 
         if (sakDto instanceof FpSak fpsak) {
             return new SakFP0(new Saksnummer(fpsak.saksnummer()), new AktørId(fpsak.aktørId()), tilVedtak(fpsak.vedtakene()),
-                fpsak.oppgittAnnenPart() == null ? null : new AktørId(fpsak.oppgittAnnenPart()));
+                fpsak.oppgittAnnenPart() == null ? null : new AktørId(fpsak.oppgittAnnenPart()), tilFamilieHendelse(fpsak.familieHendelse()));
         }
         if (sakDto instanceof SvpSak svpSak) {
-            return new SakSVP0(new Saksnummer(svpSak.saksnummer()), new AktørId(svpSak.aktørId()));
+            return new SakSVP0(new Saksnummer(svpSak.saksnummer()), new AktørId(svpSak.aktørId()), tilFamilieHendelse(svpSak.familieHendelse()));
         }
         if (sakDto instanceof EsSak esSak) {
-            return new SakES0(new Saksnummer(esSak.saksnummer()), new AktørId(esSak.aktørId()));
+            return new SakES0(new Saksnummer(esSak.saksnummer()), new AktørId(esSak.aktørId()), tilFamilieHendelse(esSak.familieHendelse()));
         }
 
         throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");
+    }
+
+    private static FamilieHendelse tilFamilieHendelse(Sak.FamilieHendelse familiehendelse) {
+        return familiehendelse == null ? null : new FamilieHendelse(familiehendelse.fødselsdato(), familiehendelse.termindato(),
+                familiehendelse.antallBarn(), familiehendelse.omsorgsovertakelse());
     }
 
     private static Set<Vedtak> tilVedtak(Set<FpSak.Vedtak> vedtakene) {

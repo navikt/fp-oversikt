@@ -6,9 +6,10 @@ import no.nav.foreldrepenger.common.innsyn.EsSak;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
-                     @JsonProperty("aktørId") AktørId aktørId) implements Sak {
+                     @JsonProperty("aktørId") AktørId aktørId,
+                     @JsonProperty("familieHendelse") FamilieHendelse familieHendelse) implements Sak {
     @Override
     public no.nav.foreldrepenger.common.innsyn.EsSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
-        return new EsSak(saksnummer.tilDto(), null, false, null, false);
+        return new EsSak(saksnummer.tilDto(), familieHendelse == null ? null : familieHendelse.tilDto(), false, null, false);
     }
 }
