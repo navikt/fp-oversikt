@@ -37,8 +37,12 @@ public class BehandlingHendelseHåndterer {
 
     void handleMessage(String key, String payload) {
         LOG.info("Lest fra teamforeldrepenger.behandling-hendelse-v1: key={} payload={}", key, payload);
-        var hendelse = map(payload);
-        lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid(), hendelse.getSaksnummer());
+        try {
+            var hendelse = map(payload);
+            lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid(), hendelse.getSaksnummer());
+        } catch (Exception e) {
+            LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key);
+        }
     }
 
     private void lagreHentSakTask(UUID behandlingUuid, UUID hendelseUuid, String saksnummer) {

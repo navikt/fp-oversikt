@@ -24,7 +24,7 @@ class SakFP0TilDtoMapperTest {
             ), Dekningsgrad.HUNDRE),
             new Vedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI)
         );
-        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), vedtakene, AktørId.dummy());
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), vedtakene, AktørId.dummy(), fh());
 
         var fnrAnnenPart = UUID.randomUUID().toString();
         var fpSakDto = sakFP0.tilSakDto(aktørId -> fnrAnnenPart);
@@ -79,7 +79,7 @@ class SakFP0TilDtoMapperTest {
             List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1), new Uttaksperiode.Resultat(INNVILGET)),
                 new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2), new Uttaksperiode.Resultat(AVSLÅTT))),
             Dekningsgrad.HUNDRE);
-        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), Set.of(vedtak), null);
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), Set.of(vedtak), null, fh());
 
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
 
@@ -92,7 +92,7 @@ class SakFP0TilDtoMapperTest {
             List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1), new Uttaksperiode.Resultat(AVSLÅTT)),
                 new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2), new Uttaksperiode.Resultat(AVSLÅTT))),
             Dekningsgrad.HUNDRE);
-        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), Set.of(vedtak), null);
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), Set.of(vedtak), null, fh());
 
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
 
@@ -101,11 +101,27 @@ class SakFP0TilDtoMapperTest {
 
     @Test
     void kan_ikke_søke_om_endring_hvis_ingen_vedtak() {
-        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), Set.of(), null);
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), Set.of(), null, fh());
 
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
 
         assertThat(fpSakDto.kanSøkeOmEndring()).isFalse();
     }
 
+    @Test
+    void skal_mappe_familieHendelse() {
+        var familieHendelse = fh();
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), Set.of(), null, familieHendelse);
+
+        var fpSakDto = sakFP0.tilSakDto(AktørId::value);
+
+        assertThat(fpSakDto.familiehendelse().antallBarn()).isEqualTo(familieHendelse.antallBarn());
+        assertThat(fpSakDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
+        assertThat(fpSakDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
+        assertThat(fpSakDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
+    }
+
+    private static FamilieHendelse fh() {
+        return new FamilieHendelse(LocalDate.now(), LocalDate.now().plusDays(1), 1, LocalDate.now().plusDays(2));
+    }
 }

@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -10,4 +12,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
     @JsonSubTypes.Type(value = EsSak.class, name = "engangsstønad"),
 })
 public interface Sak {
+
+    String saksnummer();
+
+    record FamilieHendelse(LocalDate fødselsdato, LocalDate termindato, int antallBarn, LocalDate omsorgsovertakelse) {
+
+    }
 }

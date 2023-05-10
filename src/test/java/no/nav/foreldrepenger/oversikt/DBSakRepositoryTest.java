@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.DBSakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode;
@@ -30,15 +31,19 @@ class DBSakRepositoryTest {
         var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2), new Uttaksperiode.Resultat(
             Uttaksperiode.Resultat.Type.INNVILGET)));
         var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
-        var originalt = new SakFP0(Saksnummer.dummy(), aktørId, Set.of(vedtak), AktørId.dummy());
+        var originalt = new SakFP0(Saksnummer.dummy(), aktørId, Set.of(vedtak), AktørId.dummy(), fh());
         repository.lagre(originalt);
-        var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), null, AktørId.dummy());
+        var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), null, AktørId.dummy(), fh());
         repository.lagre(annenAktørsSak);
 
         var saker = repository.hentFor(aktørId);
 
         assertThat(saker).hasSize(1);
         assertThat(saker.get(0)).isEqualTo(originalt);
+    }
+
+    private static FamilieHendelse fh() {
+        return new FamilieHendelse(LocalDate.now(), LocalDate.now(), 2, LocalDate.now());
     }
 
     @Test
@@ -50,9 +55,9 @@ class DBSakRepositoryTest {
         var vedtak = new Vedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var saksnummer = Saksnummer.dummy();
         var annenPartAktørId = AktørId.dummy();
-        var originalt = new SakFP0(saksnummer, aktørId, Set.of(vedtak), annenPartAktørId);
+        var originalt = new SakFP0(saksnummer, aktørId, Set.of(vedtak), annenPartAktørId, fh());
         repository.lagre(originalt);
-        var oppdatertSak = new SakFP0(saksnummer, aktørId, null, annenPartAktørId);
+        var oppdatertSak = new SakFP0(saksnummer, aktørId, null, annenPartAktørId, fh());
         repository.lagre(oppdatertSak);
 
         var saker = repository.hentFor(aktørId);

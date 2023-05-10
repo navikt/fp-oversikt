@@ -23,10 +23,10 @@ class SakerDtoMapperTest {
     @Test
     void verifiser_at_fordeles_på_riktig_() {
         List<Sak> saker = List.of(
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), AktørId.dummy()),
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null),
-            new SakSVP0(Saksnummer.dummy(), AKTØR_ID),
-            new SakES0(Saksnummer.dummy(), AKTØR_ID)
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), AktørId.dummy(), null),
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null, null),
+            new SakSVP0(Saksnummer.dummy(), AKTØR_ID, null),
+            new SakES0(Saksnummer.dummy(), AKTØR_ID, null)
         );
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
@@ -39,8 +39,8 @@ class SakerDtoMapperTest {
     @Test
     void skal_ikke_feile_ved_ingen_svp_saker() {
         List<Sak> saker = List.of(
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null),
-            new SakES0(Saksnummer.dummy(), AKTØR_ID)
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null, null),
+            new SakES0(Saksnummer.dummy(), AKTØR_ID, null)
         );
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
@@ -53,8 +53,8 @@ class SakerDtoMapperTest {
     @Test
     void skal_ikke_feile_ved_bare_fp_saker() {
         List<Sak> saker = List.of(
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null),
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null)
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null, null),
+            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null, null)
         );
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
@@ -67,8 +67,8 @@ class SakerDtoMapperTest {
     @Test
     void skal_ikke_feile_ved_bare_svp_sak() {
         List<Sak> saker = List.of(
-            new SakSVP0(Saksnummer.dummy(), AKTØR_ID),
-            new SakSVP0(Saksnummer.dummy(), AKTØR_ID)
+            new SakSVP0(Saksnummer.dummy(), AKTØR_ID, null),
+            new SakSVP0(Saksnummer.dummy(), AKTØR_ID, null)
         );
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
@@ -81,7 +81,7 @@ class SakerDtoMapperTest {
     @Test
     void skal_ikke_feile_ved_bare_es_sak() {
         List<Sak> saker = List.of(
-            new SakES0(Saksnummer.dummy(), AKTØR_ID)
+            new SakES0(Saksnummer.dummy(), AKTØR_ID, null)
         );
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());

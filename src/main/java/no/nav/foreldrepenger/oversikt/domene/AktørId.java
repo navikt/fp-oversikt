@@ -20,7 +20,7 @@ public record AktørId(@JsonValue String value) {
 
     @Override
     public String toString() {
-        return value;
+        return "***";
     }
 
     public static AktørId dummy() {

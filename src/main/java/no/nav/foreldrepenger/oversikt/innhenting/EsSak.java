@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
-record EsSak(String saksnummer, String aktørId) implements Sak {
+public record EsSak(String saksnummer, String aktørId, FamilieHendelse familieHendelse) implements Sak {
 
     @Override
     public String toString() {
-        return "EsSak{" + "saksnummer='" + saksnummer + '\'' + '}';
+        return "EsSak{" + "saksnummer='" + saksnummer + '\'' + ", familieHendelse=" + familieHendelse + '}';
     }
 }

@@ -154,9 +154,9 @@ public class JettyServer {
         config.setJdbcUrl(dbUrl());
         config.setUsername(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_USERNAME", "fpoversikt"));
         config.setPassword(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PASSWORD", "fpoversikt"));
-        config.setConnectionTimeout(1000);
+        config.setConnectionTimeout(2000);
         config.setMinimumIdle(2);
-        config.setMaximumPoolSize(10);
+        config.setMaximumPoolSize(30);
         config.setConnectionTestQuery("select 1");
         config.setAutoCommit(false);
 
