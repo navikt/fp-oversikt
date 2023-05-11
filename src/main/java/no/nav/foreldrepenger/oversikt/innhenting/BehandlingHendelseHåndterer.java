@@ -38,6 +38,7 @@ public class BehandlingHendelseHåndterer {
     }
 
     public BehandlingHendelseHåndterer() {
+
     }
 
     void handleMessage(String key, String payload) {
