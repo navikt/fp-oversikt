@@ -46,11 +46,14 @@ public class HentSakTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         LOG.info("kjører task");
-        var behandlingUuid = UUID.fromString(prosessTaskData.getPropertyValue(BEHANDLING_UUID));
-        var sakDto = fpSakKlient.hentSak(behandlingUuid);
+        hentOgLagreSak(fpSakKlient, sakRepository, UUID.fromString(prosessTaskData.getPropertyValue(BEHANDLING_UUID)));
+    }
+
+    public static void hentOgLagreSak(FpsakTjeneste fpsak, SakRepository repository, UUID behandlingUuid) {
+        var sakDto = fpsak.hentSak(behandlingUuid);
         LOG.info("Hentet sak {} {}", behandlingUuid, sakDto);
 
-        sakRepository.lagre(map(sakDto));
+        repository.lagre(map(sakDto));
     }
 
     static no.nav.foreldrepenger.oversikt.domene.Sak map(Sak sakDto) {
