@@ -2,7 +2,7 @@
     "environment": "dev",
     "kafkaPool": "nav-dev",
     "dbtier": "db-f1-micro",
-    "minReplicas": "1",
+    "minReplicas": "2",
     "maxReplicas": "2",
     "ingresses": [
         "https://fpoversikt.intern.dev.nav.no"
