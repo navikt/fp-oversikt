@@ -6,6 +6,7 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import javax.naming.NamingException;
 import javax.security.auth.message.config.AuthConfigFactory;
@@ -128,6 +129,7 @@ public class JettyServer {
     }
 
     void bootStrap() throws Exception {
+        System.setProperty("task.manager.runner.threads", "4");
         konfigurerSikkerhet();
         var dataSource = setupDataSource();
         migrer(dataSource);
@@ -154,11 +156,17 @@ public class JettyServer {
         config.setJdbcUrl(dbUrl());
         config.setUsername(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_USERNAME", "fpoversikt"));
         config.setPassword(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PASSWORD", "fpoversikt"));
-        config.setConnectionTimeout(2000);
+        config.setConnectionTimeout(1000);
         config.setMinimumIdle(2);
-        config.setMaximumPoolSize(30);
+        config.setMaximumPoolSize(12);
         config.setConnectionTestQuery("select 1");
         config.setAutoCommit(false);
+
+        // optimaliserer inserts for postgres
+        var dsProperties = new Properties();
+        dsProperties.setProperty("reWriteBatchedInserts", "true");
+        dsProperties.setProperty("logServerErrorDetail", "false"); // skrur av batch exceptions som lekker statements i åpen logg
+        config.setDataSourceProperties(dsProperties);
 
         return new HikariDataSource(config);
     }
