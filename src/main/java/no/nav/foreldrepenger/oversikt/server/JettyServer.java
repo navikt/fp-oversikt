@@ -156,10 +156,12 @@ public class JettyServer {
         config.setJdbcUrl(dbUrl());
         config.setUsername(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_USERNAME", "fpoversikt"));
         config.setPassword(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PASSWORD", "fpoversikt"));
-        config.setConnectionTimeout(1000);
         config.setMinimumIdle(2);
         config.setMaximumPoolSize(12);
+        config.setIdleTimeout(10001);
+        config.setMaxLifetime(30001);
         config.setConnectionTestQuery("select 1");
+        config.setDriverClassName("org.postgresql.Driver");
         config.setAutoCommit(false);
 
         // optimaliserer inserts for postgres
