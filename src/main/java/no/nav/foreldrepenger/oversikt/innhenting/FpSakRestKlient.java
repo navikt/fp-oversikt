@@ -1,10 +1,9 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
-import java.util.UUID;
-
 import javax.enterprise.context.ApplicationScoped;
 import javax.ws.rs.core.UriBuilder;
 
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
@@ -26,10 +25,10 @@ class FpSakRestKlient implements FpsakTjeneste {
     }
 
     @Override
-    public Sak hentSak(UUID behandlingId) {
-        var uri = UriBuilder.fromUri(restConfig.endpoint()).path(FPSAK_API).path("/fpoversikt/sak").queryParam("behandlingId", behandlingId.toString()).build();
+    public Sak hentSak(Saksnummer saksnummer) {
+        var uri = UriBuilder.fromUri(restConfig.endpoint()).path(FPSAK_API).path("/fpoversikt/sak").queryParam("saksnummer", saksnummer.value()).build();
         var request = RestRequest.newGET(uri, restConfig);
         return restClient.sendReturnOptional(request, Sak.class)
-            .orElseThrow(() -> new IllegalStateException("Klarte ikke hente sak: " + behandlingId));
+            .orElseThrow(() -> new IllegalStateException("Klarte ikke hente sak: " + saksnummer));
     }
 }
