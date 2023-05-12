@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
-import java.util.UUID;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 public interface FpsakTjeneste {
-    Sak hentSak(UUID behandlingUuid);
+    Sak hentSak(Saksnummer saksnummer);
 
 }

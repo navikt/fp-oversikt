@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.vedtak.hendelser.behandling.Hendelse;
@@ -48,7 +49,7 @@ public class BehandlingHendelseHåndterer {
             if (hendelse.getHendelse().equals(Hendelse.MIGRERING)) {
                 hentSakMedEnGang(hendelse);
             } else {
-                lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid(), hendelse.getSaksnummer());
+                lagreHentSakTask(hendelse.getHendelseUuid(), new Saksnummer(hendelse.getSaksnummer()));
             }
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key);
@@ -56,29 +57,29 @@ public class BehandlingHendelseHåndterer {
     }
 
     private void hentSakMedEnGang(BehandlingHendelseV1 hendelse) {
+        var saksnummer = new Saksnummer(hendelse.getSaksnummer());
         try {
-            HentSakTask.hentOgLagreSak(fpSakKlient, sakRepository, hendelse.getBehandlingUuid());
+            HentSakTask.hentOgLagreSak(fpSakKlient, sakRepository, saksnummer);
         } catch (Exception e) {
-            LOG.info("Direkte henting av sak feilet {}", hendelse.getSaksnummer(), e);
+            LOG.info("Direkte henting av sak feilet {}", saksnummer.value(), e);
             //lager task for å prøve på nytt evt feile
-            lagreHentSakTask(hendelse.getBehandlingUuid(), hendelse.getHendelseUuid(), hendelse.getSaksnummer());
+            lagreHentSakTask(hendelse.getHendelseUuid(), saksnummer);
         }
     }
 
-    private void lagreHentSakTask(UUID behandlingUuid, UUID hendelseUuid, String saksnummer) {
-        var task = opprettTask(behandlingUuid, hendelseUuid, saksnummer);
+    private void lagreHentSakTask(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = opprettTask(hendelseUuid, saksnummer);
         taskTjeneste.lagre(task);
-        LOG.info("Opprettet task");
     }
 
-    public static ProsessTaskData opprettTask(UUID behandlingUuid, UUID hendelseUuid, String saksnummer) {
+    public static ProsessTaskData opprettTask(UUID hendelseUuid, Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
         task.setCallId(hendelseUuid.toString());
-        task.setProperty(HentSakTask.BEHANDLING_UUID, behandlingUuid.toString());
+        task.setProperty(HentSakTask.SAKSNUMMER, saksnummer.value());
         task.setPrioritet(50);
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
-        task.setGruppe(saksnummer);
+        task.setGruppe(saksnummer.value());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
     }

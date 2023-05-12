@@ -4,7 +4,6 @@ import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -32,7 +31,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 public class HentSakTask implements ProsessTaskHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(HentSakTask.class);
-    static final String BEHANDLING_UUID = "behandlingUuid";
+    static final String SAKSNUMMER = "saksnummer";
 
     private final FpsakTjeneste fpSakKlient;
     private final SakRepository sakRepository;
@@ -46,12 +45,12 @@ public class HentSakTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         LOG.info("kjører task");
-        hentOgLagreSak(fpSakKlient, sakRepository, UUID.fromString(prosessTaskData.getPropertyValue(BEHANDLING_UUID)));
+        hentOgLagreSak(fpSakKlient, sakRepository, new Saksnummer(prosessTaskData.getPropertyValue(SAKSNUMMER)));
     }
 
-    public static void hentOgLagreSak(FpsakTjeneste fpsak, SakRepository repository, UUID behandlingUuid) {
-        var sakDto = fpsak.hentSak(behandlingUuid);
-        LOG.info("Hentet sak {} {}", behandlingUuid, sakDto);
+    public static void hentOgLagreSak(FpsakTjeneste fpsak, SakRepository repository, Saksnummer saksnummer) {
+        var sakDto = fpsak.hentSak(saksnummer);
+        LOG.info("Hentet sak {} {}", saksnummer, sakDto);
 
         repository.lagre(map(sakDto));
     }
