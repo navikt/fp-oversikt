@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.EsSøknad;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
@@ -75,7 +76,8 @@ public class HentSakTask implements ProsessTaskHandler {
         if (sakDto instanceof FpSak fpsak) {
             var annenPart = fpsak.oppgittAnnenPart() == null ? null : new AktørId(fpsak.oppgittAnnenPart());
             var søknader = fpsak.søknader().stream().map(HentSakTask::tilFpSøknad).collect(Collectors.toSet());
-            return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtakene()), annenPart, familieHendelse, aksjonspunkt, søknader);
+            return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtakene()), annenPart, familieHendelse, aksjonspunkt, søknader,
+                tilBrukerRolle(fpsak.brukerRolle()));
         }
         if (sakDto instanceof SvpSak svpSak) {
             var søknader = svpSak.søknader().stream().map(HentSakTask::tilSvpSøknad).collect(Collectors.toSet());
@@ -87,6 +89,14 @@ public class HentSakTask implements ProsessTaskHandler {
         }
 
         throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");
+    }
+
+    private static BrukerRolle tilBrukerRolle(FpSak.BrukerRolle brukerRolle) {
+        return switch (brukerRolle) {
+            case MOR -> BrukerRolle.MOR;
+            case FAR -> BrukerRolle.FAR;
+            case MEDMOR -> BrukerRolle.MEDMOR;
+        };
     }
 
     private static EsSøknad tilEsSøknad(EsSak.Søknad søknad) {

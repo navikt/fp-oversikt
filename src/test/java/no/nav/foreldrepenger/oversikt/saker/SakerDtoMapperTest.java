@@ -9,6 +9,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
@@ -102,7 +103,7 @@ class SakerDtoMapperTest {
     }
 
     private static SakFP0 fpSak() {
-        return new SakFP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of());
+        return new SakFP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR);
     }
 
     private static FamilieHendelse fh() {

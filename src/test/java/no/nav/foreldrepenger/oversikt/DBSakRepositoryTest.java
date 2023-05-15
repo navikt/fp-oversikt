@@ -1,6 +1,8 @@
 package no.nav.foreldrepenger.oversikt;
 
 import static java.time.LocalDateTime.now;
+import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.FAR;
+import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -38,10 +40,10 @@ class DBSakRepositoryTest {
         var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now())));
         var originalt = new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, Set.of(vedtak), AktørId.dummy(), fh(), aksjonspunkt(),
-            Set.of(søknad));
+            Set.of(søknad), MOR);
         repository.lagre(originalt);
         var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.AVSLUTTET, null, AktørId.dummy(), fh(), aksjonspunkt(),
-            Set.of());
+            Set.of(), MOR);
         repository.lagre(annenAktørsSak);
 
         var saker = repository.hentFor(aktørId);
@@ -67,10 +69,11 @@ class DBSakRepositoryTest {
         var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var saksnummer = Saksnummer.dummy();
         var annenPartAktørId = AktørId.dummy();
-        var originalt = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, Set.of(vedtak), annenPartAktørId, fh(), aksjonspunkt(), Set.of());
+        var originalt = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, Set.of(vedtak), annenPartAktørId, fh(), aksjonspunkt(), Set.of(),
+            FAR);
         repository.lagre(originalt);
         var oppdatertSak = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, null, annenPartAktørId, fh(), aksjonspunkt(),
-            Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now())))));
+            Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now())))), FAR);
         repository.lagre(oppdatertSak);
 
         var saker = repository.hentFor(aktørId);

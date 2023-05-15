@@ -1,5 +1,8 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
+import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.FAR;
+import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MEDMOR;
+import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat.Type.AVSLÅTT;
 import static no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat.Type.INNVILGET;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -30,7 +33,7 @@ class SakFP0TilDtoMapperTest {
             new FpVedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI)
         );
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, vedtakene, AktørId.dummy(), fh(), aksjonspunkt(),
-            Set.of());
+            Set.of(), MEDMOR);
 
         var fnrAnnenPart = UUID.randomUUID().toString();
         var fpSakDto = sakFP0.tilSakDto(aktørId -> fnrAnnenPart);
@@ -90,7 +93,7 @@ class SakFP0TilDtoMapperTest {
                 new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2), new Uttaksperiode.Resultat(AVSLÅTT))),
             Dekningsgrad.HUNDRE);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(vedtak), null, fh(), aksjonspunkt(),
-            Set.of());
+            Set.of(), MOR);
 
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
 
@@ -104,7 +107,7 @@ class SakFP0TilDtoMapperTest {
                 new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2), new Uttaksperiode.Resultat(AVSLÅTT))),
             Dekningsgrad.HUNDRE);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(vedtak), null, fh(), aksjonspunkt(),
-            Set.of());
+            Set.of(), MOR);
 
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
 
@@ -114,7 +117,7 @@ class SakFP0TilDtoMapperTest {
     @Test
     void kan_ikke_søke_om_endring_hvis_ingen_vedtak() {
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(), null, fh(), aksjonspunkt(),
-            Set.of());
+            Set.of(), FAR);
 
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
 
@@ -125,7 +128,7 @@ class SakFP0TilDtoMapperTest {
     void skal_mappe_familieHendelse() {
         var familieHendelse = fh();
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(), null, familieHendelse, aksjonspunkt(),
-            Set.of());
+            Set.of(), MOR);
 
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
 
@@ -140,10 +143,10 @@ class SakFP0TilDtoMapperTest {
         var familieHendelse = fh();
         var åpenBehandling = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(), null, familieHendelse,
             Set.of(new Aksjonspunkt(BehandlingTilstandUtleder.VENT_PGA_FOR_TIDLIG_SØKNAD, Aksjonspunkt.Status.OPPRETTET, null, LocalDateTime.now())),
-            Set.of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of())));
+            Set.of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of())), MOR);
         var ikkeÅpenBehandling = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(), null, familieHendelse,
             Set.of(new Aksjonspunkt(BehandlingTilstandUtleder.VENT_PGA_FOR_TIDLIG_SØKNAD, Aksjonspunkt.Status.OPPRETTET, null, LocalDateTime.now())),
-            Set.of(new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), Set.of())));
+            Set.of(new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), Set.of())), MOR);
 
 
         var fpSakDto1 = åpenBehandling.tilSakDto(AktørId::value);
@@ -153,11 +156,26 @@ class SakFP0TilDtoMapperTest {
         assertThat(fpSakDto2.åpenBehandling()).isNull();
     }
 
+    @Test
+    void skal_utlede_om_sak_er_mors_basert_på_bruker_rolle() {
+        var mor = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(), null, fh(), Set.of(),
+            Set.of(), MOR);
+        var far = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(), null, fh(), Set.of(),
+            Set.of(), FAR);
+        var medmor = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(), null, fh(), Set.of(),
+            Set.of(), MEDMOR);
+
+        assertThat(mor.tilSakDto(aktørId -> "").sakTilhørerMor()).isTrue();
+        assertThat(far.tilSakDto(aktørId -> "").sakTilhørerMor()).isFalse();
+        assertThat(medmor.tilSakDto(aktørId -> "").sakTilhørerMor()).isFalse();
+
+    }
+
     @ParameterizedTest
     @EnumSource(SakStatus.class)
     void skal_mappe_status(SakStatus status) {
         var familieHendelse = fh();
-        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), status, Set.of(), null, familieHendelse, aksjonspunkt(), Set.of());
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), status, Set.of(), null, familieHendelse, aksjonspunkt(), Set.of(), FAR);
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
         assertThat(fpSakDto.sakAvsluttet()).isEqualTo(status == SakStatus.AVSLUTTET);
     }

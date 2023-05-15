@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettTask;
+import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
@@ -43,7 +44,7 @@ class SakerRestTest {
         var søknadsperiode = new FpSak.Søknad.Periode(now().minusMonths(1), now().plusMonths(1));
         var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode));
         var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, Set.of(vedtak), aktørIdAnnenPart.value(),
-            ap(), Set.of(søknad));
+            ap(), Set.of(søknad), MOR);
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().foreldrepenger().stream().toList();
@@ -69,6 +70,8 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder()).hasSize(1);
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder().get(0).fom()).isEqualTo(søknadsperiode.fom());
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder().get(0).tom()).isEqualTo(søknadsperiode.tom());
+
+        assertThat(sakFraDbOmgjortTilDto.sakTilhørerMor()).isTrue();
     }
 
     private static Set<Sak.Aksjonspunkt> ap() {

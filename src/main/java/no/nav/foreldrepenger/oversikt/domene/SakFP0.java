@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.*;
 import static no.nav.foreldrepenger.oversikt.domene.SakStatus.avsluttet;
 
 import java.util.Comparator;
@@ -23,7 +24,8 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("annenPartAktørId") AktørId annenPartAktørId,
                      @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                      @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
-                     @JsonProperty("søknader") Set<FpSøknad> søknader) implements Sak {
+                     @JsonProperty("søknader") Set<FpSøknad> søknader,
+                     @JsonProperty("brukerRolle") BrukerRolle brukerRolle) implements Sak {
 
     @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
@@ -41,7 +43,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             .max(Comparator.comparing(FpSøknad::mottattTidspunkt))
             .map(s -> s.mottattTidspunkt().toLocalDate())
             .orElse(null);
-        return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, false, false,
+        return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, MOR.equals(brukerRolle()), false,
             false, false, false, null, annenPart, familiehendelse, fpVedtak, åpenBehandling, null, dekningsgrad);
     }
 
