@@ -1,6 +1,8 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -15,7 +17,29 @@ public interface Sak {
 
     String saksnummer();
 
+    Status status();
+
+    Set<Aksjonspunkt> aksjonspunkt();
+
+    FamilieHendelse familieHendelse();
+
+    String aktørId();
+
     record FamilieHendelse(LocalDate fødselsdato, LocalDate termindato, int antallBarn, LocalDate omsorgsovertakelse) {
 
+    }
+
+    enum Status {
+        OPPRETTET,
+        UNDER_BEHANDLING,
+        LØPENDE,
+        AVSLUTTET,
+    }
+
+    record Aksjonspunkt(String kode, Aksjonspunkt.Status status, String venteÅrsak, LocalDateTime opprettetTidspunkt) {
+        public enum Status {
+            UTFØRT,
+            OPPRETTET,
+        }
     }
 }

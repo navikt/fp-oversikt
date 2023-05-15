@@ -7,17 +7,15 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.common.innsyn.FpVedtak;
+public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
+                       @JsonProperty("perioder") List<Uttaksperiode> perioder,
+                       @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad) {
 
-public record Vedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
-                     @JsonProperty("perioder") List<Uttaksperiode> perioder,
-                     @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad) {
-
-    public FpVedtak tilDto() {
+    public no.nav.foreldrepenger.common.innsyn.FpVedtak tilDto() {
         var uttaksperioder = safeStream(perioder)
             .map(Uttaksperiode::tilDto)
             .toList();
-        return new FpVedtak(uttaksperioder);
+        return new no.nav.foreldrepenger.common.innsyn.FpVedtak(uttaksperioder);
     }
 
     public boolean innvilget() {

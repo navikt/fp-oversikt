@@ -2,16 +2,19 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
+import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 
@@ -22,12 +25,7 @@ class SakerDtoMapperTest {
 
     @Test
     void verifiser_at_fordeles_på_riktig_() {
-        List<Sak> saker = List.of(
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), AktørId.dummy(), null),
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null, null),
-            new SakSVP0(Saksnummer.dummy(), AKTØR_ID, null),
-            new SakES0(Saksnummer.dummy(), AKTØR_ID, null)
-        );
+        List<Sak> saker = List.of(fpSak(), fpSak(), svpSak(), esSak());
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
@@ -38,10 +36,7 @@ class SakerDtoMapperTest {
 
     @Test
     void skal_ikke_feile_ved_ingen_svp_saker() {
-        List<Sak> saker = List.of(
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null, null),
-            new SakES0(Saksnummer.dummy(), AKTØR_ID, null)
-        );
+        List<Sak> saker = List.of(fpSak(), esSak());
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
@@ -52,10 +47,7 @@ class SakerDtoMapperTest {
 
     @Test
     void skal_ikke_feile_ved_bare_fp_saker() {
-        List<Sak> saker = List.of(
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null, null),
-            new SakFP0(Saksnummer.dummy(), AKTØR_ID, Set.of(), null, null)
-        );
+        List<Sak> saker = List.of(fpSak(), fpSak());
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
@@ -66,10 +58,7 @@ class SakerDtoMapperTest {
 
     @Test
     void skal_ikke_feile_ved_bare_svp_sak() {
-        List<Sak> saker = List.of(
-            new SakSVP0(Saksnummer.dummy(), AKTØR_ID, null),
-            new SakSVP0(Saksnummer.dummy(), AKTØR_ID, null)
-        );
+        List<Sak> saker = List.of(svpSak(), svpSak());
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
@@ -80,9 +69,7 @@ class SakerDtoMapperTest {
 
     @Test
     void skal_ikke_feile_ved_bare_es_sak() {
-        List<Sak> saker = List.of(
-            new SakES0(Saksnummer.dummy(), AKTØR_ID, null)
-        );
+        List<Sak> saker = List.of(esSak());
 
         var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
 
@@ -104,5 +91,21 @@ class SakerDtoMapperTest {
 
     private static FødselsnummerOppslag fnrOppslag() {
         return AktørId::value;
+    }
+
+    private static SakES0 esSak() {
+        return new SakES0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of());
+    }
+
+    private static SakSVP0 svpSak() {
+        return new SakSVP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of());
+    }
+
+    private static SakFP0 fpSak() {
+        return new SakFP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of());
+    }
+
+    private static FamilieHendelse fh() {
+        return new FamilieHendelse(null, LocalDate.now(), 1, null);
     }
 }

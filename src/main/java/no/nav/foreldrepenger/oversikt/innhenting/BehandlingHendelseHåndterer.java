@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.innhenting;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -27,6 +28,8 @@ public class BehandlingHendelseHåndterer {
 
     private static final Logger LOG = LoggerFactory.getLogger(BehandlingHendelseHåndterer.class);
 
+    private static final Set<Hendelse> IGNORE = Set.of(Hendelse.ENHET);
+
     private ProsessTaskTjeneste taskTjeneste;
     private FpsakTjeneste fpSakKlient;
     private SakRepository sakRepository;
@@ -48,7 +51,7 @@ public class BehandlingHendelseHåndterer {
             var hendelse = map(payload);
             if (hendelse.getHendelse().equals(Hendelse.MIGRERING)) {
                 hentSakMedEnGang(hendelse);
-            } else {
+            } else if (!IGNORE.contains(hendelse.getHendelse())) {
                 lagreHentSakTask(hendelse.getHendelseUuid(), new Saksnummer(hendelse.getSaksnummer()));
             }
         } catch (Exception e) {
