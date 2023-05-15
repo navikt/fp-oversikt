@@ -76,8 +76,10 @@ public class HentSakTask implements ProsessTaskHandler {
         if (sakDto instanceof FpSak fpsak) {
             var annenPart = fpsak.oppgittAnnenPart() == null ? null : new AktørId(fpsak.oppgittAnnenPart());
             var søknader = fpsak.søknader().stream().map(HentSakTask::tilFpSøknad).collect(Collectors.toSet());
+            var brukerRolle = tilBrukerRolle(fpsak.brukerRolle());
+            var fødteBarn = tilFødteBarn(fpsak.fødteBarn());
             return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtakene()), annenPart, familieHendelse, aksjonspunkt, søknader,
-                tilBrukerRolle(fpsak.brukerRolle()));
+                brukerRolle, fødteBarn);
         }
         if (sakDto instanceof SvpSak svpSak) {
             var søknader = svpSak.søknader().stream().map(HentSakTask::tilSvpSøknad).collect(Collectors.toSet());
@@ -89,6 +91,10 @@ public class HentSakTask implements ProsessTaskHandler {
         }
 
         throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");
+    }
+
+    private static Set<AktørId> tilFødteBarn(Set<String> barn) {
+        return barn.stream().map(AktørId::new).collect(Collectors.toSet());
     }
 
     private static BrukerRolle tilBrukerRolle(FpSak.BrukerRolle brukerRolle) {

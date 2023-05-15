@@ -7,6 +7,7 @@ import static no.nav.foreldrepenger.oversikt.domene.SakStatus.avsluttet;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,7 +26,8 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                      @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
                      @JsonProperty("søknader") Set<FpSøknad> søknader,
-                     @JsonProperty("brukerRolle") BrukerRolle brukerRolle) implements Sak {
+                     @JsonProperty("brukerRolle") BrukerRolle brukerRolle,
+                     @JsonProperty("fødteBarn") Set<AktørId> fødteBarn) implements Sak {
 
     @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
@@ -43,8 +45,9 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             .max(Comparator.comparing(FpSøknad::mottattTidspunkt))
             .map(s -> s.mottattTidspunkt().toLocalDate())
             .orElse(null);
+        var barna = safeStream(fødteBarn).map(b -> new Person(new Fødselsnummer(b.value()), null)).collect(Collectors.toSet());
         return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, MOR.equals(brukerRolle()), false,
-            false, false, false, null, annenPart, familiehendelse, fpVedtak, åpenBehandling, null, dekningsgrad);
+            false, false, false, null, annenPart, familiehendelse, fpVedtak, åpenBehandling, barna, dekningsgrad);
     }
 
     private FpÅpenBehandling tilÅpenBehandling() {

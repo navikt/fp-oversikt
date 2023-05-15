@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt;
 
 import static java.time.LocalDateTime.now;
+import static java.util.Set.*;
 import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.FAR;
 import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MOR;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,12 +39,12 @@ class DBSakRepositoryTest {
         var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2), new Uttaksperiode.Resultat(
             Uttaksperiode.Resultat.Type.INNVILGET)));
         var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE);
-        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now())));
-        var originalt = new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, Set.of(vedtak), AktørId.dummy(), fh(), aksjonspunkt(),
-            Set.of(søknad), MOR);
+        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now())));
+        var originalt = new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, of(vedtak), AktørId.dummy(), fh(), aksjonspunkt(),
+            of(søknad), MOR, of(AktørId.dummy()));
         repository.lagre(originalt);
         var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.AVSLUTTET, null, AktørId.dummy(), fh(), aksjonspunkt(),
-            Set.of(), MOR);
+            of(), MOR, of(AktørId.dummy()));
         repository.lagre(annenAktørsSak);
 
         var saker = repository.hentFor(aktørId);
@@ -53,7 +54,7 @@ class DBSakRepositoryTest {
     }
 
     private Set<Aksjonspunkt> aksjonspunkt() {
-        return Set.of(new Aksjonspunkt("1234", Aksjonspunkt.Status.UTFØRT, "VENTER", now()));
+        return of(new Aksjonspunkt("1234", Aksjonspunkt.Status.UTFØRT, "VENTER", now()));
     }
 
     private static FamilieHendelse fh() {
@@ -69,11 +70,12 @@ class DBSakRepositoryTest {
         var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var saksnummer = Saksnummer.dummy();
         var annenPartAktørId = AktørId.dummy();
-        var originalt = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, Set.of(vedtak), annenPartAktørId, fh(), aksjonspunkt(), Set.of(),
-            FAR);
+        var barn = of(AktørId.dummy());
+        var originalt = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, of(vedtak), annenPartAktørId, fh(), aksjonspunkt(), of(),
+            FAR, barn);
         repository.lagre(originalt);
         var oppdatertSak = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, null, annenPartAktørId, fh(), aksjonspunkt(),
-            Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now())))), FAR);
+            of(new FpSøknad(SøknadStatus.MOTTATT, now(), of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now())))), FAR, barn);
         repository.lagre(oppdatertSak);
 
         var saker = repository.hentFor(aktørId);

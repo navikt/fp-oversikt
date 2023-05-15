@@ -13,7 +13,8 @@ public record FpSak(String saksnummer,
                     String oppgittAnnenPart,
                     Set<Aksjonspunkt> aksjonspunkt,
                     Set<Søknad> søknader,
-                    BrukerRolle brukerRolle) implements Sak {
+                    BrukerRolle brukerRolle,
+                    Set<String> fødteBarn) implements Sak {
 
     public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, Dekningsgrad dekningsgrad) {
         public enum Dekningsgrad {
