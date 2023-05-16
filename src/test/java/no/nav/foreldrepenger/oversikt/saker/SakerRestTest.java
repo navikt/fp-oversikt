@@ -58,7 +58,7 @@ class SakerRestTest {
         var søknadsperiode = new FpSak.Søknad.Periode(now().minusMonths(1), now().plusMonths(1), Konto.FORELDREPENGER);
         var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode));
         var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, Set.of(vedtak), aktørIdAnnenPart.value(),
-            ap(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()), new FpSak.Rettigheter(false, true, true));
+            ventTidligSøknadAp(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()), new FpSak.Rettigheter(false, true, true));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().foreldrepenger().stream().toList();
@@ -83,7 +83,7 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
 
-        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.UNDER_BEHANDLING);
+        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
 
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder()).hasSize(1);
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder().get(0).fom()).isEqualTo(søknadsperiode.fom());
@@ -97,8 +97,8 @@ class SakerRestTest {
 
     }
 
-    private static Set<Sak.Aksjonspunkt> ap() {
-        return Set.of(new Sak.Aksjonspunkt("5070", Sak.Aksjonspunkt.Status.OPPRETTET, null, LocalDateTime.now()));
+    private static Set<Sak.Aksjonspunkt> ventTidligSøknadAp() {
+        return Set.of(new Sak.Aksjonspunkt(Sak.Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD, null, LocalDateTime.now()));
     }
 
     @Test
@@ -109,7 +109,7 @@ class SakerRestTest {
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
         var søknad = new SvpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now());
-        var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, ap(), Set.of(søknad));
+        var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(), Set.of(søknad));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();
@@ -123,7 +123,7 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
 
-        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.UNDER_BEHANDLING);
+        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
     }
 
     @Test
@@ -133,7 +133,7 @@ class SakerRestTest {
         var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
-        var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, ap(),
+        var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(),
             Set.of(new EsSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
@@ -148,7 +148,7 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
 
-        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.UNDER_BEHANDLING);
+        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
     }
 
     private static void sendBehandlingHendelse(Sak fraFpsak, RepositoryStub sakRepository) {

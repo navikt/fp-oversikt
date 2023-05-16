@@ -69,7 +69,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             var trekkDagerMedForeldrepengerKonto = uttaksperioder.stream().anyMatch(p -> p.resultat().trekkerFraKonto(FORELDREPENGER));
             return trekkDagerMedForeldrepengerKonto ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
         }
-        return søknadsperioder.stream().anyMatch(sp -> sp.konto().equals(FORELDREPENGER)) ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
+        return søknadsperioder.stream().anyMatch(sp -> FORELDREPENGER.equals(sp.konto())) ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
     }
 
     private FpÅpenBehandling tilÅpenBehandling() {

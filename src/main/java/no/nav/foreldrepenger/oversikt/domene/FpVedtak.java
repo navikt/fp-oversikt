@@ -19,6 +19,6 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
     }
 
     public boolean innvilget() {
-        return perioder.stream().anyMatch(p -> p.resultat().innvilget());
+        return safeStream(perioder).anyMatch(p -> p.resultat().innvilget());
     }
 }

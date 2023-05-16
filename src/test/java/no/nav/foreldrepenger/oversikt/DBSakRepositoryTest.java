@@ -71,7 +71,7 @@ class DBSakRepositoryTest {
     }
 
     private Set<Aksjonspunkt> aksjonspunkt() {
-        return of(new Aksjonspunkt("1234", Aksjonspunkt.Status.UTFØRT, "VENTER", now()));
+        return of(new Aksjonspunkt(Aksjonspunkt.Type.VENT_KOMPLETT_SØKNAD, Aksjonspunkt.Venteårsak.SISTE_AAP_ELLER_DP_MELDEKORT, now()));
     }
 
     private static FamilieHendelse fh() {

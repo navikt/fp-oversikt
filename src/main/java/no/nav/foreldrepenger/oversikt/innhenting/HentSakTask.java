@@ -148,10 +148,40 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<Aksjonspunkt> tilAksjonspunkt(Set<Sak.Aksjonspunkt> aksjonspunkt) {
-        return safeStream(aksjonspunkt).map(a -> new Aksjonspunkt(a.kode(), switch (a.status()) {
-            case UTFØRT -> Aksjonspunkt.Status.UTFØRT;
-            case OPPRETTET -> Aksjonspunkt.Status.OPPRETTET;
-        }, a.venteÅrsak(), a.opprettetTidspunkt())).collect(Collectors.toSet());
+        return safeStream(aksjonspunkt).map(a -> {
+            var venteårsak = a.venteårsak() == null ? null : switch (a.venteårsak()) {
+                case ANKE_VENTER_PÅ_MERKNADER_FRA_BRUKER -> Aksjonspunkt.Venteårsak.ANKE_VENTER_PÅ_MERKNADER_FRA_BRUKER;
+                case AVVENT_DOKUMTANSJON -> Aksjonspunkt.Venteårsak.AVVENT_DOKUMTANSJON;
+                case AVVENT_FØDSEL -> Aksjonspunkt.Venteårsak.AVVENT_FØDSEL;
+                case AVVENT_RESPONS_REVURDERING -> Aksjonspunkt.Venteårsak.AVVENT_RESPONS_REVURDERING;
+                case FOR_TIDLIG_SOKNAD -> Aksjonspunkt.Venteårsak.FOR_TIDLIG_SOKNAD;
+                case UTVIDET_FRIST -> Aksjonspunkt.Venteårsak.UTVIDET_FRIST;
+                case INNTEKT_RAPPORTERINGSFRIST -> Aksjonspunkt.Venteårsak.INNTEKT_RAPPORTERINGSFRIST;
+                case MANGLENDE_SYKEMELDING -> Aksjonspunkt.Venteårsak.MANGLENDE_SYKEMELDING;
+                case MANGLENDE_INNTEKTSMELDING -> Aksjonspunkt.Venteårsak.MANGLENDE_INNTEKTSMELDING;
+                case OPPTJENING_OPPLYSNINGER -> Aksjonspunkt.Venteårsak.OPPTJENING_OPPLYSNINGER;
+                case SISTE_AAP_ELLER_DP_MELDEKORT -> Aksjonspunkt.Venteårsak.SISTE_AAP_ELLER_DP_MELDEKORT;
+                case SENDT_INFORMASJONSBREV -> Aksjonspunkt.Venteårsak.SENDT_INFORMASJONSBREV;
+                case ÅPEN_BEHANDLING -> Aksjonspunkt.Venteårsak.ÅPEN_BEHANDLING;
+            };
+            var type = switch (a.type()) {
+                case VENT_MANUELT_SATT -> Aksjonspunkt.Type.VENT_MANUELT_SATT;
+                case VENT_FØDSEL -> Aksjonspunkt.Type.VENT_FØDSEL;
+                case VENT_KOMPLETT_SØKNAD -> Aksjonspunkt.Type.VENT_KOMPLETT_SØKNAD;
+                case VENT_REVURDERING -> Aksjonspunkt.Type.VENT_REVURDERING;
+                case VENT_TIDLIG_SØKNAD -> Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD;
+                case VENT_KØET_BEHANDLING -> Aksjonspunkt.Type.VENT_KØET_BEHANDLING;
+                case VENT_SØKNAD -> Aksjonspunkt.Type.VENT_SØKNAD;
+                case VENT_INNTEKT_RAPPORTERINGSFRIST -> Aksjonspunkt.Type.VENT_INNTEKT_RAPPORTERINGSFRIST;
+                case VENT_SISTE_AAP_ELLER_DP_MELDEKORT -> Aksjonspunkt.Type.VENT_SISTE_AAP_ELLER_DP_MELDEKORT;
+                case VENT_ETTERLYST_INNTEKTSMELDING -> Aksjonspunkt.Type.VENT_ETTERLYST_INNTEKTSMELDING;
+                case VENT_ANKE_OVERSENDT_TIL_TRYGDERETTEN -> Aksjonspunkt.Type.VENT_ANKE_OVERSENDT_TIL_TRYGDERETTEN;
+                case VENT_SYKEMELDING -> Aksjonspunkt.Type.VENT_SYKEMELDING;
+                case VENT_KABAL_KLAGE -> Aksjonspunkt.Type.VENT_KABAL_KLAGE;
+                case VENT_PÅ_KABAL_ANKE -> Aksjonspunkt.Type.VENT_PÅ_KABAL_ANKE;
+            };
+            return new Aksjonspunkt(type, venteårsak, a.tidsfrist());
+        }).collect(Collectors.toSet());
     }
 
     private static SakStatus tilStatus(Sak.Status status) {

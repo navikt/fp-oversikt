@@ -18,7 +18,7 @@ public record Arbeidsgiver(@JsonValue String identifikator) {
 
     @Override
     public String toString() {
-        return "Arbeidsgiver{" + "identifikator='***' + '}'";
+        return "Arbeidsgiver{" + "identifikator='***'}'";
     }
 
     public no.nav.foreldrepenger.common.innsyn.Arbeidsgiver tilDto() {
