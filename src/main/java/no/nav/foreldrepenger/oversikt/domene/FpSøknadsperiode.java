@@ -4,10 +4,11 @@ import java.time.LocalDate;
 
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 
-public record FpSøknadsperiode(LocalDate fom, LocalDate tom) {
+public record FpSøknadsperiode(LocalDate fom, LocalDate tom, Konto konto) {
 
     public UttakPeriode tilDto() {
         //TODO
-        return new UttakPeriode(fom(), tom(), null, null, null, null, null, null, null, null, false);
+        var kontoType = konto == null ? null : konto.tilDto();
+        return new UttakPeriode(fom(), tom(), kontoType, null, null, null, null, null, null, null, false);
     }
 }

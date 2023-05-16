@@ -15,7 +15,6 @@ public class JpaExtension extends EntityManagerAwareExtension {
     static {
         var dataSource = datasSource();
         var flyway = flywayConfig(dataSource).cleanDisabled(false).cleanOnValidationError(true).load();
-        flyway.clean();
         flyway.migrate();
     }
 

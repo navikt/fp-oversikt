@@ -5,6 +5,7 @@ import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndt
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -15,12 +16,21 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
+import no.nav.foreldrepenger.common.innsyn.KontoType;
 import no.nav.foreldrepenger.common.innsyn.Person;
+import no.nav.foreldrepenger.common.innsyn.RettighetType;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
+import no.nav.foreldrepenger.oversikt.domene.Arbeidstidsprosent;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.Trekkdager;
 import no.nav.foreldrepenger.oversikt.innhenting.EsSak;
 import no.nav.foreldrepenger.oversikt.innhenting.FpSak;
+import no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode;
+import no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat;
+import no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.UttakAktivitet.Type;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
+import no.nav.foreldrepenger.oversikt.innhenting.Konto;
 import no.nav.foreldrepenger.oversikt.innhenting.Sak;
 import no.nav.foreldrepenger.oversikt.innhenting.SvpSak;
 import no.nav.foreldrepenger.oversikt.innhenting.SøknadStatus;
@@ -35,19 +45,20 @@ class SakerRestTest {
         var repository = new RepositoryStub();
         var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
 
-
-        var uttaksperiodeDto1 = new FpSak.Uttaksperiode(now().minusWeeks(4), now().minusWeeks(2), new FpSak.Uttaksperiode.Resultat(
-            FpSak.Uttaksperiode.Resultat.Type.INNVILGET));
-        var uttaksperioder = List.of(uttaksperiodeDto1);
+        var arbeidstidsprosent = new Arbeidstidsprosent(BigDecimal.valueOf(33.33));
+        var uttaksperiodeDto = new Uttaksperiode(now().minusWeeks(4), now().minusWeeks(2), new Resultat(
+            Resultat.Type.INNVILGET, Set.of(new Uttaksperiode.UttaksperiodeAktivitet(new Uttaksperiode.UttakAktivitet(
+            Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString()), Konto.FORELDREPENGER, new Trekkdager(10), arbeidstidsprosent))));
+        var uttaksperioder = List.of(uttaksperiodeDto);
         var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Vedtak.Dekningsgrad.HUNDRE);
 
         var aktørIdAnnenPart = AktørId.dummy();
         var aktørIdBarn = AktørId.dummy();
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
-        var søknadsperiode = new FpSak.Søknad.Periode(now().minusMonths(1), now().plusMonths(1));
+        var søknadsperiode = new FpSak.Søknad.Periode(now().minusMonths(1), now().plusMonths(1), Konto.FORELDREPENGER);
         var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode));
         var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, Set.of(vedtak), aktørIdAnnenPart.value(),
-            ap(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()));
+            ap(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()), new FpSak.Rettigheter(false, true, true));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().foreldrepenger().stream().toList();
@@ -56,11 +67,14 @@ class SakerRestTest {
         var sakFraDbOmgjortTilDto = sakerFraDBtilDto.get(0);
         assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
         assertThat(sakFraDbOmgjortTilDto.sakAvsluttet()).isTrue();
-        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder()).hasSameSizeAs(vedtak.uttaksperioder());
-        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).fom()).isEqualTo(vedtak.uttaksperioder().get(0).fom());
-        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).tom()).isEqualTo(vedtak.uttaksperioder().get(0).tom());
-        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).resultat().innvilget()).isTrue();
-        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).fom()).isBefore(sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder().get(0).tom());
+        var vedtaksperioder = sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder();
+        assertThat(vedtaksperioder).hasSameSizeAs(vedtak.uttaksperioder());
+        assertThat(vedtaksperioder.get(0).fom()).isEqualTo(vedtak.uttaksperioder().get(0).fom());
+        assertThat(vedtaksperioder.get(0).tom()).isEqualTo(vedtak.uttaksperioder().get(0).tom());
+        assertThat(vedtaksperioder.get(0).resultat().innvilget()).isTrue();
+        assertThat(vedtaksperioder.get(0).resultat().trekkerDager()).isTrue();
+        assertThat(vedtaksperioder.get(0).kontoType()).isEqualTo(KontoType.FORELDREPENGER);
+        assertThat(vedtaksperioder.get(0).gradering().arbeidstidprosent().value()).isEqualTo(arbeidstidsprosent.decimalValue());
         assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());
         assertThat(sakFraDbOmgjortTilDto.barn()).containsExactly(new Person(new Fødselsnummer(aktørIdBarn.value()), null));
         assertThat(sakFraDbOmgjortTilDto.kanSøkeOmEndring()).isTrue();
@@ -76,6 +90,11 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder().get(0).tom()).isEqualTo(søknadsperiode.tom());
 
         assertThat(sakFraDbOmgjortTilDto.sakTilhørerMor()).isTrue();
+
+        assertThat(sakFraDbOmgjortTilDto.rettighetType()).isEqualTo(RettighetType.BARE_SØKER_RETT);
+        assertThat(sakFraDbOmgjortTilDto.morUføretrygd()).isTrue();
+        assertThat(sakFraDbOmgjortTilDto.harAnnenForelderTilsvarendeRettEØS()).isTrue();
+
     }
 
     private static Set<Sak.Aksjonspunkt> ap() {

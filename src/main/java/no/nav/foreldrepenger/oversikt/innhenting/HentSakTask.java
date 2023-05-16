@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.EsSøknad;
@@ -21,6 +22,8 @@ import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.FpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.FpSøknadsperiode;
 import no.nav.foreldrepenger.oversikt.domene.FpVedtak;
+import no.nav.foreldrepenger.oversikt.domene.Konto;
+import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
@@ -79,7 +82,7 @@ public class HentSakTask implements ProsessTaskHandler {
             var brukerRolle = tilBrukerRolle(fpsak.brukerRolle());
             var fødteBarn = tilFødteBarn(fpsak.fødteBarn());
             return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtakene()), annenPart, familieHendelse, aksjonspunkt, søknader,
-                brukerRolle, fødteBarn);
+                brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()));
         }
         if (sakDto instanceof SvpSak svpSak) {
             var søknader = svpSak.søknader().stream().map(HentSakTask::tilSvpSøknad).collect(Collectors.toSet());
@@ -91,6 +94,10 @@ public class HentSakTask implements ProsessTaskHandler {
         }
 
         throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");
+    }
+
+    private static Rettigheter tilRettigheter(FpSak.Rettigheter rettigheter) {
+        return new Rettigheter(rettigheter.aleneomsorg(), rettigheter.morUføretrygd(), rettigheter.annenForelderTilsvarendeRettEØS());
     }
 
     private static Set<AktørId> tilFødteBarn(Set<String> barn) {
@@ -126,7 +133,18 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static FpSøknadsperiode tilSøknadsperiode(FpSak.Søknad.Periode periode) {
-        return new FpSøknadsperiode(periode.fom(), periode.tom());
+        return new FpSøknadsperiode(periode.fom(), periode.tom(), tilKonto(periode.konto()));
+    }
+
+    private static Konto tilKonto(no.nav.foreldrepenger.oversikt.innhenting.Konto konto) {
+        if (konto == null) return null;
+        return switch (konto) {
+            case FORELDREPENGER -> Konto.FORELDREPENGER;
+            case MØDREKVOTE -> Konto.MØDREKVOTE;
+            case FEDREKVOTE -> Konto.FEDREKVOTE;
+            case FELLESPERIODE -> Konto.FELLESPERIODE;
+            case FORELDREPENGER_FØR_FØDSEL -> Konto.FORELDREPENGER_FØR_FØDSEL;
+        };
     }
 
     private static Set<Aksjonspunkt> tilAksjonspunkt(Set<Sak.Aksjonspunkt> aksjonspunkt) {
@@ -169,8 +187,27 @@ public class HentSakTask implements ProsessTaskHandler {
         if (uttaksperiodeDto == null) {
             return null;
         }
+        var aktiviteter = uttaksperiodeDto.resultat().aktiviteter().stream().map(HentSakTask::tilUttaksperiodeAktivitet).collect(Collectors.toSet());
         return new Uttaksperiode(uttaksperiodeDto.fom(), uttaksperiodeDto.tom(),
-            new Uttaksperiode.Resultat(tilResultatType(uttaksperiodeDto.resultat().type())));
+            new Uttaksperiode.Resultat(tilResultatType(uttaksperiodeDto.resultat().type()), aktiviteter));
+    }
+
+    private static Uttaksperiode.UttaksperiodeAktivitet tilUttaksperiodeAktivitet(FpSak.Uttaksperiode.UttaksperiodeAktivitet a) {
+        var type = tilUttakAktivitetType(a);
+        var arbeidsgiver = a.aktivitet().arbeidsgiver() == null ? null : new Arbeidsgiver(a.aktivitet().arbeidsgiver().identifikator());
+        var arbeidsforholdId = a.aktivitet().arbeidsforholdId();
+        var trekkdager = a.trekkdager();
+        return new Uttaksperiode.UttaksperiodeAktivitet(new Uttaksperiode.UttakAktivitet(type, arbeidsgiver, arbeidsforholdId), tilKonto(a.konto()), trekkdager,
+            a.arbeidstidsprosent());
+    }
+
+    private static Uttaksperiode.UttakAktivitet.Type tilUttakAktivitetType(FpSak.Uttaksperiode.UttaksperiodeAktivitet a) {
+        return switch (a.aktivitet().type()) {
+            case ORDINÆRT_ARBEID -> Uttaksperiode.UttakAktivitet.Type.ORDINÆRT_ARBEID;
+            case SELVSTENDIG_NÆRINGSDRIVENDE -> Uttaksperiode.UttakAktivitet.Type.SELVSTENDIG_NÆRINGSDRIVENDE;
+            case FRILANS -> Uttaksperiode.UttakAktivitet.Type.FRILANS;
+            case ANNET -> Uttaksperiode.UttakAktivitet.Type.ANNET;
+        };
     }
 
     private static Uttaksperiode.Resultat.Type tilResultatType(FpSak.Uttaksperiode.Resultat.Type type) {

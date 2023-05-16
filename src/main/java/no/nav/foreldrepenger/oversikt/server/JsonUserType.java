@@ -15,12 +15,14 @@ import org.hibernate.usertype.UserType;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 
 public class JsonUserType implements UserType {
 
-    public static final ObjectMapper MAPPER = DefaultJsonMapper.getObjectMapper();
+    public static final ObjectMapper MAPPER = DefaultJsonMapper.getObjectMapper()
+        .setNodeFactory(JsonNodeFactory.withExactBigDecimals(true));
 
     @Override
     public int[] sqlTypes() {
