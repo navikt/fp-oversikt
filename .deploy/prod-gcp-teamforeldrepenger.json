@@ -1,7 +1,10 @@
 {
     "environment": "prod",
     "kafkaPool": "nav-prod",
-    "dbtier": "finnriktigsize",
+    "dbTier": "db-custom-1-1024",
+    "dbDiskAutoresize": "true",
+    "dbHighAvilability": "true",
+    "dbPointInTimeRecovery": "true",
     "minReplicas": "2",
     "maxReplicas": "3",
     "ingresses": [
