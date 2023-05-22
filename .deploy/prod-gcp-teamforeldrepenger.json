@@ -3,7 +3,7 @@
     "kafkaPool": "nav-prod",
     "dbTier": "db-custom-1-1024",
     "dbDiskAutoresize": "true",
-    "dbHighAvilability": "true",
+    "dbHighAvailability": "true",
     "dbPointInTimeRecovery": "true",
     "minReplicas": "2",
     "maxReplicas": "3",

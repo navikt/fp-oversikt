@@ -3,7 +3,7 @@
     "kafkaPool": "nav-dev",
     "dbTier": "db-f1-micro",
     "dbDiskAutoresize": "false",
-    "dbHighAvilability": "false",
+    "dbHighAvailability": "false",
     "dbPointInTimeRecovery": "false",
     "minReplicas": "2",
     "maxReplicas": "2",
