@@ -21,7 +21,8 @@ public record FpSak(String saksnummer,
                     Set<Søknad> søknader,
                     BrukerRolle brukerRolle,
                     Set<String> fødteBarn,
-                    Rettigheter rettigheter) implements Sak {
+                    Rettigheter rettigheter,
+                    boolean ønskerJustertUttakVedFødsel) implements Sak {
 
     public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, Dekningsgrad dekningsgrad) {
         public enum Dekningsgrad {

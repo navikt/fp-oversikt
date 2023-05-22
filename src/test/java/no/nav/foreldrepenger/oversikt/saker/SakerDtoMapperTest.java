@@ -105,7 +105,7 @@ class SakerDtoMapperTest {
 
     private static SakFP0 fpSak() {
         return new SakFP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR,
-            Set.of(), new Rettigheter(false, false, false));
+            Set.of(), new Rettigheter(false, false, false), false);
     }
 
     private static FamilieHendelse fh() {
