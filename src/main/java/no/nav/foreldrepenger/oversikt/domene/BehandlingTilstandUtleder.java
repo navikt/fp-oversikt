@@ -1,7 +1,10 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,10 +18,11 @@ final class BehandlingTilstandUtleder {
     private BehandlingTilstandUtleder() {
     }
 
-    static BehandlingTilstand utled(Set<Aksjonspunkt> aksjonspunkter) {
+    static BehandlingTilstand utled(Set<Aksjonspunkt> ap) {
 
-        var tilstand = utledGittOpprettetAksjonspunkt(aksjonspunkter);
-        LOG.info("Utledet behandlingtilstand {} for aksjonspunkter {}", tilstand, aksjonspunkter);
+        var aksjonspunkt = safeStream(ap).collect(Collectors.toSet());
+        var tilstand = utledGittOpprettetAksjonspunkt(aksjonspunkt);
+        LOG.info("Utledet behandlingtilstand {} for aksjonspunkter {}", tilstand, ap);
         return tilstand;
     }
 

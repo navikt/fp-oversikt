@@ -22,7 +22,11 @@ import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.FpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.FpSøknadsperiode;
 import no.nav.foreldrepenger.oversikt.domene.FpVedtak;
+import no.nav.foreldrepenger.oversikt.domene.Gradering;
 import no.nav.foreldrepenger.oversikt.domene.Konto;
+import no.nav.foreldrepenger.oversikt.domene.MorsAktivitet;
+import no.nav.foreldrepenger.oversikt.domene.OppholdÅrsak;
+import no.nav.foreldrepenger.oversikt.domene.OverføringÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
@@ -32,6 +36,8 @@ import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SvpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
+import no.nav.foreldrepenger.oversikt.domene.UtsettelseÅrsak;
+import no.nav.foreldrepenger.oversikt.domene.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -81,7 +87,7 @@ public class HentSakTask implements ProsessTaskHandler {
             var søknader = fpsak.søknader().stream().map(HentSakTask::tilFpSøknad).collect(Collectors.toSet());
             var brukerRolle = tilBrukerRolle(fpsak.brukerRolle());
             var fødteBarn = tilFødteBarn(fpsak.fødteBarn());
-            return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtakene()), annenPart, familieHendelse, aksjonspunkt, søknader,
+            return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtak()), annenPart, familieHendelse, aksjonspunkt, søknader,
                 brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()));
         }
         if (sakDto instanceof SvpSak svpSak) {
@@ -133,7 +139,55 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static FpSøknadsperiode tilSøknadsperiode(FpSak.Søknad.Periode periode) {
-        return new FpSøknadsperiode(periode.fom(), periode.tom(), tilKonto(periode.konto()));
+        var utsettelseÅrsak = periode.utsettelseÅrsak() == null ? null : switch (periode.utsettelseÅrsak()) {
+            case HV_ØVELSE -> UtsettelseÅrsak.HV_ØVELSE;
+            case ARBEID -> UtsettelseÅrsak.ARBEID;
+            case LOVBESTEMT_FERIE -> UtsettelseÅrsak.LOVBESTEMT_FERIE;
+            case SØKER_SYKDOM -> UtsettelseÅrsak.SØKER_SYKDOM;
+            case SØKER_INNLAGT -> UtsettelseÅrsak.SØKER_INNLAGT;
+            case BARN_INNLAGT -> UtsettelseÅrsak.BARN_INNLAGT;
+            case NAV_TILTAK -> UtsettelseÅrsak.NAV_TILTAK;
+            case FRI -> UtsettelseÅrsak.FRI;
+        };
+        var oppholdÅrsak = periode.oppholdÅrsak() == null ? null : switch (periode.oppholdÅrsak()) {
+            case MØDREKVOTE_ANNEN_FORELDER -> OppholdÅrsak.MØDREKVOTE_ANNEN_FORELDER;
+            case FEDREKVOTE_ANNEN_FORELDER -> OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER;
+            case FELLESPERIODE_ANNEN_FORELDER -> OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER;
+            case FORELDREPENGER_ANNEN_FORELDER -> OppholdÅrsak.FORELDREPENGER_ANNEN_FORELDER;
+        };
+        var overføringÅrsak = periode.overføringÅrsak() == null ? null : switch (periode.overføringÅrsak()) {
+            case INSTITUSJONSOPPHOLD_ANNEN_FORELDER -> OverføringÅrsak.INSTITUSJONSOPPHOLD_ANNEN_FORELDER;
+            case SYKDOM_ANNEN_FORELDER -> OverføringÅrsak.SYKDOM_ANNEN_FORELDER;
+            case IKKE_RETT_ANNEN_FORELDER -> OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER;
+            case ALENEOMSORG -> OverføringÅrsak.ALENEOMSORG;
+        };
+        var gradering = mapGradering(periode.gradering());
+        var morsAktivitet = periode.morsAktivitet() == null ? null : switch (periode.morsAktivitet()) {
+            case ARBEID -> MorsAktivitet.ARBEID;
+            case UTDANNING -> MorsAktivitet.UTDANNING;
+            case KVALPROG -> MorsAktivitet.KVALPROG;
+            case INTROPROG -> MorsAktivitet.INTROPROG;
+            case TRENGER_HJELP -> MorsAktivitet.TRENGER_HJELP;
+            case INNLAGT -> MorsAktivitet.INNLAGT;
+            case ARBEID_OG_UTDANNING -> MorsAktivitet.ARBEID_OG_UTDANNING;
+            case UFØRE -> MorsAktivitet.UFØRE;
+            case IKKE_OPPGITT -> MorsAktivitet.IKKE_OPPGITT;
+        };
+        return new FpSøknadsperiode(periode.fom(), periode.tom(), tilKonto(periode.konto()), utsettelseÅrsak, oppholdÅrsak, overføringÅrsak,
+            gradering, periode.samtidigUttak(), periode.flerbarnsdager(), morsAktivitet);
+    }
+
+    private static Gradering mapGradering(FpSak.Gradering gradering) {
+        return gradering == null ? null : new Gradering(gradering.prosent(), mapAktivitet(gradering.uttakAktivitet()));
+    }
+
+    private static UttakAktivitet mapAktivitet(FpSak.UttakAktivitet uttakAktivitet) {
+        return new UttakAktivitet(switch (uttakAktivitet.type()) {
+            case ORDINÆRT_ARBEID -> UttakAktivitet.Type.ORDINÆRT_ARBEID;
+            case SELVSTENDIG_NÆRINGSDRIVENDE -> UttakAktivitet.Type.SELVSTENDIG_NÆRINGSDRIVENDE;
+            case FRILANS -> UttakAktivitet.Type.FRILANS;
+            case ANNET -> UttakAktivitet.Type.ANNET;
+        }, uttakAktivitet.arbeidsgiver(), uttakAktivitet.arbeidsforholdId());
     }
 
     private static Konto tilKonto(no.nav.foreldrepenger.oversikt.innhenting.Konto konto) {
@@ -227,16 +281,16 @@ public class HentSakTask implements ProsessTaskHandler {
         var arbeidsgiver = a.aktivitet().arbeidsgiver() == null ? null : new Arbeidsgiver(a.aktivitet().arbeidsgiver().identifikator());
         var arbeidsforholdId = a.aktivitet().arbeidsforholdId();
         var trekkdager = a.trekkdager();
-        return new Uttaksperiode.UttaksperiodeAktivitet(new Uttaksperiode.UttakAktivitet(type, arbeidsgiver, arbeidsforholdId), tilKonto(a.konto()), trekkdager,
+        return new Uttaksperiode.UttaksperiodeAktivitet(new UttakAktivitet(type, arbeidsgiver, arbeidsforholdId), tilKonto(a.konto()), trekkdager,
             a.arbeidstidsprosent());
     }
 
-    private static Uttaksperiode.UttakAktivitet.Type tilUttakAktivitetType(FpSak.Uttaksperiode.UttaksperiodeAktivitet a) {
+    private static UttakAktivitet.Type tilUttakAktivitetType(FpSak.Uttaksperiode.UttaksperiodeAktivitet a) {
         return switch (a.aktivitet().type()) {
-            case ORDINÆRT_ARBEID -> Uttaksperiode.UttakAktivitet.Type.ORDINÆRT_ARBEID;
-            case SELVSTENDIG_NÆRINGSDRIVENDE -> Uttaksperiode.UttakAktivitet.Type.SELVSTENDIG_NÆRINGSDRIVENDE;
-            case FRILANS -> Uttaksperiode.UttakAktivitet.Type.FRILANS;
-            case ANNET -> Uttaksperiode.UttakAktivitet.Type.ANNET;
+            case ORDINÆRT_ARBEID -> UttakAktivitet.Type.ORDINÆRT_ARBEID;
+            case SELVSTENDIG_NÆRINGSDRIVENDE -> UttakAktivitet.Type.SELVSTENDIG_NÆRINGSDRIVENDE;
+            case FRILANS -> UttakAktivitet.Type.FRILANS;
+            case ANNET -> UttakAktivitet.Type.ANNET;
         };
     }
 

@@ -24,7 +24,7 @@ import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("aktørId") AktørId aktørId,
                      @JsonProperty("status") SakStatus status,
-                     @JsonProperty("vedtakene") Set<FpVedtak> vedtakene,
+                     @JsonProperty("vedtak") Set<FpVedtak> vedtak,
                      @JsonProperty("annenPartAktørId") AktørId annenPartAktørId,
                      @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                      @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
@@ -35,7 +35,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
 
     @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
-        var gjeldendeVedtak = safeStream(vedtakene()).max(Comparator.comparing(FpVedtak::vedtakstidspunkt));
+        var gjeldendeVedtak = safeStream(vedtak()).max(Comparator.comparing(FpVedtak::vedtakstidspunkt));
         var dekningsgrad = gjeldendeVedtak.map(vedtak -> vedtak.dekningsgrad().tilDto()).orElse(null);
         var fpVedtak = gjeldendeVedtak
             .map(FpVedtak::tilDto)

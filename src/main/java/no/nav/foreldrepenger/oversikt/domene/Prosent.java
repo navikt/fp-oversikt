@@ -7,20 +7,19 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;
 
-public class Arbeidstidsprosent implements Comparable<Arbeidstidsprosent> {
+public class Prosent implements Comparable<Prosent> {
 
-    public static final Arbeidstidsprosent ZERO = new Arbeidstidsprosent(BigDecimal.ZERO);
-
+    public static final Prosent ZERO = new Prosent(BigDecimal.ZERO);
     @JsonValue
     private final BigDecimal verdi;
 
     @JsonCreator
-    public Arbeidstidsprosent(BigDecimal verdi) {
+    public Prosent(BigDecimal verdi) {
         Objects.requireNonNull(verdi);
         this.verdi = verdi.setScale(2, RoundingMode.DOWN);
     }
 
-    public Arbeidstidsprosent(int verdi) {
+    public Prosent(int verdi) {
         this(BigDecimal.valueOf(verdi));
     }
 
@@ -37,7 +36,7 @@ public class Arbeidstidsprosent implements Comparable<Arbeidstidsprosent> {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        var that = (Arbeidstidsprosent) o;
+        var that = (Prosent) o;
         return Objects.equals(decimalValue(), that.decimalValue());
     }
 
@@ -47,8 +46,8 @@ public class Arbeidstidsprosent implements Comparable<Arbeidstidsprosent> {
     }
 
     @Override
-    public int compareTo(Arbeidstidsprosent trekkdager) {
-        return decimalValue().compareTo(trekkdager.decimalValue());
+    public int compareTo(Prosent o) {
+        return decimalValue().compareTo(o.decimalValue());
     }
 
     public boolean merEnn0() {

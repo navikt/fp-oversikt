@@ -22,13 +22,8 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, Resultat resultat) {
         var gradertAktivitet = finnGradertAktivitet(resultat());
 
         //TODO sjekke gradering opp mot samtidig uttak som i fpinfo
-        var gradering = gradertAktivitet.map(a -> new Gradering(new Gradering.Arbeidstidprosent(a.arbeidstidsprosent().decimalValue()), new Aktivitet(
-            switch (a.aktivitet.type) {
-                case ORDINÆRT_ARBEID -> Aktivitet.Type.ORDINÆRT_ARBEID;
-                case SELVSTENDIG_NÆRINGSDRIVENDE -> Aktivitet.Type.SELVSTENDIG_NÆRINGSDRIVENDE;
-                case FRILANS -> Aktivitet.Type.FRILANS;
-                case ANNET -> Aktivitet.Type.ANNET;
-            }, a.aktivitet.arbeidsgiver == null ? null : a.aktivitet.arbeidsgiver.tilDto())));
+        var gradering = gradertAktivitet.map(a -> new Gradering(new Gradering.Arbeidstidprosent(a.arbeidstidsprosent().decimalValue()),
+            new Aktivitet(a.aktivitet().type().tilDto(), a.aktivitet().arbeidsgiver() == null ? null : a.aktivitet().arbeidsgiver().tilDto())));
 
         var konto = utledKontoType(resultat());
         return new UttakPeriode(fom, tom, konto.map(Konto::tilDto).orElse(null), res, null, null, null, gradering.orElse(null), null, null, false);
@@ -66,16 +61,7 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, Resultat resultat) {
         }
     }
 
-    public record UttaksperiodeAktivitet(UttakAktivitet aktivitet, Konto konto, Trekkdager trekkdager, Arbeidstidsprosent arbeidstidsprosent) {
+    public record UttaksperiodeAktivitet(UttakAktivitet aktivitet, Konto konto, Trekkdager trekkdager, Prosent arbeidstidsprosent) {
 
-    }
-
-    public record UttakAktivitet(Type type, Arbeidsgiver arbeidsgiver, String arbeidsforholdId) {
-        public enum Type {
-            ORDINÆRT_ARBEID,
-            SELVSTENDIG_NÆRINGSDRIVENDE,
-            FRILANS,
-            ANNET
-        }
     }
 }
