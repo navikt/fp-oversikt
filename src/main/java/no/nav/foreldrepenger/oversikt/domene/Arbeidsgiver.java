@@ -13,7 +13,7 @@ public record Arbeidsgiver(@JsonValue String identifikator) {
     }
 
     public static Arbeidsgiver dummy() {
-        return new Arbeidsgiver(UUID.randomUUID().toString());
+        return new Arbeidsgiver(UUID.randomUUID().toString().substring(0, 9));
     }
 
     @Override

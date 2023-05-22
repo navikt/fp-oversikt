@@ -25,7 +25,6 @@ import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
-import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.UttaksperiodeAktivitet;
 
 class SakFP0TilDtoMapperTest {
@@ -58,7 +57,7 @@ class SakFP0TilDtoMapperTest {
     private static Set<UttaksperiodeAktivitet> uttaksperiodeAktivitet(Trekkdager trekkdager, Konto konto) {
         return Set.of(
             new UttaksperiodeAktivitet(new UttakAktivitet(UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString()),
-                konto, trekkdager, Arbeidstidsprosent.ZERO));
+                konto, trekkdager, Prosent.ZERO));
     }
 
     @Test

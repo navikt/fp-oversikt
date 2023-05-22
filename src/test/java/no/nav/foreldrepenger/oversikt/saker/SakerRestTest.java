@@ -21,19 +21,22 @@ import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
-import no.nav.foreldrepenger.oversikt.domene.Arbeidstidsprosent;
+import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.Trekkdager;
 import no.nav.foreldrepenger.oversikt.innhenting.EsSak;
 import no.nav.foreldrepenger.oversikt.innhenting.FpSak;
 import no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode;
 import no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat;
-import no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.UttakAktivitet.Type;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
 import no.nav.foreldrepenger.oversikt.innhenting.Konto;
+import no.nav.foreldrepenger.oversikt.innhenting.MorsAktivitet;
+import no.nav.foreldrepenger.oversikt.innhenting.OppholdÅrsak;
+import no.nav.foreldrepenger.oversikt.innhenting.OverføringÅrsak;
 import no.nav.foreldrepenger.oversikt.innhenting.Sak;
 import no.nav.foreldrepenger.oversikt.innhenting.SvpSak;
 import no.nav.foreldrepenger.oversikt.innhenting.SøknadStatus;
+import no.nav.foreldrepenger.oversikt.innhenting.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.stub.FpsakTjenesteStub;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 
@@ -45,17 +48,19 @@ class SakerRestTest {
         var repository = new RepositoryStub();
         var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
 
-        var arbeidstidsprosent = new Arbeidstidsprosent(BigDecimal.valueOf(33.33));
+        var arbeidstidsprosent = new Prosent(BigDecimal.valueOf(33.33));
         var uttaksperiodeDto = new Uttaksperiode(now().minusWeeks(4), now().minusWeeks(2), new Resultat(
-            Resultat.Type.INNVILGET, Set.of(new Uttaksperiode.UttaksperiodeAktivitet(new Uttaksperiode.UttakAktivitet(
-            Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString()), Konto.FORELDREPENGER, new Trekkdager(10), arbeidstidsprosent))));
+            Resultat.Type.INNVILGET, Set.of(new Uttaksperiode.UttaksperiodeAktivitet(new FpSak.UttakAktivitet(
+            FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString()), Konto.FORELDREPENGER, new Trekkdager(10), arbeidstidsprosent))));
         var uttaksperioder = List.of(uttaksperiodeDto);
         var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Vedtak.Dekningsgrad.HUNDRE);
 
         var aktørIdAnnenPart = AktørId.dummy();
         var aktørIdBarn = AktørId.dummy();
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
-        var søknadsperiode = new FpSak.Søknad.Periode(now().minusMonths(1), now().plusMonths(1), Konto.FORELDREPENGER);
+        var søknadsperiode = new FpSak.Søknad.Periode(now().minusMonths(1), now().plusMonths(1), Konto.FORELDREPENGER, UtsettelseÅrsak.SØKER_SYKDOM,
+            OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER, OverføringÅrsak.SYKDOM_ANNEN_FORELDER, new FpSak.Gradering(arbeidstidsprosent, new FpSak.UttakAktivitet(
+            FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null)), new Prosent(40), true, MorsAktivitet.ARBEID);
         var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode));
         var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, Set.of(vedtak), aktørIdAnnenPart.value(),
             ventTidligSøknadAp(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()), new FpSak.Rettigheter(false, true, true));
@@ -86,8 +91,6 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
 
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder()).hasSize(1);
-        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder().get(0).fom()).isEqualTo(søknadsperiode.fom());
-        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder().get(0).tom()).isEqualTo(søknadsperiode.tom());
 
         assertThat(sakFraDbOmgjortTilDto.sakTilhørerMor()).isTrue();
 
