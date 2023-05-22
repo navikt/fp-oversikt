@@ -14,5 +14,9 @@ public record FamilieHendelse(@JsonProperty("fødselsdato") LocalDate fødselsda
     public Familiehendelse tilDto() {
         return new Familiehendelse(fødselsdato, termindato, antallBarn, omsorgsovertakelse);
     }
+
+    public boolean gjelderAdopsjon() {
+        return omsorgsovertakelse != null;
+    }
 }
 
