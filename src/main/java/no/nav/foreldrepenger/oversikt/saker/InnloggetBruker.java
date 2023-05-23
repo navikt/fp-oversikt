@@ -5,4 +5,7 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 public interface InnloggetBruker {
 
     AktørId aktørId();
+
+    boolean erMyndig();
+
 }

@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
+import java.time.LocalDate;
+
 @ApplicationScoped
 public class KontekstBruker implements InnloggetBruker {
 
@@ -31,5 +33,12 @@ public class KontekstBruker implements InnloggetBruker {
         var aktørId = pdlKlient.hentAktørIdForPersonIdent(fnr).orElseThrow();
         LOG.info("Mapper fnr til aktørId");
         return new AktørId(aktørId);
+    }
+
+    @Override
+    public boolean erMyndig() {
+        var fnr = KontekstHolder.getKontekst().getUid();
+        var fødselsdato = pdlKlient.fødselsdato(fnr);
+        return fødselsdato.plusYears(18).isBefore(LocalDate.now());
     }
 }

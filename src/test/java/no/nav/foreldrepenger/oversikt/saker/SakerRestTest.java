@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
+import static no.nav.foreldrepenger.oversikt.saker.SakerRestTest.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -44,11 +45,21 @@ import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 
 class SakerRestTest {
 
+    record DummyInnloggetTestbruker(AktørId aktørId, boolean erMyndig) implements InnloggetBruker  {
+        public static DummyInnloggetTestbruker myndigInnloggetBruker() {
+            return new DummyInnloggetTestbruker(AktørId.dummy(), true);
+        }
+
+        public static DummyInnloggetTestbruker umyndigInnloggetBruker() {
+            return new DummyInnloggetTestbruker(AktørId.dummy(), false);
+        }
+    }
+
     @Test
     void hent_fp_sak_roundtrip_test() {
-        var aktørId = AktørId.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var repository = new RepositoryStub();
-        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
+        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), innloggetBruker);
 
         var arbeidstidsprosent = new Prosent(BigDecimal.valueOf(33.33));
         var aktivitet = new FpSak.UttakAktivitet(FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString());
@@ -66,7 +77,7 @@ class SakerRestTest {
             OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER, OverføringÅrsak.SYKDOM_ANNEN_FORELDER, new FpSak.Gradering(arbeidstidsprosent, new FpSak.UttakAktivitet(
             FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null)), new Prosent(40), true, MorsAktivitet.ARBEID);
         var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode), FpSak.Dekningsgrad.ÅTTI);
-        var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, Set.of(vedtak), aktørIdAnnenPart.value(),
+        var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, Sak.Status.AVSLUTTET, Set.of(vedtak), aktørIdAnnenPart.value(),
             ventTidligSøknadAp(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()), new FpSak.Rettigheter(false, true, true), true);
         sendBehandlingHendelse(sakFraFpsak, repository);
 
@@ -118,13 +129,13 @@ class SakerRestTest {
 
     @Test
     void hent_svp_sak_roundtrip_test() {
-        var aktørId = AktørId.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var repository = new RepositoryStub();
-        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
+        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), innloggetBruker);
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
         var søknad = new SvpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now());
-        var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(), Set.of(søknad));
+        var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(), Set.of(søknad));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();
@@ -143,12 +154,12 @@ class SakerRestTest {
 
     @Test
     void hent_es_sak_roundtrip_test() {
-        var aktørId = AktørId.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var repository = new RepositoryStub();
-        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
+        var tjeneste = new SakerRest(new Saker(repository, AktørId::value), innloggetBruker);
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
-        var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(),
+        var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(),
             Set.of(new EsSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
