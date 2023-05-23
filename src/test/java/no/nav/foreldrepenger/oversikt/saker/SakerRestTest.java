@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
+import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -50,9 +51,11 @@ class SakerRestTest {
         var tjeneste = new SakerRest(new Saker(repository, AktørId::value), () -> aktørId);
 
         var arbeidstidsprosent = new Prosent(BigDecimal.valueOf(33.33));
-        var uttaksperiodeDto = new Uttaksperiode(now().minusWeeks(4), now().minusWeeks(2), new Resultat(
-            Resultat.Type.INNVILGET, Set.of(new Uttaksperiode.UttaksperiodeAktivitet(new FpSak.UttakAktivitet(
-            FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString()), Konto.FORELDREPENGER, new Trekkdager(10), arbeidstidsprosent))));
+        var aktivitet = new FpSak.UttakAktivitet(FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString());
+        var uttaksperiodeDto = new Uttaksperiode(now().minusWeeks(4), now().minusWeeks(2), UtsettelseÅrsak.FRI,
+            OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER, OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER, null, true, MorsAktivitet.INNLAGT,
+            new Resultat(Type.INNVILGET_GRADERING, Årsak.ANNET,
+                Set.of(new Uttaksperiode.UttaksperiodeAktivitet(aktivitet, Konto.FORELDREPENGER, new Trekkdager(10), arbeidstidsprosent)), false));
         var uttaksperioder = List.of(uttaksperiodeDto);
         var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Dekningsgrad.HUNDRE);
 
@@ -82,6 +85,11 @@ class SakerRestTest {
         assertThat(vedtaksperioder.get(0).resultat().trekkerDager()).isTrue();
         assertThat(vedtaksperioder.get(0).kontoType()).isEqualTo(KontoType.FORELDREPENGER);
         assertThat(vedtaksperioder.get(0).gradering().arbeidstidprosent().value()).isEqualTo(arbeidstidsprosent.decimalValue());
+        assertThat(vedtaksperioder.get(0).utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UtsettelseÅrsak.FRI);
+        assertThat(vedtaksperioder.get(0).oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER);
+        assertThat(vedtaksperioder.get(0).overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER);
+        assertThat(vedtaksperioder.get(0).samtidigUttak()).isNull();
+        assertThat(vedtaksperioder.get(0).morsAktivitet()).isEqualTo(no.nav.foreldrepenger.common.innsyn.MorsAktivitet.INNLAGT);
         assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());
         assertThat(sakFraDbOmgjortTilDto.barn()).containsExactly(new Person(new Fødselsnummer(aktørIdBarn.value()), null));
         assertThat(sakFraDbOmgjortTilDto.kanSøkeOmEndring()).isTrue();

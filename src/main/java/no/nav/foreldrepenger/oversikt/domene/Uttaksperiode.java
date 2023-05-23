@@ -4,29 +4,45 @@ import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
 import no.nav.foreldrepenger.common.innsyn.Aktivitet;
 import no.nav.foreldrepenger.common.innsyn.Gradering;
+import no.nav.foreldrepenger.common.innsyn.SamtidigUttak;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
 
-public record Uttaksperiode(LocalDate fom, LocalDate tom, Resultat resultat) {
+public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utsettelseÅrsak, OppholdÅrsak oppholdÅrsak,
+                            OverføringÅrsak overføringÅrsak, Prosent samtidigUttak, Boolean flerbarnsdager,
+                            MorsAktivitet morsAktivitet, Resultat resultat) {
 
     public UttakPeriode tilDto() {
-        //TODO resten av resultat
         var trekkerDager = resultat().aktiviteter().stream().anyMatch(a -> a.trekkdager().merEnn0());
-        var res = new UttakPeriodeResultat(resultat().innvilget(), false, trekkerDager, null);
-        var gradertAktivitet = finnGradertAktivitet(resultat());
 
-        //TODO sjekke gradering opp mot samtidig uttak som i fpinfo
-        var gradering = gradertAktivitet.map(a -> new Gradering(new Gradering.Arbeidstidprosent(a.arbeidstidsprosent().decimalValue()),
-            new Aktivitet(a.aktivitet().type().tilDto(), a.aktivitet().arbeidsgiver() == null ? null : a.aktivitet().arbeidsgiver().tilDto())));
+        var utsettelse = utsettelseÅrsak() == null ? null : utsettelseÅrsak().tilDto();
+        var opphold = oppholdÅrsak() == null ? null : oppholdÅrsak().tilDto();
+        var overføring = overføringÅrsak() == null ? null : overføringÅrsak().tilDto();
+        var ma = morsAktivitet() == null ? null : morsAktivitet().tilDto();
+
+        var sa = samtidigUttak() == null || !samtidigUttak().merEnn0() ? null : new SamtidigUttak(samtidigUttak().decimalValue());
+
+        //frontend vil ikke ha detaljer om gradering ved samtidigUttak
+        var gradering = sa == null ? utledGradering().orElse(null) : null;
 
         var konto = utledKontoType(resultat());
-        return new UttakPeriode(fom, tom, konto.map(Konto::tilDto).orElse(null), res, null, null, null, gradering.orElse(null), null, null, false);
+        var res = new UttakPeriodeResultat(resultat().innvilget(), resultat().trekkerMinsterett(), trekkerDager, resultat().årsak().tilDto());
+        return new UttakPeriode(fom, tom, konto.map(Konto::tilDto).orElse(null), res, utsettelse, opphold, overføring, gradering,
+            ma, sa, flerbarnsdager() != null && flerbarnsdager());
+    }
+
+    private Optional<Gradering> utledGradering() {
+        if (!Resultat.Type.INNVILGET_GRADERING.equals(resultat.type())) {
+            return Optional.empty();
+        }
+        var gradertAktivitet = finnGradertAktivitet(resultat());
+        return gradertAktivitet.map(a -> new Gradering(new Gradering.Arbeidstidprosent(a.arbeidstidsprosent().decimalValue()),
+            new Aktivitet(a.aktivitet().type().tilDto(), a.aktivitet().arbeidsgiver() == null ? null : a.aktivitet().arbeidsgiver().tilDto())));
     }
 
     private Optional<Konto> utledKontoType(Resultat resultat) {
@@ -45,10 +61,10 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, Resultat resultat) {
             .filter(a -> a.arbeidstidsprosent.merEnn0());
     }
 
-    public record Resultat(Type type, Set<UttaksperiodeAktivitet> aktiviteter) {
+    public record Resultat(Type type, Årsak årsak, Set<UttaksperiodeAktivitet> aktiviteter, boolean trekkerMinsterett) {
 
         public boolean innvilget() {
-            return Objects.equals(type, Type.INNVILGET);
+            return Set.of(Type.INNVILGET, Type.INNVILGET_GRADERING).contains(type());
         }
 
         public boolean trekkerFraKonto(Konto konto) {
@@ -57,7 +73,20 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, Resultat resultat) {
 
         public enum Type {
             INNVILGET,
+            INNVILGET_GRADERING,
             AVSLÅTT
+        }
+
+        public enum Årsak {
+            AVSLAG_HULL_I_UTTAKSPLAN,
+            ANNET;
+
+            public UttakPeriodeResultat.Årsak tilDto() {
+                return switch (this) {
+                    case AVSLAG_HULL_I_UTTAKSPLAN -> UttakPeriodeResultat.Årsak.AVSLAG_HULL_MELLOM_FORELDRENES_PERIODER;
+                    case ANNET -> UttakPeriodeResultat.Årsak.ANNET;
+                };
+            }
         }
     }
 
