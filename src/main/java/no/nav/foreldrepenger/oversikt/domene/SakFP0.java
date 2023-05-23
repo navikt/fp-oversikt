@@ -37,8 +37,10 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
 
     @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
+        var sisteSøknad = safeStream(søknader).max(Comparator.comparing(FpSøknad::mottattTidspunkt));
         var gjeldendeVedtak = safeStream(vedtak()).max(Comparator.comparing(FpVedtak::vedtakstidspunkt));
-        var dekningsgrad = gjeldendeVedtak.map(vedtak -> vedtak.dekningsgrad().tilDto()).orElse(null);
+        var dekningsgrad = gjeldendeVedtak.map(vedtak -> vedtak.dekningsgrad().tilDto())
+            .orElseGet(() -> sisteSøknad.map(fpSøknad -> fpSøknad.dekningsgrad().tilDto()).orElse(null));
         var fpVedtak = gjeldendeVedtak
             .map(FpVedtak::tilDto)
             .orElse(null);
@@ -47,7 +49,6 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
         var åpenBehandling = tilÅpenBehandling();
-        var sisteSøknad = safeStream(søknader).max(Comparator.comparing(FpSøknad::mottattTidspunkt));
         var sisteSøknadMottattDato = sisteSøknad
             .map(s -> s.mottattTidspunkt().toLocalDate())
             .orElse(null);

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
+import no.nav.foreldrepenger.common.innsyn.Dekningsgrad;
 import no.nav.foreldrepenger.common.innsyn.KontoType;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
@@ -53,7 +54,7 @@ class SakerRestTest {
             Resultat.Type.INNVILGET, Set.of(new Uttaksperiode.UttaksperiodeAktivitet(new FpSak.UttakAktivitet(
             FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString()), Konto.FORELDREPENGER, new Trekkdager(10), arbeidstidsprosent))));
         var uttaksperioder = List.of(uttaksperiodeDto);
-        var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Vedtak.Dekningsgrad.HUNDRE);
+        var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Dekningsgrad.HUNDRE);
 
         var aktørIdAnnenPart = AktørId.dummy();
         var aktørIdBarn = AktørId.dummy();
@@ -61,7 +62,7 @@ class SakerRestTest {
         var søknadsperiode = new FpSak.Søknad.Periode(now().minusMonths(1), now().plusMonths(1), Konto.FORELDREPENGER, UtsettelseÅrsak.SØKER_SYKDOM,
             OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER, OverføringÅrsak.SYKDOM_ANNEN_FORELDER, new FpSak.Gradering(arbeidstidsprosent, new FpSak.UttakAktivitet(
             FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null)), new Prosent(40), true, MorsAktivitet.ARBEID);
-        var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode));
+        var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode), FpSak.Dekningsgrad.ÅTTI);
         var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), aktørId.value(), familieHendelse, Sak.Status.AVSLUTTET, Set.of(vedtak), aktørIdAnnenPart.value(),
             ventTidligSøknadAp(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()), new FpSak.Rettigheter(false, true, true), true);
         sendBehandlingHendelse(sakFraFpsak, repository);
@@ -72,6 +73,7 @@ class SakerRestTest {
         var sakFraDbOmgjortTilDto = sakerFraDBtilDto.get(0);
         assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
         assertThat(sakFraDbOmgjortTilDto.sakAvsluttet()).isTrue();
+        assertThat(sakFraDbOmgjortTilDto.dekningsgrad()).isEqualTo(Dekningsgrad.HUNDRE);
         var vedtaksperioder = sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder();
         assertThat(vedtaksperioder).hasSameSizeAs(vedtak.uttaksperioder());
         assertThat(vedtaksperioder.get(0).fom()).isEqualTo(vedtak.uttaksperioder().get(0).fom());
