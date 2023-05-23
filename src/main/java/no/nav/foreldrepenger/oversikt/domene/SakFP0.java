@@ -36,6 +36,11 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("ønskerJustertUttakVedFødsel") boolean ønskerJustertUttakVedFødsel) implements Sak {
 
     @Override
+    public boolean harSakSøknad() {
+        return søknader != null && !søknader.isEmpty();
+    }
+
+    @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
         var sisteSøknad = safeStream(søknader).max(Comparator.comparing(FpSøknad::mottattTidspunkt));
         var gjeldendeVedtak = safeStream(vedtak()).max(Comparator.comparing(FpVedtak::vedtakstidspunkt));

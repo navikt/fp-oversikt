@@ -18,4 +18,6 @@ public interface Sak {
     Saksnummer saksnummer();
 
     AktørId aktørId();
+
+    boolean harSakSøknad();
 }

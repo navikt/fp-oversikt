@@ -19,6 +19,12 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                      @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
                      @JsonProperty("søknader") Set<EsSøknad> søknader) implements Sak {
+
+    @Override
+    public boolean harSakSøknad() {
+        return søknader != null && !søknader.isEmpty();
+    }
+
     @Override
     public no.nav.foreldrepenger.common.innsyn.EsSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
         var familiehendelse = familieHendelse == null ? null : familieHendelse.tilDto();
@@ -26,7 +32,9 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     private EsÅpenBehandling tilÅpenBehandling() {
-        return søknadUnderBehandling().map(s -> new EsÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()))).orElse(null);
+        return søknadUnderBehandling()
+            .map(s -> new EsÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt())))
+            .orElse(null);
     }
 
     private Optional<EsSøknad> søknadUnderBehandling() {

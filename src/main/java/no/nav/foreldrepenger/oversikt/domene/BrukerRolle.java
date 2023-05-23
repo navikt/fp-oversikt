@@ -1,5 +1,5 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
 public enum BrukerRolle {
-    MOR, FAR, MEDMOR
+    MOR, FAR, MEDMOR, UKJENT
 }
