@@ -55,7 +55,7 @@ public class SakEntitet {
         try {
             return MAPPER.treeToValue(json, Sak.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new IllegalStateException("Problemer med å deserialisere sak", e);
         }
     }
 

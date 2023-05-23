@@ -6,6 +6,8 @@ import static no.nav.foreldrepenger.oversikt.server.JettyServer.setupDataSource;
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
+import org.junit.jupiter.api.extension.TestInstantiationException;
+
 import no.nav.vedtak.felles.testutilities.db.EntityManagerAwareExtension;
 
 public class JpaExtension extends EntityManagerAwareExtension {
@@ -23,7 +25,7 @@ public class JpaExtension extends EntityManagerAwareExtension {
             try {
                 DS = setupDataSource();
             } catch (NamingException e) {
-                throw new RuntimeException(e);
+                throw new TestInstantiationException("Problemer med å sette oppe datasource", e);
             }
         }
         return DS;

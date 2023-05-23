@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.server;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -54,7 +55,7 @@ public class JsonUserType implements UserType {
             return null;
         }
         try {
-            return MAPPER.readTree(cellContent.getBytes("UTF-8"));
+            return MAPPER.readTree(cellContent.getBytes(StandardCharsets.UTF_8));
         } catch (Exception ex) {
             throw new HibernateException(ex);
         }
@@ -99,7 +100,7 @@ public class JsonUserType implements UserType {
         Object deepCopy = deepCopy(value);
 
         if (!(deepCopy instanceof Serializable)) {
-            throw new RuntimeException(String.format("deepCopy %s er ikke serialiserbar", value), null);
+            throw new IllegalStateException(String.format("deepCopy %s er ikke serialiserbar", value), null);
         }
 
         return (Serializable) deepCopy;
