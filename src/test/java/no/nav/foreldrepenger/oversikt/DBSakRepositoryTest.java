@@ -54,10 +54,10 @@ class DBSakRepositoryTest {
             UtsettelseÅrsak.SØKER_SYKDOM, null, null, new Gradering(new Prosent(3), new UttakAktivitet(UttakAktivitet.Type.FRILANS,
             Arbeidsgiver.dummy(), null)), new Prosent(44), true, MorsAktivitet.ARBEID)));
         var originalt = new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, of(vedtak), AktørId.dummy(), fh(), aksjonspunkt(),
-            of(søknad), MOR, of(AktørId.dummy()), beggeRett());
+            of(søknad), MOR, of(AktørId.dummy()), beggeRett(), false);
         repository.lagre(originalt);
         var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.AVSLUTTET, null, AktørId.dummy(), fh(), aksjonspunkt(), of(),
-            MOR, of(AktørId.dummy()), beggeRett());
+            MOR, of(AktørId.dummy()), beggeRett(), false);
         repository.lagre(annenAktørsSak);
 
         var saker = repository.hentFor(aktørId);
@@ -94,11 +94,10 @@ class DBSakRepositoryTest {
         var annenPartAktørId = AktørId.dummy();
         var barn = of(AktørId.dummy());
         var originalt = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, of(vedtak), annenPartAktørId, fh(), aksjonspunkt(), of(), FAR,
-            barn, beggeRett());
+            barn, beggeRett(), false);
         repository.lagre(originalt);
         var oppdatertSak = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, null, annenPartAktørId, fh(), aksjonspunkt(),
-            of(new FpSøknad(SøknadStatus.MOTTATT, now(), null)), FAR, barn,
-            beggeRett());
+            of(new FpSøknad(SøknadStatus.MOTTATT, now(), null)), FAR, barn, beggeRett(), false);
         repository.lagre(oppdatertSak);
 
         var saker = repository.hentFor(aktørId);

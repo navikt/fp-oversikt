@@ -88,7 +88,7 @@ public class HentSakTask implements ProsessTaskHandler {
             var brukerRolle = tilBrukerRolle(fpsak.brukerRolle());
             var fødteBarn = tilFødteBarn(fpsak.fødteBarn());
             return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtak()), annenPart, familieHendelse, aksjonspunkt, søknader,
-                brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()));
+                brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()), fpsak.ønskerJustertUttakVedFødsel());
         }
         if (sakDto instanceof SvpSak svpSak) {
             var søknader = svpSak.søknader().stream().map(HentSakTask::tilSvpSøknad).collect(Collectors.toSet());

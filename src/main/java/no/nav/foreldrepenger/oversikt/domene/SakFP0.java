@@ -31,7 +31,8 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("søknader") Set<FpSøknad> søknader,
                      @JsonProperty("brukerRolle") BrukerRolle brukerRolle,
                      @JsonProperty("fødteBarn") Set<AktørId> fødteBarn,
-                     @JsonProperty("rettigheter") Rettigheter rettigheter) implements Sak {
+                     @JsonProperty("rettigheter") Rettigheter rettigheter,
+                     @JsonProperty("ønskerJustertUttakVedFødsel") boolean ønskerJustertUttakVedFødsel) implements Sak {
 
     @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
@@ -56,7 +57,8 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var rettighetType = utledRettighetType(rettigheter, sisteSøknad.map(FpSøknad::perioder).orElse(Set.of()), gjeldendeVedtak.map(
             FpVedtak::perioder).orElse(List.of()));
         return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
-            morUføretrygd, harAnnenForelderTilsvarendeRettEØS, false, rettighetType, annenPart, fh, fpVedtak, åpenBehandling, barna, dekningsgrad);
+            morUføretrygd, harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart, fh, fpVedtak, åpenBehandling,
+            barna, dekningsgrad);
     }
 
     private static RettighetType utledRettighetType(Rettigheter rettigheter,
