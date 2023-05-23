@@ -128,7 +128,7 @@ public class HentSakTask implements ProsessTaskHandler {
 
     private static FpSøknad tilFpSøknad(FpSak.Søknad søknad) {
         var perioder = søknad.perioder().stream().map(HentSakTask::tilSøknadsperiode).collect(Collectors.toSet());
-        return new FpSøknad(map(søknad.status()), søknad.mottattTidspunkt(), perioder);
+        return new FpSøknad(map(søknad.status()), søknad.mottattTidspunkt(), perioder, tilDekningsgrad(søknad.dekningsgrad()));
     }
 
     private static SøknadStatus map(no.nav.foreldrepenger.oversikt.innhenting.SøknadStatus status) {
@@ -301,7 +301,7 @@ public class HentSakTask implements ProsessTaskHandler {
         };
     }
 
-    private static Dekningsgrad tilDekningsgrad(FpSak.Vedtak.Dekningsgrad dekningsgrad) {
+    private static Dekningsgrad tilDekningsgrad(FpSak.Dekningsgrad dekningsgrad) {
         return switch (dekningsgrad) {
             case HUNDRE -> Dekningsgrad.HUNDRE;
             case ÅTTI -> Dekningsgrad.ÅTTI;

@@ -159,10 +159,10 @@ class SakFP0TilDtoMapperTest {
         var familieHendelse = fh();
         var åpenBehandling = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, of(), null, familieHendelse,
             of(new Aksjonspunkt(Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD, null, LocalDateTime.now())),
-            of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), of())), MOR, of(), rettigheter(), false);
+            of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), of(), Dekningsgrad.HUNDRE)), MOR, of(), rettigheter(), false);
         var ikkeÅpenBehandling = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, of(), null, familieHendelse,
             of(new Aksjonspunkt(Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD, null, LocalDateTime.now())),
-            of(new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), of())), MOR, of(), rettigheter(), false);
+            of(new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), of(), Dekningsgrad.HUNDRE)), MOR, of(), rettigheter(), false);
 
 
         var fpSakDto1 = åpenBehandling.tilSakDto(AktørId::value);
