@@ -18,6 +18,7 @@ import no.nav.foreldrepenger.common.innsyn.FpSak;
 import no.nav.foreldrepenger.common.innsyn.FpÅpenBehandling;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
+import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 
@@ -75,7 +76,10 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     private FpÅpenBehandling tilÅpenBehandling() {
         var søknadUnderBehandling = søknadUnderBehandling();
         return søknadUnderBehandling.map(s -> {
-            var perioder = s.perioder().stream().map(FpSøknadsperiode::tilDto).toList();
+            var perioder = s.perioder().stream()
+                .map(FpSøknadsperiode::tilDto)
+                .sorted(Comparator.comparing(UttakPeriode::fom))
+                .toList();
             return new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()), perioder);
         }).orElse(null);
     }
