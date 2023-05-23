@@ -3,9 +3,12 @@ package no.nav.foreldrepenger.oversikt.domene;
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 
 public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
                        @JsonProperty("perioder") List<Uttaksperiode> perioder,
@@ -14,6 +17,7 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
     public no.nav.foreldrepenger.common.innsyn.FpVedtak tilDto() {
         var uttaksperioder = safeStream(perioder)
             .map(Uttaksperiode::tilDto)
+            .sorted(Comparator.comparing(UttakPeriode::fom))
             .toList();
         return new no.nav.foreldrepenger.common.innsyn.FpVedtak(uttaksperioder);
     }
