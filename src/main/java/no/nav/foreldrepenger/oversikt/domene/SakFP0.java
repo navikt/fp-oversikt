@@ -57,10 +57,13 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var sisteSøknadMottattDato = sisteSøknad
             .map(s -> s.mottattTidspunkt().toLocalDate())
             .orElse(null);
-        var barna = safeStream(fødteBarn).map(b -> new Person(new Fødselsnummer(b.value()), null)).collect(Collectors.toSet());
+        var barna = safeStream(fødteBarn).map(b -> {
+            var fnr = new Fødselsnummer(fødselsnummerOppslag.forAktørId(b));
+            return new Person(fnr, null);
+        }).collect(Collectors.toSet());
         var gjelderAdopsjon = familieHendelse() != null && familieHendelse().gjelderAdopsjon();
-        var morUføretrygd = rettigheter == null ? false : rettigheter.morUføretrygd();
-        var harAnnenForelderTilsvarendeRettEØS = rettigheter == null ? false : rettigheter.annenForelderTilsvarendeRettEØS();
+        var morUføretrygd = rettigheter != null && rettigheter.morUføretrygd();
+        var harAnnenForelderTilsvarendeRettEØS = rettigheter != null && rettigheter.annenForelderTilsvarendeRettEØS();
         var rettighetType = utledRettighetType(rettigheter, sisteSøknad.map(FpSøknad::perioder).orElse(Set.of()), gjeldendeVedtak.map(
             FpVedtak::perioder).orElse(List.of()));
         return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
