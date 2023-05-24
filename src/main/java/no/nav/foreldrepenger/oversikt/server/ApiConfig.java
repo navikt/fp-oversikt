@@ -10,7 +10,6 @@ import javax.ws.rs.core.Application;
 import org.glassfish.jersey.server.ServerProperties;
 
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
-import no.nav.vedtak.felles.prosesstask.rest.ProsessTaskRestTjeneste;
 
 @ApplicationPath("/api")
 public class ApiConfig extends Application {
@@ -18,7 +17,7 @@ public class ApiConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         // eksponert grensesnitt bak sikkerhet
-        return Set.of(SakerRest.class, ProsessTaskRestTjeneste.class);
+        return Set.of(SakerRest.class);
     }
 
     @Override
