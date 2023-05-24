@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -114,22 +114,24 @@ class SakerDtoMapperTest {
     }
 
     static SakES0 esSak(AktørId aktørId) {
-        return new SakES0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+        return new SakES0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, now())),
+            now());
     }
 
     static SakSVP0 svpSak(AktørId aktørId) {
-        return new SakSVP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+        return new SakSVP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, now())),
+            now());
     }
 
     static SakFP0 fpSak(AktørId aktørId) {
         return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(),
-            Set.of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(), Dekningsgrad.HUNDRE)), BrukerRolle.MOR,
-            Set.of(), new Rettigheter(false, false, false), false);
+            Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(), Dekningsgrad.HUNDRE)), BrukerRolle.MOR,
+            Set.of(), new Rettigheter(false, false, false), false, now());
     }
 
     static SakFP0 fpSakUtenSøknad(AktørId aktørId) {
         return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR,
-            Set.of(), new Rettigheter(false, false, false), false);
+            Set.of(), new Rettigheter(false, false, false), false, now());
     }
 
     static FamilieHendelse fh() {

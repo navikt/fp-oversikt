@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.domene;
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 import static no.nav.foreldrepenger.oversikt.domene.SakStatus.avsluttet;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
@@ -18,7 +19,8 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                       @JsonProperty("status") SakStatus status,
                       @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                       @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
-                      @JsonProperty("søknader") Set<SvpSøknad> søknader) implements Sak {
+                      @JsonProperty("søknader") Set<SvpSøknad> søknader,
+                      @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements Sak {
 
     @Override
     public boolean harSakSøknad() {

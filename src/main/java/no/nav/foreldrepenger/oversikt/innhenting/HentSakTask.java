@@ -2,6 +2,8 @@ package no.nav.foreldrepenger.oversikt.innhenting;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -82,21 +84,22 @@ public class HentSakTask implements ProsessTaskHandler {
         var saksnummer = new Saksnummer(sakDto.saksnummer());
         var aktørId = new AktørId(sakDto.aktørId());
         var aksjonspunkt = tilAksjonspunkt(sakDto.aksjonspunkt());
+        var oppdatertTidspunkt = LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         if (sakDto instanceof FpSak fpsak) {
             var annenPart = fpsak.oppgittAnnenPart() == null ? null : new AktørId(fpsak.oppgittAnnenPart());
             var søknader = fpsak.søknader().stream().map(HentSakTask::tilFpSøknad).collect(Collectors.toSet());
             var brukerRolle = tilBrukerRolle(fpsak.brukerRolle());
             var fødteBarn = tilFødteBarn(fpsak.fødteBarn());
             return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtak()), annenPart, familieHendelse, aksjonspunkt, søknader,
-                brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()), fpsak.ønskerJustertUttakVedFødsel());
+                brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()), fpsak.ønskerJustertUttakVedFødsel(), oppdatertTidspunkt);
         }
         if (sakDto instanceof SvpSak svpSak) {
             var søknader = svpSak.søknader().stream().map(HentSakTask::tilSvpSøknad).collect(Collectors.toSet());
-            return new SakSVP0(saksnummer, aktørId, status, familieHendelse, aksjonspunkt, søknader);
+            return new SakSVP0(saksnummer, aktørId, status, familieHendelse, aksjonspunkt, søknader, oppdatertTidspunkt);
         }
         if (sakDto instanceof EsSak esSak) {
             var søknader = esSak.søknader().stream().map(HentSakTask::tilEsSøknad).collect(Collectors.toSet());
-            return new SakES0(saksnummer, aktørId, status, familieHendelse, aksjonspunkt, søknader);
+            return new SakES0(saksnummer, aktørId, status, familieHendelse, aksjonspunkt, søknader, oppdatertTidspunkt);
         }
 
         throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");

@@ -5,6 +5,7 @@ import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.domene.Konto.FORELDREPENGER;
 import static no.nav.foreldrepenger.oversikt.domene.SakStatus.avsluttet;
 
+import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -33,7 +34,8 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("brukerRolle") BrukerRolle brukerRolle,
                      @JsonProperty("fødteBarn") Set<AktørId> fødteBarn,
                      @JsonProperty("rettigheter") Rettigheter rettigheter,
-                     @JsonProperty("ønskerJustertUttakVedFødsel") boolean ønskerJustertUttakVedFødsel) implements Sak {
+                     @JsonProperty("ønskerJustertUttakVedFødsel") boolean ønskerJustertUttakVedFødsel,
+                     @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements Sak {
 
     @Override
     public boolean harSakSøknad() {
