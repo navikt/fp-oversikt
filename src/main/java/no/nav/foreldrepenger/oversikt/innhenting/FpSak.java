@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.oversikt.innhenting;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
@@ -32,17 +31,21 @@ public record FpSak(String saksnummer,
     public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, FpSak.Dekningsgrad dekningsgrad) {
     }
 
-    public record Uttaksperiode(LocalDate fom, LocalDate tom, Resultat resultat) {
+    public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utsettelseÅrsak, OppholdÅrsak oppholdÅrsak,
+                                OverføringÅrsak overføringÅrsak, Prosent samtidigUttak, Boolean flerbarnsdager,
+                                MorsAktivitet morsAktivitet, Resultat resultat) {
 
-        public record Resultat(Type type, Set<UttaksperiodeAktivitet> aktiviteter) {
-
-            public boolean innvilget() {
-                return Objects.equals(type, Type.INNVILGET);
-            }
+        public record Resultat(Type type, Årsak årsak, Set<UttaksperiodeAktivitet> aktiviteter, boolean trekkerMinsterett) {
 
             public enum Type {
                 INNVILGET,
+                INNVILGET_GRADERING,
                 AVSLÅTT
+            }
+
+            public enum Årsak {
+                ANNET,
+                AVSLAG_HULL_I_UTTAKSPLAN,
             }
         }
 

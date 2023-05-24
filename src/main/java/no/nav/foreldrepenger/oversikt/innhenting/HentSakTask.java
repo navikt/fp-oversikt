@@ -139,30 +139,17 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static FpSøknadsperiode tilSøknadsperiode(FpSak.Søknad.Periode periode) {
-        var utsettelseÅrsak = periode.utsettelseÅrsak() == null ? null : switch (periode.utsettelseÅrsak()) {
-            case HV_ØVELSE -> UtsettelseÅrsak.HV_ØVELSE;
-            case ARBEID -> UtsettelseÅrsak.ARBEID;
-            case LOVBESTEMT_FERIE -> UtsettelseÅrsak.LOVBESTEMT_FERIE;
-            case SØKER_SYKDOM -> UtsettelseÅrsak.SØKER_SYKDOM;
-            case SØKER_INNLAGT -> UtsettelseÅrsak.SØKER_INNLAGT;
-            case BARN_INNLAGT -> UtsettelseÅrsak.BARN_INNLAGT;
-            case NAV_TILTAK -> UtsettelseÅrsak.NAV_TILTAK;
-            case FRI -> UtsettelseÅrsak.FRI;
-        };
-        var oppholdÅrsak = periode.oppholdÅrsak() == null ? null : switch (periode.oppholdÅrsak()) {
-            case MØDREKVOTE_ANNEN_FORELDER -> OppholdÅrsak.MØDREKVOTE_ANNEN_FORELDER;
-            case FEDREKVOTE_ANNEN_FORELDER -> OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER;
-            case FELLESPERIODE_ANNEN_FORELDER -> OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER;
-            case FORELDREPENGER_ANNEN_FORELDER -> OppholdÅrsak.FORELDREPENGER_ANNEN_FORELDER;
-        };
-        var overføringÅrsak = periode.overføringÅrsak() == null ? null : switch (periode.overføringÅrsak()) {
-            case INSTITUSJONSOPPHOLD_ANNEN_FORELDER -> OverføringÅrsak.INSTITUSJONSOPPHOLD_ANNEN_FORELDER;
-            case SYKDOM_ANNEN_FORELDER -> OverføringÅrsak.SYKDOM_ANNEN_FORELDER;
-            case IKKE_RETT_ANNEN_FORELDER -> OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER;
-            case ALENEOMSORG -> OverføringÅrsak.ALENEOMSORG;
-        };
+        var utsettelseÅrsak = periode.utsettelseÅrsak() == null ? null : map(periode.utsettelseÅrsak());
+        var oppholdÅrsak = periode.oppholdÅrsak() == null ? null : map(periode.oppholdÅrsak());
+        var overføringÅrsak = periode.overføringÅrsak() == null ? null : map(periode.overføringÅrsak());
         var gradering = mapGradering(periode.gradering());
-        var morsAktivitet = periode.morsAktivitet() == null ? null : switch (periode.morsAktivitet()) {
+        var morsAktivitet = periode.morsAktivitet() == null ? null : map(periode.morsAktivitet());
+        return new FpSøknadsperiode(periode.fom(), periode.tom(), tilKonto(periode.konto()), utsettelseÅrsak, oppholdÅrsak, overføringÅrsak,
+            gradering, periode.samtidigUttak(), periode.flerbarnsdager(), morsAktivitet);
+    }
+
+    private static MorsAktivitet map(no.nav.foreldrepenger.oversikt.innhenting.MorsAktivitet morsAktivitet) {
+        return morsAktivitet == null ? null : switch (morsAktivitet) {
             case ARBEID -> MorsAktivitet.ARBEID;
             case UTDANNING -> MorsAktivitet.UTDANNING;
             case KVALPROG -> MorsAktivitet.KVALPROG;
@@ -173,8 +160,37 @@ public class HentSakTask implements ProsessTaskHandler {
             case UFØRE -> MorsAktivitet.UFØRE;
             case IKKE_OPPGITT -> MorsAktivitet.IKKE_OPPGITT;
         };
-        return new FpSøknadsperiode(periode.fom(), periode.tom(), tilKonto(periode.konto()), utsettelseÅrsak, oppholdÅrsak, overføringÅrsak,
-            gradering, periode.samtidigUttak(), periode.flerbarnsdager(), morsAktivitet);
+    }
+
+    private static OverføringÅrsak map(no.nav.foreldrepenger.oversikt.innhenting.OverføringÅrsak overføringÅrsak) {
+        return overføringÅrsak == null ? null : switch (overføringÅrsak) {
+            case INSTITUSJONSOPPHOLD_ANNEN_FORELDER -> OverføringÅrsak.INSTITUSJONSOPPHOLD_ANNEN_FORELDER;
+            case SYKDOM_ANNEN_FORELDER -> OverføringÅrsak.SYKDOM_ANNEN_FORELDER;
+            case IKKE_RETT_ANNEN_FORELDER -> OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER;
+            case ALENEOMSORG -> OverføringÅrsak.ALENEOMSORG;
+        };
+    }
+
+    private static OppholdÅrsak map(no.nav.foreldrepenger.oversikt.innhenting.OppholdÅrsak oppholdÅrsak) {
+        return oppholdÅrsak == null ? null : switch (oppholdÅrsak) {
+            case MØDREKVOTE_ANNEN_FORELDER -> OppholdÅrsak.MØDREKVOTE_ANNEN_FORELDER;
+            case FEDREKVOTE_ANNEN_FORELDER -> OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER;
+            case FELLESPERIODE_ANNEN_FORELDER -> OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER;
+            case FORELDREPENGER_ANNEN_FORELDER -> OppholdÅrsak.FORELDREPENGER_ANNEN_FORELDER;
+        };
+    }
+
+    private static UtsettelseÅrsak map(no.nav.foreldrepenger.oversikt.innhenting.UtsettelseÅrsak utsettelseÅrsak) {
+        return utsettelseÅrsak == null ? null : switch (utsettelseÅrsak) {
+            case HV_ØVELSE -> UtsettelseÅrsak.HV_ØVELSE;
+            case ARBEID -> UtsettelseÅrsak.ARBEID;
+            case LOVBESTEMT_FERIE -> UtsettelseÅrsak.LOVBESTEMT_FERIE;
+            case SØKER_SYKDOM -> UtsettelseÅrsak.SØKER_SYKDOM;
+            case SØKER_INNLAGT -> UtsettelseÅrsak.SØKER_INNLAGT;
+            case BARN_INNLAGT -> UtsettelseÅrsak.BARN_INNLAGT;
+            case NAV_TILTAK -> UtsettelseÅrsak.NAV_TILTAK;
+            case FRI -> UtsettelseÅrsak.FRI;
+        };
     }
 
     private static Gradering mapGradering(FpSak.Gradering gradering) {
@@ -272,8 +288,18 @@ public class HentSakTask implements ProsessTaskHandler {
             return null;
         }
         var aktiviteter = uttaksperiodeDto.resultat().aktiviteter().stream().map(HentSakTask::tilUttaksperiodeAktivitet).collect(Collectors.toSet());
-        return new Uttaksperiode(uttaksperiodeDto.fom(), uttaksperiodeDto.tom(),
-            new Uttaksperiode.Resultat(tilResultatType(uttaksperiodeDto.resultat().type()), aktiviteter));
+        return new Uttaksperiode(uttaksperiodeDto.fom(), uttaksperiodeDto.tom(), map(uttaksperiodeDto.utsettelseÅrsak()),
+            map(uttaksperiodeDto.oppholdÅrsak()), map(uttaksperiodeDto.overføringÅrsak()), uttaksperiodeDto.samtidigUttak(),
+            uttaksperiodeDto.flerbarnsdager(), map(uttaksperiodeDto.morsAktivitet()),
+            new Uttaksperiode.Resultat(tilResultatType(uttaksperiodeDto.resultat().type()), map(uttaksperiodeDto.resultat().årsak()), aktiviteter,
+                uttaksperiodeDto.resultat().trekkerMinsterett()));
+    }
+
+    private static Uttaksperiode.Resultat.Årsak map(FpSak.Uttaksperiode.Resultat.Årsak årsak) {
+        return switch (årsak) {
+            case AVSLAG_HULL_I_UTTAKSPLAN -> Uttaksperiode.Resultat.Årsak.AVSLAG_HULL_I_UTTAKSPLAN;
+            case ANNET -> Uttaksperiode.Resultat.Årsak.ANNET;
+        };
     }
 
     private static Uttaksperiode.UttaksperiodeAktivitet tilUttaksperiodeAktivitet(FpSak.Uttaksperiode.UttaksperiodeAktivitet a) {
@@ -297,6 +323,7 @@ public class HentSakTask implements ProsessTaskHandler {
     private static Uttaksperiode.Resultat.Type tilResultatType(FpSak.Uttaksperiode.Resultat.Type type) {
         return switch (type) {
             case INNVILGET -> Uttaksperiode.Resultat.Type.INNVILGET;
+            case INNVILGET_GRADERING -> Uttaksperiode.Resultat.Type.INNVILGET_GRADERING;
             case AVSLÅTT -> Uttaksperiode.Resultat.Type.AVSLÅTT;
         };
     }

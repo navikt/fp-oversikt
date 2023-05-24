@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
+import static java.time.LocalDate.now;
 import static java.util.Set.of;
 import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.FAR;
 import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MEDMOR;
@@ -9,6 +10,7 @@ import static no.nav.foreldrepenger.oversikt.domene.Konto.MØDREKVOTE;
 import static no.nav.foreldrepenger.oversikt.domene.Trekkdager.ZERO;
 import static no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat.Type.AVSLÅTT;
 import static no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat.Type.INNVILGET;
+import static no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat.Årsak.ANNET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -31,13 +33,11 @@ class SakFP0TilDtoMapperTest {
 
     @Test
     void verifiser_at_gjeldende_vedtak_er_det_med_senest_vedtakstidspunkt() {
-        var uttaksperioderGjeldendeVedtak = List.of(
-            new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1), new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(ZERO))));
-        var vedtakene = of(new FpVedtak(LocalDateTime.now().minusYears(1), List.of(
-                new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1), new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(ZERO))),
-                new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2),
-                    new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(ZERO)))), Dekningsgrad.HUNDRE),
-            new FpVedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI));
+        var uttaksperioderGjeldendeVedtak = List.of(uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO)));
+        var gjeldendeVedtak = new FpVedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI);
+        var tidligereVedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO)),
+            uttaksperiode(now().plusMonths(1), now().plusMonths(2), innvilget(ZERO))), Dekningsgrad.HUNDRE);
+        var vedtakene = of(tidligereVedtak, gjeldendeVedtak);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, vedtakene, AktørId.dummy(), fh(), of(),
             of(), MEDMOR, of(), rettigheter(), false);
 
@@ -48,6 +48,14 @@ class SakFP0TilDtoMapperTest {
         assertThat(fpSakDto.gjeldendeVedtak().perioder()).hasSameSizeAs(uttaksperioderGjeldendeVedtak);
         assertThat(fpSakDto.gjeldendeVedtak().perioder().get(0).fom()).isEqualTo(uttaksperioderGjeldendeVedtak.get(0).fom());
         assertThat(fpSakDto.annenPart().fnr().value()).isEqualTo(fnrAnnenPart);
+    }
+
+    private static Uttaksperiode.Resultat innvilget(Trekkdager trekkdager) {
+        return new Uttaksperiode.Resultat(INNVILGET, ANNET, uttaksperiodeAktivitet(trekkdager), false);
+    }
+
+    private static Uttaksperiode uttaksperiode(LocalDate fom, LocalDate tom, Uttaksperiode.Resultat resultat) {
+        return new Uttaksperiode(fom, tom, null, null, null, null, false, null, resultat);
     }
 
     private static Set<UttaksperiodeAktivitet> uttaksperiodeAktivitet(Trekkdager trekkdager) {
@@ -62,8 +70,7 @@ class SakFP0TilDtoMapperTest {
 
     @Test
     void sjekk_at_mapping_av_uttaksperiode_til_dto_fungere() {
-        var uttaksperiode = new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1),
-            new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(ZERO)));
+        var uttaksperiode = uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO));
 
         var uttaksperiodeDto = uttaksperiode.tilDto();
 
@@ -75,10 +82,8 @@ class SakFP0TilDtoMapperTest {
 
     @Test
     void sjekk_at_mapping_av_vedtak_til_dto_fungere_happy_case() {
-        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1),
-                new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(ZERO))),
-            new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2),
-                new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(ZERO))));
+        var uttaksperioder = List.of(uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO)),
+            uttaksperiode(now().plusMonths(1), now().plusMonths(2), innvilget(ZERO)));
         var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
 
         var vedtakDto = vedtak.tilDto();
@@ -99,16 +104,19 @@ class SakFP0TilDtoMapperTest {
     @Test
     void kan_søke_om_endring_hvis_periode_innvilget() {
         var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(
-            new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1),
-                new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(ZERO))),
-            new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2),
-                new Uttaksperiode.Resultat(AVSLÅTT, uttaksperiodeAktivitet(ZERO)))), Dekningsgrad.HUNDRE);
+            uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO)),
+            uttaksperiode(now().plusMonths(1), now().plusMonths(2), avslått())),
+            Dekningsgrad.HUNDRE);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, of(vedtak), null, fh(), of(), of(), MOR,
             of(), rettigheter(), false);
 
         var fpSakDto = sakFP0.tilSakDto(AktørId::value);
 
         assertThat(fpSakDto.kanSøkeOmEndring()).isTrue();
+    }
+
+    private static Uttaksperiode.Resultat avslått() {
+        return new Uttaksperiode.Resultat(AVSLÅTT, ANNET, uttaksperiodeAktivitet(ZERO), false);
     }
 
     private Rettigheter rettigheter() {
@@ -118,10 +126,9 @@ class SakFP0TilDtoMapperTest {
     @Test
     void kan_ikke_søke_om_endring_hvis_alle_periodene_avslått() {
         var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(
-            new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(1),
-                new Uttaksperiode.Resultat(AVSLÅTT, uttaksperiodeAktivitet(ZERO))),
-            new Uttaksperiode(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(2),
-                new Uttaksperiode.Resultat(AVSLÅTT, uttaksperiodeAktivitet(ZERO)))), Dekningsgrad.HUNDRE);
+            uttaksperiode(now(), now().plusMonths(1), avslått()),
+            uttaksperiode(now().plusMonths(1), now().plusMonths(2), avslått())),
+            Dekningsgrad.HUNDRE);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, of(vedtak), null, fh(), of(), of(), MOR,
             of(), rettigheter(), false);
 
@@ -198,8 +205,7 @@ class SakFP0TilDtoMapperTest {
 
     @Test
     void skal_mappe_rettigheter_begge_rett() {
-        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now(),
-            new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(new Trekkdager(20), MØDREKVOTE))));
+        var uttaksperioder = List.of(uttaksperiode(now(), now(), innvilget(new Trekkdager(20))));
         var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(false, false, false), false);
@@ -212,8 +218,8 @@ class SakFP0TilDtoMapperTest {
 
     @Test
     void skal_mappe_rettigheter_aleneomsorg() {
-        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now(),
-            new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(new Trekkdager(20), FORELDREPENGER))));
+        var uttaksperioder = List.of(uttaksperiode(now(), now(),
+            new Uttaksperiode.Resultat(INNVILGET, ANNET, uttaksperiodeAktivitet(new Trekkdager(20), FORELDREPENGER), false)));
         var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(true, false, false), false);
@@ -226,8 +232,8 @@ class SakFP0TilDtoMapperTest {
 
     @Test
     void skal_mappe_rettigheter_enerett() {
-        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now(),
-            new Uttaksperiode.Resultat(INNVILGET, uttaksperiodeAktivitet(new Trekkdager(20), FORELDREPENGER))));
+        var uttaksperioder = List.of(uttaksperiode(now(), now(),
+            new Uttaksperiode.Resultat(INNVILGET, ANNET, uttaksperiodeAktivitet(new Trekkdager(20), FORELDREPENGER), false)));
         var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.UNDER_BEHANDLING, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(false, true, true), false);
@@ -262,6 +268,6 @@ class SakFP0TilDtoMapperTest {
     }
 
     private static FamilieHendelse fh() {
-        return new FamilieHendelse(LocalDate.now(), LocalDate.now().plusDays(1), 1, LocalDate.now().plusDays(2));
+        return new FamilieHendelse(now(), now().plusDays(1), 1, now().plusDays(2));
     }
 }

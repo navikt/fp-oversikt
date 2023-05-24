@@ -47,8 +47,9 @@ class DBSakRepositoryTest {
     void roundtrip(EntityManager entityManager) {
         var repository = new DBSakRepository(entityManager);
         var aktørId = AktørId.dummy();
-        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2),
-            new Resultat(Resultat.Type.INNVILGET, Set.of(uttaksperiodeAktivitet(new Trekkdager(20))))));
+        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2), UtsettelseÅrsak.NAV_TILTAK, null,
+            null, Prosent.ZERO, false, MorsAktivitet.IKKE_OPPGITT,
+            new Resultat(Resultat.Type.INNVILGET, Resultat.Årsak.ANNET, Set.of(uttaksperiodeAktivitet(new Trekkdager(20))), false)));
         var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now(), Konto.FELLESPERIODE,
             UtsettelseÅrsak.SØKER_SYKDOM, null, null, new Gradering(new Prosent(3), new UttakAktivitet(UttakAktivitet.Type.FRILANS,
@@ -87,8 +88,8 @@ class DBSakRepositoryTest {
     void oppdatererJsonPåSak(EntityManager entityManager) {
         var repository = new DBSakRepository(entityManager);
         var aktørId = AktørId.dummy();
-        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2),
-            new Resultat(Resultat.Type.AVSLÅTT, Set.of(uttaksperiodeAktivitet(Trekkdager.ZERO)))));
+        var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2), null, null, null, Prosent.ZERO,
+            false, null, new Resultat(Resultat.Type.AVSLÅTT, Resultat.Årsak.ANNET, Set.of(uttaksperiodeAktivitet(Trekkdager.ZERO)), false)));
         var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var saksnummer = Saksnummer.dummy();
         var annenPartAktørId = AktørId.dummy();

@@ -14,10 +14,7 @@ class FpSøknadsperiodeTest {
 
     @Test
     void mapper_til_dto() {
-        var periode = new FpSøknadsperiode(LocalDate.now(), LocalDate.now().plusDays(5), Konto.MØDREKVOTE, UtsettelseÅrsak.SØKER_SYKDOM,
-            OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER, OverføringÅrsak.SYKDOM_ANNEN_FORELDER,
-            new Gradering(new Prosent(10), new UttakAktivitet(UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null)),
-            new Prosent(20), true, MorsAktivitet.ARBEID);
+        var periode = periode();
 
         var dto = periode.tilDto();
         assertThat(dto.fom()).isEqualTo(periode.fom());
@@ -30,9 +27,39 @@ class FpSøknadsperiodeTest {
         assertThat(dto.morsAktivitet()).isEqualTo(no.nav.foreldrepenger.common.innsyn.MorsAktivitet.ARBEID);
         assertThat(dto.resultat()).isNull();
         assertThat(dto.flerbarnsdager()).isTrue();
-        assertThat(dto.samtidigUttak().value()).isEqualTo(periode.samtidigUttak().decimalValue());
+        assertThat(dto.samtidigUttak()).isNull();
         assertThat(dto.oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER);
         assertThat(dto.utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UtsettelseÅrsak.SØKER_SYKDOM);
         assertThat(dto.overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.SYKDOM_ANNEN_FORELDER);
+    }
+
+    @Test
+    void samtidig_uttak_skal_sett_gradering_til_null() {
+        var periode = periode(new Prosent(10), new Prosent(20));
+
+        var dto = periode.tilDto();
+
+        assertThat(dto.gradering()).isNull();
+        assertThat(dto.samtidigUttak().value()).isEqualTo(periode.samtidigUttak().decimalValue());
+    }
+
+    @Test
+    void null_prosent_samtidig_uttak_er_ikke_samtidig_uttak() {
+        var periode = periode(Prosent.ZERO, null);
+
+        var dto = periode.tilDto();
+
+        assertThat(dto.samtidigUttak()).isNull();
+    }
+
+    private static FpSøknadsperiode periode() {
+        return periode(null, new Prosent(10));
+    }
+
+    private static FpSøknadsperiode periode(Prosent samtidigUttak, Prosent arbeidsprosent) {
+        var gradering = arbeidsprosent == null ? null : new Gradering(arbeidsprosent, new UttakAktivitet(UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null));
+        return new FpSøknadsperiode(LocalDate.now(), LocalDate.now().plusDays(5), Konto.MØDREKVOTE, UtsettelseÅrsak.SØKER_SYKDOM,
+            OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER, OverføringÅrsak.SYKDOM_ANNEN_FORELDER, gradering, samtidigUttak, true,
+            MorsAktivitet.ARBEID);
     }
 }
