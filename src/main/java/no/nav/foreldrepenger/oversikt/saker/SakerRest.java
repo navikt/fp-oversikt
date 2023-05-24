@@ -40,7 +40,7 @@ public class SakerRest {
 
     private void tilgangssjekkMyndighetsalder() {
         if (!innloggetBruker.erMyndig()) {
-            throw new GeneralRestExceptionMapper.UmyndigBrukerException();
+            throw new UmyndigBrukerException();
         }
     }
 }

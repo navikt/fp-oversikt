@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
+import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static no.nav.foreldrepenger.oversikt.saker.SakerRestTest.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -44,16 +45,6 @@ import no.nav.foreldrepenger.oversikt.stub.FpsakTjenesteStub;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 
 class SakerRestTest {
-
-    record DummyInnloggetTestbruker(AktørId aktørId, boolean erMyndig) implements InnloggetBruker  {
-        public static DummyInnloggetTestbruker myndigInnloggetBruker() {
-            return new DummyInnloggetTestbruker(AktørId.dummy(), true);
-        }
-
-        public static DummyInnloggetTestbruker umyndigInnloggetBruker() {
-            return new DummyInnloggetTestbruker(AktørId.dummy(), false);
-        }
-    }
 
     @Test
     void hent_fp_sak_roundtrip_test() {

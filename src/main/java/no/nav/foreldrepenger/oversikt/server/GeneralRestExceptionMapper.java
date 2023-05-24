@@ -1,6 +1,6 @@
-package no.nav.foreldrepenger.oversikt.saker;
+package no.nav.foreldrepenger.oversikt.server;
 
-import no.nav.foreldrepenger.oversikt.server.ProblemDetails;
+import no.nav.foreldrepenger.oversikt.saker.UmyndigBrukerException;
 import no.nav.vedtak.exception.VLException;
 
 import org.slf4j.Logger;
@@ -16,24 +16,18 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable exception) {
-        LOG.warn("hei fra error", exception);
         if (exception instanceof UmyndigBrukerException umyndigBrukerException) {
             var status = Response.Status.FORBIDDEN;
             return Response.status(status)
                 .entity(problemDetails(umyndigBrukerException, status.getStatusCode()))
                 .build();
         }
-        return Response.status(500).entity(exception).build();
+        LOG.warn("FP-OVERSIKT fikk feil", exception);
+        return Response.status(500).build();
     }
 
-    public static ProblemDetails problemDetails(VLException vlException, int feilkode) {
+    static ProblemDetails problemDetails(VLException vlException, int feilkode) {
         return new ProblemDetails(vlException.getKode(), feilkode, vlException.getFeilmelding());
     }
 
-    public static class UmyndigBrukerException extends VLException {
-
-        protected UmyndigBrukerException() {
-            super("UMYNDIG_BRUKER", "Innlogget bruker er under myndighetsalder", null);
-        }
-    }
 }
