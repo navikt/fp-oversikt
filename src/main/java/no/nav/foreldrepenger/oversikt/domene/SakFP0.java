@@ -59,8 +59,8 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             .orElse(null);
         var barna = safeStream(fødteBarn).map(b -> new Person(new Fødselsnummer(b.value()), null)).collect(Collectors.toSet());
         var gjelderAdopsjon = familieHendelse() != null && familieHendelse().gjelderAdopsjon();
-        var morUføretrygd =  rettigheter.morUføretrygd();
-        var harAnnenForelderTilsvarendeRettEØS =  rettigheter.annenForelderTilsvarendeRettEØS();
+        var morUføretrygd = rettigheter == null ? false : rettigheter.morUføretrygd();
+        var harAnnenForelderTilsvarendeRettEØS = rettigheter == null ? false : rettigheter.annenForelderTilsvarendeRettEØS();
         var rettighetType = utledRettighetType(rettigheter, sisteSøknad.map(FpSøknad::perioder).orElse(Set.of()), gjeldendeVedtak.map(
             FpVedtak::perioder).orElse(List.of()));
         return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
@@ -71,6 +71,9 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     private static RettighetType utledRettighetType(Rettigheter rettigheter,
                                                     Set<FpSøknadsperiode> søknadsperioder,
                                                     List<Uttaksperiode> uttaksperioder) {
+        if (rettigheter == null) {
+            return null;
+        }
         if (rettigheter.aleneomsorg()) {
             return RettighetType.ALENEOMSORG;
         }

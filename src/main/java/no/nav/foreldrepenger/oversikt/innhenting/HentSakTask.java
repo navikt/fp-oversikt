@@ -103,6 +103,9 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Rettigheter tilRettigheter(FpSak.Rettigheter rettigheter) {
+        if (rettigheter == null) {
+            return null;
+        }
         return new Rettigheter(rettigheter.aleneomsorg(), rettigheter.morUføretrygd(), rettigheter.annenForelderTilsvarendeRettEØS());
     }
 
