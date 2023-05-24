@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -20,4 +22,6 @@ public interface Sak {
     AktørId aktørId();
 
     boolean harSakSøknad();
+
+    LocalDateTime oppdatertTidspunkt();
 }
