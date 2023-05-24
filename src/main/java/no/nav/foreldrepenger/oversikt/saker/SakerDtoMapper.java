@@ -15,7 +15,6 @@ final class SakerDtoMapper {
 
     static no.nav.foreldrepenger.common.innsyn.Saker tilDto(List<Sak> saker, FødselsnummerOppslag fnrOppslag) {
         var sakerDtoer = saker.stream()
-            .filter(Sak::harSakSøknad)
             .map(s -> s.tilSakDto(fnrOppslag))
             .collect(Collectors.toSet());
 

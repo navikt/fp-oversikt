@@ -97,41 +97,42 @@ class SakerDtoMapperTest {
         assertThat(sakerDto.engangsstønad()).isEmpty();
     }
 
-    @Test
-    void skal_ikke_returne_saker_uten_søknad() {
-        List<Sak> saker = List.of(fpSak(), fpSak(), fpSakUtenSøknad(), svpSak(), esSak());
-
-        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
-
-        assertThat(sakerDto.foreldrepenger()).hasSize(2);
-        assertThat(sakerDto.svangerskapspenger()).hasSize(1);
-        assertThat(sakerDto.engangsstønad()).hasSize(1);
-    }
-
-    private static FødselsnummerOppslag fnrOppslag() {
+    static FødselsnummerOppslag fnrOppslag() {
         return AktørId::value;
     }
 
     private static SakES0 esSak() {
-        return new SakES0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+        return esSak(AKTØR_ID);
     }
 
     private static SakSVP0 svpSak() {
-        return new SakSVP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+        return svpSak(AKTØR_ID);
     }
 
     private static SakFP0 fpSak() {
-        return new SakFP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(),
+        return fpSak(AKTØR_ID);
+    }
+
+    static SakES0 esSak(AktørId aktørId) {
+        return new SakES0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+    }
+
+    static SakSVP0 svpSak(AktørId aktørId) {
+        return new SakSVP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+    }
+
+    static SakFP0 fpSak(AktørId aktørId) {
+        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(),
             Set.of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(), Dekningsgrad.HUNDRE)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false);
     }
 
-    private static SakFP0 fpSakUtenSøknad() {
-        return new SakFP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR,
+    static SakFP0 fpSakUtenSøknad(AktørId aktørId) {
+        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false);
     }
 
-    private static FamilieHendelse fh() {
+    static FamilieHendelse fh() {
         return new FamilieHendelse(null, LocalDate.now(), 1, null);
     }
 }
