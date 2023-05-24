@@ -137,9 +137,7 @@ public class JettyServer {
     }
 
     private static void migrer(DataSource dataSource) {
-        var flyway = flywayConfig(dataSource)
-            .cleanDisabled(false)
-            .cleanOnValidationError(true);
+        var flyway = flywayConfig(dataSource);
         flyway.load().migrate();
     }
 
