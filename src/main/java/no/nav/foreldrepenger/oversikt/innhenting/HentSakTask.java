@@ -115,6 +115,7 @@ public class HentSakTask implements ProsessTaskHandler {
             case MOR -> BrukerRolle.MOR;
             case FAR -> BrukerRolle.FAR;
             case MEDMOR -> BrukerRolle.MEDMOR;
+            case UKJENT -> BrukerRolle.UKJENT;
         };
     }
 

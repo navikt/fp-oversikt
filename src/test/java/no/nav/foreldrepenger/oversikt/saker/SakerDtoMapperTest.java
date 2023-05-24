@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -10,7 +11,10 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.BrukerRolle;
+import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.EsSøknad;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.FpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
@@ -18,6 +22,8 @@ import no.nav.foreldrepenger.oversikt.domene.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
 import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.SvpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 
 
 class SakerDtoMapperTest {
@@ -91,24 +97,42 @@ class SakerDtoMapperTest {
         assertThat(sakerDto.engangsstønad()).isEmpty();
     }
 
-    private static FødselsnummerOppslag fnrOppslag() {
+    static FødselsnummerOppslag fnrOppslag() {
         return AktørId::value;
     }
 
     private static SakES0 esSak() {
-        return new SakES0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of());
+        return esSak(AKTØR_ID);
     }
 
     private static SakSVP0 svpSak() {
-        return new SakSVP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of());
+        return svpSak(AKTØR_ID);
     }
 
     private static SakFP0 fpSak() {
-        return new SakFP0(Saksnummer.dummy(), AKTØR_ID, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR,
+        return fpSak(AKTØR_ID);
+    }
+
+    static SakES0 esSak(AktørId aktørId) {
+        return new SakES0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+    }
+
+    static SakSVP0 svpSak(AktørId aktørId) {
+        return new SakSVP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+    }
+
+    static SakFP0 fpSak(AktørId aktørId) {
+        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(),
+            Set.of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(), Dekningsgrad.HUNDRE)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false);
     }
 
-    private static FamilieHendelse fh() {
+    static SakFP0 fpSakUtenSøknad(AktørId aktørId) {
+        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR,
+            Set.of(), new Rettigheter(false, false, false), false);
+    }
+
+    static FamilieHendelse fh() {
         return new FamilieHendelse(null, LocalDate.now(), 1, null);
     }
 }

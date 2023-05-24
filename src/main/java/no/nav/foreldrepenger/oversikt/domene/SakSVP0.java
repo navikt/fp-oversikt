@@ -19,6 +19,12 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                       @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                       @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
                       @JsonProperty("søknader") Set<SvpSøknad> søknader) implements Sak {
+
+    @Override
+    public boolean harSakSøknad() {
+        return søknader != null && !søknader.isEmpty();
+    }
+
     @Override
     public no.nav.foreldrepenger.common.innsyn.SvpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
         var familiehendelse = familieHendelse == null ? null : familieHendelse.tilDto();
