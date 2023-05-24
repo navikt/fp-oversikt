@@ -33,7 +33,14 @@ public class SakerRest {
     @Produces(MediaType.APPLICATION_JSON)
     public no.nav.foreldrepenger.common.innsyn.Saker hent() {
         LOG.info("Kall mot saker endepunkt");
+        tilgangssjekkMyndighetsalder();
         var aktørId = innloggetBruker.aktørId();
         return saker.hent(aktørId);
+    }
+
+    private void tilgangssjekkMyndighetsalder() {
+        if (!innloggetBruker.erMyndig()) {
+            throw new GeneralRestExceptionMapper.UmyndigBrukerException();
+        }
     }
 }
