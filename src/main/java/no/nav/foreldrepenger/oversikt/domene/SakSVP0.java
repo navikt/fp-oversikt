@@ -30,7 +30,7 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     @Override
     public no.nav.foreldrepenger.common.innsyn.SvpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
         var familiehendelse = familieHendelse == null ? null : familieHendelse.tilDto();
-        return new SvpSak(saksnummer.tilDto(), familiehendelse, avsluttet(status), tilÅpenBehandling());
+        return new SvpSak(saksnummer.tilDto(), familiehendelse, avsluttet(status), tilÅpenBehandling(), oppdatertTidspunkt());
     }
 
     private SvpÅpenBehandling tilÅpenBehandling() {

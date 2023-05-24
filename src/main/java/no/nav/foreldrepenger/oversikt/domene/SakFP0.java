@@ -70,7 +70,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             FpVedtak::perioder).orElse(List.of()));
         return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
             morUføretrygd, harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart, fh, fpVedtak, åpenBehandling,
-            barna, dekningsgrad);
+            barna, dekningsgrad, oppdatertTidspunkt());
     }
 
     private static RettighetType utledRettighetType(Rettigheter rettigheter,
