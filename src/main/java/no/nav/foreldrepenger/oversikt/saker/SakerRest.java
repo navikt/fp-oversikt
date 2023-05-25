@@ -8,6 +8,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +36,14 @@ public class SakerRest {
     @Produces(MediaType.APPLICATION_JSON)
     public no.nav.foreldrepenger.common.innsyn.Saker hent() {
         LOG.info("Kall mot saker endepunkt");
+        tilgangssjekkMyndighetsalder();
         var aktørId = innloggetBruker.aktørId();
         return saker.hent(aktørId);
+    }
+
+    private void tilgangssjekkMyndighetsalder() {
+        if (!innloggetBruker.erMyndig()) {
+            throw new ManglerTilgangException(FeilKode.IKKE_TILGANG_UMYNDIG);
+        }
     }
 }
