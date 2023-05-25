@@ -69,7 +69,7 @@ public class HentSakTask implements ProsessTaskHandler {
 
     public static void hentOgLagreSak(FpsakTjeneste fpsak, SakRepository repository, Saksnummer saksnummer) {
         var sakDto = fpsak.hentSak(saksnummer);
-        LOG.info("Hentet sak {} {}", saksnummer, sakDto);
+        LOG.info("Hentet sak fra fpsak {}", saksnummer);
 
         repository.lagre(map(sakDto));
     }
@@ -336,7 +336,7 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Dekningsgrad tilDekningsgrad(FpSak.Dekningsgrad dekningsgrad) {
-        return switch (dekningsgrad) {
+        return dekningsgrad == null ? null : switch (dekningsgrad) {
             case HUNDRE -> Dekningsgrad.HUNDRE;
             case ÅTTI -> Dekningsgrad.ÅTTI;
         };
