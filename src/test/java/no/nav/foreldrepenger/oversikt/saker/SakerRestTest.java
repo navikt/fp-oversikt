@@ -4,7 +4,6 @@ import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
-import static no.nav.foreldrepenger.oversikt.saker.SakerRestTest.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
