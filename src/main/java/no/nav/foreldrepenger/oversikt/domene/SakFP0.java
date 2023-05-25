@@ -55,7 +55,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var annenPart = annenPartAktørId == null ? null : new Person(new Fødselsnummer(fødselsnummerOppslag.forAktørId(annenPartAktørId)), null);
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
-        var åpenBehandling = tilÅpenBehandling();
+        var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
         var sisteSøknadMottattDato = sisteSøknad
             .map(s -> s.mottattTidspunkt().toLocalDate())
             .orElse(null);
@@ -89,10 +89,13 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         return søknadsperioder.stream().anyMatch(sp -> FORELDREPENGER.equals(sp.konto())) ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
     }
 
-    private FpÅpenBehandling tilÅpenBehandling() {
+    private FpÅpenBehandling tilÅpenBehandling(boolean kanSøkeOmEndring) {
         var søknadUnderBehandling = søknadUnderBehandling();
         return søknadUnderBehandling.map(s -> {
-            var perioder = s.perioder().stream()
+            //Innsyn-frontend har nå bare støtte for å vise søknadsperioder i førstegangssøknad. Bruker nå kanSøkeOmEndring for best effort å
+            // bare returnere perioder i førstegangsbehandlinger
+            List<UttakPeriode> perioder = kanSøkeOmEndring ? List.of() : s.perioder()
+                .stream()
                 .map(FpSøknadsperiode::tilDto)
                 .sorted(Comparator.comparing(UttakPeriode::fom))
                 .toList();
