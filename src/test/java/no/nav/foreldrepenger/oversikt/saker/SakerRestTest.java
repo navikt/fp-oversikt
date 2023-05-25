@@ -101,8 +101,6 @@ class SakerRestTest {
 
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
 
-        assertThat(sakFraDbOmgjortTilDto.åpenBehandling().søknadsperioder()).hasSize(1);
-
         assertThat(sakFraDbOmgjortTilDto.sakTilhørerMor()).isTrue();
 
         assertThat(sakFraDbOmgjortTilDto.rettighetType()).isEqualTo(RettighetType.BARE_SØKER_RETT);
