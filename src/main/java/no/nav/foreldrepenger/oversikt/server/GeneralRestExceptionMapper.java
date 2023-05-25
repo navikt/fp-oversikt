@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-import no.nav.foreldrepenger.oversikt.saker.UmyndigBrukerException;
-import no.nav.vedtak.exception.VLException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FpoversiktException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,18 +16,16 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<Throwable> {
 
     @Override
     public Response toResponse(Throwable exception) {
-        if (exception instanceof UmyndigBrukerException umyndigBrukerException) {
-            var status = Response.Status.FORBIDDEN;
-            return Response.status(status)
-                .entity(problemDetails(umyndigBrukerException, status.getStatusCode()))
+        if (exception instanceof ManglerTilgangException manglerTilgangException) {
+            return Response.status(manglerTilgangException.getStatusCode())
+                .entity(problemDetails(manglerTilgangException))
                 .build();
         }
         LOG.warn("FP-OVERSIKT fikk feil", exception);
         return Response.status(500).build();
     }
 
-    static ProblemDetails problemDetails(VLException vlException, int feilkode) {
-        return new ProblemDetails(vlException.getKode(), feilkode, vlException.getFeilmelding());
+    static ProblemDetails problemDetails(FpoversiktException exception) {
+        return new ProblemDetails(exception.getFeilKode(), exception.getStatusCode().getStatusCode(), exception.getFeilKode().getBeskrivelse());
     }
-
 }

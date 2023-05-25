@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-public record ProblemDetails(String error, int status, String message) {
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
+
+public record ProblemDetails(FeilKode feilKode, int status, String message) {
 
 }

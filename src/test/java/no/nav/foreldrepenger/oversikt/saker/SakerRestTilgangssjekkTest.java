@@ -6,6 +6,9 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+
 import org.junit.jupiter.api.Test;
 
 public class SakerRestTilgangssjekkTest {
@@ -22,7 +25,9 @@ public class SakerRestTilgangssjekkTest {
     void umyndig_innlogget_bruker_skal_kaste_umyndigbruker_exception() {
         var umyndigCase = new SakerRest(saker, umyndigInnloggetBruker());
         assertThatThrownBy(umyndigCase::hent)
-            .isInstanceOf(UmyndigBrukerException.class);
+            .isInstanceOf(ManglerTilgangException.class)
+            .extracting("feilKode")
+            .isEqualTo(FeilKode.IKKE_TILGANG_UMYNDIG);
     }
 
 }
