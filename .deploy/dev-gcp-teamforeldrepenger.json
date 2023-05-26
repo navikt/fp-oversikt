@@ -1,6 +1,7 @@
 {
     "environment": "dev",
     "kafkaPool": "nav-dev",
+    "dbName": "fpoversikt-v2",
     "dbTier": "db-custom-1-1024",
     "dbDiskAutoresize": "true",
     "dbHighAvailability": "true",
