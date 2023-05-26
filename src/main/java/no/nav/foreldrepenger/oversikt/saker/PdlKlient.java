@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import java.time.LocalDate;
+
 import javax.enterprise.context.Dependent;
 
 import org.slf4j.Logger;
@@ -15,11 +17,6 @@ import no.nav.pdl.PersonResponseProjection;
 import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDate;
 
 @RestClientConfig(
     tokenConfig = TokenFlow.ADAPTIVE,

@@ -6,12 +6,12 @@ import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
+import org.junit.jupiter.api.Test;
+
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
-import org.junit.jupiter.api.Test;
-
-public class SakerRestTilgangssjekkTest {
+class SakerRestTilgangssjekkTest {
 
     private final static Saker saker = mock(Saker.class);
 
