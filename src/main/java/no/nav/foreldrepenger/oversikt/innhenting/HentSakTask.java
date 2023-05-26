@@ -46,7 +46,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = "hent.sak", thenDelay = 600, maxFailedRuns = 20)
+@ProsessTask(value = "hent.sak")
 public class HentSakTask implements ProsessTaskHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(HentSakTask.class);
