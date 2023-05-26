@@ -38,11 +38,8 @@ public class Saker {
     }
 
     List<Sak> hentSaker(AktørId aktørId) {
-        var filtrerteSaker = sakRepository.hentFor(aktørId).stream()
+        return sakRepository.hentFor(aktørId).stream()
             .filter(Sak::harSakSøknad)
             .toList();
-
-        LOG.info("Hentet og filtrerte saker {}", filtrerteSaker);
-        return filtrerteSaker;
     }
 }
