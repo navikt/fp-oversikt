@@ -1,10 +1,11 @@
 {
     "environment": "dev",
     "kafkaPool": "nav-dev",
-    "dbTier": "db-f1-micro",
-    "dbDiskAutoresize": "false",
-    "dbHighAvailability": "false",
-    "dbPointInTimeRecovery": "false",
+    "dbName": "fpoversikt-v2",
+    "dbTier": "db-custom-1-1024",
+    "dbDiskAutoresize": "true",
+    "dbHighAvailability": "true",
+    "dbPointInTimeRecovery": "true",
     "minReplicas": "2",
     "maxReplicas": "2",
     "ingresses": [
