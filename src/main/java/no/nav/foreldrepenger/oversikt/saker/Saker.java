@@ -1,7 +1,8 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapper.tilDto;
+
+import java.util.List;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -32,12 +33,16 @@ public class Saker {
     }
 
     public no.nav.foreldrepenger.common.innsyn.Saker hent(AktørId aktørId) {
-        var filtrerteSaker = safeStream(sakRepository.hentFor(aktørId))
+        var saker = hentSaker(aktørId);
+        return tilDto(saker, fødselsnummerOppslag);
+    }
+
+    List<Sak> hentSaker(AktørId aktørId) {
+        var filtrerteSaker = sakRepository.hentFor(aktørId).stream()
             .filter(Sak::harSakSøknad)
             .toList();
 
         LOG.info("Hentet og filtrerte saker {}", filtrerteSaker);
-
-        return tilDto(filtrerteSaker, fødselsnummerOppslag);
+        return filtrerteSaker;
     }
 }

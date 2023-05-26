@@ -13,7 +13,6 @@ import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 
 class SakerTest {
 
-    private static final String FNR_DUMMY = "12345678910";
     private static final AktørId AKTØR_ID_DUMMY = AktørId.dummy();
 
     @Test
@@ -24,7 +23,7 @@ class SakerTest {
         repository.lagre(fpSakUtenSøknad(AKTØR_ID_DUMMY));
         repository.lagre(svpSak(AKTØR_ID_DUMMY));
         repository.lagre(esSak(AKTØR_ID_DUMMY));
-        var saker = new Saker(repository, AKTØR_ID_DUMMY -> FNR_DUMMY);
+        var saker = new Saker(repository, AktørId::value);
 
         var sakerDto = saker.hent(AKTØR_ID_DUMMY);
 

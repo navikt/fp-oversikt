@@ -2,6 +2,10 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import javax.enterprise.context.Dependent;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FødseldatoOppslag;
 import no.nav.pdl.Foedsel;
@@ -24,7 +28,7 @@ import java.time.LocalDate;
     scopesProperty = "pdl.scopes",
     scopesDefault = "api://prod-fss.pdl.pdl-api/.default")
 @Dependent
-public class PdlKlient extends AbstractPersonKlient implements FødselsnummerOppslag, FødseldatoOppslag {
+public class PdlKlient extends AbstractPersonKlient implements FødselsnummerOppslag, FødseldatoOppslag, AktørIdOppslag {
 
     private static final Logger LOG = LoggerFactory.getLogger(PdlKlient.class);
 
@@ -32,6 +36,13 @@ public class PdlKlient extends AbstractPersonKlient implements FødselsnummerOpp
     public String forAktørId(AktørId aktørId) {
         LOG.info("Mapper aktørId til fnr");
         return hentPersonIdentForAktørId(aktørId.value()).orElseThrow();
+    }
+
+    @Override
+    public AktørId forFnr(Fødselsnummer fnr) {
+        LOG.info("Mapper fnr til aktørId");
+        var a = hentAktørIdForPersonIdent(fnr.value()).orElseThrow();
+        return new AktørId(a);
     }
 
     @Override

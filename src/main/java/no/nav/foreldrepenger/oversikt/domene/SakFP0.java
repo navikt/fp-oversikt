@@ -35,7 +35,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("fødteBarn") Set<AktørId> fødteBarn,
                      @JsonProperty("rettigheter") Rettigheter rettigheter,
                      @JsonProperty("ønskerJustertUttakVedFødsel") boolean ønskerJustertUttakVedFødsel,
-                     @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements Sak {
+                     @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements ForeldrepengerSak {
 
     @Override
     public boolean harSakSøknad() {
@@ -44,10 +44,9 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
 
     @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
-        var sisteSøknad = safeStream(søknader).max(Comparator.comparing(FpSøknad::mottattTidspunkt));
-        var gjeldendeVedtak = safeStream(vedtak()).max(Comparator.comparing(FpVedtak::vedtakstidspunkt));
-        var dekningsgrad = gjeldendeVedtak.map(vedtak -> vedtak.dekningsgrad().tilDto())
-            .orElseGet(() -> sisteSøknad.map(fpSøknad -> fpSøknad.dekningsgrad().tilDto()).orElse(null));
+        var sisteSøknad = sisteSøknad();
+        var gjeldendeVedtak = gjeldendeVedtak();
+        var dekningsgrad = dekningsgrad();
         var fpVedtak = gjeldendeVedtak
             .map(FpVedtak::tilDto)
             .orElse(null);
@@ -70,7 +69,28 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             FpVedtak::perioder).orElse(List.of()));
         return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
             morUføretrygd, harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart, fh, fpVedtak, åpenBehandling,
-            barna, dekningsgrad, oppdatertTidspunkt());
+            barna, dekningsgrad == null ? null : dekningsgrad.tilDto(), oppdatertTidspunkt());
+    }
+
+    @Override
+    public Dekningsgrad dekningsgrad() {
+        return gjeldendeVedtak().map(FpVedtak::dekningsgrad)
+            .orElseGet(() -> sisteSøknad().map(FpSøknad::dekningsgrad).orElse(null));
+    }
+
+    @Override
+    public Optional<FpSøknad> sisteSøknad() {
+        return safeStream(søknader).max(Comparator.comparing(FpSøknad::mottattTidspunkt));
+    }
+
+    @Override
+    public boolean oppgittAleneomsorg() {
+        return rettigheter != null && rettigheter.aleneomsorg();
+    }
+
+    @Override
+    public Optional<FpVedtak> gjeldendeVedtak() {
+        return safeStream(vedtak()).max(Comparator.comparing(FpVedtak::vedtakstidspunkt));
     }
 
     private static RettighetType utledRettighetType(Rettigheter rettigheter,
