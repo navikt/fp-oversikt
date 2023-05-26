@@ -1,7 +1,7 @@
 {
     "environment": "prod",
     "kafkaPool": "nav-prod",
-    "dbTier": "db-custom-1-1024",
+    "dbTier": "db-custom-1-3840",
     "dbDiskAutoresize": "true",
     "dbHighAvailability": "true",
     "dbPointInTimeRecovery": "true",
