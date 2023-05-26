@@ -21,29 +21,29 @@ import no.nav.vedtak.log.metrics.Controllable;
 import no.nav.vedtak.log.metrics.LiveAndReadinessAware;
 
 @ApplicationScoped
-public class BehandlingHendelseConsumer implements LiveAndReadinessAware, Controllable {
+public class BehandlingMigreringConsumer implements LiveAndReadinessAware, Controllable {
 
-    private static final Logger LOG = LoggerFactory.getLogger(BehandlingHendelseConsumer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BehandlingMigreringConsumer.class);
     private static final Environment ENV = Environment.current();
 
-    private static final String PROD_APP_ID = "fpoversikt-behandling"; // Hold konstant pga offset commit !!
+    private static final String PROD_APP_ID = "fpoversikt-migrering"; // Hold konstant pga offset commit !!
 
     private String topicName;
     private KafkaStreams stream;
 
-    public BehandlingHendelseConsumer() {
+    public BehandlingMigreringConsumer() {
     }
 
     @Inject
-    public BehandlingHendelseConsumer(@KonfigVerdi(value = "kafka.behandlinghendelse.topic", defaultVerdi = "teamforeldrepenger.behandling-hendelse-v1") String topicName,
-                                      BehandlingHendelseHåndterer behandlingHendelseHåndterer) {
+    public BehandlingMigreringConsumer(@KonfigVerdi(value = "kafka.migerering.topic", defaultVerdi = "fpoversikt-migrering-v1") String topicName,
+                                       BehandlingHendelseHåndterer behandlingHendelseHåndterer) {
         this.topicName = topicName;
 
         final Consumed<String, String> consumed = Consumed.with(Topology.AutoOffsetReset.EARLIEST);
 
         final StreamsBuilder builder = new StreamsBuilder();
         builder.stream(topicName, consumed)
-            .foreach((key, payload) -> behandlingHendelseHåndterer.handleMessage(topicName, key, payload)); // TODO: Legg til logging av partisjon og offset
+            .foreach((key, payload) -> behandlingHendelseHåndterer.handleMessage(topicName, key, payload));
 
         this.stream = new KafkaStreams(builder.build(), KafkaProperties.forStreamsStringValue(getApplicationId()));
     }
