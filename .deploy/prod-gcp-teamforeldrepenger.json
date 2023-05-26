@@ -1,7 +1,6 @@
 {
     "environment": "prod",
     "kafkaPool": "nav-prod",
-    "dbName": "fpoversikt",
     "dbTier": "db-custom-1-1024",
     "dbDiskAutoresize": "true",
     "dbHighAvailability": "true",
