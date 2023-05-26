@@ -55,7 +55,7 @@ public class BehandlingHendelseHåndterer {
                 lagreHentSakTask(hendelse.getHendelseUuid(), new Saksnummer(hendelse.getSaksnummer()));
             }
         } catch (Exception e) {
-            LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key);
+            LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
         }
     }
 
