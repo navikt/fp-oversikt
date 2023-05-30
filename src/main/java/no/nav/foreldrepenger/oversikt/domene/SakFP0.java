@@ -106,6 +106,9 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             var trekkDagerMedForeldrepengerKonto = uttaksperioder.stream().anyMatch(p -> p.resultat().trekkerFraKonto(FORELDREPENGER));
             return trekkDagerMedForeldrepengerKonto ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
         }
+        if (rettigheter.annenForelderTilsvarendeRettEØS()) {
+            return RettighetType.BARE_SØKER_RETT;
+        }
         return søknadsperioder.stream().anyMatch(sp -> FORELDREPENGER.equals(sp.konto())) ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
     }
 
