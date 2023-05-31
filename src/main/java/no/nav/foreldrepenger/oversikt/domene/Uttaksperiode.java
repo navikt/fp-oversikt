@@ -18,7 +18,7 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
                             MorsAktivitet morsAktivitet, Resultat resultat) {
 
     public UttakPeriode tilDto() {
-        var trekkerDager = resultat().aktiviteter().stream().anyMatch(a -> a.trekkdager().merEnn0());
+        var trekkerDager = safeStream(resultat().aktiviteter()).anyMatch(a -> a.trekkdager().merEnn0());
 
         var utsettelse = utsettelseÅrsak() == null ? null : utsettelseÅrsak().tilDto();
         var opphold = oppholdÅrsak() == null ? null : oppholdÅrsak().tilDto();
