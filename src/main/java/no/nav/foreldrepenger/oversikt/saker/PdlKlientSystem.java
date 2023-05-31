@@ -45,9 +45,7 @@ public class PdlKlientSystem extends AbstractPersonKlient implements AdresseBesk
             return AdresseBeskyttelse.Gradering.UGRADERT;
         }
         return switch (adressebeskyttelseGradering) {
-            case STRENGT_FORTROLIG_UTLAND -> AdresseBeskyttelse.Gradering.STRENGT_FORTROLIG_UTLAND;
-            case STRENGT_FORTROLIG -> AdresseBeskyttelse.Gradering.STRENGT_FORTROLIG;
-            case FORTROLIG -> AdresseBeskyttelse.Gradering.FORTROLIG;
+            case STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, FORTROLIG -> AdresseBeskyttelse.Gradering.GRADERT;
             case UGRADERT -> AdresseBeskyttelse.Gradering.UGRADERT;
         };
     }

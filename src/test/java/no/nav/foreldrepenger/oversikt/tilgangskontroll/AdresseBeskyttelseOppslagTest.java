@@ -22,25 +22,20 @@ class AdresseBeskyttelseOppslagTest {
     }
 
     @Test
-    void ugradert_og_fortrolig_gradering_fører_til_beskyttet_adresse() {
-        var annenPartAutorisering = new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.UGRADERT, AdresseBeskyttelse.Gradering.FORTROLIG));
-        assertThat(annenPartAutorisering.harBeskyttetAdresse()).isTrue();
-    }
-    @Test
     void strengt_fortrolig_fører_til_beskyttet_adresse() {
-        var annenPartAutorisering = new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.STRENGT_FORTROLIG));
+        var annenPartAutorisering = new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT));
         assertThat(annenPartAutorisering.harBeskyttetAdresse()).isTrue();
     }
 
     @Test
     void fortrolig_fører_til_beskyttet_adresse() {
-        var annenPartAutorisering = new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.FORTROLIG));
+        var annenPartAutorisering = new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT));
         assertThat(annenPartAutorisering.harBeskyttetAdresse()).isTrue();
     }
 
     @Test
     void strengt_fortrolig_utland_fører_til_beskyttet_adresse() {
-        var annenPartAutorisering = new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.STRENGT_FORTROLIG_UTLAND));
+        var annenPartAutorisering = new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT));
         assertThat(annenPartAutorisering.harBeskyttetAdresse()).isTrue();
     }
 }

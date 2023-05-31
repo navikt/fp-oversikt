@@ -18,7 +18,7 @@ class AnnenPartRestAutoriseringTest {
 
     @Test
     void sjekkAtEndepunktReturnereNullNårDetErBeskyttetAdresse() {
-        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.FORTROLIG)));
+        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
         var annenPartRest = new AnnenPartRest(null, null, null, adresseBeskyttelseOppslag);
 
         var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);

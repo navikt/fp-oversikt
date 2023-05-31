@@ -5,9 +5,7 @@ import java.util.Set;
 public record AdresseBeskyttelse(Set<Gradering> gradering) {
 
     public enum Gradering {
-        STRENGT_FORTROLIG_UTLAND,
-        STRENGT_FORTROLIG,
-        FORTROLIG,
+        GRADERT,
         UGRADERT,
     }
 
