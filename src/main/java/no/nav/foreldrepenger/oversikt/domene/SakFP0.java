@@ -55,9 +55,6 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
         var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
-        var sisteSøknadMottattDato = sisteSøknad
-            .map(s -> s.mottattTidspunkt().toLocalDate())
-            .orElse(null);
         var barna = safeStream(fødteBarn).map(b -> {
             var fnr = new Fødselsnummer(fødselsnummerOppslag.forAktørId(b));
             return new Person(fnr, null);
@@ -67,7 +64,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var harAnnenForelderTilsvarendeRettEØS = rettigheter != null && rettigheter.annenForelderTilsvarendeRettEØS();
         var rettighetType = utledRettighetType(rettigheter, sisteSøknad.map(FpSøknad::perioder).orElse(Set.of()), gjeldendeVedtak.map(
             FpVedtak::perioder).orElse(List.of()));
-        return new FpSak(saksnummer.tilDto(), avsluttet(status), sisteSøknadMottattDato, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
+        return new FpSak(saksnummer.tilDto(), avsluttet(status), kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
             morUføretrygd, harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart, fh, fpVedtak, åpenBehandling,
             barna, dekningsgrad == null ? null : dekningsgrad.tilDto(), oppdatertTidspunkt());
     }
