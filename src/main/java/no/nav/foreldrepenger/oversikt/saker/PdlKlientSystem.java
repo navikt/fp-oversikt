@@ -5,7 +5,9 @@ import java.util.stream.Collectors;
 import javax.enterprise.context.Dependent;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.pdl.Adressebeskyttelse;
+import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.AdressebeskyttelseResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
 import no.nav.pdl.PersonResponseProjection;
@@ -32,9 +34,22 @@ public class PdlKlientSystem extends AbstractPersonKlient implements AdresseBesk
 
         var gradering = person.getAdressebeskyttelse().stream()
             .map(Adressebeskyttelse::getGradering)
+            .map(PdlKlientSystem::tilGradering)
             .collect(Collectors.toSet());
 
         return new no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse(gradering);
+    }
+
+    private static AdresseBeskyttelse.Gradering tilGradering(AdressebeskyttelseGradering adressebeskyttelseGradering) {
+        if (adressebeskyttelseGradering == null) {
+            return AdresseBeskyttelse.Gradering.UGRADERT;
+        }
+        return switch (adressebeskyttelseGradering) {
+            case STRENGT_FORTROLIG_UTLAND -> AdresseBeskyttelse.Gradering.STRENGT_FORTROLIG_UTLAND;
+            case STRENGT_FORTROLIG -> AdresseBeskyttelse.Gradering.STRENGT_FORTROLIG;
+            case FORTROLIG -> AdresseBeskyttelse.Gradering.FORTROLIG;
+            case UGRADERT -> AdresseBeskyttelse.Gradering.UGRADERT;
+        };
     }
 
 }

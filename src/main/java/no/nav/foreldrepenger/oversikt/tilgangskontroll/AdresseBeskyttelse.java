@@ -2,15 +2,19 @@ package no.nav.foreldrepenger.oversikt.tilgangskontroll;
 
 import java.util.Set;
 
-import no.nav.pdl.AdressebeskyttelseGradering;
+public record AdresseBeskyttelse(Set<Gradering> gradering) {
 
-public record AdresseBeskyttelse(Set<AdressebeskyttelseGradering> gradering) {
+    public enum Gradering {
+        STRENGT_FORTROLIG_UTLAND,
+        STRENGT_FORTROLIG,
+        FORTROLIG,
+        UGRADERT,
+    }
 
     public boolean harBeskyttetAdresse() {
-        if (gradering == null || gradering.isEmpty() || gradering.stream().allMatch(AdressebeskyttelseGradering.UGRADERT::equals)) {
+        if (gradering.isEmpty() || gradering.stream().allMatch(Gradering.UGRADERT::equals)) {
             return false;
         }
         return true;
     }
-
 }

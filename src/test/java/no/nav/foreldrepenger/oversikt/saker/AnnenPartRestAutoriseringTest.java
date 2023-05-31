@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
-import no.nav.pdl.AdressebeskyttelseGradering;
 
 class AnnenPartRestAutoriseringTest {
 
@@ -19,7 +18,7 @@ class AnnenPartRestAutoriseringTest {
 
     @Test
     void sjekkAtEndepunktReturnereNullNårDetErBeskyttetAdresse() {
-        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdressebeskyttelseGradering.FORTROLIG)));
+        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.FORTROLIG)));
         var annenPartRest = new AnnenPartRest(null, null, null, adresseBeskyttelseOppslag);
 
         var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);
