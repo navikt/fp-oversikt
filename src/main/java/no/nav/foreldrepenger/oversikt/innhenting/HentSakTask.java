@@ -20,6 +20,7 @@ import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.EsSøknad;
+import no.nav.foreldrepenger.oversikt.domene.EsVedtak;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.FpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.FpSøknadsperiode;
@@ -37,6 +38,7 @@ import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
 import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SvpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.SvpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.domene.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.UttakAktivitet;
@@ -90,19 +92,27 @@ public class HentSakTask implements ProsessTaskHandler {
             var søknader = fpsak.søknader().stream().map(HentSakTask::tilFpSøknad).collect(Collectors.toSet());
             var brukerRolle = tilBrukerRolle(fpsak.brukerRolle());
             var fødteBarn = tilFødteBarn(fpsak.fødteBarn());
-            return new SakFP0(saksnummer, aktørId, status, tilVedtak(fpsak.vedtak()), annenPart, familieHendelse, aksjonspunkt, søknader,
+            return new SakFP0(saksnummer, aktørId, status, tilFpVedtak(fpsak.vedtak()), annenPart, familieHendelse, aksjonspunkt, søknader,
                 brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()), fpsak.ønskerJustertUttakVedFødsel(), oppdatertTidspunkt);
         }
         if (sakDto instanceof SvpSak svpSak) {
             var søknader = svpSak.søknader().stream().map(HentSakTask::tilSvpSøknad).collect(Collectors.toSet());
-            return new SakSVP0(saksnummer, aktørId, status, familieHendelse, aksjonspunkt, søknader, oppdatertTidspunkt);
+            return new SakSVP0(saksnummer, aktørId, status, familieHendelse, aksjonspunkt, søknader, tilSvpVedtak(svpSak.vedtak()), oppdatertTidspunkt);
         }
         if (sakDto instanceof EsSak esSak) {
             var søknader = esSak.søknader().stream().map(HentSakTask::tilEsSøknad).collect(Collectors.toSet());
-            return new SakES0(saksnummer, aktørId, status, familieHendelse, aksjonspunkt, søknader, oppdatertTidspunkt);
+            return new SakES0(saksnummer, aktørId, status, familieHendelse, aksjonspunkt, søknader,tilEsVedtak(esSak.vedtak()), oppdatertTidspunkt);
         }
 
         throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");
+    }
+
+    private static Set<SvpVedtak> tilSvpVedtak(Set<SvpSak.Vedtak> vedtak) {
+        return safeStream(vedtak).map(v -> new SvpVedtak(v.vedtakstidspunkt())).collect(Collectors.toSet());
+    }
+
+    private static Set<EsVedtak> tilEsVedtak(Set<EsSak.Vedtak> vedtak) {
+        return safeStream(vedtak).map(v -> new EsVedtak(v.vedtakstidspunkt())).collect(Collectors.toSet());
     }
 
     private static Rettigheter tilRettigheter(FpSak.Rettigheter rettigheter) {
@@ -275,11 +285,11 @@ public class HentSakTask implements ProsessTaskHandler {
             familiehendelse.antallBarn(), familiehendelse.omsorgsovertakelse());
     }
 
-    private static Set<FpVedtak> tilVedtak(Set<FpSak.Vedtak> vedtakene) {
-        return safeStream(vedtakene).map(HentSakTask::tilVedtak).collect(Collectors.toSet());
+    private static Set<FpVedtak> tilFpVedtak(Set<FpSak.Vedtak> vedtakene) {
+        return safeStream(vedtakene).map(HentSakTask::tilFpVedtak).collect(Collectors.toSet());
     }
 
-    private static FpVedtak tilVedtak(FpSak.Vedtak vedtakDto) {
+    private static FpVedtak tilFpVedtak(FpSak.Vedtak vedtakDto) {
         if (vedtakDto == null) {
             return null;
         }

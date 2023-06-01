@@ -4,6 +4,7 @@ import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -13,8 +14,10 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.EsSøknad;
+import no.nav.foreldrepenger.oversikt.domene.EsVedtak;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.FpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.FpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
@@ -23,6 +26,7 @@ import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
 import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SvpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.SvpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 
 
@@ -115,17 +119,19 @@ class SakerDtoMapperTest {
 
     static SakES0 esSak(AktørId aktørId) {
         return new SakES0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, now())),
-            now());
+            Set.of(new EsVedtak(LocalDateTime.now())), now());
     }
 
     static SakSVP0 svpSak(AktørId aktørId) {
         return new SakSVP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, now())),
-            now());
+            Set.of(new SvpVedtak(LocalDateTime.now())), now());
     }
 
     static SakFP0 fpSak(AktørId aktørId) {
-        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(),
-            Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(), Dekningsgrad.HUNDRE)), BrukerRolle.MOR,
+        var dekningsgrad = Dekningsgrad.HUNDRE;
+        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(), dekningsgrad);
+        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(vedtak), AktørId.dummy(), fh(), Set.of(),
+            Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(), dekningsgrad)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
     }
 

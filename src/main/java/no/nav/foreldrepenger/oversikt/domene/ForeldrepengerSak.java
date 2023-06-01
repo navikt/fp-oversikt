@@ -22,4 +22,9 @@ public interface ForeldrepengerSak extends Sak {
     default boolean gjelderBarn(AktørId barnAktørid) {
         return fødteBarn() != null && fødteBarn().contains(barnAktørid);
     }
+
+    @Override
+    default boolean harVedtak() {
+        return gjeldendeVedtak().isPresent();
+    }
 }

@@ -38,7 +38,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements ForeldrepengerSak {
 
     @Override
-    public boolean harSakSøknad() {
+    public boolean harSøknad() {
         return søknader != null && !søknader.isEmpty();
     }
 

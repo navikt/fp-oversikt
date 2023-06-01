@@ -20,11 +20,17 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                       @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                       @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
                       @JsonProperty("søknader") Set<SvpSøknad> søknader,
+                      @JsonProperty("vedtak") Set<SvpVedtak> vedtak,
                       @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements Sak {
 
     @Override
-    public boolean harSakSøknad() {
+    public boolean harSøknad() {
         return søknader != null && !søknader.isEmpty();
+    }
+
+    @Override
+    public boolean harVedtak() {
+        return vedtak != null && !vedtak.isEmpty();
     }
 
     @Override
