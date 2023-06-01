@@ -7,17 +7,12 @@ import java.util.List;
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 
 @ApplicationScoped
 public class Saker {
-
-    private static final Logger LOG = LoggerFactory.getLogger(Saker.class);
 
     private SakRepository sakRepository;
     private FødselsnummerOppslag fødselsnummerOppslag;
@@ -39,7 +34,8 @@ public class Saker {
 
     List<Sak> hentSaker(AktørId aktørId) {
         return sakRepository.hentFor(aktørId).stream()
-            .filter(Sak::harSakSøknad)
+            .filter(Sak::harSøknad)
+       //     .filter(not(Sak::erHenlagt))
             .toList();
     }
 }

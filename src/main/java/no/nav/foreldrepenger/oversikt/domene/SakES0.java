@@ -20,11 +20,17 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                      @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
                      @JsonProperty("søknader") Set<EsSøknad> søknader,
+                     @JsonProperty("vedtak") Set<EsVedtak> vedtak,
                      @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements Sak {
 
     @Override
-    public boolean harSakSøknad() {
+    public boolean harSøknad() {
         return søknader != null && !søknader.isEmpty();
+    }
+
+    @Override
+    public boolean harVedtak() {
+        return vedtak != null && !vedtak.isEmpty();
     }
 
     @Override

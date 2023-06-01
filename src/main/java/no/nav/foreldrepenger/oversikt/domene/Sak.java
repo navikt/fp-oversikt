@@ -21,7 +21,15 @@ public interface Sak {
 
     AktørId aktørId();
 
-    boolean harSakSøknad();
+    boolean harSøknad();
 
     LocalDateTime oppdatertTidspunkt();
+
+    boolean harVedtak();
+
+    SakStatus status();
+
+    default boolean erHenlagt() {
+        return !harVedtak() && SakStatus.avsluttet(status());
+    }
 }

@@ -123,7 +123,8 @@ class SakerRestTest {
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
         var søknad = new SvpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now());
-        var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(), Set.of(søknad));
+        var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse,
+            Sak.Status.AVSLUTTET, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now())));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();
@@ -148,7 +149,7 @@ class SakerRestTest {
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
         var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(),
-            Set.of(new EsSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now())));
+            Set.of(new EsSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now())), Set.of(new EsSak.Vedtak(LocalDateTime.now())));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().engangsstønad().stream().toList();
