@@ -37,7 +37,7 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
     }
 
     private Optional<Gradering> utledGradering() {
-        if (!Resultat.Type.INNVILGET_GRADERING.equals(resultat.type())) {
+        if (Resultat.Type.INNVILGET.equals(resultat.type())) {
             return Optional.empty();
         }
         var gradertAktivitet = finnGradertAktivitet(resultat());
