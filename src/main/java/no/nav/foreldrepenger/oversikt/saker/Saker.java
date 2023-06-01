@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import static java.util.function.Predicate.not;
 import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapper.tilDto;
 
 import java.util.List;
@@ -35,7 +36,7 @@ public class Saker {
     List<Sak> hentSaker(AktørId aktørId) {
         return sakRepository.hentFor(aktørId).stream()
             .filter(Sak::harSøknad)
-       //     .filter(not(Sak::erHenlagt))
+            .filter(not(Sak::erHenlagt))
             .toList();
     }
 }
