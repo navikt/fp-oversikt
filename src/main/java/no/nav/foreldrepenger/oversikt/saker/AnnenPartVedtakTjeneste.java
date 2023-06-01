@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -19,8 +21,8 @@ import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
-import no.nav.foreldrepenger.oversikt.domene.FpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.ForeldrepengerSak;
+import no.nav.foreldrepenger.oversikt.domene.FpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode;
 
 @ApplicationScoped
@@ -75,7 +77,7 @@ class AnnenPartVedtakTjeneste {
 
     private static List<UttakPeriode> filterSensitive(FpVedtak gjeldendeVedtak) {
         //SKal ikke kunne se annen parts arbeidsgivere
-        return gjeldendeVedtak.perioder().stream().map(Uttaksperiode::tilDto).map(p -> {
+        return safeStream(gjeldendeVedtak.perioder()).map(Uttaksperiode::tilDto).map(p -> {
             var gradering = p.gradering() == null ? null : new Gradering(p.gradering().arbeidstidprosent(), null);
             return new UttakPeriode(p.fom(), p.tom(),
                 p.kontoType(), p.resultat(), p.utsettelseÅrsak(), p.oppholdÅrsak(), p.overføringÅrsak(), gradering,
