@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
-import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
@@ -41,18 +41,18 @@ public class AnnenPartRest {
     AnnenPartRest() {
     }
 
-    @GET
+    @POST
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartVedtak hent(@Valid @NotNull AnnenPartVedtakRequest request) {
-        if (adresseBeskyttelseOppslag.adresseBeskyttelse(request.annenPartFnr()).harBeskyttetAdresse()) {
+        if (adresseBeskyttelseOppslag.adresseBeskyttelse(request.annenPartFødselsnummer()).harBeskyttetAdresse()) {
             return null;
         }
 
         LOG.info("Kall mot annenPart endepunkt");
         var søkerAktørId = innloggetBruker.aktørId();
-        var annenPartAktørId = aktørIdOppslag.forFnr(request.annenPartFnr());
-        var barnAktørId = aktørIdOppslag.forFnr(request.barnFnr());
-        var familieHendelse = request.familieHendelse();
+        var annenPartAktørId = aktørIdOppslag.forFnr(request.annenPartFødselsnummer());
+        var barnAktørId = aktørIdOppslag.forFnr(request.barnFødselsnummer());
+        var familieHendelse = request.familiehendelse();
         var vedtak = annenPartVedtakTjeneste.hentFor(søkerAktørId, annenPartAktørId, barnAktørId, familieHendelse);
         if (vedtak.isPresent()) {
             LOG.info("Returnerer annen parts vedtak. Antall perioder {} dekningsgrad {}", vedtak.get().perioder().size(), vedtak.get().dekningsgrad());
@@ -60,6 +60,6 @@ public class AnnenPartRest {
         return vedtak.orElse(null);
     }
 
-    record AnnenPartVedtakRequest(@Valid @NotNull Fødselsnummer annenPartFnr, @Valid Fødselsnummer barnFnr, LocalDate familieHendelse) {
+    record AnnenPartVedtakRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer, LocalDate familiehendelse) {
     }
 }
