@@ -51,7 +51,7 @@ public class AnnenPartRest {
         LOG.info("Kall mot annenPart endepunkt");
         var søkerAktørId = innloggetBruker.aktørId();
         var annenPartAktørId = aktørIdOppslag.forFnr(request.annenPartFødselsnummer());
-        var barnAktørId = aktørIdOppslag.forFnr(request.barnFødselsnummer());
+        var barnAktørId = request.barnFødselsnummer() == null ? null : aktørIdOppslag.forFnr(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
         var vedtak = annenPartVedtakTjeneste.hentFor(søkerAktørId, annenPartAktørId, barnAktørId, familieHendelse);
         if (vedtak.isPresent()) {
