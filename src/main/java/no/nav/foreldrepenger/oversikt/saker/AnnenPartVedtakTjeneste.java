@@ -104,7 +104,7 @@ class AnnenPartVedtakTjeneste {
             .stream()
             .filter(sak -> !sak.oppgittAleneomsorg())
             .filter(sak -> sak.annenPartAktørId() != null && sak.annenPartAktørId().equals(søker))
-            .filter(sak -> barn == null || sak.fødteBarn().contains(barn))
+            .filter(sak -> barn == null || sak.gjelderBarn(barn))
             //Sjekker ikke familiehendelse hvis vi har aktørId på barnet
             .filter(sak -> barn != null || familiehendelse == null || isEquals(familiehendelse, sak.familieHendelse()))
             .toList();
