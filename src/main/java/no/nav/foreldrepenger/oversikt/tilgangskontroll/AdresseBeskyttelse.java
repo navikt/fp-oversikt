@@ -10,9 +10,6 @@ public record AdresseBeskyttelse(Set<Gradering> gradering) {
     }
 
     public boolean harBeskyttetAdresse() {
-        if (gradering.isEmpty() || gradering.stream().allMatch(Gradering.UGRADERT::equals)) {
-            return false;
-        }
-        return true;
+        return !gradering.isEmpty() && !gradering.stream().allMatch(Gradering.UGRADERT::equals);
     }
 }

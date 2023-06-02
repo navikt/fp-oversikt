@@ -46,7 +46,7 @@ public class BehandlingHendelseHåndterer {
     }
 
     void handleMessage(String topic, String key, String payload) {
-        LOG.info("Lest fra : key={}", topic, key);
+        LOG.info("Lest fra : topic={}", topic);
         try {
             var hendelse = map(payload);
             if (hendelse.getHendelse().equals(Hendelse.MIGRERING)) {
