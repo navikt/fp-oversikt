@@ -1,5 +1,8 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+
+import static no.nav.foreldrepenger.oversikt.saker.TilgangsstyringBorger.sjekkAtKallErFraBorger;
+
 import java.time.LocalDate;
 
 import javax.enterprise.context.ApplicationScoped;
@@ -44,6 +47,7 @@ public class AnnenPartRest {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartVedtak hent(@Valid @NotNull AnnenPartVedtakRequest request) {
+        sjekkAtKallErFraBorger();
         if (adresseBeskyttelseOppslag.adresseBeskyttelse(request.annenPartFødselsnummer()).harBeskyttetAdresse()) {
             return null;
         }
