@@ -8,6 +8,10 @@ import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 public class TilgangsstyringBorger {
 
+    private TilgangsstyringBorger() {
+        // Ikke instanseres
+    }
+
     public static void sjekkAtKallErFraBorger() {
         var kontekst = KontekstHolder.getKontekst();
         if (erBorger(kontekst)) {

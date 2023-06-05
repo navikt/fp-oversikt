@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import static no.nav.foreldrepenger.oversikt.KontestForTest.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.KontestForTest.innloggetSaksbehandler;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandler;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;

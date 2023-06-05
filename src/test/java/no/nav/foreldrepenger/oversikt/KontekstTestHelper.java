@@ -9,7 +9,7 @@ import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 import no.nav.vedtak.sikkerhet.kontekst.RequestKontekst;
 
-public class KontestForTest {
+public class KontekstTestHelper {
 
     public static void innloggetBorger() {
         var kontekst = mock(Kontekst.class);

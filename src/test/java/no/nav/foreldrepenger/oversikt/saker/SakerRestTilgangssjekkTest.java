@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import static no.nav.foreldrepenger.oversikt.KontestForTest.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.KontestForTest.innloggetSaksbehandler;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandler;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.umyndigInnloggetBruker;
 import static org.assertj.core.api.Assertions.assertThatCode;

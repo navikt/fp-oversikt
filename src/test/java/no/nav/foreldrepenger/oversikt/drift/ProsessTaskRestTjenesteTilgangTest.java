@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
-import static no.nav.foreldrepenger.oversikt.KontestForTest.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.KontestForTest.innloggetSaksbehandler;
-import static no.nav.foreldrepenger.oversikt.KontestForTest.innloggetSaksbehandlerMedDriftRolle;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandler;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandlerMedDriftRolle;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

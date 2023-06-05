@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import static java.time.LocalDate.now;
-import static no.nav.foreldrepenger.oversikt.KontestForTest.innloggetBorger;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Type;
