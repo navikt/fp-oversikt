@@ -10,6 +10,7 @@ import javax.ws.rs.core.Application;
 
 import org.glassfish.jersey.server.ServerProperties;
 
+import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.integration.GenericOpenApiContextBuilder;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
 import io.swagger.v3.oas.integration.SwaggerConfiguration;
@@ -53,7 +54,7 @@ public class ApiConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         // eksponert grensesnitt bak sikkerhet
-        return Set.of(SakerRest.class, AnnenPartRest.class, ProsessTaskRestTjeneste.class);
+        return Set.of(SakerRest.class, AnnenPartRest.class, ProsessTaskRestTjeneste.class, OpenApiResource.class);
     }
 
     @Override
