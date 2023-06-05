@@ -5,7 +5,6 @@ import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndt
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Type;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Årsak;
-import static no.nav.foreldrepenger.oversikt.saker.AnnenPartRestAutoriseringTest.setKontestForBruker;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -16,7 +15,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
@@ -25,6 +23,7 @@ import no.nav.foreldrepenger.common.innsyn.Dekningsgrad;
 import no.nav.foreldrepenger.common.innsyn.KontoType;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
+import no.nav.foreldrepenger.oversikt.KontestForTest;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
@@ -46,12 +45,8 @@ import no.nav.foreldrepenger.oversikt.innhenting.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.stub.FpsakTjenesteStub;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 
-class SakerRestTest {
+class SakerRestTest extends KontestForTest {
 
-    @BeforeAll
-    public static void initializeKontekst() {
-        setKontestForBruker();
-    }
 
     @Test
     void hent_fp_sak_roundtrip_test() {

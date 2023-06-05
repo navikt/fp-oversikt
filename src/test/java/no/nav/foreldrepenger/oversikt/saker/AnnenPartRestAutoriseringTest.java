@@ -7,23 +7,15 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.KontestForTest;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
-import no.nav.vedtak.sikkerhet.kontekst.IdentType;
-import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
-import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
-class AnnenPartRestAutoriseringTest {
+class AnnenPartRestAutoriseringTest extends KontestForTest {
 
     private AdresseBeskyttelseOppslag adresseBeskyttelseOppslag = mock(AdresseBeskyttelseOppslag.class);;
-
-    @BeforeAll
-    public static void initializeKontekst() {
-        setKontestForBruker();
-    }
 
     @Test
     void sjekkAtEndepunktReturnereNullNårDetErBeskyttetAdresse() {
@@ -35,10 +27,5 @@ class AnnenPartRestAutoriseringTest {
         assertThat(annenPartRest.hent(request)).isNull();
     }
 
-    static void setKontestForBruker() {
-        var kontekst = mock(Kontekst.class);
-        when(kontekst.harKontekst()).thenReturn(true);
-        when(kontekst.getIdentType()).thenReturn(IdentType.EksternBruker);
-        KontekstHolder.setKontekst(kontekst);
-    }
+
 }

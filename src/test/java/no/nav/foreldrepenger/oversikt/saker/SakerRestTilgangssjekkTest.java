@@ -8,10 +8,11 @@ import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.oversikt.KontestForTest;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
-class SakerRestTilgangssjekkTest {
+class SakerRestTilgangssjekkTest extends KontestForTest {
 
     private final static Saker saker = mock(Saker.class);
 
