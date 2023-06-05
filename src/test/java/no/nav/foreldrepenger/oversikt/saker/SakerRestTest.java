@@ -3,8 +3,10 @@ package no.nav.foreldrepenger.oversikt.saker;
 import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
+import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Type;
+import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Årsak;
+import static no.nav.foreldrepenger.oversikt.saker.AnnenPartRestAutoriseringTest.setKontestForBruker;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
-import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -14,6 +16,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
@@ -44,6 +47,11 @@ import no.nav.foreldrepenger.oversikt.stub.FpsakTjenesteStub;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 
 class SakerRestTest {
+
+    @BeforeAll
+    public static void initializeKontekst() {
+        setKontestForBruker();
+    }
 
     @Test
     void hent_fp_sak_roundtrip_test() {

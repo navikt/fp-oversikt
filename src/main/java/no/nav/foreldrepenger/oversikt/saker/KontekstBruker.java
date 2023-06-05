@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import java.time.LocalDate;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 
@@ -8,8 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
-
-import java.time.LocalDate;
 
 @ApplicationScoped
 public class KontekstBruker implements InnloggetBruker {

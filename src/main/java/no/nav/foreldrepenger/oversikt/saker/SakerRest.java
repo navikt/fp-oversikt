@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import static no.nav.foreldrepenger.oversikt.saker.TilgangsstyringBorger.sjekkAtKallErFraBorger;
+
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
 import javax.transaction.Transactional;
@@ -8,11 +10,11 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
 @Path("/saker")
 @ApplicationScoped
@@ -35,8 +37,9 @@ public class SakerRest {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public no.nav.foreldrepenger.common.innsyn.Saker hent() {
-        LOG.info("Kall mot saker endepunkt");
+        sjekkAtKallErFraBorger();
         tilgangssjekkMyndighetsalder();
+        LOG.info("Kall mot saker endepunkt");
         var aktørId = innloggetBruker.aktørId();
         return saker.hent(aktørId);
     }
