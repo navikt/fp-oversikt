@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -23,7 +23,7 @@ class ProsessTaskRestTjenesteTilgangTest {
         when(kontekst.harGruppe(Groups.DRIFT)).thenReturn(true);
         KontekstHolder.setKontekst(kontekst);
 
-        assertDoesNotThrow(ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift);
+        assertThatCode(ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift).doesNotThrowAnyException();
     }
 
     @Test
@@ -34,7 +34,7 @@ class ProsessTaskRestTjenesteTilgangTest {
         when(kontekst.harGruppe(Groups.SAKSBEHANDLER)).thenReturn(true);
         KontekstHolder.setKontekst(kontekst);
 
-        assertThrows(ManglerTilgangException.class, ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift);
+        assertThatThrownBy(ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
     @Test
@@ -44,7 +44,7 @@ class ProsessTaskRestTjenesteTilgangTest {
         when(kontekst.getIdentType()).thenReturn(IdentType.EksternBruker);
         KontekstHolder.setKontekst(kontekst);
 
-        assertThrows(ManglerTilgangException.class, ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift);
+        assertThatThrownBy(ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
     @Test
@@ -57,12 +57,12 @@ class ProsessTaskRestTjenesteTilgangTest {
 
         var prosessTaskRestTjeneste = new ProsessTaskRestTjeneste(null);
 
-        assertThrows(ManglerTilgangException.class, () -> prosessTaskRestTjeneste.createProsessTask(null));
-        assertThrows(ManglerTilgangException.class, () -> prosessTaskRestTjeneste.restartProsessTask(null));
-        assertThrows(ManglerTilgangException.class, () -> prosessTaskRestTjeneste.retryAllProsessTask());
-        assertThrows(ManglerTilgangException.class, () -> prosessTaskRestTjeneste.finnProsessTasks(null));
-        assertThrows(ManglerTilgangException.class, () -> prosessTaskRestTjeneste.searchProsessTasks(null));
-        assertThrows(ManglerTilgangException.class, () -> prosessTaskRestTjeneste.finnFeiletProsessTask(null));
-        assertThrows(ManglerTilgangException.class, () -> prosessTaskRestTjeneste.setFeiletProsessTaskFerdig(null));
+        assertThatThrownBy(() -> prosessTaskRestTjeneste.createProsessTask(null)).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> prosessTaskRestTjeneste.restartProsessTask(null)).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> prosessTaskRestTjeneste.retryAllProsessTask()).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> prosessTaskRestTjeneste.finnProsessTasks(null)).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> prosessTaskRestTjeneste.searchProsessTasks(null)).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> prosessTaskRestTjeneste.finnFeiletProsessTask(null)).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> prosessTaskRestTjeneste.setFeiletProsessTaskFerdig(null)).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 }

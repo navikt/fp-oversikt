@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -22,7 +22,7 @@ class TilgangsstyringBorgerTest {
         when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
         KontekstHolder.setKontekst(kontekst);
 
-        assertThrows(ManglerTilgangException.class, TilgangsstyringBorger::sjekkAtKallErFraBorger);
+        assertThatThrownBy(TilgangsstyringBorger::sjekkAtKallErFraBorger).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
 
@@ -33,6 +33,6 @@ class TilgangsstyringBorgerTest {
         when(kontekst.getIdentType()).thenReturn(IdentType.EksternBruker);
         KontekstHolder.setKontekst(kontekst);
 
-        assertDoesNotThrow(TilgangsstyringBorger::sjekkAtKallErFraBorger);
+        assertThatCode(TilgangsstyringBorger::sjekkAtKallErFraBorger).doesNotThrowAnyException();
     }
 }
