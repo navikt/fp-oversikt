@@ -9,9 +9,9 @@ spec:
   image: {{image}}
   port: 8080
   ingresses:
-{{#each ingresses as |url|}}
-   - {{url}}
-{{/each}}
+  {{#each ingresses as |url|}}
+     - {{url}}
+  {{/each}}
   liveness:
     path: /internal/health/isAlive
     initialDelay: 5
@@ -58,12 +58,22 @@ spec:
       claims:
         extra:
           - "azp_name"
+        groups:
+          {{#each groups as |group|}}
+             - id: "{{group}}"
+         {{/each}}
   accessPolicy:
     inbound:
       rules:
         - application: foreldrepengesoknad-api
           namespace: teamforeldrepenger
           cluster: {{environment}}-gcp
+        - application: fp-swagger
+          namespace: teamforeldrepenger
+          cluster: {{environment}}-gcp
+          permissions:
+            scopes:
+              - swagger
     outbound:
       external:
         - host: pdl-api.{{environment}}-fss-pub.nais.io

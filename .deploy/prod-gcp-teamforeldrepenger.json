@@ -9,5 +9,8 @@
     "maxReplicas": "4",
     "ingresses": [
         "https://fpoversikt.intern.nav.no"
+    ],
+    "groups": [
+        "0d226374-4748-4367-a38a-062dcad70034"
     ]
 }
