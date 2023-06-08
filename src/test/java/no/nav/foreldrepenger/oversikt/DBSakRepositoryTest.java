@@ -31,7 +31,6 @@ import no.nav.foreldrepenger.oversikt.domene.MorsAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
-import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.domene.Trekkdager;
@@ -55,10 +54,10 @@ class DBSakRepositoryTest {
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now(), Konto.FELLESPERIODE,
             UtsettelseÅrsak.SØKER_SYKDOM, null, null, new Gradering(new Prosent(3), new UttakAktivitet(UttakAktivitet.Type.FRILANS,
             Arbeidsgiver.dummy(), null)), new Prosent(44), true, MorsAktivitet.ARBEID)), Dekningsgrad.HUNDRE);
-        var originalt = new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, of(vedtak), AktørId.dummy(), fh(), aksjonspunkt(),
+        var originalt = new SakFP0(Saksnummer.dummy(), aktørId, false, of(vedtak), AktørId.dummy(), fh(), aksjonspunkt(),
             of(søknad), MOR, of(AktørId.dummy()), beggeRett(), false, LocalDateTime.now());
         repository.lagre(originalt);
-        var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), SakStatus.AVSLUTTET, null, AktørId.dummy(), fh(), aksjonspunkt(), of(),
+        var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), true, null, AktørId.dummy(), fh(), aksjonspunkt(), of(),
             MOR, of(AktørId.dummy()), beggeRett(), false, LocalDateTime.now());
         repository.lagre(annenAktørsSak);
 
@@ -95,10 +94,10 @@ class DBSakRepositoryTest {
         var saksnummer = Saksnummer.dummy();
         var annenPartAktørId = AktørId.dummy();
         var barn = of(AktørId.dummy());
-        var originalt = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, of(vedtak), annenPartAktørId, fh(), aksjonspunkt(), of(), FAR,
+        var originalt = new SakFP0(saksnummer, aktørId, false, of(vedtak), annenPartAktørId, fh(), aksjonspunkt(), of(), FAR,
             barn, beggeRett(), false, LocalDateTime.now());
         repository.lagre(originalt);
-        var oppdatertSak = new SakFP0(saksnummer, aktørId, SakStatus.UNDER_BEHANDLING, null, annenPartAktørId, fh(), aksjonspunkt(),
+        var oppdatertSak = new SakFP0(saksnummer, aktørId, false, null, annenPartAktørId, fh(), aksjonspunkt(),
             of(new FpSøknad(SøknadStatus.MOTTATT, now(), null, Dekningsgrad.HUNDRE)), FAR, barn, beggeRett(), false, LocalDateTime.now());
         repository.lagre(oppdatertSak);
 

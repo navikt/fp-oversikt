@@ -23,7 +23,6 @@ import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
-import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SvpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
@@ -53,12 +52,12 @@ class SakerTest {
     void skal_ikke_returnere_saker_henlagte_saker() {
         var aktørId = AktørId.dummy();
         var henlagtFpSak = new SakFP0(Saksnummer.dummy(), aktørId,
-            SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(new FpSøknad(SøknadStatus.BEHANDLET, now(),
+            true, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(new FpSøknad(SøknadStatus.BEHANDLET, now(),
             Set.of(), Dekningsgrad.HUNDRE)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
-        var henlagtSvpSak = new SakSVP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, new FamilieHendelse(null, LocalDate.now(),
+        var henlagtSvpSak = new SakSVP0(Saksnummer.dummy(), aktørId, true, new FamilieHendelse(null, LocalDate.now(),
             0, null), Set.of(), Set.of(new SvpSøknad(SøknadStatus.BEHANDLET, now())), Set.of(), now());
-        var henlagtEsSak = new SakES0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.BEHANDLET,
+        var henlagtEsSak = new SakES0(Saksnummer.dummy(), aktørId, true, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.BEHANDLET,
             now())), Set.of(), now());
         var repository = new RepositoryStub();
         repository.lagre(henlagtFpSak);

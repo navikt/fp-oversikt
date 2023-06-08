@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.oversikt.domene;
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.domene.Konto.FORELDREPENGER;
-import static no.nav.foreldrepenger.oversikt.domene.SakStatus.avsluttet;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -25,7 +24,7 @@ import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("aktørId") AktørId aktørId,
-                     @JsonProperty("status") SakStatus status,
+                     @JsonProperty("avsluttet") boolean avsluttet,
                      @JsonProperty("vedtak") Set<FpVedtak> vedtak,
                      @JsonProperty("annenPartAktørId") AktørId annenPartAktørId,
                      @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
@@ -64,7 +63,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var harAnnenForelderTilsvarendeRettEØS = rettigheter != null && rettigheter.annenForelderTilsvarendeRettEØS();
         var rettighetType = utledRettighetType(rettigheter, sisteSøknad.map(FpSøknad::perioder).orElse(Set.of()), gjeldendeVedtak.map(
             FpVedtak::perioder).orElse(List.of()));
-        return new FpSak(saksnummer.tilDto(), avsluttet(status), kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
+        return new FpSak(saksnummer.tilDto(), avsluttet, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
             morUføretrygd, harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart, fh, fpVedtak, åpenBehandling,
             barna, dekningsgrad == null ? null : dekningsgrad.tilDto(), oppdatertTidspunkt());
     }

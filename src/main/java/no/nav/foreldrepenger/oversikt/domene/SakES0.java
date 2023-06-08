@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-import static no.nav.foreldrepenger.oversikt.domene.SakStatus.avsluttet;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -16,7 +15,7 @@ import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("aktørId") AktørId aktørId,
-                     @JsonProperty("status") SakStatus status,
+                     @JsonProperty("avsluttet") boolean avsluttet,
                      @JsonProperty("familieHendelse") FamilieHendelse familieHendelse,
                      @JsonProperty("aksjonspunkt") Set<Aksjonspunkt> aksjonspunkt,
                      @JsonProperty("søknader") Set<EsSøknad> søknader,
@@ -36,7 +35,7 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     @Override
     public no.nav.foreldrepenger.common.innsyn.EsSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
         var familiehendelse = familieHendelse == null ? null : familieHendelse.tilDto();
-        return new EsSak(saksnummer.tilDto(), familiehendelse, avsluttet(status), tilÅpenBehandling(), false, oppdatertTidspunkt());
+        return new EsSak(saksnummer.tilDto(), familiehendelse, avsluttet, tilÅpenBehandling(), false, oppdatertTidspunkt());
     }
 
     private EsÅpenBehandling tilÅpenBehandling() {

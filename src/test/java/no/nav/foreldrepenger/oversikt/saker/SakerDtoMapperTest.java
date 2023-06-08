@@ -23,7 +23,6 @@ import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
-import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SvpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.SvpVedtak;
@@ -118,25 +117,25 @@ class SakerDtoMapperTest {
     }
 
     static SakES0 esSak(AktørId aktørId) {
-        return new SakES0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, now())),
+        return new SakES0(Saksnummer.dummy(), aktørId, true, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, now())),
             Set.of(new EsVedtak(LocalDateTime.now())), now());
     }
 
     static SakSVP0 svpSak(AktørId aktørId) {
-        return new SakSVP0(Saksnummer.dummy(), aktørId, SakStatus.UNDER_BEHANDLING, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, now())),
+        return new SakSVP0(Saksnummer.dummy(), aktørId, false, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, now())),
             Set.of(new SvpVedtak(LocalDateTime.now())), now());
     }
 
     static SakFP0 fpSak(AktørId aktørId) {
         var dekningsgrad = Dekningsgrad.HUNDRE;
         var vedtak = new FpVedtak(LocalDateTime.now(), List.of(), dekningsgrad);
-        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(vedtak), AktørId.dummy(), fh(), Set.of(),
+        return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(vedtak), AktørId.dummy(), fh(), Set.of(),
             Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(), dekningsgrad)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
     }
 
     static SakFP0 fpSakUtenSøknad(AktørId aktørId) {
-        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR,
+        return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
     }
 

@@ -75,7 +75,7 @@ class SakerRestTest {
             OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER, OverføringÅrsak.SYKDOM_ANNEN_FORELDER, new FpSak.Gradering(arbeidstidsprosent, new FpSak.UttakAktivitet(
             FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null)), new Prosent(40), true, MorsAktivitet.ARBEID);
         var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode), FpSak.Dekningsgrad.ÅTTI);
-        var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, Sak.Status.AVSLUTTET, Set.of(vedtak), aktørIdAnnenPart.value(),
+        var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, true, Set.of(vedtak), aktørIdAnnenPart.value(),
             ventTidligSøknadAp(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()), new FpSak.Rettigheter(false, true, true), true);
         sendBehandlingHendelse(sakFraFpsak, repository);
 
@@ -132,7 +132,7 @@ class SakerRestTest {
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
         var søknad = new SvpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now());
         var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse,
-            Sak.Status.AVSLUTTET, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now())));
+            true, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now())));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();
@@ -156,7 +156,7 @@ class SakerRestTest {
         var tjeneste = new SakerRest(new Saker(repository, AktørId::value), innloggetBruker);
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
-        var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, Sak.Status.AVSLUTTET, ventTidligSøknadAp(),
+        var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, true, ventTidligSøknadAp(),
             Set.of(new EsSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now())), Set.of(new EsSak.Vedtak(LocalDateTime.now())));
         sendBehandlingHendelse(sakFraFpsak, repository);
 

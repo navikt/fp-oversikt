@@ -17,7 +17,7 @@ public interface Sak {
 
     String saksnummer();
 
-    Status status();
+    boolean avsluttet();
 
     Set<Aksjonspunkt> aksjonspunkt();
 
@@ -27,13 +27,6 @@ public interface Sak {
 
     record FamilieHendelse(LocalDate fødselsdato, LocalDate termindato, int antallBarn, LocalDate omsorgsovertakelse) {
 
-    }
-
-    enum Status {
-        OPPRETTET,
-        UNDER_BEHANDLING,
-        LØPENDE,
-        AVSLUTTET,
     }
 
     record Aksjonspunkt(Type type, Venteårsak venteårsak, LocalDateTime tidsfrist) {
