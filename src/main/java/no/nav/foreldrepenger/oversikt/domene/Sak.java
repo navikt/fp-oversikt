@@ -27,9 +27,9 @@ public interface Sak {
 
     boolean harVedtak();
 
-    SakStatus status();
+    boolean avsluttet();
 
     default boolean erHenlagt() {
-        return !harVedtak() && SakStatus.avsluttet(status());
+        return !harVedtak() && avsluttet();
     }
 }

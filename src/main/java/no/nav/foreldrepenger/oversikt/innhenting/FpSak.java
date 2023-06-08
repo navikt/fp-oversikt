@@ -13,7 +13,7 @@ import no.nav.foreldrepenger.oversikt.domene.Trekkdager;
 public record FpSak(String saksnummer,
                     String aktørId,
                     FamilieHendelse familieHendelse,
-                    Status status,
+                    boolean avsluttet,
                     Set<Vedtak> vedtak,
                     String oppgittAnnenPart,
                     Set<Aksjonspunkt> aksjonspunkt,
@@ -80,7 +80,7 @@ public record FpSak(String saksnummer,
 
     @Override
     public String toString() {
-        return "FpSak{" + "saksnummer='" + saksnummer + '\'' + ", familieHendelse=" + familieHendelse + ", status=" + status + ", vedtak="
+        return "FpSak{" + "saksnummer='" + saksnummer + '\'' + ", familieHendelse=" + familieHendelse + ", avsluttet=" + avsluttet + ", vedtak="
             + vedtak + ", aksjonspunkt=" + aksjonspunkt + ", søknader=" + søknader + ", brukerRolle=" + brukerRolle + ", rettigheter="
             + rettigheter + '}';
     }

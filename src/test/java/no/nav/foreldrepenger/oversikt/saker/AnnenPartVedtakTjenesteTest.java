@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import static java.time.LocalDateTime.*;
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -18,7 +18,6 @@ import no.nav.foreldrepenger.oversikt.domene.FpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.FpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.SakFP0;
-import no.nav.foreldrepenger.oversikt.domene.SakStatus;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
@@ -124,7 +123,7 @@ class AnnenPartVedtakTjenesteTest {
         var dekningsgrad = Dekningsgrad.HUNDRE;
         var vedtak = new FpVedtak(vedtakstidspunkt, List.of(), dekningsgrad);
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(), dekningsgrad);
-        return new SakFP0(Saksnummer.dummy(), aktørId, SakStatus.AVSLUTTET, Set.of(vedtak), annenPartAktørId,
+        return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(vedtak), annenPartAktørId,
             new FamilieHendelse(fødselsdato, termindato, 1, null), Set.of(), Set.of(søknad), BrukerRolle.MOR,
             aktørIdBarn == null ? Set.of() : Set.of(aktørIdBarn), new Rettigheter(aleneomsorg, false, false), false, now());
     }
