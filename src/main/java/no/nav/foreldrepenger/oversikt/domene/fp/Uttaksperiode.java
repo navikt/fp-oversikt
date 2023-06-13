@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
@@ -12,6 +12,7 @@ import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.SamtidigUttak;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
+import no.nav.foreldrepenger.oversikt.domene.Prosent;
 
 public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utsettelseÅrsak, OppholdÅrsak oppholdÅrsak,
                             OverføringÅrsak overføringÅrsak, Prosent samtidigUttak, Boolean flerbarnsdager,

@@ -1,8 +1,8 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MOR;
-import static no.nav.foreldrepenger.oversikt.domene.Konto.FORELDREPENGER;
+import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Konto.FORELDREPENGER;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -19,6 +19,7 @@ import no.nav.foreldrepenger.common.innsyn.FpÅpenBehandling;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
+import no.nav.foreldrepenger.oversikt.domene.*;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
 
 public enum UtsettelseÅrsak {
     HV_ØVELSE,

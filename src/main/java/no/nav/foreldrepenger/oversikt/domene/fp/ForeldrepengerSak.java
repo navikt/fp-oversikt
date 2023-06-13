@@ -1,4 +1,8 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
+
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.Sak;
 
 import java.util.Optional;
 import java.util.Set;

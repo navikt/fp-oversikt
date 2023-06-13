@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.es;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.foreldrepenger.common.innsyn.EsSak;
 import no.nav.foreldrepenger.common.innsyn.EsÅpenBehandling;
+import no.nav.foreldrepenger.oversikt.domene.*;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,

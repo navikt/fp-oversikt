@@ -1,6 +1,7 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import no.nav.foreldrepenger.common.innsyn.Aktivitet;
+import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 
 public record UttakAktivitet(Type type, Arbeidsgiver arbeidsgiver, String arbeidsforholdId) {
     public enum Type {

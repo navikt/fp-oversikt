@@ -11,14 +11,14 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
 
-final class BehandlingTilstandUtleder {
+public final class BehandlingTilstandUtleder {
 
     private static final Logger LOG = LoggerFactory.getLogger(BehandlingTilstandUtleder.class);
 
     private BehandlingTilstandUtleder() {
     }
 
-    static BehandlingTilstand utled(Set<Aksjonspunkt> ap) {
+    public static BehandlingTilstand utled(Set<Aksjonspunkt> ap) {
 
         var aksjonspunkt = safeStream(ap).collect(Collectors.toSet());
         var tilstand = utledGittOpprettetAksjonspunkt(aksjonspunkt);

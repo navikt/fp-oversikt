@@ -29,7 +29,7 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.Trekkdager;
+import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
 import no.nav.foreldrepenger.oversikt.innhenting.EsSak;
 import no.nav.foreldrepenger.oversikt.innhenting.FpSak;
 import no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode;

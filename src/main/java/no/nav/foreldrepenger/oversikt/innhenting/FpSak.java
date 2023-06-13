@@ -7,7 +7,7 @@ import java.util.Set;
 
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
-import no.nav.foreldrepenger.oversikt.domene.Trekkdager;
+import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
 
 
 public record FpSak(String saksnummer,

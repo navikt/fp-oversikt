@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.svp;
 
 import java.time.LocalDateTime;
 

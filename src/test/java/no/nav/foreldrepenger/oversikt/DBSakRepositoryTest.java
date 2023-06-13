@@ -2,8 +2,8 @@ package no.nav.foreldrepenger.oversikt;
 
 import static java.time.LocalDateTime.now;
 import static java.util.Set.of;
-import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.FAR;
-import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MOR;
+import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.FAR;
+import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -20,25 +20,25 @@ import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.DBSakRepository;
-import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
-import no.nav.foreldrepenger.oversikt.domene.FpSøknad;
-import no.nav.foreldrepenger.oversikt.domene.FpSøknadsperiode;
-import no.nav.foreldrepenger.oversikt.domene.FpVedtak;
-import no.nav.foreldrepenger.oversikt.domene.Gradering;
-import no.nav.foreldrepenger.oversikt.domene.Konto;
-import no.nav.foreldrepenger.oversikt.domene.MorsAktivitet;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
+import no.nav.foreldrepenger.oversikt.domene.fp.Gradering;
+import no.nav.foreldrepenger.oversikt.domene.fp.Konto;
+import no.nav.foreldrepenger.oversikt.domene.fp.MorsAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
-import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
-import no.nav.foreldrepenger.oversikt.domene.SakFP0;
+import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
+import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
-import no.nav.foreldrepenger.oversikt.domene.Trekkdager;
-import no.nav.foreldrepenger.oversikt.domene.UtsettelseÅrsak;
-import no.nav.foreldrepenger.oversikt.domene.UttakAktivitet;
-import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode;
-import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat;
-import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.UttaksperiodeAktivitet;
+import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
+import no.nav.foreldrepenger.oversikt.domene.fp.UtsettelseÅrsak;
+import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
+import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
+import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.Resultat;
+import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.UttaksperiodeAktivitet;
 
 @ExtendWith(JpaExtension.class)
 class DBSakRepositoryTest {

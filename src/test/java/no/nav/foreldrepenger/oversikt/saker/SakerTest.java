@@ -14,17 +14,17 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.domene.BrukerRolle;
-import no.nav.foreldrepenger.oversikt.domene.Dekningsgrad;
-import no.nav.foreldrepenger.oversikt.domene.EsSøknad;
+import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
+import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.es.EsSøknad;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
-import no.nav.foreldrepenger.oversikt.domene.FpSøknad;
-import no.nav.foreldrepenger.oversikt.domene.Rettigheter;
-import no.nav.foreldrepenger.oversikt.domene.SakES0;
-import no.nav.foreldrepenger.oversikt.domene.SakFP0;
-import no.nav.foreldrepenger.oversikt.domene.SakSVP0;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
+import no.nav.foreldrepenger.oversikt.domene.es.SakES0;
+import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
+import no.nav.foreldrepenger.oversikt.domene.svp.SakSVP0;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.SvpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.svp.SvpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 

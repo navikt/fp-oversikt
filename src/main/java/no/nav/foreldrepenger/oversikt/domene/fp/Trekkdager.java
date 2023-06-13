@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

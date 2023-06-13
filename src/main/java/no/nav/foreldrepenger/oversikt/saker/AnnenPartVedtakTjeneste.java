@@ -21,9 +21,9 @@ import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
-import no.nav.foreldrepenger.oversikt.domene.ForeldrepengerSak;
-import no.nav.foreldrepenger.oversikt.domene.FpVedtak;
-import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode;
+import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
+import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
 
 @ApplicationScoped
 class AnnenPartVedtakTjeneste {

@@ -1,16 +1,16 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static java.time.LocalDate.now;
 import static java.util.Set.of;
-import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.FAR;
-import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MEDMOR;
-import static no.nav.foreldrepenger.oversikt.domene.BrukerRolle.MOR;
-import static no.nav.foreldrepenger.oversikt.domene.Konto.FORELDREPENGER;
-import static no.nav.foreldrepenger.oversikt.domene.Konto.MØDREKVOTE;
-import static no.nav.foreldrepenger.oversikt.domene.Trekkdager.ZERO;
-import static no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat.Type.AVSLÅTT;
-import static no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat.Type.INNVILGET;
-import static no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.Resultat.Årsak.ANNET;
+import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.FAR;
+import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MEDMOR;
+import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Konto.FORELDREPENGER;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Konto.MØDREKVOTE;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager.ZERO;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.Resultat.Type.AVSLÅTT;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.Resultat.Type.INNVILGET;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.Resultat.Årsak.ANNET;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -19,13 +19,21 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.Prosent;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
+import no.nav.foreldrepenger.oversikt.domene.fp.*;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
-import no.nav.foreldrepenger.oversikt.domene.Uttaksperiode.UttaksperiodeAktivitet;
+import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.UttaksperiodeAktivitet;
 
 class SakFP0TilDtoMapperTest {
 
@@ -163,7 +171,7 @@ class SakFP0TilDtoMapperTest {
     void skal_mappe_aksjonspunkt_og_søknad_til_åpen_behandling() {
         var familieHendelse = fh();
         var åpenBehandling = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(), null, familieHendelse,
-            of(new Aksjonspunkt(Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD, null, LocalDateTime.now())),
+            Set.of(new Aksjonspunkt(Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD, null, LocalDateTime.now())),
             of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), of(), Dekningsgrad.HUNDRE)), MOR, of(), rettigheter(), false, LocalDateTime.now());
         var ikkeÅpenBehandling = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(), null, familieHendelse,
             of(new Aksjonspunkt(Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD, null, LocalDateTime.now())),

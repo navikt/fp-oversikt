@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.svp;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
@@ -11,6 +11,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.foreldrepenger.common.innsyn.SvpSak;
 import no.nav.foreldrepenger.common.innsyn.SvpÅpenBehandling;
+import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.Sak;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,

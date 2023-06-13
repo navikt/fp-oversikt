@@ -1,10 +1,13 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static no.nav.foreldrepenger.common.innsyn.Arbeidsgiver.ArbeidsgiverType;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
+import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
+import no.nav.foreldrepenger.oversikt.domene.Prosent;
+import no.nav.foreldrepenger.oversikt.domene.fp.*;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.innsyn.Aktivitet;

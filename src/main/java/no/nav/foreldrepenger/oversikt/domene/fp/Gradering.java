@@ -1,6 +1,7 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import no.nav.foreldrepenger.common.innsyn.Aktivitet;
+import no.nav.foreldrepenger.oversikt.domene.Prosent;
 
 public record Gradering(Prosent prosent, UttakAktivitet uttakAktivitet) {
     public no.nav.foreldrepenger.common.innsyn.Gradering tilDto() {

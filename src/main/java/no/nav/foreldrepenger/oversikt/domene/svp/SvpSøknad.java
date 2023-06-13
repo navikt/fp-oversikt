@@ -1,4 +1,6 @@
-package no.nav.foreldrepenger.oversikt.domene;
+package no.nav.foreldrepenger.oversikt.domene.svp;
+
+import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 
 import java.time.LocalDateTime;
 
