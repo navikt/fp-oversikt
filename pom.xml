@@ -6,7 +6,7 @@
     <parent>
         <groupId>no.nav.foreldrepenger.felles</groupId>
         <artifactId>fp-bom</artifactId>
-        <version>0.5.2</version>
+        <version>0.5.5</version>
     </parent>
 
     <groupId>no.nav.foreldrepenger</groupId>
@@ -20,10 +20,10 @@
         <sonar.projectName>fp-oversikt</sonar.projectName>
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
-        <felles.version>4.2.43</felles.version>
-        <prosesstask.version>3.1.28</prosesstask.version>
-        <fp-kontrakter.version>6.2.20</fp-kontrakter.version>
-        <fpsoknad-felles.version>2.3.4</fpsoknad-felles.version>
+        <felles.version>4.2.47</felles.version>
+        <prosesstask.version>3.1.29</prosesstask.version>
+        <fp-kontrakter.version>6.2.21</fp-kontrakter.version>
+        <fpsoknad-felles.version>2.3.6</fpsoknad-felles.version>
     </properties>
 
     <dependencyManagement>
@@ -31,7 +31,7 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.felles</groupId>
                 <artifactId>fp-bom</artifactId>
-                <version>0.5.2</version>
+                <version>0.5.5</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
@@ -210,7 +210,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0</version>
                 <configuration>
                     <properties>
                         <configurationParameters>
