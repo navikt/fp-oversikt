@@ -19,7 +19,6 @@ jobs:
     uses: navikt/fp-gha-workflows/.github/workflows/build-app-postgres.yml@main
     with:
       postgres-user: fpoversikt
-      sonar-scan: true
       build-image: ${{ github.ref_name == 'master' }} # default: true
       push-image: ${{ github.ref_name == 'master' }} # default: false
     secrets: inherit
