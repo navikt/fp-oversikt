@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.enterprise.context.Dependent;
@@ -25,19 +26,22 @@ import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 public class PdlKlientSystem extends AbstractPersonKlient implements AdresseBeskyttelseOppslag {
 
     @Override
-    public no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) {
+    public Optional<AdresseBeskyttelse> adresseBeskyttelse(Fødselsnummer fnr) {
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr.value());
         var projection = new PersonResponseProjection()
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
         var person = hentPerson(request, projection);
 
-        var gradering = person.getAdressebeskyttelse().stream()
-            .map(Adressebeskyttelse::getGradering)
-            .map(PdlKlientSystem::tilGradering)
-            .collect(Collectors.toSet());
+        if (person == null) {
+            return Optional.empty();
+        }
 
-        return new no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse(gradering);
+        var gradering = person.getAdressebeskyttelse().stream()
+                .map(Adressebeskyttelse::getGradering)
+                .map(PdlKlientSystem::tilGradering)
+                .collect(Collectors.toSet());
+        return Optional.of(new AdresseBeskyttelse(gradering));
     }
 
     private static AdresseBeskyttelse.Gradering tilGradering(AdressebeskyttelseGradering adressebeskyttelseGradering) {

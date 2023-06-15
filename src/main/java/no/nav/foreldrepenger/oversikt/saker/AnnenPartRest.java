@@ -48,12 +48,8 @@ public class AnnenPartRest {
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartVedtak hent(@Valid @NotNull AnnenPartVedtakRequest request) {
         sjekkAtKallErFraBorger();
-        if (adresseBeskyttelseOppslag.adresseBeskyttelse(request.annenPartFødselsnummer()).harBeskyttetAdresse()) {
-            return null;
-        }
-
-        if (request.annenPartFødselsnummer() == null || request.annenPartFødselsnummer().value().isBlank()) {
-            LOG.warn("Feil input annen parts fnr {}. Returnerer tomt resultat", request.annenPartFødselsnummer());
+        var annenpartsAdressebeskyttelse = adresseBeskyttelseOppslag.adresseBeskyttelse(request.annenPartFødselsnummer());
+        if (annenpartsAdressebeskyttelse.isEmpty() || annenpartsAdressebeskyttelse.get().harBeskyttetAdresse()) {
             return null;
         }
 
