@@ -20,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.AnnenPartVedtak;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 
 @Path("/annenPart")
 @ApplicationScoped
@@ -48,7 +49,7 @@ public class AnnenPartRest {
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartVedtak hent(@Valid @NotNull AnnenPartVedtakRequest request) {
         sjekkAtKallErFraBorger();
-        if (adresseBeskyttelseOppslag.adresseBeskyttelse(request.annenPartFødselsnummer()).harBeskyttetAdresse()) {
+        if (harAnnenpartBeskyttetAdresseEllerFinnesIkkeIPDL(request.annenPartFødselsnummer())) {
             return null;
         }
 
@@ -62,6 +63,17 @@ public class AnnenPartRest {
             LOG.info("Returnerer annen parts vedtak. Antall perioder {} dekningsgrad {}", vedtak.get().perioder().size(), vedtak.get().dekningsgrad());
         }
         return vedtak.orElse(null);
+    }
+
+    private boolean harAnnenpartBeskyttetAdresseEllerFinnesIkkeIPDL(Fødselsnummer fnr) {
+        AdresseBeskyttelse adresseBeskyttelse;
+        try {
+            adresseBeskyttelse = adresseBeskyttelseOppslag.adresseBeskyttelse(fnr);
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            return true;
+        }
+
+        return adresseBeskyttelse.harBeskyttetAdresse();
     }
 
     record AnnenPartVedtakRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer, LocalDate familiehendelse) {

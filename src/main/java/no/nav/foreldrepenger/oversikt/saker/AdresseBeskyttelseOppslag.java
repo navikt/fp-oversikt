@@ -1,8 +1,9 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 
 public interface AdresseBeskyttelseOppslag {
 
-    no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr);
+    AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr);
 }

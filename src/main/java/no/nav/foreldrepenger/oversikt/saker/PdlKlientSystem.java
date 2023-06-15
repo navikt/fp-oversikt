@@ -25,19 +25,22 @@ import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 public class PdlKlientSystem extends AbstractPersonKlient implements AdresseBeskyttelseOppslag {
 
     @Override
-    public no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) {
+    public AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) {
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr.value());
         var projection = new PersonResponseProjection()
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-        var person = hentPerson(request, projection);
+        var person = hentPerson(request, projection, true);
+
+        if (person == null) {
+            throw new BrukerIkkeFunnetIPdlException();
+        }
 
         var gradering = person.getAdressebeskyttelse().stream()
-            .map(Adressebeskyttelse::getGradering)
-            .map(PdlKlientSystem::tilGradering)
-            .collect(Collectors.toSet());
-
-        return new no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse(gradering);
+                .map(Adressebeskyttelse::getGradering)
+                .map(PdlKlientSystem::tilGradering)
+                .collect(Collectors.toSet());
+        return new AdresseBeskyttelse(gradering);
     }
 
     private static AdresseBeskyttelse.Gradering tilGradering(AdressebeskyttelseGradering adressebeskyttelseGradering) {
