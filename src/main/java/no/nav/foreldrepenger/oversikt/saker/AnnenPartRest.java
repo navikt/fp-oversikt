@@ -52,6 +52,11 @@ public class AnnenPartRest {
             return null;
         }
 
+        if (request.annenPartFødselsnummer() == null || request.annenPartFødselsnummer().value().isBlank()) {
+            LOG.warn("Feil input annen parts fnr {}. Returnerer tomt resultat", request.annenPartFødselsnummer());
+            return null;
+        }
+
         LOG.info("Kall mot annenPart endepunkt");
         var søkerAktørId = innloggetBruker.aktørId();
         var annenPartAktørId = aktørIdOppslag.forFnr(request.annenPartFødselsnummer());
@@ -64,6 +69,6 @@ public class AnnenPartRest {
         return vedtak.orElse(null);
     }
 
-    record AnnenPartVedtakRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer, LocalDate familiehendelse) {
+    record AnnenPartVedtakRequest(@Valid Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer, LocalDate familiehendelse) {
     }
 }
