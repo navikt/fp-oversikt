@@ -41,4 +41,5 @@ class AnnenPartRestAutoriseringTest {
 
         assertThatThrownBy(() -> annenPartRest.hent(request)).isExactlyInstanceOf(ManglerTilgangException.class);
     }
+
 }
