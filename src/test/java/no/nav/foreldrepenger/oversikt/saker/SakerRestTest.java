@@ -130,9 +130,16 @@ class SakerRestTest {
         var tjeneste = new SakerRest(new Saker(repository, AktørId::value), innloggetBruker);
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
-        var søknad = new SvpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now());
+        var aktivitet = new SvpSak.Aktivitet(SvpSak.Aktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null);
+        var oppholdsperioder = Set.of(new SvpSak.OppholdPeriode(now(), now(), SvpSak.OppholdPeriode.Årsak.FERIE));
+        var tilrettelegging = new SvpSak.Søknad.Tilrettelegging(aktivitet, now(), "risiko", "tiltak",
+            Set.of(new SvpSak.Søknad.Tilrettelegging.Periode(now(), SvpSak.TilretteleggingType.DELVIS, new Prosent(50))), oppholdsperioder);
+        var søknad = new SvpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(tilrettelegging));
+        var arbeidsforholdUttak = new SvpSak.Vedtak.ArbeidsforholdUttak(aktivitet, now(), "risk", "til", Set.of(
+            new SvpSak.Vedtak.ArbeidsforholdUttak.SvpPeriode(now(), now(), SvpSak.TilretteleggingType.DELVIS, new Prosent(50), new Prosent(50),
+                SvpSak.Vedtak.ArbeidsforholdUttak.SvpPeriode.ResultatÅrsak.INNVILGET)), oppholdsperioder, null);
         var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse,
-            true, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now())));
+            true, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now(), Set.of(arbeidsforholdUttak))));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();

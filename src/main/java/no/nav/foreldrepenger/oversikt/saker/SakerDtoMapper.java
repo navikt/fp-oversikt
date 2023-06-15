@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.common.innsyn.EsSak;
 import no.nav.foreldrepenger.common.innsyn.FpSak;
-import no.nav.foreldrepenger.common.innsyn.SvpSak;
+import no.nav.foreldrepenger.common.innsyn.svp.SvpSak;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 
 final class SakerDtoMapper {

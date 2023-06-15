@@ -1,8 +1,19 @@
 package no.nav.foreldrepenger.oversikt.domene.svp;
 
-import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
+import static no.nav.foreldrepenger.oversikt.domene.NullUtil.nullSafe;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
-public record SvpSøknad(SøknadStatus status, LocalDateTime mottattTidspunkt) {
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
+
+public record SvpSøknad(@JsonProperty("status") SøknadStatus status,
+                        @JsonProperty("mottattTidspunkt") LocalDateTime mottattTidspunkt,
+                        @JsonProperty("tilrettelegginger") Set<Tilrettelegging> tilrettelegginger) {
+
+    public Set<Tilrettelegging> tilrettelegginger() {
+        return nullSafe(tilrettelegginger);
+    }
 }

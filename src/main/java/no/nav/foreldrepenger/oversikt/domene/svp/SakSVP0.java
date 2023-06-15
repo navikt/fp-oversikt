@@ -1,19 +1,14 @@
 package no.nav.foreldrepenger.oversikt.domene.svp;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+import static no.nav.foreldrepenger.oversikt.domene.NullUtil.nullSafe;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
-import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.common.innsyn.SvpSak;
-import no.nav.foreldrepenger.common.innsyn.SvpÅpenBehandling;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -29,6 +24,21 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                       @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements Sak {
 
     @Override
+    public Set<Aksjonspunkt> aksjonspunkt() {
+        return nullSafe(aksjonspunkt);
+    }
+
+    @Override
+    public Set<SvpSøknad> søknader() {
+        return nullSafe(søknader);
+    }
+
+    @Override
+    public Set<SvpVedtak> vedtak() {
+        return nullSafe(vedtak);
+    }
+
+    @Override
     public boolean harSøknad() {
         return søknader != null && !søknader.isEmpty();
     }
@@ -39,18 +49,7 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.SvpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
-        var familiehendelse = familieHendelse == null ? null : familieHendelse.tilDto();
-        return new SvpSak(saksnummer.tilDto(), familiehendelse, avsluttet, tilÅpenBehandling(), oppdatertTidspunkt());
-    }
-
-    private SvpÅpenBehandling tilÅpenBehandling() {
-        return søknadUnderBehandling().map(s -> new SvpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()))).orElse(null);
-    }
-
-    private Optional<SvpSøknad> søknadUnderBehandling() {
-        return safeStream(søknader())
-            .max(Comparator.comparing(SvpSøknad::mottattTidspunkt))
-            .filter(sisteSøknad -> !sisteSøknad.status().behandlet());
+    public no.nav.foreldrepenger.common.innsyn.svp.SvpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
+        return DtoMapper.mapFra(this);
     }
 }

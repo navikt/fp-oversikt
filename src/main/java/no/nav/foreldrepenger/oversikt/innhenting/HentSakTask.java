@@ -17,11 +17,15 @@ import org.slf4j.LoggerFactory;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
-import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
-import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.SakRepository;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.domene.es.EsSøknad;
 import no.nav.foreldrepenger.oversikt.domene.es.EsVedtak;
-import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.es.SakES0;
+import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
+import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
@@ -31,17 +35,21 @@ import no.nav.foreldrepenger.oversikt.domene.fp.MorsAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.fp.OppholdÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.OverføringÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
-import no.nav.foreldrepenger.oversikt.domene.es.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
-import no.nav.foreldrepenger.oversikt.domene.SakRepository;
-import no.nav.foreldrepenger.oversikt.domene.svp.SakSVP0;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.svp.SvpSøknad;
-import no.nav.foreldrepenger.oversikt.domene.svp.SvpVedtak;
-import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.domene.fp.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
+import no.nav.foreldrepenger.oversikt.domene.svp.Aktivitet;
+import no.nav.foreldrepenger.oversikt.domene.svp.ArbeidsforholdUttak;
+import no.nav.foreldrepenger.oversikt.domene.svp.OppholdPeriode;
+import no.nav.foreldrepenger.oversikt.domene.svp.ResultatÅrsak;
+import no.nav.foreldrepenger.oversikt.domene.svp.SakSVP0;
+import no.nav.foreldrepenger.oversikt.domene.svp.SvpPeriode;
+import no.nav.foreldrepenger.oversikt.domene.svp.SvpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.svp.SvpVedtak;
+import no.nav.foreldrepenger.oversikt.domene.svp.Tilrettelegging;
+import no.nav.foreldrepenger.oversikt.domene.svp.TilretteleggingPeriode;
+import no.nav.foreldrepenger.oversikt.domene.svp.TilretteleggingType;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -106,7 +114,39 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<SvpVedtak> tilSvpVedtak(Set<SvpSak.Vedtak> vedtak) {
-        return safeStream(vedtak).map(v -> new SvpVedtak(v.vedtakstidspunkt())).collect(Collectors.toSet());
+        return safeStream(vedtak).map(v -> {
+            var arbeidsforhold = v.arbeidsforhold().stream().map(HentSakTask::tilArbeidsforhold).collect(Collectors.toSet());
+            return new SvpVedtak(v.vedtakstidspunkt(), arbeidsforhold);
+        }).collect(Collectors.toSet());
+    }
+
+    private static ArbeidsforholdUttak tilArbeidsforhold(SvpSak.Vedtak.ArbeidsforholdUttak a) {
+        var svpPerioder = a.svpPerioder().stream().map(HentSakTask::tilSvpPeriode).collect(Collectors.toSet());
+        var oppholdsperioder = a.oppholdsperioder().stream().map(HentSakTask::tilOppholdPeriode).collect(Collectors.toSet());
+        var ikkeOppfyltÅrsak = a.ikkeOppfyltÅrsak() == null ? null : switch (a.ikkeOppfyltÅrsak()) {
+            case ARBEIDSGIVER_KAN_TILRETTELEGGE -> ArbeidsforholdUttak.ArbeidsforholdIkkeOppfyltÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE;
+            case ARBEIDSGIVER_KAN_TILRETTELEGGE_FREM_TIL_3_UKER_FØR_TERMIN ->
+                ArbeidsforholdUttak.ArbeidsforholdIkkeOppfyltÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE_FREM_TIL_3_UKER_FØR_TERMIN;
+            case ANNET -> ArbeidsforholdUttak.ArbeidsforholdIkkeOppfyltÅrsak.ANNET;
+        };
+        return new ArbeidsforholdUttak(tilAktivitet(a.aktivitet()), a.behovFom(), a.risikoFaktorer(), a.tiltak(), svpPerioder, oppholdsperioder,
+            ikkeOppfyltÅrsak);
+    }
+
+    private static SvpPeriode tilSvpPeriode(SvpSak.Vedtak.ArbeidsforholdUttak.SvpPeriode periode) {
+        var resultatÅrsak = switch (periode.resultatÅrsak()) {
+            case INNVILGET -> ResultatÅrsak.INNVILGET;
+            case AVSLAG_SØKNADSFRIST -> ResultatÅrsak.AVSLAG_SØKNADSFRIST;
+            case AVSLAG_ANNET -> ResultatÅrsak.AVSLAG_ANNET;
+            case AVSLAG_INNGANGSVILKÅR -> ResultatÅrsak.AVSLAG_INNGANGSVILKÅR;
+            case OPPHØR_OVERGANG_FORELDREPENGER -> ResultatÅrsak.OPPHØR_OVERGANG_FORELDREPENGER;
+            case OPPHØR_FØDSEL -> ResultatÅrsak.OPPHØR_FØDSEL;
+            case OPPHØR_TIDSPERIODE_FØR_TERMIN -> ResultatÅrsak.OPPHØR_TIDSPERIODE_FØR_TERMIN;
+            case OPPHØR_OPPHOLD_I_YTELSEN -> ResultatÅrsak.OPPHØR_OPPHOLD_I_YTELSEN;
+            case OPPHØR_ANNET -> ResultatÅrsak.OPPHØR_ANNET;
+        };
+        return new SvpPeriode(periode.fom(), periode.tom(), tilTilretteleggingType(periode.tilretteleggingType()), periode.arbeidstidprosent(),
+            periode.utbetalingsgrad(), resultatÅrsak);
     }
 
     private static Set<EsVedtak> tilEsVedtak(Set<EsSak.Vedtak> vedtak) {
@@ -138,7 +178,43 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static SvpSøknad tilSvpSøknad(SvpSak.Søknad søknad) {
-        return new SvpSøknad(map(søknad.status()), søknad.mottattTidspunkt());
+        return new SvpSøknad(map(søknad.status()), søknad.mottattTidspunkt(), tilTilrettelegginger(søknad.tilrettelegginger()));
+    }
+
+    private static Set<Tilrettelegging> tilTilrettelegginger(Set<SvpSak.Søknad.Tilrettelegging> tilrettelegginger) {
+        return tilrettelegginger.stream().map(t -> new Tilrettelegging(tilAktivitet(t.aktivitet()), t.behovFom(), t.risikoFaktorer(), t.tiltak(),
+            t.perioder().stream().map(HentSakTask::tilTilrettleggingPeriode).collect(Collectors.toSet()),
+            t.oppholdsperioder().stream().map(HentSakTask::tilOppholdPeriode).collect(Collectors.toSet())))
+            .collect(Collectors.toSet());
+    }
+
+    private static OppholdPeriode tilOppholdPeriode(SvpSak.OppholdPeriode oppholdPeriode) {
+        return new OppholdPeriode(oppholdPeriode.fom(), oppholdPeriode.tom(), switch (oppholdPeriode.årsak()) {
+            case FERIE -> OppholdPeriode.Årsak.FERIE;
+            case SYKEPENGER -> OppholdPeriode.Årsak.SYKEPENGER;
+        });
+    }
+
+    private static TilretteleggingPeriode tilTilrettleggingPeriode(SvpSak.Søknad.Tilrettelegging.Periode periode) {
+        return new TilretteleggingPeriode(periode.fom(), tilTilretteleggingType(periode.type()), periode.arbeidstidprosent());
+    }
+
+    private static TilretteleggingType tilTilretteleggingType(SvpSak.TilretteleggingType type) {
+        return switch (type) {
+            case HEL -> TilretteleggingType.HEL;
+            case DELVIS -> TilretteleggingType.DELVIS;
+            case INGEN -> TilretteleggingType.INGEN;
+        };
+    }
+
+    private static Aktivitet tilAktivitet(SvpSak.Aktivitet aktivitet) {
+        var type = switch (aktivitet.type()) {
+            case ORDINÆRT_ARBEID -> Aktivitet.Type.ORDINÆRT_ARBEID;
+            case SELVSTENDIG_NÆRINGSDRIVENDE -> Aktivitet.Type.SELVSTENDIG_NÆRINGSDRIVENDE;
+            case FRILANS -> Aktivitet.Type.FRILANS;
+        };
+        var arbeidsgiver = tilArbeidsgiver(aktivitet.arbeidsgiver());
+        return new Aktivitet(type, arbeidsgiver, aktivitet.arbeidsforholdId());
     }
 
     private static FpSøknad tilFpSøknad(FpSak.Søknad søknad) {
@@ -310,11 +386,15 @@ public class HentSakTask implements ProsessTaskHandler {
 
     private static Uttaksperiode.UttaksperiodeAktivitet tilUttaksperiodeAktivitet(FpSak.Uttaksperiode.UttaksperiodeAktivitet a) {
         var type = tilUttakAktivitetType(a);
-        var arbeidsgiver = a.aktivitet().arbeidsgiver() == null ? null : new Arbeidsgiver(a.aktivitet().arbeidsgiver().identifikator());
+        var arbeidsgiver = tilArbeidsgiver(a.aktivitet().arbeidsgiver());
         var arbeidsforholdId = a.aktivitet().arbeidsforholdId();
         var trekkdager = a.trekkdager();
         return new Uttaksperiode.UttaksperiodeAktivitet(new UttakAktivitet(type, arbeidsgiver, arbeidsforholdId), tilKonto(a.konto()), trekkdager,
             a.arbeidstidsprosent());
+    }
+
+    private static Arbeidsgiver tilArbeidsgiver(Arbeidsgiver arbeidsgiver) {
+        return arbeidsgiver == null ? null : new Arbeidsgiver(arbeidsgiver.identifikator());
     }
 
     private static UttakAktivitet.Type tilUttakAktivitetType(FpSak.Uttaksperiode.UttaksperiodeAktivitet a) {
