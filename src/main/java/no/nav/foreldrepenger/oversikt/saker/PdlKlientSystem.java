@@ -30,7 +30,7 @@ public class PdlKlientSystem extends AbstractPersonKlient implements AdresseBesk
         request.setIdent(fnr.value());
         var projection = new PersonResponseProjection()
             .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-        var person = hentPerson(request, projection);
+        var person = hentPerson(request, projection, true);
 
         if (person == null) {
             throw new BrukerIkkeFunnetIPdlException();
