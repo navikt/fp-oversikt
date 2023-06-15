@@ -8,7 +8,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -24,7 +23,7 @@ class AnnenPartRestAutoriseringTest {
     @Test
     void sjekkAtEndepunktReturnereNullNårDetErBeskyttetAdresse() {
         innloggetBorger();
-        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(Optional.of(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT))));
+        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
         var annenPartRest = new AnnenPartRest(null, null, null, adresseBeskyttelseOppslag);
 
         var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);
@@ -35,23 +34,11 @@ class AnnenPartRestAutoriseringTest {
     @Test
     void innloggetAnsattSkalIkkeHenteAnnenpartsVedtakEndepunktet() {
         innloggetSaksbehandler();
-        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(Optional.of(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.UGRADERT))));
+        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.UGRADERT)));
         var annenPartRest = new AnnenPartRest(null, null, null, adresseBeskyttelseOppslag);
 
         var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);
 
         assertThatThrownBy(() -> annenPartRest.hent(request)).isExactlyInstanceOf(ManglerTilgangException.class);
     }
-
-    @Test
-    void hvisViIkkeFinnerPersonReturnerNull() {
-        innloggetSaksbehandler();
-        when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(Optional.empty());
-        var annenPartRest = new AnnenPartRest(null, null, null, adresseBeskyttelseOppslag);
-
-        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);
-
-        assertThatThrownBy(() -> annenPartRest.hent(request)).isExactlyInstanceOf(ManglerTilgangException.class);
-    }
-
 }
