@@ -19,6 +19,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import org.junit.jupiter.api.Test;
+
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
+import no.nav.foreldrepenger.common.innsyn.Person;
+import no.nav.foreldrepenger.common.innsyn.RettighetType;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
@@ -26,16 +32,9 @@ import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
-import no.nav.foreldrepenger.oversikt.domene.fp.*;
-import org.junit.jupiter.api.Test;
-
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
-import no.nav.foreldrepenger.common.innsyn.Person;
-import no.nav.foreldrepenger.common.innsyn.RettighetType;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.UttaksperiodeAktivitet;
 
-class SakFP0TilDtoMapperTest {
+class SakFP0Test {
 
     @Test
     void verifiser_at_gjeldende_vedtak_er_det_med_senest_vedtakstidspunkt() {

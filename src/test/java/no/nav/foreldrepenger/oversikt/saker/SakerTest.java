@@ -56,7 +56,7 @@ class SakerTest {
             Set.of(), Dekningsgrad.HUNDRE)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
         var henlagtSvpSak = new SakSVP0(Saksnummer.dummy(), aktørId, true, new FamilieHendelse(null, LocalDate.now(),
-            0, null), Set.of(), Set.of(new SvpSøknad(SøknadStatus.BEHANDLET, now())), Set.of(), now());
+            0, null), Set.of(), Set.of(new SvpSøknad(SøknadStatus.BEHANDLET, now(), Set.of())), Set.of(), now());
         var henlagtEsSak = new SakES0(Saksnummer.dummy(), aktørId, true, fh(), Set.of(), Set.of(new EsSøknad(SøknadStatus.BEHANDLET,
             now())), Set.of(), now());
         var repository = new RepositoryStub();

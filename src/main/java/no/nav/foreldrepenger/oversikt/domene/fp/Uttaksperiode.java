@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import no.nav.foreldrepenger.common.innsyn.Aktivitet;
+import no.nav.foreldrepenger.common.innsyn.Arbeidstidprosent;
 import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.SamtidigUttak;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
@@ -42,7 +43,7 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
             return Optional.empty();
         }
         var gradertAktivitet = finnGradertAktivitet(resultat());
-        return gradertAktivitet.map(a -> new Gradering(new Gradering.Arbeidstidprosent(a.arbeidstidsprosent().decimalValue()),
+        return gradertAktivitet.map(a -> new Gradering(new Arbeidstidprosent(a.arbeidstidsprosent().decimalValue()),
             new Aktivitet(a.aktivitet().type().tilDto(), a.aktivitet().arbeidsgiver() == null ? null : a.aktivitet().arbeidsgiver().tilDto())));
     }
 
