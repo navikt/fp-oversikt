@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandler;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandlerUtenDrift;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.umyndigInnloggetBruker;
 import static org.assertj.core.api.Assertions.assertThatCode;
@@ -27,7 +27,7 @@ class SakerRestTilgangssjekkTest {
 
     @Test
     void innlogget_saksbehandler_skal_ikke_få_tilgang_til_saker() {
-        innloggetSaksbehandler();
+        innloggetSaksbehandlerUtenDrift();
         var myndigCase = new SakerRest(saker, myndigInnloggetBruker());
         assertThatThrownBy(myndigCase::hent).isExactlyInstanceOf(ManglerTilgangException.class);
     }

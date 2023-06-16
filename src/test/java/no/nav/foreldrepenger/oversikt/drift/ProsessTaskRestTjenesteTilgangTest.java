@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
 import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandler;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandlerUtenDrift;
 import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandlerMedDriftRolle;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -20,7 +20,7 @@ class ProsessTaskRestTjenesteTilgangTest {
 
     @Test
     void ansattMedSaksbehandlerRolleIKKESkalFåTilgang() {
-        innloggetSaksbehandler();
+        innloggetSaksbehandlerUtenDrift();
         assertThatThrownBy(ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
@@ -32,7 +32,7 @@ class ProsessTaskRestTjenesteTilgangTest {
 
     @Test
     void verifiserAtSamtligeEndepunktHarSjekk() {
-        innloggetSaksbehandler();
+        innloggetSaksbehandlerUtenDrift();
         var prosessTaskRestTjeneste = new ProsessTaskRestTjeneste(null);
 
         assertThatThrownBy(() -> prosessTaskRestTjeneste.createProsessTask(null)).isExactlyInstanceOf(ManglerTilgangException.class);
