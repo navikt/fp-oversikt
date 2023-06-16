@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.server;
 
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FpoversiktException;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
@@ -17,7 +18,11 @@ public class GeneralRestExceptionMapper implements ExceptionMapper<Throwable> {
     @Override
     public Response toResponse(Throwable exception) {
         if (exception instanceof ManglerTilgangException manglerTilgangException) {
-            return Response.status(manglerTilgangException.getStatusCode())
+            if (FeilKode.IKKE_TILGANG_UMYNDIG.equals(manglerTilgangException.getFeilKode()) {
+                return Response.noContent().build();
+            }
+
+            return Response.status(manglerTilgangException.getStatusCode())R
                 .entity(problemDetails(manglerTilgangException))
                 .build();
         }
