@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
 
+import static no.nav.foreldrepenger.common.domain.validation.InputValideringRegex.BARE_TALL;
 import static no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste.sjekkAtSaksbehandlerHarRollenDrift;
 
 import java.time.Instant;
@@ -12,6 +13,7 @@ import javax.inject.Inject;
 import javax.transaction.Transactional;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Pattern;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -27,7 +29,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
@@ -59,27 +60,27 @@ public class ManuellOppdateringAvSakDriftTjeneste {
         @ApiResponse(responseCode = "200", description = "HentSakTask opprettet for alle saknsummre"),
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
-    public Response opprettHentSakTaskForSaksnummre(@Parameter(description = "Liste med saksnummre som skal oppdateres") @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
+    public Response opprettHentSakTaskForSaksnummre(@Parameter(description = "Liste med saksnummre som skal oppdateres") @NotNull List<@Valid @NotNull @Pattern(regexp = BARE_TALL) String> saksnummre) {
         sjekkAtSaksbehandlerHarRollenDrift();
         for (var saksnummer : saksnummre) {
-            LOG.info("Lager task for å oppdatere følgende sak {}", saksnummer.value());
+            LOG.info("Lager task for å oppdatere følgende sak {}", saksnummer);
             lagreHentSakTask(saksnummer);
         }
         return Response.ok().build();
     }
 
-    private void lagreHentSakTask(Saksnummer saksnummer) {
+    private void lagreHentSakTask(String saksnummer) {
         var task = opprettTask(saksnummer);
         taskTjeneste.lagre(task);
     }
 
-    public static ProsessTaskData opprettTask(Saksnummer saksnummer) {
+    public static ProsessTaskData opprettTask(String saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
-        task.setProperty(HentSakTask.SAKSNUMMER, saksnummer.value());
+        task.setProperty(HentSakTask.SAKSNUMMER, saksnummer);
         task.setPrioritet(50);
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
-        task.setGruppe(saksnummer.value());
+        task.setGruppe(saksnummer);
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
     }
