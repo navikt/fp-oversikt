@@ -6,7 +6,6 @@ import static no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste.sjekk
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.UUID;
 
 import javax.enterprise.context.RequestScoped;
 import javax.inject.Inject;
@@ -34,7 +33,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 
 @OpenAPIDefinition(tags = @Tag(name = "saker", description = "Manuell oppdatering av saker"))
-@Path("/saker")
+@Path("/forvaltningSaker")
 @Produces(MediaType.APPLICATION_JSON)
 @RequestScoped
 @Transactional
@@ -76,7 +75,6 @@ public class ManuellOppdateringAvSakDriftTjeneste {
 
     public static ProsessTaskData opprettTask(Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
-        task.setCallId(UUID.randomUUID().toString());
         task.setProperty(HentSakTask.SAKSNUMMER, saksnummer.value());
         task.setPrioritet(50);
         task.medNesteKjøringEtter(LocalDateTime.now());
