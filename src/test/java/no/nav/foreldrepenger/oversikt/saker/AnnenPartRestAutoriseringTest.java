@@ -1,7 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandler;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandlerUtenDrift;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +33,7 @@ class AnnenPartRestAutoriseringTest {
 
     @Test
     void innloggetAnsattSkalIkkeHenteAnnenpartsVedtakEndepunktet() {
-        innloggetSaksbehandler();
+        innloggetSaksbehandlerUtenDrift();
         when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.UGRADERT)));
         var annenPartRest = new AnnenPartRest(null, null, null, adresseBeskyttelseOppslag);
 

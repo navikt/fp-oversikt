@@ -59,7 +59,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 public class HentSakTask implements ProsessTaskHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(HentSakTask.class);
-    static final String SAKSNUMMER = "saksnummer";
+    public static final String SAKSNUMMER = "saksnummer";
 
     private final FpsakTjeneste fpSakKlient;
     private final SakRepository sakRepository;

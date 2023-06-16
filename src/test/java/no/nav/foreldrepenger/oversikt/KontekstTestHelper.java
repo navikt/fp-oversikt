@@ -18,7 +18,7 @@ public class KontekstTestHelper {
         KontekstHolder.setKontekst(kontekst);
     }
 
-    public static void innloggetSaksbehandler() {
+    public static void innloggetSaksbehandlerUtenDrift() {
         var kontekst = mock(RequestKontekst.class);
         when(kontekst.harKontekst()).thenReturn(true);
         when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
