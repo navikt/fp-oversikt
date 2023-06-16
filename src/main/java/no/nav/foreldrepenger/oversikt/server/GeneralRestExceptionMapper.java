@@ -1,14 +1,14 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.FpoversiktException;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.ext.ExceptionMapper;
+import javax.ws.rs.ext.Provider;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.core.Response;
-import javax.ws.rs.ext.ExceptionMapper;
-import javax.ws.rs.ext.Provider;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FpoversiktException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
 @Provider
 public class GeneralRestExceptionMapper implements ExceptionMapper<Throwable> {
