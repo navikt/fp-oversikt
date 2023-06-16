@@ -126,7 +126,7 @@ final class DtoMapper {
             case DELVIS -> TilretteleggingType.DELVIS;
             case INGEN -> TilretteleggingType.INGEN;
         };
-        var arbeidstidprosent = new Arbeidstidprosent(tilretteleggingPeriode.arbeidstidprosent().decimalValue());
+        var arbeidstidprosent = tilretteleggingPeriode.arbeidstidprosent() == null ? null : new Arbeidstidprosent(tilretteleggingPeriode.arbeidstidprosent().decimalValue());
         return new no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging(tilretteleggingPeriode.fom(), tom, type, arbeidstidprosent,
             null);
     }
