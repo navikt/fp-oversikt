@@ -15,7 +15,15 @@ final class SakerDtoMapper {
 
     static no.nav.foreldrepenger.common.innsyn.Saker tilDto(List<Sak> saker, FødselsnummerOppslag fnrOppslag) {
         var sakerDtoer = saker.stream()
-            .map(s -> s.tilSakDto(fnrOppslag))
+            .map(s -> {
+                no.nav.foreldrepenger.common.innsyn.Sak mapped;
+                try {
+                    mapped = s.tilSakDto(fnrOppslag);
+                } catch (Exception e) {
+                    throw new DtoMappingException("Feil ved mapping fra db til dto for saksnummer " + s.saksnummer().value(), e);
+                }
+                return mapped;
+            })
             .collect(Collectors.toSet());
 
         var foreldrepenger = sakerDtoer.stream()
@@ -31,5 +39,12 @@ final class SakerDtoMapper {
             .map(EsSak.class::cast)
             .collect(Collectors.toSet());
         return new no.nav.foreldrepenger.common.innsyn.Saker(foreldrepenger, engangsstønad, svangeskapspenger);
+    }
+
+    private static class DtoMappingException extends RuntimeException {
+
+        public DtoMappingException(String msg, Exception cause) {
+            super(msg, cause);
+        }
     }
 }
