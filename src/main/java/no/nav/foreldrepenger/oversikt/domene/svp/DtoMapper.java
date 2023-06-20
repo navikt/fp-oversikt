@@ -33,7 +33,7 @@ final class DtoMapper {
             .orElse(null);
         var åpenBehandling = søknadUnderBehandling(sak).map(s -> {
             var behandlingTilstand = BehandlingTilstandUtleder.utled(sak.aksjonspunkt());
-            var avslutningDato = utledDato(sak.familieHendelse());
+            var avslutningDato = sak.familieHendelse() == null ? null : utledDato(sak.familieHendelse());
             var søknadDto = tilDto(s, avslutningDato);
             return new ÅpenBehandling(behandlingTilstand, søknadDto);
         }).orElse(null);
