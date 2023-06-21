@@ -11,22 +11,26 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
-import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.Sak;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.domene.es.EsSøknad;
 import no.nav.foreldrepenger.oversikt.domene.es.EsVedtak;
-import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
-import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
-import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
-import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
-import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.es.SakES0;
+import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
+import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
+import no.nav.foreldrepenger.oversikt.domene.fp.Konto;
+import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
+import no.nav.foreldrepenger.oversikt.domene.svp.Aktivitet;
 import no.nav.foreldrepenger.oversikt.domene.svp.SakSVP0;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.svp.SvpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.svp.SvpVedtak;
-import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
+import no.nav.foreldrepenger.oversikt.domene.svp.Tilrettelegging;
 
 
 class SakerDtoMapperTest {
@@ -122,7 +126,8 @@ class SakerDtoMapperTest {
     }
 
     static SakSVP0 svpSak(AktørId aktørId) {
-        return new SakSVP0(Saksnummer.dummy(), aktørId, false, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, now(), Set.of())),
+        return new SakSVP0(Saksnummer.dummy(), aktørId, false, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, now(), Set.of(new Tilrettelegging(new Aktivitet(
+            Aktivitet.Type.FRILANS, null, null), null, null, null, Set.of(), Set.of())))),
             Set.of(new SvpVedtak(LocalDateTime.now(), Set.of())), now());
     }
 
@@ -130,7 +135,8 @@ class SakerDtoMapperTest {
         var dekningsgrad = Dekningsgrad.HUNDRE;
         var vedtak = new FpVedtak(LocalDateTime.now(), List.of(), dekningsgrad);
         return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(vedtak), AktørId.dummy(), fh(), Set.of(),
-            Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(), dekningsgrad)), BrukerRolle.MOR,
+            Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now(), Konto.MØDREKVOTE,
+                null, null, null, null, null, false, null)), dekningsgrad)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
     }
 

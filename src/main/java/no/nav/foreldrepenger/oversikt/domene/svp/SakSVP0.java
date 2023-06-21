@@ -3,6 +3,8 @@ package no.nav.foreldrepenger.oversikt.domene.svp;
 import static no.nav.foreldrepenger.oversikt.domene.NullUtil.nullSafe;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -49,7 +51,18 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
+    public boolean erUpunchetPapirsøknad() {
+        return søknadUnderBehandling().map(s -> s.tilrettelegginger().isEmpty()).orElse(false);
+    }
+
+    @Override
     public no.nav.foreldrepenger.common.innsyn.svp.SvpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
         return DtoMapper.mapFra(this);
+    }
+
+    public Optional<SvpSøknad> søknadUnderBehandling() {
+        return søknader().stream()
+            .max(Comparator.comparing(SvpSøknad::mottattTidspunkt))
+            .filter(sisteSøknad -> !sisteSøknad.status().behandlet());
     }
 }

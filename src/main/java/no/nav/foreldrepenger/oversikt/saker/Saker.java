@@ -36,6 +36,7 @@ public class Saker {
     List<Sak> hentSaker(AktørId aktørId) {
         return sakRepository.hentFor(aktørId).stream()
             .filter(Sak::harSøknad)
+            .filter(not(Sak::erUpunchetPapirsøknad))
             .filter(not(Sak::erHenlagt))
             .toList();
     }
