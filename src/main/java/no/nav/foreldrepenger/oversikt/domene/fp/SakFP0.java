@@ -43,6 +43,11 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
+    public boolean erUpunchetPapirsøknad() {
+        return søknadUnderBehandling().map(s -> s.perioder().isEmpty()).orElse(false);
+    }
+
+    @Override
     public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
         var sisteSøknad = sisteSøknad();
         var gjeldendeVedtak = gjeldendeVedtak();

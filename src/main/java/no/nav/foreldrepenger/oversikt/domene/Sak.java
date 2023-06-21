@@ -32,6 +32,8 @@ public interface Sak {
 
     boolean avsluttet();
 
+    boolean erUpunchetPapirsøknad();
+
     default boolean erHenlagt() {
         return !harVedtak() && avsluttet();
     }

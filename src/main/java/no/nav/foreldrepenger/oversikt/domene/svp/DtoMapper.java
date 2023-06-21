@@ -31,7 +31,7 @@ final class DtoMapper {
         var gjeldendeVedtak = gjeldendeVedtak(sak)
             .map(DtoMapper::tilDto)
             .orElse(null);
-        var åpenBehandling = søknadUnderBehandling(sak).map(s -> {
+        var åpenBehandling = sak.søknadUnderBehandling().map(s -> {
             var behandlingTilstand = BehandlingTilstandUtleder.utled(sak.aksjonspunkt());
             var avslutningDato = sak.familieHendelse() == null ? null : utledDato(sak.familieHendelse());
             var søknadDto = tilDto(s, avslutningDato);
@@ -133,11 +133,5 @@ final class DtoMapper {
 
     private static Optional<SvpVedtak> gjeldendeVedtak(SakSVP0 sak) {
         return sak.vedtak().stream().max(Comparator.comparing(SvpVedtak::vedtakstidspunkt));
-    };
-
-    private static Optional<SvpSøknad> søknadUnderBehandling(SakSVP0 sak) {
-        return sak.søknader().stream()
-            .max(Comparator.comparing(SvpSøknad::mottattTidspunkt))
-            .filter(sisteSøknad -> !sisteSøknad.status().behandlet());
     }
 }
