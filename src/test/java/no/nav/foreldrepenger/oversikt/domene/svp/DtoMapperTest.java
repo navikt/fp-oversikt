@@ -27,7 +27,7 @@ class DtoMapperTest {
         var antallBarn = 1;
         var aktivitet = new Aktivitet(Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null);
         var arbeidstidprosent = new Prosent(50);
-        var oppholdPeriode = new OppholdPeriode(now(), now(), FERIE);
+        var oppholdPeriode = new OppholdPeriode(now(), now(), FERIE, OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
         var tlPeriode = new TilretteleggingPeriode(now(), TilretteleggingType.DELVIS, arbeidstidprosent);
         var tilrettelegging = new Tilrettelegging(aktivitet, now(), "risiko", "tiltak",
             Set.of(tlPeriode),
@@ -69,6 +69,8 @@ class DtoMapperTest {
         assertThat(tl2.tom()).isEqualTo(svpPeriode.tom());
         assertThat(tl2.arbeidstidprosent().value()).isEqualTo(arbeidstidprosent.decimalValue());
         assertThat(tl2.type()).isEqualTo(no.nav.foreldrepenger.common.innsyn.svp.TilretteleggingType.DELVIS);
+        assertThat(arbeidsforhold.oppholdsperioder()).hasSize(1);
+        assertThat(arbeidsforhold.oppholdsperioder().stream().toList().get(0).oppholdKilde()).isEqualTo(no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
 
         assertThat(dto.åpenBehandling().søknad().arbeidsforhold()).hasSize(1);
         var arbeidsforholdSøknad = dto.åpenBehandling().søknad().arbeidsforhold().stream().findFirst().orElseThrow();

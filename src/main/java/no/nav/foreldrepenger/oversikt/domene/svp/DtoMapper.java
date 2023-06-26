@@ -114,10 +114,15 @@ final class DtoMapper {
     }
 
     private static no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode tilDto(OppholdPeriode opphold) {
-        return new no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode(opphold.fom(), opphold.tom(), switch (opphold.årsak()) {
+        return new no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode(opphold.fom(), opphold.tom(),
+            switch (opphold.årsak()) {
             case FERIE -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.Årsak.FERIE;
             case SYKEPENGER -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.Årsak.SYKEPENGER;
-        });
+            },
+            switch (opphold.kilde()) {
+            case SAKSBEHANDLER -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
+            case INNTEKTSMELDING -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
+            });
     }
 
     private static no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging tilDto(TilretteleggingPeriode tilretteleggingPeriode, LocalDate tom) {
