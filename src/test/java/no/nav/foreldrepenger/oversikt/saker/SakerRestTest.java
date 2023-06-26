@@ -25,6 +25,7 @@ import no.nav.foreldrepenger.common.innsyn.Dekningsgrad;
 import no.nav.foreldrepenger.common.innsyn.KontoType;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
+import no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
@@ -131,7 +132,7 @@ class SakerRestTest {
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
         var aktivitet = new SvpSak.Aktivitet(SvpSak.Aktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null);
-        var oppholdsperioder = Set.of(new SvpSak.OppholdPeriode(now(), now(), SvpSak.OppholdPeriode.Årsak.FERIE));
+        var oppholdsperioder = Set.of(new SvpSak.OppholdPeriode(now(), now(), SvpSak.OppholdPeriode.Årsak.FERIE, SvpSak.OppholdPeriode.OppholdKilde.SAKSBEHANDLER));
         var tilrettelegging = new SvpSak.Søknad.Tilrettelegging(aktivitet, now(), "risiko", "tiltak",
             Set.of(new SvpSak.Søknad.Tilrettelegging.Periode(now(), SvpSak.TilretteleggingType.DELVIS, new Prosent(50))), oppholdsperioder);
         var søknad = new SvpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(tilrettelegging));
@@ -152,6 +153,8 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
+        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().arbeidsforhold().stream().toList().get(0).oppholdsperioder().stream().toList().get(0).oppholdKilde()).isEqualTo(
+            OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
 
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
     }

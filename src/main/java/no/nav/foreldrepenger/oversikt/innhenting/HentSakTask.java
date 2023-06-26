@@ -189,10 +189,15 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static OppholdPeriode tilOppholdPeriode(SvpSak.OppholdPeriode oppholdPeriode) {
-        return new OppholdPeriode(oppholdPeriode.fom(), oppholdPeriode.tom(), switch (oppholdPeriode.årsak()) {
+        return new OppholdPeriode(oppholdPeriode.fom(), oppholdPeriode.tom(),
+            switch (oppholdPeriode.årsak()) {
             case FERIE -> OppholdPeriode.Årsak.FERIE;
             case SYKEPENGER -> OppholdPeriode.Årsak.SYKEPENGER;
-        });
+        },
+            switch (oppholdPeriode.kilde()) {
+            case SAKSBEHANDLER -> OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
+            case INNTEKTSMELDING -> OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
+            });
     }
 
     private static TilretteleggingPeriode tilTilrettleggingPeriode(SvpSak.Søknad.Tilrettelegging.Periode periode) {
