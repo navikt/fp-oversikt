@@ -9,6 +9,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
@@ -24,6 +25,8 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                       @JsonProperty("søknader") Set<SvpSøknad> søknader,
                       @JsonProperty("vedtak") Set<SvpVedtak> vedtak,
                       @JsonProperty("oppdatertTidspunkt") LocalDateTime oppdatertTidspunkt) implements Sak {
+
+    private static final Environment ENV = Environment.current();
 
     @Override
     public Set<Aksjonspunkt> aksjonspunkt() {
@@ -52,6 +55,10 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
 
     @Override
     public boolean erUpunchetPapirsøknad() {
+        if (ENV.isProd()) {
+            //Fjern etter at tilrettelegginger er migrert i prod
+            return false;
+        }
         return søknadUnderBehandling().map(s -> s.tilrettelegginger().isEmpty()).orElse(false);
     }
 
