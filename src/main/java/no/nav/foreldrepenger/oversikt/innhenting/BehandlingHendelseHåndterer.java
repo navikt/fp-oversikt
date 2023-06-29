@@ -52,11 +52,23 @@ public class BehandlingHendelseHåndterer {
             if (hendelse.getHendelse().equals(Hendelse.MIGRERING)) {
                 hentSakMedEnGang(hendelse);
             } else if (!IGNORE.contains(hendelse.getHendelse())) {
-                lagreHentSakTask(hendelse.getHendelseUuid(), new Saksnummer(hendelse.getSaksnummer()));
+                if (erNyOppdatering(hendelse)) {
+                    lagreHentSakTask(hendelse.getHendelseUuid(), new Saksnummer(hendelse.getSaksnummer()));
+                } else {
+                    LOG.info("Lager ikke task for å hente sak. Allerede oppdatert. {}", hendelse.getSaksnummer());
+                }
             }
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
         }
+    }
+
+    private boolean erNyOppdatering(BehandlingHendelseV1 hendelse) {
+        if (hendelse.getTidspunkt() == null) {
+            return true;
+        }
+        var eksisterende = sakRepository.hent(new Saksnummer(hendelse.getSaksnummer()));
+        return eksisterende.map(sak -> sak.oppdatertTidspunkt().isBefore(hendelse.getTidspunkt())).orElse(true);
     }
 
     private void hentSakMedEnGang(BehandlingHendelseV1 hendelse) {

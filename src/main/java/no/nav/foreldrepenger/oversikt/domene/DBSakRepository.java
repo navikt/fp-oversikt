@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.domene;
 import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
 import java.util.List;
+import java.util.Optional;
 
 import javax.enterprise.context.ApplicationScoped;
 import javax.inject.Inject;
@@ -20,8 +21,7 @@ public class DBSakRepository implements SakRepository {
 
     @Override
     public void lagre(Sak sak) {
-        var query = entityManager.createQuery("from sak where saksnummer =:saksnummer", SakEntitet.class).setParameter("saksnummer", sak.saksnummer().value());
-        var eksisterendeSak = hentUniktResultat(query);
+        var eksisterendeSak = hentEntitet(sak.saksnummer());
         if (eksisterendeSak.isEmpty()) {
             entityManager.persist(new SakEntitet(sak));
         } else {
@@ -39,5 +39,15 @@ public class DBSakRepository implements SakRepository {
             .stream()
             .map(SakEntitet::map)
             .toList();
+    }
+
+    @Override
+    public Optional<Sak> hent(Saksnummer saksnummer) {
+        return hentEntitet(saksnummer).map(SakEntitet::map);
+    }
+
+    private Optional<SakEntitet> hentEntitet(Saksnummer saksnummer) {
+        var query = entityManager.createQuery("from sak where saksnummer =:saksnummer", SakEntitet.class).setParameter("saksnummer", saksnummer.value());
+        return hentUniktResultat(query);
     }
 }
