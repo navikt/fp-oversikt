@@ -16,13 +16,17 @@ class ManuellOppdateringAvSakDriftTjenesteTest {
     void verifiserSaksbehandlerUtenDriftRolleIkkeFårTilgang() {
         innloggetSaksbehandlerUtenDrift();
         var manuellOppdateringAvSakDriftTjeneste = new ManuellOppdateringAvSakDriftTjeneste(null);
-        assertThatThrownBy(() -> manuellOppdateringAvSakDriftTjeneste.opprettHentSakTaskForSaksnummre(List.of())).isExactlyInstanceOf(ManglerTilgangException.class);
+        List<String> saksnummer = List.of();
+        assertThatThrownBy(() -> manuellOppdateringAvSakDriftTjeneste.opprettHentSakTaskForSaksnummre(saksnummer))
+            .isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
     @Test
     void verifiserAtBorgerIkkeFårTilgang() {
         innloggetBorger();
         var manuellOppdateringAvSakDriftTjeneste = new ManuellOppdateringAvSakDriftTjeneste(null);
-        assertThatThrownBy(() -> manuellOppdateringAvSakDriftTjeneste.opprettHentSakTaskForSaksnummre(List.of())).isExactlyInstanceOf(ManglerTilgangException.class);
+        List<String> saksnummer = List.of();
+        assertThatThrownBy(() -> manuellOppdateringAvSakDriftTjeneste.opprettHentSakTaskForSaksnummre(saksnummer))
+            .isExactlyInstanceOf(ManglerTilgangException.class);
     }
 }
