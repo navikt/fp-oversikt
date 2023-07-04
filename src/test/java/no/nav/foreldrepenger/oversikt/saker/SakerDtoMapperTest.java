@@ -128,7 +128,7 @@ class SakerDtoMapperTest {
     static SakSVP0 svpSak(AktørId aktørId) {
         return new SakSVP0(Saksnummer.dummy(), aktørId, false, fh(), Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, now(), Set.of(new Tilrettelegging(new Aktivitet(
             Aktivitet.Type.FRILANS, null, null), null, null, null, Set.of(), Set.of())))),
-            Set.of(new SvpVedtak(LocalDateTime.now(), Set.of())), now());
+            Set.of(new SvpVedtak(LocalDateTime.now(), Set.of(), null)), now());
     }
 
     static SakFP0 fpSak(AktørId aktørId) {

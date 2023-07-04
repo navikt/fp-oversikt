@@ -116,7 +116,13 @@ public class HentSakTask implements ProsessTaskHandler {
     private static Set<SvpVedtak> tilSvpVedtak(Set<SvpSak.Vedtak> vedtak) {
         return safeStream(vedtak).map(v -> {
             var arbeidsforhold = v.arbeidsforhold().stream().map(HentSakTask::tilArbeidsforhold).collect(Collectors.toSet());
-            return new SvpVedtak(v.vedtakstidspunkt(), arbeidsforhold);
+            var avslagÅrsak = v.avslagÅrsak() == null ? null : switch (v.avslagÅrsak()) {
+                case ARBEIDSGIVER_KAN_TILRETTELEGGE -> SvpVedtak.AvslagÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE;
+                case SØKER_ER_INNVILGET_SYKEPENGER -> SvpVedtak.AvslagÅrsak.SØKER_ER_INNVILGET_SYKEPENGER;
+                case MANGLENDE_DOKUMENTASJON -> SvpVedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON;
+                case ANNET -> SvpVedtak.AvslagÅrsak.ANNET;
+            };
+            return new SvpVedtak(v.vedtakstidspunkt(), arbeidsforhold, avslagÅrsak);
         }).collect(Collectors.toSet());
     }
 

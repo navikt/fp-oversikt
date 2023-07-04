@@ -12,6 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
+import no.nav.foreldrepenger.common.innsyn.svp.Vedtak;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
@@ -37,7 +38,7 @@ class DtoMapperTest {
         var arbeidsforholdVedtak = new ArbeidsforholdUttak(aktivitet, now(), "ris", "til",
             Set.of(svpPeriode),
             Set.of(oppholdPeriode), null);
-        var vedtak = new SvpVedtak(LocalDateTime.now(), Set.of(arbeidsforholdVedtak));
+        var vedtak = new SvpVedtak(LocalDateTime.now(), Set.of(arbeidsforholdVedtak), SvpVedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON);
         var sakSVP0 = new SakSVP0(Saksnummer.dummy(), AktørId.dummy(), false, new FamilieHendelse(null, termindato, antallBarn, null),
             Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(tilrettelegging))), Set.of(vedtak),
             LocalDateTime.now());
@@ -51,6 +52,7 @@ class DtoMapperTest {
 
         assertThat(dto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.UNDER_BEHANDLING);
 
+        assertThat(dto.gjeldendeVedtak().avslagÅrsak()).isEqualTo(Vedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON);
         assertThat(dto.gjeldendeVedtak().arbeidsforhold()).hasSize(1);
         var arbeidsforhold = dto.gjeldendeVedtak().arbeidsforhold().stream().findFirst().get();
         assertThat(arbeidsforhold.tilrettelegginger()).hasSize(2);

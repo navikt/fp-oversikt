@@ -42,18 +42,26 @@ final class DtoMapper {
     }
 
     private static Vedtak tilDto(SvpVedtak vedtak) {
-        return new Vedtak(vedtak.arbeidsforhold().stream().map(arbeidsforhold -> {
-            var tilrettelegginger = arbeidsforhold.svpPerioder().stream()
+        var a = vedtak.arbeidsforhold().stream().map(arbeidsforhold -> {
+            var tilrettelegginger = arbeidsforhold.svpPerioder()
+                .stream()
                 .filter(not(p -> p.resultatÅrsak().erOpphør()))
                 .filter(not(p -> p.resultatÅrsak().equals(ResultatÅrsak.AVSLAG_INNGANGSVILKÅR)))
-                .map(DtoMapper::tilDto).collect(Collectors.toSet());
+                .map(DtoMapper::tilDto)
+                .collect(Collectors.toSet());
             var avslutningÅrsak = utledÅrsak(arbeidsforhold.ikkeOppfyltÅrsak(), arbeidsforhold.svpPerioder());
             var oppholdsperioder = arbeidsforhold.oppholdsperioder().stream().map(DtoMapper::tilDto).collect(Collectors.toSet());
             var tilretteleggingJustertForOpphold = fjernPerioderMedOpphold(tilrettelegginger, oppholdsperioder);
-            return new Arbeidsforhold(arbeidsforhold.aktivitet().tilDto(), arbeidsforhold.behovFom(),
-                arbeidsforhold.risikoFaktorer(), arbeidsforhold.tiltak(), tilretteleggingJustertForOpphold, oppholdsperioder, avslutningÅrsak
-                );
-        }).collect(Collectors.toSet()));
+            return new Arbeidsforhold(arbeidsforhold.aktivitet().tilDto(), arbeidsforhold.behovFom(), arbeidsforhold.risikoFaktorer(),
+                arbeidsforhold.tiltak(), tilretteleggingJustertForOpphold, oppholdsperioder, avslutningÅrsak);
+        }).collect(Collectors.toSet());
+        var avslagÅrsak = vedtak.avslagÅrsak() == null ? null : switch (vedtak.avslagÅrsak()) {
+            case ARBEIDSGIVER_KAN_TILRETTELEGGE -> Vedtak.AvslagÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE;
+            case SØKER_ER_INNVILGET_SYKEPENGER -> Vedtak.AvslagÅrsak.SØKER_ER_INNVILGET_SYKEPENGER;
+            case MANGLENDE_DOKUMENTASJON -> Vedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON;
+            case ANNET -> Vedtak.AvslagÅrsak.ANNET;
+        };
+        return new Vedtak(a, avslagÅrsak);
     }
 
 

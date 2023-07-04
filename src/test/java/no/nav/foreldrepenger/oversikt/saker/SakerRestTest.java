@@ -26,6 +26,7 @@ import no.nav.foreldrepenger.common.innsyn.KontoType;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
 import no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode;
+import no.nav.foreldrepenger.common.innsyn.svp.Vedtak;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
@@ -140,7 +141,7 @@ class SakerRestTest {
             new SvpSak.Vedtak.ArbeidsforholdUttak.SvpPeriode(now(), now(), SvpSak.TilretteleggingType.DELVIS, new Prosent(50), new Prosent(50),
                 SvpSak.Vedtak.ArbeidsforholdUttak.SvpPeriode.ResultatÅrsak.INNVILGET)), oppholdsperioder, null);
         var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse,
-            true, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now(), Set.of(arbeidsforholdUttak))));
+            true, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now(), Set.of(arbeidsforholdUttak), SvpSak.Vedtak.AvslagÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE)));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();
@@ -157,6 +158,8 @@ class SakerRestTest {
             OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
 
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
+
+        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().avslagÅrsak()).isEqualTo(Vedtak.AvslagÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE);
     }
 
     @Test
