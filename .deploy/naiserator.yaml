@@ -14,13 +14,13 @@ spec:
   {{/each}}
   liveness:
     path: /internal/health/isAlive
-    initialDelay: 5
+    initialDelay: 15
     periodSeconds: 10
     failureThreshold: 20
     timeout: 3
   readiness:
     path: /internal/health/isReady
-    initialDelay: 5
+    initialDelay: 15
     periodSeconds: 10
     failureThreshold: 20
     timeout: 3
