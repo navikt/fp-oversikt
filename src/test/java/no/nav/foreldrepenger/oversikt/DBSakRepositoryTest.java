@@ -11,28 +11,27 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import javax.persistence.EntityManager;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import jakarta.persistence.EntityManager;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.DBSakRepository;
-import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.Prosent;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
+import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.fp.Gradering;
 import no.nav.foreldrepenger.oversikt.domene.fp.Konto;
 import no.nav.foreldrepenger.oversikt.domene.fp.MorsAktivitet;
-import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
 import no.nav.foreldrepenger.oversikt.domene.fp.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;

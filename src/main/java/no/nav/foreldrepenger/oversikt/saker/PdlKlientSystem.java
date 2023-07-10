@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import java.util.stream.Collectors;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
