@@ -160,7 +160,7 @@ public class JettyServer {
         config.setMaximumPoolSize(6);
         config.setIdleTimeout(10001);
         config.setMaxLifetime(30001);
-        config.setInitializationFailTimeout(10000);
+        config.setInitializationFailTimeout(30000);
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
         config.setAutoCommit(false);
