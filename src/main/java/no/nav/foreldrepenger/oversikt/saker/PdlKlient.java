@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import java.time.LocalDate;
 
-import javax.enterprise.context.Dependent;
+import jakarta.enterprise.context.Dependent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
