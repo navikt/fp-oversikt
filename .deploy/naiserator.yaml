@@ -24,6 +24,9 @@ spec:
     periodSeconds: 10
     failureThreshold: 20
     timeout: 3
+  prometheus:
+    enabled: true
+    path: /api/actuator/prometheus
   preStopHook:
     http:
       path: /internal/health/preStop
