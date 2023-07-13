@@ -14,7 +14,7 @@ public class InternalApiConfig extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return Set.of(HealtCheckRest.class);
+        return Set.of(HealtCheckRest.class, PrometheusRestService.class);
     }
 
 }
