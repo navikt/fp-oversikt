@@ -22,13 +22,6 @@ spec:
           for: 10s
           annotations:
             consequence:  "Ingen tilgjengelige podder for FPOVERSIKT"
-            action: "TODO"
-          labels:
-            severity: critical
-        - alert: Mange 4xx feil på kort tid
-          expr: sum by (app, namespace) (increase(http_client_requests_seconds_count{namespace="fpsak", status=~"^4.."}[1m]) > 5)
-          annotations:
-            consequence: "Opplever mange 4xx feil mot fpoversikt på kort tid"
-            action: "Sjekk loggen for {{ $labels.app }} mer info"
+            action: "Sjekk hvorfor ingen podder er tilgjengelig"
           labels:
             severity: critical

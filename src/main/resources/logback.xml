@@ -25,7 +25,7 @@
         </encoder>
     </appender>
 
-
+    <appender name="METRICS" class="io.prometheus.client.logback.InstrumentedAppender" />
 
     <logger name="no.nav" level="${log.level.no.nav:-INFO}"/>
     <logger name="no.nav.vault" level="${log.level.no.nav.vault:-WARN}"/>
@@ -38,6 +38,7 @@
 
     <root level="${log.level.root:-INFO}">
         <appender-ref ref="stdout_json"/>
+        <appender-ref ref="METRICS" />
     </root>
 
 </configuration>

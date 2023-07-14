@@ -131,10 +131,15 @@
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-jaspi</artifactId>
         </dependency>
+
         <!-- Prometheus -->
         <dependency>
             <groupId>io.prometheus</groupId>
             <artifactId>simpleclient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.prometheus</groupId>
+            <artifactId>simpleclient_logback</artifactId>
         </dependency>
         <dependency>
             <groupId>io.prometheus</groupId>
