@@ -40,7 +40,7 @@ spec:
           labels:
             severity: warning
         - alert: DUMMY ALERT observert i loggen de siste 5 minuttene
-          expr: sum by (app) (floor(increase(logback_events_total{app="fpoversikt", namespace="teamforeldrepenger", level="error"}[5m]))) > 1
+          expr: sum by (app) (floor(increase(logback_events_total{app="fpoversikt", namespace="teamforeldrepenger", level="warn"}[5m]))) > 1
           annotations:
             consequence: "Mange innslag i loggen er observert de siste 5 minuttene! Dette er bare en dummy test!"
             action: "Ikke gjør noe"
