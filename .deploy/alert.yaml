@@ -4,7 +4,6 @@ metadata:
   name: {{app}}-alerts
   namespace: {{namespace}}
   labels:
-    app: {{app}}
     team: {{namespace}}
 spec:
   groups:
@@ -14,8 +13,8 @@ spec:
           expr: sum by (app) (prosesstask_antall{app="{{app}}", namespace="{{namespace}}", status="feilet"}) > 0
           for: 30s
           annotations:
-            consequence: "Det finnes feilede prosesstask i {{ $labels.app }}!"
-            action: "Sjekk loggen for {{ $labels.app }} mer info"
+            consequence: "Det finnes feilede prosesstask i {{app}}!"
+            action: "Sjekk loggen for {{app}} mer info"
           labels:
             namespace: {{namespace}}
             severity: warning
@@ -23,8 +22,8 @@ spec:
         - alert: Mange feilede prosesstask i {{app}}!
           expr: sum by (app) (floor(increase(prosesstask_antall{app="{{app}}", namespace="{{namespace}}", status="feilet"}[5m]))) > 2
           annotations:
-            consequence: "Det finnes mange feilede prosesstask i {{ $labels.app }}!"
-            action: "Sjekk loggen for {{ $labels.app }} mer info"
+            consequence: "Det finnes mange feilede prosesstask i {{app}}!"
+            action: "Sjekk loggen for {{app}} mer info"
           labels:
             namespace: {{namespace}}
             severity: critical
@@ -32,8 +31,8 @@ spec:
         - alert: Mange errors observert i loggen til {{app}} de siste 5 minuttene
           expr: sum by (app) (floor(increase(logback_events_total{app="{{app}}", namespace="{{namespace}}", level="error"}[5m]))) > 1
           annotations:
-            consequence: "Flere error er observert i loggen til {{ $labels.app }} de siste 5 minuttene!"
-            action: "Sjekk loggen for {{ $labels.app }} mer info"
+            consequence: "Flere error er observert i loggen til {{app}} de siste 5 minuttene!"
+            action: "Sjekk loggen for {{app}} mer info"
           labels:
             namespace: {{namespace}}
             severity: critical
@@ -41,8 +40,8 @@ spec:
         - alert: Mange warnings observert i loggen til {{app}} de siste 5 minuttene
           expr: sum by (app) (floor(increase(logback_events_total{app="{{app}}", namespace="{{namespace}}", level="warn"}[5m]))) > 1
           annotations:
-            consequence: "Flere warnings er observert i loggen til {{ $labels.app }} de siste 5 minuttene!"
-            action: "Sjekk loggen for {{ $labels.app }} mer info"
+            consequence: "Flere warnings er observert i loggen til {{app}} de siste 5 minuttene!"
+            action: "Sjekk loggen for {{app}} mer info"
           labels:
             namespace: {{namespace}}
             severity: warning
