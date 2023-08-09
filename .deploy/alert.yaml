@@ -7,10 +7,10 @@ metadata:
     team: {{namespace}}
 spec:
   groups:
-    - name: {{app}-alerts
+    - name: {{app}}-alerts
       rules:
-        - alert: Feilede prosesstask i {{app}!
-          expr: sum by (app) (prosesstask_antall{app="{{app}", namespace="teamforeldrepenger", status="feilet"}) > 0
+        - alert: Feilede prosesstask i {{app}}!
+          expr: sum by (app) (prosesstask_antall{app="{{app}}", namespace="teamforeldrepenger", status="feilet"}) > 0
           for: 30s
           annotations:
             consequence: "Det finnes feilede prosesstask i {{ $labels.app }}!"
@@ -19,8 +19,8 @@ spec:
             namespace: {{namespace}}
             severity: warning
 
-        - alert: Mange feilede prosesstask i {{app}!
-          expr: sum by (app) (floor(increase(prosesstask_antall{app="{{app}", namespace="teamforeldrepenger", status="feilet"}[5m]))) > 2
+        - alert: Mange feilede prosesstask i {{app}}!
+          expr: sum by (app) (floor(increase(prosesstask_antall{app="{{app}}", namespace="teamforeldrepenger", status="feilet"}[5m]))) > 2
           annotations:
             consequence: "Det finnes mange feilede prosesstask i {{ $labels.app }}!"
             action: "Sjekk loggen for {{ $labels.app }} mer info"
@@ -28,8 +28,8 @@ spec:
             namespace: {{namespace}}
             severity: critical
 
-        - alert: Mange errors observert i loggen de siste 5 minuttene
-          expr: sum by (app) (floor(increase(logback_events_total{app="{{app}", namespace="teamforeldrepenger", level="error"}[5m]))) > 1
+        - alert: Mange errors observert i loggen til {{app}} de siste 5 minuttene
+          expr: sum by (app) (floor(increase(logback_events_total{app="{{app}}", namespace="teamforeldrepenger", level="error"}[5m]))) > 1
           annotations:
             consequence: "Flere error er observert i loggen til {{ $labels.app }} de siste 5 minuttene!"
             action: "Sjekk loggen for {{ $labels.app }} mer info"
@@ -37,7 +37,7 @@ spec:
             namespace: {{namespace}}
             severity: critical
 
-        - alert: Mange warnings observert i loggen de siste 5 minuttene
+        - alert: Mange warnings observert i loggen til {{app}} de siste 5 minuttene
           expr: sum by (app) (floor(increase(logback_events_total{app="{{app}", namespace="teamforeldrepenger", level="error"}[5m]))) > 1
           annotations:
             consequence: "Flere warnings er observert i loggen til {{ $labels.app }} de siste 5 minuttene!"
@@ -47,7 +47,7 @@ spec:
             severity: warning
 
         - alert: DUMMY ALERT observert i loggen de siste 5 minuttene
-          expr: sum by (app) (floor(increase(logback_events_total{app="fpoversikt", namespace="teamforeldrepenger", level="info"}[5m]))) > 2
+          expr: sum by (app) (floor(increase(logback_events_total{app="{{app}}", namespace="teamforeldrepenger", level="info"}[5m]))) > 2
           annotations:
             consequence: "Mange innslag i loggen er observert de siste 5 minuttene! Dette er bare en dummy test!"
             action: "Ikke gjør noe mer for {{ $labels.app }}"
@@ -56,7 +56,7 @@ spec:
             severity: warning
 
         - alert: Ingen poder oppe og tilgjengelig
-          expr: sum(up{app="{{app}", namespace="teamforeldrepenger"}) == 0
+          expr: sum(up{app="{{app}}", namespace="teamforeldrepenger"}) == 0
           for: 10s
           annotations:
             consequence: "Ingen tilgjengelige podder for FPOVERSIKT"
