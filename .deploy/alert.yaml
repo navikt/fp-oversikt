@@ -12,46 +12,31 @@ spec:
         - alert: Feilede prosesstask i {{app}}!
           expr: sum by (app) (prosesstask_antall{app="{{app}}", namespace="{{namespace}}", status="feilet"}) > 0
           for: 30s
-          annotations:
-            consequence: "Det finnes feilede prosesstask i {{app}}!"
-            action: "Sjekk loggen for {{app}} mer info"
           labels:
             namespace: {{namespace}}
             severity: warning
 
         - alert: Mange feilede prosesstask i {{app}}!
           expr: sum by (app) (floor(increase(prosesstask_antall{app="{{app}}", namespace="{{namespace}}", status="feilet"}[5m]))) > 2
-          annotations:
-            consequence: "Det finnes mange feilede prosesstask i {{app}}!"
-            action: "Sjekk loggen for {{app}} mer info"
           labels:
             namespace: {{namespace}}
             severity: critical
 
         - alert: Mange errors observert i loggen til {{app}} de siste 5 minuttene
           expr: sum by (app) (floor(increase(logback_events_total{app="{{app}}", namespace="{{namespace}}", level="error"}[5m]))) > 1
-          annotations:
-            consequence: "Flere error er observert i loggen til {{app}} de siste 5 minuttene!"
-            action: "Sjekk loggen for {{app}} mer info"
           labels:
             namespace: {{namespace}}
             severity: critical
 
         - alert: Mange warnings observert i loggen til {{app}} de siste 5 minuttene
           expr: sum by (app) (floor(increase(logback_events_total{app="{{app}}", namespace="{{namespace}}", level="warn"}[5m]))) > 1
-          annotations:
-            consequence: "Flere warnings er observert i loggen til {{app}} de siste 5 minuttene!"
-            action: "Sjekk loggen for {{app}} mer info"
           labels:
             namespace: {{namespace}}
             severity: warning
 
-        - alert: Ingen poder oppe og tilgjengelig
+        - alert: Ingen poder oppe og tilgjengelig for {{app}}!
           expr: sum(up{app="{{app}}", namespace="{{namespace}}"}) == 0
           for: 10s
-          annotations:
-            consequence: "Ingen tilgjengelige podder for FPOVERSIKT"
-            action: "Sjekk hvorfor ingen podder er tilgjengelig"
           labels:
             namespace: {{namespace}}
             severity: critical
