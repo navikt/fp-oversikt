@@ -1,10 +1,10 @@
 kind: Application
 apiVersion: nais.io/v1alpha1
 metadata:
-  name: fpoversikt
-  namespace: teamforeldrepenger
+  name: {{app}}
+  namespace: {{namespace}}
   labels:
-    team: teamforeldrepenger
+    team: {{namespace}}
 spec:
   image: {{image}}
   port: 8080

@@ -1,4 +1,6 @@
 {
+    "app": "fpoversikt",
+    "namespace": "teamforeldrepenger",
     "environment": "dev",
     "kafkaPool": "nav-dev",
     "dbTier": "db-f1-micro",
