@@ -19,7 +19,7 @@ spec:
           labels:
             severity: warning
         - alert: Mange feilede prosesstask i fpoversikt!
-          expr: sum by (app) (floor(increase(prosesstask_antall{app="fpoversikt", namespace="teamforeldrepenger", status="feilet"}))) > 2
+          expr: sum by (app) (floor(increase(prosesstask_antall{app="fpoversikt", namespace="teamforeldrepenger", status="feilet"}[5m]))) > 2
           annotations:
             consequence: "Det finnes mange feilede prosesstask i {{ $labels.app }}!"
             action: "Sjekk loggen for {{ $labels.app }} mer info"
