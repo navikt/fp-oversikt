@@ -38,7 +38,7 @@ spec:
             severity: critical
 
         - alert: Mange warnings observert i loggen til {{app}} de siste 5 minuttene
-          expr: sum by (app) (floor(increase(logback_events_total{app="{{app}", namespace="teamforeldrepenger", level="error"}[5m]))) > 1
+          expr: sum by (app) (floor(increase(logback_events_total{app="{{app}}", namespace="teamforeldrepenger", level="error"}[5m]))) > 1
           annotations:
             consequence: "Flere warnings er observert i loggen til {{ $labels.app }} de siste 5 minuttene!"
             action: "Sjekk loggen for {{ $labels.app }} mer info"
