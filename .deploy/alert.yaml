@@ -4,6 +4,7 @@ metadata:
   name: {{app}}-alerts
   namespace: {{namespace}}
   labels:
+    app: {{app}}
     team: {{namespace}}
 spec:
   groups:
@@ -42,6 +43,15 @@ spec:
           annotations:
             consequence: "Flere warnings er observert i loggen til {{ $labels.app }} de siste 5 minuttene!"
             action: "Sjekk loggen for {{ $labels.app }} mer info"
+          labels:
+            namespace: {{namespace}}
+            severity: warning
+
+        - alert: DUMMY ALERT observert i loggen de siste 5 minuttene
+          expr: sum by (app) (floor(increase(logback_events_total{app="{{app}}", namespace="teamforeldrepenger", level="info"}[5m]))) > 2
+          annotations:
+            consequence: "Mange innslag i loggen er observert de siste 5 minuttene! Dette er bare en dummy test!"
+            action: "Ikke gjør noe mer for {{ $labels.app }}"
           labels:
             namespace: {{namespace}}
             severity: warning
