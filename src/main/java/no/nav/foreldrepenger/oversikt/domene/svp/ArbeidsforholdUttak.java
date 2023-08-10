@@ -3,9 +3,14 @@ package no.nav.foreldrepenger.oversikt.domene.svp;
 import static no.nav.foreldrepenger.oversikt.domene.NullUtil.nullSafe;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
 public record ArbeidsforholdUttak(@JsonProperty("aktivitet") Aktivitet aktivitet,
                                   @JsonProperty("behovFom") LocalDate behovFom,
@@ -23,7 +28,14 @@ public record ArbeidsforholdUttak(@JsonProperty("aktivitet") Aktivitet aktivitet
 
     @Override
     public Set<OppholdPeriode> oppholdsperioder() {
-        return nullSafe(oppholdsperioder);
+        return fjernOverlapp(nullSafe(oppholdsperioder));
+    }
+
+    private static Set<OppholdPeriode> fjernOverlapp(Set<OppholdPeriode> perioder) {
+        List<LocalDateSegment<OppholdPeriode>> segments = perioder.stream()
+            .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), p))
+            .toList();
+        return new LocalDateTimeline<>(segments, new OppholdPeriodeSegmentCombinator()).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
     }
 
     public enum ArbeidsforholdIkkeOppfyltÅrsak {
