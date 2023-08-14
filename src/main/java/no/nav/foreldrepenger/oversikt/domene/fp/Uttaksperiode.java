@@ -81,11 +81,13 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
 
         public enum Årsak {
             AVSLAG_HULL_I_UTTAKSPLAN,
+            AVSLAG_FRATREKK_PLEIEPENGER,
             ANNET;
 
             public UttakPeriodeResultat.Årsak tilDto() {
                 return switch (this) {
                     case AVSLAG_HULL_I_UTTAKSPLAN -> UttakPeriodeResultat.Årsak.AVSLAG_HULL_MELLOM_FORELDRENES_PERIODER;
+                    case AVSLAG_FRATREKK_PLEIEPENGER -> UttakPeriodeResultat.Årsak.AVSLAG_FRATREKK_PLEIEPENGER;
                     case ANNET -> UttakPeriodeResultat.Årsak.ANNET;
                 };
             }

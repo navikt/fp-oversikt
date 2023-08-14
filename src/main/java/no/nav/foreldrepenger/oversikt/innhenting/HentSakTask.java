@@ -8,12 +8,11 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
@@ -391,6 +390,7 @@ public class HentSakTask implements ProsessTaskHandler {
     private static Uttaksperiode.Resultat.Årsak map(FpSak.Uttaksperiode.Resultat.Årsak årsak) {
         return switch (årsak) {
             case AVSLAG_HULL_I_UTTAKSPLAN -> Uttaksperiode.Resultat.Årsak.AVSLAG_HULL_I_UTTAKSPLAN;
+            case AVSLAG_FRATREKK_PLEIEPENGER -> Uttaksperiode.Resultat.Årsak.AVSLAG_FRATREKK_PLEIEPENGER;
             case ANNET -> Uttaksperiode.Resultat.Årsak.ANNET;
         };
     }
