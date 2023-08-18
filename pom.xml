@@ -21,7 +21,7 @@
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
         <felles.version>4.4.3.1-jakarta</felles.version>
-        <prosesstask.version>3.2.5-jakarta</prosesstask.version>
+        <prosesstask.version>3.2.6-ee9</prosesstask.version>
         <fp-kontrakter.version>6.3.1</fp-kontrakter.version>
         <fpsoknad-felles.version>2.4.5</fpsoknad-felles.version>
         <fp-tidsserie.version>2.6.8</fp-tidsserie.version>
