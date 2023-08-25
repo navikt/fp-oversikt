@@ -63,5 +63,4 @@ jobs:
     with:
       image: ghcr.io/${{ github.repository }}:${{ needs.build-app.outputs.build-version }}
       cluster: prod-gcp
-      alert: true
     secrets: inherit
