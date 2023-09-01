@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
 import no.nav.saf.Journalpost;
 import no.nav.saf.JournalpostQueryRequest;
 import no.nav.saf.JournalpostResponseProjection;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
@@ -22,7 +24,7 @@ public class DokumentArkivTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(DokumentArkivTjeneste.class);
 
-    private final static String FP_DOK_TYPE = "fp_innholdtype";
+    private static final String FP_DOK_TYPE = "fp_innholdtype";
     private Saf safKlient;
 
     DokumentArkivTjeneste() {
@@ -59,7 +61,17 @@ public class DokumentArkivTjeneste {
             journalpost.getJournalpostId(), antallDokumenter, journalpost.getSak().getFagsaksystem(),
             doktypeFraTilleggsopplysning);
         LOG.info(msg);
-        return new EnkelJournalpost(saksnummer, doktypeFraTilleggsopplysning);
+        return new EnkelJournalpost(saksnummer, tilDokumentType(doktypeFraTilleggsopplysning));
+    }
+
+    private static Set<DokumentType> tilDokumentType(Set<String> doktypeFraTilleggsopplysning) {
+        return doktypeFraTilleggsopplysning.stream()
+                .map(DokumentArkivTjeneste::tilDokumentType)
+                .collect(Collectors.toSet());
+    }
+
+    private static DokumentType tilDokumentType(String doktypeFraTilleggsopplysning) {
+        return DokumentType.valueOf(doktypeFraTilleggsopplysning); // TODO: Antar ID og ikke tittel her.
     }
 
 

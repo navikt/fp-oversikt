@@ -1,6 +1,8 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
+
 import java.util.Set;
 
-record EnkelJournalpost(String saksnummer, Set<String> dokumentTypeId) {
+public record EnkelJournalpost(String saksnummer, Set<DokumentType> dokumentTypeId) {
 }

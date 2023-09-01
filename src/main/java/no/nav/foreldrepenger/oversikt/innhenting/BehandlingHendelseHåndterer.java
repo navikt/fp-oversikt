@@ -1,18 +1,9 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.Set;
-import java.util.UUID;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -20,6 +11,13 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.vedtak.hendelser.behandling.Hendelse;
 import no.nav.vedtak.hendelser.behandling.v1.BehandlingHendelseV1;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.Set;
+import java.util.UUID;
 
 @ApplicationScoped
 @ActivateRequestContext
@@ -81,7 +79,6 @@ public class BehandlingHendelseHåndterer {
         task.setProperty(HentSakTask.SAKSNUMMER, saksnummer.value());
         task.setPrioritet(50);
         task.medNesteKjøringEtter(LocalDateTime.now());
-        task.setCallIdFraEksisterende();
         task.setGruppe(saksnummer.value());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
