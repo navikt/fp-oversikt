@@ -20,11 +20,14 @@
         <sonar.projectName>fp-oversikt</sonar.projectName>
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
+        <io.confluent.version>7.4.1</io.confluent.version>
+
         <felles.version>5.1.0</felles.version>
         <prosesstask.version>4.0.0</prosesstask.version>
         <fp-kontrakter.version>7.0.0</fp-kontrakter.version>
         <fpsoknad-felles.version>2.5.0</fpsoknad-felles.version>
         <fp-tidsserie.version>2.6.8</fp-tidsserie.version>
+        <teamdokumenthandtering-avro-schemas.version>3aec620a</teamdokumenthandtering-avro-schemas.version>
     </properties>
 
     <dependencyManagement>
@@ -165,15 +168,24 @@
             <artifactId>kafka-streams</artifactId>
         </dependency>
         <dependency>
+            <groupId>io.confluent</groupId>
+            <artifactId>kafka-streams-avro-serde</artifactId>
+            <version>${io.confluent.version}</version>
+        </dependency>
+        <dependency>
             <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
             <artifactId>kafka-properties</artifactId>
             <version>${felles.version}</version>
         </dependency>
-
         <dependency>
             <groupId>no.nav.foreldrepenger.kontrakter.topics</groupId>
             <artifactId>hendelser-behandling</artifactId>
             <version>${fp-kontrakter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.teamdokumenthandtering</groupId>
+            <artifactId>teamdokumenthandtering-avro-schemas</artifactId>
+            <version>${teamdokumenthandtering-avro-schemas.version}</version>
         </dependency>
 
         <dependency>
@@ -315,4 +327,14 @@
         </repository>
     </distributionManagement>
 
+    <repositories>
+        <repository>
+            <id>confluent</id>
+            <url>https://packages.confluent.io/maven/</url>
+        </repository>
+        <repository>
+            <id>dok-github</id>
+            <url>https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas</url>
+        </repository>
+    </repositories>
 </project>

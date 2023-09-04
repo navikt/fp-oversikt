@@ -1,16 +1,18 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
-import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
-
-import java.util.List;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+
+import java.util.List;
+
+import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
 @ApplicationScoped
 public class DBSakRepository implements SakRepository {
 
+    private final String SAKSNUMMER = "saksnummer";
     private final EntityManager entityManager;
 
     @Inject
@@ -20,7 +22,7 @@ public class DBSakRepository implements SakRepository {
 
     @Override
     public void lagre(Sak sak) {
-        var query = entityManager.createQuery("from sak where saksnummer =:saksnummer", SakEntitet.class).setParameter("saksnummer", sak.saksnummer().value());
+        var query = entityManager.createQuery("from sak where saksnummer =:saksnummer", SakEntitet.class).setParameter(SAKSNUMMER, sak.saksnummer().value());
         var eksisterendeSak = hentUniktResultat(query);
         if (eksisterendeSak.isEmpty()) {
             entityManager.persist(new SakEntitet(sak));
@@ -29,6 +31,12 @@ public class DBSakRepository implements SakRepository {
             entityManager.merge(eksisterendeSak.get());
         }
         entityManager.flush();
+    }
+
+    @Override
+    public void lagreManglendeVedleggPåSak(String saksnummer, List<DokumentType> manglendeVedlegg) {
+        var query = entityManager.createNativeQuery("from sak where saksnummer =:saksnummer").setParameter(SAKSNUMMER, saksnummer);
+        // TODO
     }
 
     @Override

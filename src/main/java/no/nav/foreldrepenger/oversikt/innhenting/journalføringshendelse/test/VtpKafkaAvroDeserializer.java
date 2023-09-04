@@ -1,0 +1,33 @@
+package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.test;
+
+import io.confluent.kafka.schemaregistry.avro.AvroSchema;
+import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
+import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
+import io.confluent.kafka.serializers.KafkaAvroDeserializer;
+import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
+import org.apache.avro.Schema;
+import org.apache.kafka.common.header.Headers;
+
+public class VtpKafkaAvroDeserializer extends KafkaAvroDeserializer {
+
+    private static SchemaRegistryClient getMockClient(final Schema schema) {
+        return new MockSchemaRegistryClient() {
+            @Override
+            public synchronized AvroSchema getSchemaBySubjectAndId(String subject, int id) {
+                return new AvroSchema(schema);
+            }
+        };
+    }
+
+    @Override
+    public Object deserialize(String topic, byte[] bytes) {
+        this.schemaRegistry = getMockClient(JournalfoeringHendelseRecord.SCHEMA$);
+        return super.deserialize(topic, bytes);
+    }
+
+    @Override
+    public Object deserialize(String topic, Headers headers, byte[] bytes) {
+        this.schemaRegistry = getMockClient(JournalfoeringHendelseRecord.SCHEMA$);
+        return super.deserialize(topic, headers, bytes);
+    }
+}
