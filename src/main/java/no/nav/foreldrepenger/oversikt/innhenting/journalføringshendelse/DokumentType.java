@@ -1,9 +1,16 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import java.util.Arrays;
 import java.util.Set;
 
 public enum DokumentType {
+    // Søknader
+    I000001("Søknad om svangerskapspenger"),
+    I000002("Søknad om foreldrepenger ved adopsjon"),
+    I000003("Søknad om engangsstønad ved fødsel"),
+    I000004("Søknad om engangsstønad ved adopsjon"),
+    I000005("Søknad om foreldrepenger ved fødsel"),
+    I000006("Utsettelse eller gradert uttak av foreldrepenger (fleksibelt uttak)"),
+    I000050("Søknad om endring av uttak av foreldrepenger eller overføring av kvote"),
 
     // Tilbakekreving
     I000114("Uttalelse tilbakekreving"),
@@ -71,6 +78,16 @@ public enum DokumentType {
             I000117
     );
 
+    public static final Set<DokumentType> SØKNAD_TYPER = Set.of(
+            I000001,
+            I000002,
+            I000003,
+            I000004,
+            I000005,
+            I000006,
+            I000050
+    );
+
 
     private final String tittel;
 
@@ -78,23 +95,13 @@ public enum DokumentType {
         this.tittel = tittel;
     }
 
-    public static DokumentType fraTittel(String tittel) {
-        if (tittel == null) {
-            return null;
-        }
-        var ad = Arrays.stream(values())
-                .filter(dokumentType ->  dokumentType.getTittel().equals(tittel))
-                .findFirst()
-                .orElse(DokumentType.URELEVANT);
-        if (ad == null) {
-            throw new IllegalArgumentException("Ukjent Tema: " + tittel);
-        }
-        return ad;
-    }
-
 
     public String getTittel() {
         return tittel;
+    }
+
+    public boolean erSøknad() {
+        return SØKNAD_TYPER.contains(this);
     }
 
     public boolean erVedlegg() {

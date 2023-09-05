@@ -79,13 +79,7 @@ public class DokumentArkivTjeneste {
 
     private static Set<DokumentType> tilDokumentType(Set<String> doktypeFraTilleggsopplysning) {
         return doktypeFraTilleggsopplysning.stream()
-                .map(DokumentArkivTjeneste::tilDokumentType)
+                .map(DokumentType::valueOf)
                 .collect(Collectors.toSet());
     }
-
-    private static DokumentType tilDokumentType(String doktypeFraTilleggsopplysning) {
-        return DokumentType.valueOf(doktypeFraTilleggsopplysning); // TODO: Antar ID og ikke tittel her.
-    }
-
-
 }

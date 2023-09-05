@@ -52,7 +52,7 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
         }
 
         var dokumentType = dokumentTypeOpt.get();
-        if (dokumentType.erVedlegg()) {
+        if (dokumentType.erSøknad() || dokumentType.erVedlegg()) {
             var m = ProsessTaskData.forProsessTask(HentMangledeVedleggTask.class);
             m.setSaksnummer(saksnummer);
             m.setCallIdFraEksisterende();
