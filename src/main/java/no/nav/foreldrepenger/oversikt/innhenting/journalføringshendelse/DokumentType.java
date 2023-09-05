@@ -48,7 +48,6 @@ public enum DokumentType {
 
     URELEVANT("Urelevant");
 
-
     private static final Set<DokumentType> VEDLEGG_TYPER = Set.of(
             I000007,
             I000023,
@@ -94,7 +93,6 @@ public enum DokumentType {
     DokumentType(String tittel) {
         this.tittel = tittel;
     }
-
 
     public String getTittel() {
         return tittel;

@@ -79,7 +79,16 @@ public class DokumentArkivTjeneste {
 
     private static Set<DokumentType> tilDokumentType(Set<String> doktypeFraTilleggsopplysning) {
         return doktypeFraTilleggsopplysning.stream()
-                .map(DokumentType::valueOf)
+                .map(DokumentArkivTjeneste::tilDokumentType)
                 .collect(Collectors.toSet());
+    }
+
+    private static DokumentType tilDokumentType(String dokumentType) {
+        try {
+            return DokumentType.valueOf(dokumentType);
+        } catch (Exception e) {
+            LOG.info("Ukjent/urelevant dokumentTypeId fra SAF: {}", dokumentType);
+            return DokumentType.URELEVANT;
+        }
     }
 }
