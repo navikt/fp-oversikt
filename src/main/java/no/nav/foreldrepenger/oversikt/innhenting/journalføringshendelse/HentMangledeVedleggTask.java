@@ -5,12 +5,14 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
+import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 @ApplicationScoped
+@ProsessTask("hent.manglendeVedlegg")
 public class HentMangledeVedleggTask implements ProsessTaskHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(HentMangledeVedleggTask.class);
