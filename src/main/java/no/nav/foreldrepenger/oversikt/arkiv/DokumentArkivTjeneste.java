@@ -3,9 +3,13 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
+import no.nav.saf.DokumentInfoResponseProjection;
+import no.nav.saf.DokumentvariantResponseProjection;
 import no.nav.saf.Journalpost;
 import no.nav.saf.JournalpostQueryRequest;
 import no.nav.saf.JournalpostResponseProjection;
+import no.nav.saf.LogiskVedleggResponseProjection;
+import no.nav.saf.SakResponseProjection;
 import no.nav.saf.Tilleggsopplysning;
 import no.nav.saf.TilleggsopplysningResponseProjection;
 import no.nav.vedtak.felles.integrasjon.saf.Saf;
@@ -40,9 +44,18 @@ public class DokumentArkivTjeneste {
         var query = new JournalpostQueryRequest();
         query.setJournalpostId(journalpostId.verdi());
         var projection = new JournalpostResponseProjection()
+            .sak(new SakResponseProjection()
+                    .fagsakId()
+                    .fagsaksystem())
             .journalpostId()
             .journalposttype()
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
+            .dokumenter(new DokumentInfoResponseProjection()
+                    .tittel()
+                    .dokumentInfoId()
+                    .brevkode()
+                    .logiskeVedlegg(new LogiskVedleggResponseProjection().tittel())
+                    .dokumentvarianter(new DokumentvariantResponseProjection().variantformat()))
             .journalstatus();
         var resultat = safKlient.hentJournalpostInfo(query, projection);
         return Optional.ofNullable(resultat).map(DokumentArkivTjeneste::mapTilJournalpost);
