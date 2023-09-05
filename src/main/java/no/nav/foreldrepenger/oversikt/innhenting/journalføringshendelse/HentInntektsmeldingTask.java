@@ -1,10 +1,12 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 import java.time.Duration;
 
+@ApplicationScoped
 public class HentInntektsmeldingTask implements ProsessTaskHandler {
 
     public static final Duration TASK_DELAY = Duration.ofMinutes(5);

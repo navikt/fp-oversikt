@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -9,6 +10,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+@ApplicationScoped
 public class HentMangledeVedleggTask implements ProsessTaskHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(HentMangledeVedleggTask.class);
