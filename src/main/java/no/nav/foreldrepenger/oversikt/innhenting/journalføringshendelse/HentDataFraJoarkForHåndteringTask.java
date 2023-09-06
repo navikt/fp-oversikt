@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
-import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentInntektsmeldingTask.TASK_DELAY;
-
 @ApplicationScoped
 @ProsessTask("hendelse.hentFraJoark")
 public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
@@ -63,16 +61,18 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             var i = ProsessTaskData.forProsessTask(HentInntektsmeldingTask.class);
             i.setSaksnummer(saksnummer);
             i.setCallIdFraEksisterende();
-            i.medNesteKjøringEtter(LocalDateTime.now().plus(TASK_DELAY));
+            i.medNesteKjøringEtter(LocalDateTime.now().plus(HentInntektsmeldingTask.TASK_DELAY));
             i.setGruppe(saksnummer);
             i.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
             prosessTaskTjeneste.lagre(i);
         }
 
-        if (dokumentType.erTilbakekrevingUttalelse()) {
-            var t = ProsessTaskData.forProsessTask(TilbakekrevingUttalelseMottattTask.class);
+        if (dokumentType.omhandlerTilbakekreving()) {
+            var t = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
             t.setSaksnummer(saksnummer);
             t.setCallIdFraEksisterende();
+            t.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+            t.medNesteKjøringEtter(LocalDateTime.now().plus(HentTilbakekrevingTask.TASK_DELAY));
             prosessTaskTjeneste.lagre(t);
         }
     }

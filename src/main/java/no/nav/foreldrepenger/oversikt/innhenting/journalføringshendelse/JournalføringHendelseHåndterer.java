@@ -31,10 +31,10 @@ public class JournalføringHendelseHåndterer {
     void handleMessage(JournalfoeringHendelseRecord payload) {
         var journalpostId = String.valueOf(payload.getJournalpostId());
         var kanalreferanse = payload.getKanalReferanseId();
-        lagreHentMangledeVedleggTask(journalpostId, kanalreferanse);
+        lagreHentFraJoarkTask(journalpostId, kanalreferanse);
     }
 
-    private void lagreHentMangledeVedleggTask(String journalpostId, String kanalreferanse) {
+    private void lagreHentFraJoarkTask(String journalpostId, String kanalreferanse) {
         var task = ProsessTaskData.forProsessTask(HentDataFraJoarkForHåndteringTask.class);
         task.setCallId(kanalreferanse);
         task.setProperty(JOURNALPOST_ID, journalpostId);

@@ -6,6 +6,8 @@
                  version="3.0">
 
     <sequence-generator name="SEQ_SAK" allocation-size="50" sequence-name="SEQ_SAK" />
+    <sequence-generator name="SEQ_TILBAKEKREVING" allocation-size="50" sequence-name="SEQ_TILBAKEKREVING" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.SakEntitet" />
+    <entity class="no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingEntitet" />
 
 </entity-mappings>

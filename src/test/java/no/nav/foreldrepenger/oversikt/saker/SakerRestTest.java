@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettTask;
+import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettHentSakTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Type;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Årsak;
@@ -189,7 +189,7 @@ class SakerRestTest {
 
     private static void sendBehandlingHendelse(Sak fraFpsak, RepositoryStub sakRepository) {
         var saksnummer = new Saksnummer(fraFpsak.saksnummer());
-        var prosessTaskData = opprettTask(UUID.randomUUID(), saksnummer);
+        var prosessTaskData = opprettHentSakTask(UUID.randomUUID(), saksnummer);
         new HentSakTask(new FpsakTjenesteStub(Map.of(saksnummer, fraFpsak)), sakRepository).doTask(prosessTaskData);
     }
 

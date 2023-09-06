@@ -110,7 +110,7 @@ public enum DokumentType {
         return I000067.equals(this);
     }
 
-    public boolean erTilbakekrevingUttalelse() {
-        return I000114.equals(this);
+    public boolean omhandlerTilbakekreving() {
+        return I000114.equals(this); //TODO få inn utgående varselsbrevbrev
     }
 }
