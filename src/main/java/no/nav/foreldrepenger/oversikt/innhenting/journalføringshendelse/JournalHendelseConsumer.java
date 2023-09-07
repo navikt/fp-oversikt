@@ -1,12 +1,9 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import no.nav.foreldrepenger.konfig.KonfigVerdi;
-import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
-import no.nav.vedtak.felles.integrasjon.kafka.KafkaProperties;
-import no.nav.vedtak.log.metrics.Controllable;
-import no.nav.vedtak.log.metrics.LiveAndReadinessAware;
+import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
+
+import java.time.Duration;
+
 import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsBuilder;
 import org.apache.kafka.streams.Topology;
@@ -14,9 +11,13 @@ import org.apache.kafka.streams.kstream.Consumed;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-
-import static org.apache.kafka.streams.errors.StreamsUncaughtExceptionHandler.StreamThreadExceptionResponse.SHUTDOWN_CLIENT;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.foreldrepenger.konfig.KonfigVerdi;
+import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
+import no.nav.vedtak.felles.integrasjon.kafka.KafkaProperties;
+import no.nav.vedtak.log.metrics.Controllable;
+import no.nav.vedtak.log.metrics.LiveAndReadinessAware;
 
 /*
  * Dokumentasjon https://confluence.adeo.no/display/BOA/Joarkhendelser
@@ -56,7 +57,7 @@ public class JournalHendelseConsumer implements LiveAndReadinessAware, Controlla
         builder.stream(topic.topic(), consumed)
             .filter((key, value) -> TEMA_FOR.equals(value.getTemaNytt()))
             .filter((key, value) -> MOTTAKSKANAL_ALTINN.equals(value.getMottaksKanal()) || MOTTAKSKANAL_SELVBETJENING.equals(value.getMottaksKanal()))
-            .peek((key, value) -> LOG.info("Motttok hendelse {} med id {} fra kanal {}", value.getHendelsesType(), value.getKanalReferanseId(), value.getMottaksKanal()))
+            .peek((key, value) -> LOG.info("Mottok hendelse {} med id {} fra kanal {}", value.getHendelsesType(), value.getKanalReferanseId(), value.getMottaksKanal()))
             .filter((key, value) -> HENDELSE_ENDELIG_JOURNALFØRT.equals(value.getHendelsesType()))
             .foreach((key, value) -> journalføringHendelseHåndterer.handleMessage(value));
 

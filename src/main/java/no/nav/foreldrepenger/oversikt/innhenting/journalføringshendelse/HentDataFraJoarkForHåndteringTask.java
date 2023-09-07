@@ -1,5 +1,11 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentArkivTjeneste;
@@ -8,11 +14,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
 
 @ApplicationScoped
 @ProsessTask("hendelse.hentFraJoark")
@@ -54,15 +55,17 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             var m = ProsessTaskData.forProsessTask(HentMangledeVedleggTask.class);
             m.setSaksnummer(saksnummer);
             m.setCallIdFraEksisterende();
+            m.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+            m.setGruppe(saksnummer + "-V");
             prosessTaskTjeneste.lagre(m);
         }
 
         if (dokumentType.erInntektsmelding()) {
-            var i = ProsessTaskData.forProsessTask(HentInntektsmeldingTask.class);
+            var i = ProsessTaskData.forProsessTask(HentInntektsmeldingerTask.class);
             i.setSaksnummer(saksnummer);
             i.setCallIdFraEksisterende();
-            i.medNesteKjøringEtter(LocalDateTime.now().plus(HentInntektsmeldingTask.TASK_DELAY));
-            i.setGruppe(saksnummer);
+            i.medNesteKjøringEtter(LocalDateTime.now().plus(HentInntektsmeldingerTask.TASK_DELAY));
+            i.setGruppe(saksnummer + "-I");
             i.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
             prosessTaskTjeneste.lagre(i);
         }
@@ -72,6 +75,7 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             t.setSaksnummer(saksnummer);
             t.setCallIdFraEksisterende();
             t.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+            t.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer));
             t.medNesteKjøringEtter(LocalDateTime.now().plus(HentTilbakekrevingTask.TASK_DELAY));
             prosessTaskTjeneste.lagre(t);
         }
