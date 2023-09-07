@@ -57,7 +57,6 @@ import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 public class HentSakTask implements ProsessTaskHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(HentSakTask.class);
-    public static final String SAKSNUMMER = "saksnummer";
 
     private final FpsakTjeneste fpSakKlient;
     private final SakRepository sakRepository;
@@ -70,8 +69,7 @@ public class HentSakTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
-        LOG.info("kjører task");
-        hentOgLagreSak(fpSakKlient, sakRepository, new Saksnummer(prosessTaskData.getPropertyValue(SAKSNUMMER)));
+        hentOgLagreSak(fpSakKlient, sakRepository, new Saksnummer(prosessTaskData.getSaksnummer()));
     }
 
     public static void hentOgLagreSak(FpsakTjeneste fpsak, SakRepository repository, Saksnummer saksnummer) {

@@ -6,9 +6,11 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.vedtak.hendelser.behandling.Hendelse;
+import no.nav.vedtak.hendelser.behandling.Kildesystem;
 import no.nav.vedtak.hendelser.behandling.v1.BehandlingHendelseV1;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 import org.slf4j.Logger;
@@ -50,7 +52,12 @@ public class BehandlingHendelseHåndterer {
             if (hendelse.getHendelse().equals(Hendelse.MIGRERING)) {
                 hentSakMedEnGang(hendelse);
             } else if (!IGNORE.contains(hendelse.getHendelse())) {
-                lagreHentSakTask(hendelse.getHendelseUuid(), new Saksnummer(hendelse.getSaksnummer()));
+                var hendelseUuid = hendelse.getHendelseUuid();
+                var saksnummer = new Saksnummer(hendelse.getSaksnummer());
+                lagreHentSakTask(hendelseUuid, saksnummer);
+                if (hendelse.getKildesystem() == Kildesystem.FPTILBAKE) {
+                    lagreHentTilbakekrevingTask(hendelseUuid, saksnummer);
+                }
             }
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
@@ -69,15 +76,29 @@ public class BehandlingHendelseHåndterer {
     }
 
     private void lagreHentSakTask(UUID hendelseUuid, Saksnummer saksnummer) {
-        var task = opprettTask(hendelseUuid, saksnummer);
+        var task = opprettHentSakTask(hendelseUuid, saksnummer);
         taskTjeneste.lagre(task);
     }
 
-    public static ProsessTaskData opprettTask(UUID hendelseUuid, Saksnummer saksnummer) {
+    public static ProsessTaskData opprettHentSakTask(UUID hendelseUuid, Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
         task.setCallId(hendelseUuid.toString());
-        task.setProperty(HentSakTask.SAKSNUMMER, saksnummer.value());
-        task.setPrioritet(50);
+        task.setSaksnummer(saksnummer.value());
+        task.medNesteKjøringEtter(LocalDateTime.now());
+        task.setGruppe(saksnummer.value());
+        task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+        return task;
+    }
+
+    private void lagreHentTilbakekrevingTask(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = opprettHentTilbakekrevingTask(hendelseUuid, saksnummer);
+        taskTjeneste.lagre(task);
+    }
+
+    public static ProsessTaskData opprettHentTilbakekrevingTask(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
+        task.setCallId(hendelseUuid.toString());
+        task.setSaksnummer(saksnummer.value());
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setGruppe(saksnummer.value());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
