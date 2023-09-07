@@ -42,9 +42,12 @@ public class HentTilbakekrevingTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
-        fptilbakeTjeneste.hent(saksnummer).ifPresent(tilbakekreving -> {
-            LOG.info("Hentet tilbakekreving {}", saksnummer);
+        fptilbakeTjeneste.hent(saksnummer).ifPresentOrElse(tilbakekreving -> {
+            LOG.info("Hentet tilbakekreving for sak {}", saksnummer);
             tilbakekrevingRepository.lagre(map(tilbakekreving));
+        }, () -> {
+            LOG.info("Finner ingen tilbakekreving for sak {}", saksnummer);
+            tilbakekrevingRepository.slett(saksnummer);
         });
     }
 

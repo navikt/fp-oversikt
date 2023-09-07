@@ -1,10 +1,10 @@
 package no.nav.foreldrepenger.oversikt.domene.tilbakekreving;
 
+import java.time.LocalDateTime;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-
-import java.time.LocalDateTime;
 
 public record TilbakekrevingV1(@JsonProperty("saksnummer") Saksnummer saksnummer,
                                @JsonProperty("varsel") Varsel varsel,

@@ -2,17 +2,22 @@ package no.nav.foreldrepenger.oversikt.domene.tilbakekreving;
 
 import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.TypedQuery;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 @ApplicationScoped
 public class DBTilbakekrevingRepository implements TilbakekrevingRepository {
+
+    private static final Logger LOG = LoggerFactory.getLogger(DBTilbakekrevingRepository.class);
 
     private EntityManager entityManager;
 
@@ -27,8 +32,7 @@ public class DBTilbakekrevingRepository implements TilbakekrevingRepository {
 
     @Override
     public void lagre(Tilbakekreving tilbakekreving) {
-        var query = hentTilbakekreving(tilbakekreving.saksnummer());
-        var eksisterende = hentUniktResultat(query);
+        var eksisterende = hentTilbakekreving(tilbakekreving.saksnummer());
         if (eksisterende.isEmpty()) {
             entityManager.persist(new TilbakekrevingEntitet(tilbakekreving));
         } else {
@@ -38,9 +42,10 @@ public class DBTilbakekrevingRepository implements TilbakekrevingRepository {
         entityManager.flush();
     }
 
-    private TypedQuery<TilbakekrevingEntitet> hentTilbakekreving(Saksnummer saksnummer) {
-        return entityManager.createQuery("from tilbakekreving where saksnummer =:saksnummer", TilbakekrevingEntitet.class)
+    private Optional<TilbakekrevingEntitet> hentTilbakekreving(Saksnummer saksnummer) {
+        var query = entityManager.createQuery("from tilbakekreving where saksnummer =:saksnummer", TilbakekrevingEntitet.class)
             .setParameter("saksnummer", saksnummer.value());
+        return hentUniktResultat(query);
     }
 
     @Override
@@ -51,5 +56,14 @@ public class DBTilbakekrevingRepository implements TilbakekrevingRepository {
             .stream()
             .map(TilbakekrevingEntitet::map)
             .collect(Collectors.toSet());
+    }
+
+    @Override
+    public void slett(Saksnummer saksnummer) {
+        hentTilbakekreving(saksnummer).ifPresent(tbk -> {
+            LOG.info("Sletter tilbakekreving for sak {}", saksnummer);
+            entityManager.remove(tbk);
+            entityManager.flush();
+        });
     }
 }

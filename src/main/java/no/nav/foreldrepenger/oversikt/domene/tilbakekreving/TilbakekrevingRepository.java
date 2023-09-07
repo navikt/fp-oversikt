@@ -9,4 +9,6 @@ public interface TilbakekrevingRepository {
     void lagre(Tilbakekreving tilbakekreving);
 
     Set<Tilbakekreving> hentFor(Set<Saksnummer> saksnummer);
+
+    void slett(Saksnummer saksnummer);
 }
