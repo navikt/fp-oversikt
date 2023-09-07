@@ -12,7 +12,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
@@ -190,7 +189,9 @@ class SakerRestTest {
     private static void sendBehandlingHendelse(Sak fraFpsak, RepositoryStub sakRepository) {
         var saksnummer = new Saksnummer(fraFpsak.saksnummer());
         var prosessTaskData = opprettHentSakTask(UUID.randomUUID(), saksnummer);
-        new HentSakTask(new FpsakTjenesteStub(Map.of(saksnummer, fraFpsak)), sakRepository).doTask(prosessTaskData);
+        var fpsakTjeneste = new FpsakTjenesteStub()
+            .leggTilSak(fraFpsak);
+        new HentSakTask(fpsakTjeneste, sakRepository).doTask(prosessTaskData);
     }
 
 }

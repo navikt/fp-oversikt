@@ -1,5 +1,9 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,10 +17,6 @@ import no.nav.foreldrepenger.oversikt.innhenting.tilbakekreving.Tilbakekreving;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 
 @ApplicationScoped
 @ProsessTask("hent.tilbakekreving")
@@ -33,6 +33,10 @@ public class HentTilbakekrevingTask implements ProsessTaskHandler {
     public HentTilbakekrevingTask(FptilbakeTjeneste fptilbakeTjeneste, TilbakekrevingRepository tilbakekrevingRepository) {
         this.fptilbakeTjeneste = fptilbakeTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
+    }
+
+    public static String taskGruppeFor(String saksnummer) {
+        return saksnummer + "-T";
     }
 
     @Override
