@@ -11,4 +11,7 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 })
 public interface Tilbakekreving {
     Saksnummer saksnummer();
+
+    boolean varsleBrukerOmTilbakekreving();
+
 }

@@ -46,4 +46,11 @@ public class DBSakRepository implements SakRepository {
             .map(SakEntitet::map)
             .toList();
     }
+
+    @Override
+    public boolean erSakKobletTilAktør(Saksnummer saksnummer, AktørId aktørId) {
+        var nativeQuery = entityManager.createNativeQuery("select count(1) from sak where json->>'aktørId' = :aktørId and saksnummer =:saksnummer", Integer.class);
+        var rader = (Integer) nativeQuery.getSingleResult();
+        return rader == 1;
+    }
 }

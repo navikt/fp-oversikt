@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.tilgangskontroll;
 
 public enum FeilKode {
 
+    IKKE_TILGANG("Ikke tilgang"),
     IKKE_TILGANG_IKKE_EKSTERN("Bare eksterne kan nå dette endepunktet her"),
     IKKE_TILGANG_UMYNDIG("Innlogget bruker er under myndighetsalder"),
     IKKE_TILGANG_MANGLER_DRIFT_ROLLE("Innlogget ansatt har ikke driftrolle");
