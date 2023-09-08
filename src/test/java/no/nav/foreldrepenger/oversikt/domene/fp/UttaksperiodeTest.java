@@ -5,14 +5,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.Set;
 
-import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
-import no.nav.foreldrepenger.oversikt.domene.Prosent;
-import no.nav.foreldrepenger.oversikt.domene.fp.*;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.innsyn.Aktivitet;
 import no.nav.foreldrepenger.common.innsyn.KontoType;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
+import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
+import no.nav.foreldrepenger.oversikt.domene.Prosent;
 
 class UttaksperiodeTest {
 

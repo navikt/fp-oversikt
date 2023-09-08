@@ -1,6 +1,16 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
 
+import static no.nav.foreldrepenger.common.domain.validation.InputValideringRegex.BARE_TALL;
+import static no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste.sjekkAtSaksbehandlerHarRollenDrift;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -21,15 +31,6 @@ import jakarta.ws.rs.core.Response;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.List;
-
-import static no.nav.foreldrepenger.common.domain.validation.InputValideringRegex.BARE_TALL;
-import static no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste.sjekkAtSaksbehandlerHarRollenDrift;
 
 @OpenAPIDefinition(tags = @Tag(name = "saker", description = "Manuell oppdatering av saker"))
 @Path("/forvaltningSaker")

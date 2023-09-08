@@ -11,7 +11,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.foreldrepenger.common.innsyn.EsSak;
 import no.nav.foreldrepenger.common.innsyn.EsÅpenBehandling;
-import no.nav.foreldrepenger.oversikt.domene.*;
+import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.Sak;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,

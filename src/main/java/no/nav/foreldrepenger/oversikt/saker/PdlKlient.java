@@ -2,11 +2,10 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import java.time.LocalDate;
 
-import jakarta.enterprise.context.Dependent;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.Dependent;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FødseldatoOppslag;

@@ -1,12 +1,13 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.test;
 
+import org.apache.avro.Schema;
+import org.apache.kafka.common.header.Headers;
+
 import io.confluent.kafka.schemaregistry.avro.AvroSchema;
 import io.confluent.kafka.schemaregistry.client.MockSchemaRegistryClient;
 import io.confluent.kafka.schemaregistry.client.SchemaRegistryClient;
 import io.confluent.kafka.serializers.KafkaAvroDeserializer;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
-import org.apache.avro.Schema;
-import org.apache.kafka.common.header.Headers;
 
 public class VtpKafkaAvroDeserializer extends KafkaAvroDeserializer {
 

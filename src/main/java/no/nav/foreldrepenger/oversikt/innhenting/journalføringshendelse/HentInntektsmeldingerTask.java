@@ -1,5 +1,12 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import java.time.Duration;
+import java.util.List;
+import java.util.Objects;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -9,12 +16,6 @@ import no.nav.vedtak.exception.IntegrasjonException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.Duration;
-import java.util.List;
-import java.util.Objects;
 
 @ApplicationScoped
 @ProsessTask(value = "hent.inntektsmeldinger", maxFailedRuns = 10)

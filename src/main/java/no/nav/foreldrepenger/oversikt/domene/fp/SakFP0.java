@@ -19,7 +19,11 @@ import no.nav.foreldrepenger.common.innsyn.FpÅpenBehandling;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
-import no.nav.foreldrepenger.oversikt.domene.*;
+import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 

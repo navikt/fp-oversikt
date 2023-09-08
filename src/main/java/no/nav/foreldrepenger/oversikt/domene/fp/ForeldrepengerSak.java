@@ -1,11 +1,11 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
+import java.util.Optional;
+import java.util.Set;
+
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
-
-import java.util.Optional;
-import java.util.Set;
 
 public interface ForeldrepengerSak extends Sak {
 

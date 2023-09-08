@@ -1,12 +1,11 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-import jakarta.servlet.ServletRequestEvent;
-import jakarta.servlet.ServletRequestListener;
-import jakarta.servlet.annotation.WebListener;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.servlet.ServletRequestEvent;
+import jakarta.servlet.ServletRequestListener;
+import jakarta.servlet.annotation.WebListener;
 import no.nav.vedtak.sikkerhet.context.ContextCleaner;
 
 @WebListener

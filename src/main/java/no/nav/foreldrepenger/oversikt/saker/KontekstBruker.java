@@ -2,12 +2,11 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import java.time.LocalDate;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 

@@ -1,5 +1,14 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
@@ -13,15 +22,6 @@ import no.nav.saf.SakResponseProjection;
 import no.nav.saf.Tilleggsopplysning;
 import no.nav.saf.TilleggsopplysningResponseProjection;
 import no.nav.vedtak.felles.integrasjon.saf.Saf;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 @ApplicationScoped
 public class DokumentArkivTjeneste {

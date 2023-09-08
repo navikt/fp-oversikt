@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende;
 
+import java.util.List;
+
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
-
-import java.util.List;
 
 public interface ManglendeVedleggRepository {
 

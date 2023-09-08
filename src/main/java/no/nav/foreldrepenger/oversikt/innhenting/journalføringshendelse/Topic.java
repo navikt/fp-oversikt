@@ -1,18 +1,19 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG;
+
+import java.util.Map;
+import java.util.Objects;
+
+import org.apache.kafka.common.serialization.Serde;
+import org.apache.kafka.common.serialization.Serdes;
+
 import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.test.VtpKafkaAvroSerde;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.vedtak.felles.integrasjon.kafka.KafkaProperties;
-import org.apache.kafka.common.serialization.Serde;
-import org.apache.kafka.common.serialization.Serdes;
-
-import java.util.Map;
-import java.util.Objects;
-
-import static io.confluent.kafka.serializers.KafkaAvroDeserializerConfig.SPECIFIC_AVRO_READER_CONFIG;
 
 record Topic<K, V>(String topic, Serde<K> serdeKey, Serde<V> serdeValue) {
 

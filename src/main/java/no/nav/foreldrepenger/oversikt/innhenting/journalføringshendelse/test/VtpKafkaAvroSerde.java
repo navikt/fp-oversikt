@@ -1,13 +1,14 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.test;
 
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
+import java.util.Map;
+
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.common.serialization.Deserializer;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
 import org.apache.kafka.common.serialization.Serializer;
 
-import java.util.Map;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 
 public class VtpKafkaAvroSerde<T extends SpecificRecord> implements Serde<T> {
     private final Serde<T> inner;

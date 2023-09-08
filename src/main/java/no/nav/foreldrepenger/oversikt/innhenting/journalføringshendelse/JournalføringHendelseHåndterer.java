@@ -1,6 +1,8 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
 
+import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentDataFraJoarkForHåndteringTask.JOURNALPOST_ID;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
@@ -8,8 +10,6 @@ import jakarta.transaction.Transactional;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
-
-import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentDataFraJoarkForHåndteringTask.JOURNALPOST_ID;
 
 
 @ApplicationScoped

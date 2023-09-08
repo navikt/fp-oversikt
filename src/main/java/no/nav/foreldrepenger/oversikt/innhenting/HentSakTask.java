@@ -1,5 +1,16 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
@@ -41,16 +52,6 @@ import no.nav.foreldrepenger.oversikt.domene.svp.TilretteleggingType;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 @ApplicationScoped
 @ProsessTask(value = "hent.sak")
