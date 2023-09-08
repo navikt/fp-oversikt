@@ -31,7 +31,7 @@ public class DBManglendeVedleggRepository implements ManglendeVedleggRepository 
         var query = hentManglendeVedlegg(saksnummer);
         var eksisterendeManglendeVedlegg = hentUniktResultat(query);
         if (eksisterendeManglendeVedlegg.isEmpty()) {
-            entityManager.persist(new ManglendeVedleggEntitet(saksnummer.value(), manglendeVedlegg));
+            entityManager.persist(new ManglendeVedleggEntitet(saksnummer, manglendeVedlegg));
         } else {
             eksisterendeManglendeVedlegg.get().setJson(manglendeVedlegg);
             entityManager.merge(eksisterendeManglendeVedlegg.get());
@@ -51,7 +51,7 @@ public class DBManglendeVedleggRepository implements ManglendeVedleggRepository 
     }
 
     private Optional<ManglendeVedleggEntitet> hent(Saksnummer saksnummer) {
-        var query = entityManager.createQuery("from manglendeVedlegg where saksnummer in (:saksnummer)", ManglendeVedleggEntitet.class);
+        var query = entityManager.createQuery("from manglendeVedlegg where saksnummer =:saksnummer", ManglendeVedleggEntitet.class);
         query.setParameter("saksnummer", saksnummer.value());
         return hentUniktResultat(query);
     }

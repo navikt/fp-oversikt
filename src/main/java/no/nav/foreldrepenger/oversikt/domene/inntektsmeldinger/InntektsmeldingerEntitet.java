@@ -1,7 +1,7 @@
-package no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende;
+package no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger;
 
-import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
@@ -13,39 +13,36 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
 
-@Entity(name = "manglendeVedlegg")
-@Table(name = "manglende_vedlegg")
-public class ManglendeVedleggEntitet {
+@Entity(name = "inntektsmeldinger")
+@Table(name = "inntektsmeldinger")
+public class InntektsmeldingerEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MANGLENDE_VEDLEGG")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_INNTEKTSMELDINGER")
     private Long id;
 
     @Column(name = "saksnummer")
     private String saksnummer;
 
-
     @Column(name = "json")
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<DokumentType> json;
+    private Set<Inntektsmelding> json;
 
-    public ManglendeVedleggEntitet(Saksnummer saksnummer, List<DokumentType> json) {
-        this.saksnummer = saksnummer.value();
+    public InntektsmeldingerEntitet(Saksnummer saksnummer, Set<Inntektsmelding> json) {
         this.json = json;
+        this.saksnummer = saksnummer.value();
     }
 
-    protected ManglendeVedleggEntitet() {
+    protected InntektsmeldingerEntitet() {
     }
 
-    public List<DokumentType> manglendeVedlegg() {
+    void setJson(Set<Inntektsmelding> inntektsmeldinger) {
+        this.json = inntektsmeldinger;
+    }
+
+    public Set<Inntektsmelding> map() {
         return json;
-    }
-
-    public ManglendeVedleggEntitet setJson(List<DokumentType> manglendeVedlegg) {
-        this.json = manglendeVedlegg;
-        return this;
     }
 
     @Override
@@ -54,7 +51,7 @@ public class ManglendeVedleggEntitet {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        ManglendeVedleggEntitet that = (ManglendeVedleggEntitet) o;
+        InntektsmeldingerEntitet that = (InntektsmeldingerEntitet) o;
         return Objects.equals(id, that.id);
     }
 

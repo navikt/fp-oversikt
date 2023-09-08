@@ -7,7 +7,11 @@
 
     <sequence-generator name="SEQ_SAK" allocation-size="50" sequence-name="SEQ_SAK" />
     <sequence-generator name="SEQ_TILBAKEKREVING" allocation-size="50" sequence-name="SEQ_TILBAKEKREVING" />
+    <sequence-generator name="SEQ_MANGLENDE_VEDLEGG" allocation-size="50" sequence-name="SEQ_MANGLENDE_VEDLEGG" />
+    <sequence-generator name="SEQ_INNTEKTSMELDINGER" allocation-size="50" sequence-name="SEQ_INNTEKTSMELDINGER" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.SakEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingEntitet" />
+    <entity class="no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende.ManglendeVedleggEntitet" />
+    <entity class="no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerEntitet" />
 
 </entity-mappings>
