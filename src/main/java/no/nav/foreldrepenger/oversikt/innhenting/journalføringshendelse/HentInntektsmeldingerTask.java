@@ -3,6 +3,8 @@ package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,6 +12,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV1;
+import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerRepository;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.Inntektsmelding;
 import no.nav.vedtak.exception.IntegrasjonException;
@@ -26,10 +30,12 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
     private static final Logger LOG = LoggerFactory.getLogger(HentInntektsmeldingerTask.class);
 
     private final FpsakTjeneste fpsakTjeneste;
+    private final InntektsmeldingerRepository inntektsmeldingerRepository;
 
     @Inject
-    public HentInntektsmeldingerTask(FpsakTjeneste fpsakTjeneste) {
+    public HentInntektsmeldingerTask(FpsakTjeneste fpsakTjeneste, InntektsmeldingerRepository inntektsmeldingerRepository) {
         this.fpsakTjeneste = fpsakTjeneste;
+        this.inntektsmeldingerRepository = inntektsmeldingerRepository;
     }
 
     @Override
@@ -42,6 +48,19 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
             throw new IntegrasjonException("FPOVERSIKT-IM",
                     "Finner ikke inntektsmelding med journalpostId " + journalpostId + " på sak " + saksnummer);
         }
+        Set<no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmelding> mapped =
+            inntektsmeldinger.stream().map(HentInntektsmeldingerTask::map).collect(Collectors.toSet());
+
+        if (inntektsmeldinger.isEmpty()) {
+            inntektsmeldingerRepository.slett(saksnummer);
+        } else {
+            inntektsmeldingerRepository.lagre(saksnummer, mapped);
+        }
+    }
+
+    static InntektsmeldingV1 map(Inntektsmelding inntektsmelding) {
+        return new InntektsmeldingV1(inntektsmelding.journalpostId(), inntektsmelding.arbeidsgiver(), inntektsmelding.innsendingstidspunkt(),
+            inntektsmelding.inntekt());
     }
 
     private static boolean imKnyttetTilJournalpost(List<Inntektsmelding> inntektsmeldinger, String journalpostId) {
