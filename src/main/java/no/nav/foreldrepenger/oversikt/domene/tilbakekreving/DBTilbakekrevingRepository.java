@@ -52,8 +52,7 @@ public class DBTilbakekrevingRepository implements TilbakekrevingRepository {
     public Set<Tilbakekreving> hentFor(Set<Saksnummer> saksnummer) {
         var query = entityManager.createQuery("from tilbakekreving where saksnummer in (:saksnummer)", TilbakekrevingEntitet.class);
         query.setParameter("saksnummer", saksnummer.stream().map(Saksnummer::value).toList());
-        return query.getResultList()
-            .stream()
+        return query.getResultStream()
             .map(TilbakekrevingEntitet::map)
             .collect(Collectors.toSet());
     }
