@@ -4,11 +4,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.Sak;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.Inntektsmelding;
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
 
 public class FpsakTjenesteStub implements FpsakTjeneste {
 
