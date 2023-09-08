@@ -19,7 +19,7 @@ import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.Dokumen
 public class ManglendeVedleggEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SAK")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_MANGLENDE_VEDLEGG")
     private Long id;
 
     @Column(name = "saksnummer")
