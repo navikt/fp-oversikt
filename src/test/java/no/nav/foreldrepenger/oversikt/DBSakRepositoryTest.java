@@ -106,4 +106,36 @@ class DBSakRepositoryTest {
         assertThat(saker.get(0)).isNotEqualTo(originalt);
         assertThat(saker.get(0)).isEqualTo(oppdatertSak);
     }
+
+
+    @Test
+    void erSakKobletTilAktørReturnerTrueVedFlereSakerOgBareEnMatcher(EntityManager entityManager) {
+        var repository = new DBSakRepository(entityManager);
+        var saksnummer1 = Saksnummer.dummy();
+        var saksnummer2 = Saksnummer.dummy();
+        var aktørId = AktørId.dummy();
+
+        var sak1 = new SakFP0(saksnummer1, aktørId, false, null, null, null, null, null, null, null, null, false, null);
+        var sak2 = new SakFP0(saksnummer2, aktørId, false, null, null, null, null, null, null, null, null, false, null);
+
+        repository.lagre(sak1);
+        repository.lagre(sak2);
+
+        assertThat(repository.erSakKobletTilAktør(saksnummer1, aktørId)).isTrue();
+    }
+
+
+    @Test
+    void erSakKobletTilAktørReturnereFalseHvisSaksnummerIkkeMatcherNoenSakerPåAktørId(EntityManager entityManager) {
+        var repository = new DBSakRepository(entityManager);
+        var saksnummer1 = Saksnummer.dummy();
+        var aktørId = AktørId.dummy();
+
+        var sak1 = new SakFP0(saksnummer1, aktørId, false, null, null, null, null, null, null, null, null, false, null);
+
+        repository.lagre(sak1);
+
+        var saksnummerSomIkkeEksistererPåBruker = Saksnummer.dummy();
+        assertThat(repository.erSakKobletTilAktør(saksnummerSomIkkeEksistererPåBruker, aktørId)).isFalse();
+    }
 }

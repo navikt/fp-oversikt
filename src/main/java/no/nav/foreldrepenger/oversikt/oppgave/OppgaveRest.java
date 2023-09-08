@@ -53,7 +53,6 @@ public class OppgaveRest {
         sjekkAtKallErFraBorger();
         tilgangssjekkMyndighetsalder();
         sakKobletTilAktørGuard(saksnummer);
-
         LOG.info("Henter manglede vedlegg for sak {}", saksnummer.value());
         return oppgaver.manglendeVedlegg(saksnummer);
     }
@@ -64,9 +63,8 @@ public class OppgaveRest {
     public Set<TilbakekrevingsInnslag> tilbakekrevingsuttalelser() {
         sjekkAtKallErFraBorger();
         tilgangssjekkMyndighetsalder();
-        LOG.info("Kall mot saker endepunkt");
-        var aktørId = innloggetBruker.aktørId();
-        return oppgaver.tilbakekrevingsuttalelser(aktørId);
+        LOG.info("Henter alle uttalelser om tilbakekreving på person");
+        return oppgaver.tilbakekrevingsuttalelser(innloggetBruker.aktørId());
     }
 
     private void tilgangssjekkMyndighetsalder() {
