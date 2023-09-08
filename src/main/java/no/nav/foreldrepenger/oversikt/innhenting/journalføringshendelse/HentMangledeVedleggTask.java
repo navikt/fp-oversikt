@@ -32,6 +32,10 @@ public class HentMangledeVedleggTask implements ProsessTaskHandler {
         var saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
         var manglendeVedlegg = fpsakTjeneste.hentMangelendeVedlegg(saksnummer);
         LOG.info("Hentet manglende vedlegg for sak {}: {}", saksnummer.value(), manglendeVedlegg);
-        manglendeVedleggRepository.lagreManglendeVedleggPåSak(saksnummer, manglendeVedlegg);
+        if (manglendeVedlegg.isEmpty()) {
+            manglendeVedleggRepository.slett(saksnummer);
+        } else {
+            manglendeVedleggRepository.lagreManglendeVedleggPåSak(saksnummer, manglendeVedlegg);
+        }
     }
 }
