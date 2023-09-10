@@ -7,6 +7,7 @@ import java.util.Set;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 public class RepositoryStub implements SakRepository {
 
@@ -20,5 +21,10 @@ public class RepositoryStub implements SakRepository {
     @Override
     public List<Sak> hentFor(AktørId aktørId) {
         return sakList.stream().filter(v -> v.aktørId().equals(aktørId)).toList();
+    }
+
+    @Override
+    public boolean erSakKobletTilAktør(Saksnummer saksnummer, AktørId aktørId) {
+        return sakList.stream().anyMatch(sak -> sak.saksnummer().equals(saksnummer) && sak.aktørId().equals(aktørId));
     }
 }
