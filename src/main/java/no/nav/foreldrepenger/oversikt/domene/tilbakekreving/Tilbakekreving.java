@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.domene.tilbakekreving;
 
+import java.time.LocalDate;
+
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
@@ -12,6 +14,8 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 public interface Tilbakekreving {
     Saksnummer saksnummer();
 
-    boolean varsleBrukerOmTilbakekreving();
+    boolean trengerSvarFraBruker();
+
+    LocalDate varselDato();
 
 }

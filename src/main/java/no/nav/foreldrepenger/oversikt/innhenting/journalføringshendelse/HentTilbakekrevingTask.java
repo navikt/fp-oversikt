@@ -57,6 +57,9 @@ public class HentTilbakekrevingTask implements ProsessTaskHandler {
     }
 
     private static TilbakekrevingV1.Varsel map(Tilbakekreving.Varsel varsel) {
-        return new TilbakekrevingV1.Varsel(varsel.sendt(), varsel.besvart());
+        if (varsel == null) {
+            return null;
+        }
+        return new TilbakekrevingV1.Varsel(varsel.utsendtTidspunkt(), varsel.besvart());
     }
 }
