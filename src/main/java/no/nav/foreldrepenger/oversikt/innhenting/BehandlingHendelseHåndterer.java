@@ -11,7 +11,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -28,17 +27,13 @@ public class BehandlingHendelseHåndterer {
 
     private static final Logger LOG = LoggerFactory.getLogger(BehandlingHendelseHåndterer.class);
 
-    private static final Set<Hendelse> IGNORE = Set.of(Hendelse.ENHET);
+    private static final Set<Hendelse> IGNORE = Set.of(Hendelse.ENHET, Hendelse.MIGRERING);
 
     private ProsessTaskTjeneste taskTjeneste;
-    private FpsakTjeneste fpSakKlient;
-    private SakRepository sakRepository;
 
     @Inject
-    public BehandlingHendelseHåndterer(ProsessTaskTjeneste taskTjeneste, FpsakTjeneste fpSakKlient, SakRepository repository) {
+    public BehandlingHendelseHåndterer(ProsessTaskTjeneste taskTjeneste) {
         this.taskTjeneste = taskTjeneste;
-        this.fpSakKlient = fpSakKlient;
-        this.sakRepository = repository;
     }
 
     public BehandlingHendelseHåndterer() {
@@ -49,9 +44,7 @@ public class BehandlingHendelseHåndterer {
         LOG.info("Lest fra : topic={}", topic);
         try {
             var hendelse = map(payload);
-            if (hendelse.getHendelse().equals(Hendelse.MIGRERING)) {
-                hentSakMedEnGang(hendelse);
-            } else if (!IGNORE.contains(hendelse.getHendelse())) {
+            if (!IGNORE.contains(hendelse.getHendelse())) {
                 var hendelseUuid = hendelse.getHendelseUuid();
                 var saksnummer = new Saksnummer(hendelse.getSaksnummer());
                 lagreHentSakTask(hendelseUuid, saksnummer);
@@ -61,17 +54,6 @@ public class BehandlingHendelseHåndterer {
             }
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
-        }
-    }
-
-    private void hentSakMedEnGang(BehandlingHendelseV1 hendelse) {
-        var saksnummer = new Saksnummer(hendelse.getSaksnummer());
-        try {
-            HentSakTask.hentOgLagreSak(fpSakKlient, sakRepository, saksnummer);
-        } catch (Exception e) {
-            LOG.info("Direkte henting av sak feilet {}", saksnummer.value(), e);
-            //lager task for å prøve på nytt evt feile
-            lagreHentSakTask(hendelse.getHendelseUuid(), saksnummer);
         }
     }
 
