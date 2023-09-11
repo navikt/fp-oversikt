@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
 import java.util.Set;
 
-public enum DokumentType {
+public enum DokumentTypeId {
     // Søknader
     I000001("Søknad om svangerskapspenger"),
     I000002("Søknad om foreldrepenger ved adopsjon"),
@@ -48,7 +48,7 @@ public enum DokumentType {
 
     URELEVANT("Urelevant");
 
-    private static final Set<DokumentType> VEDLEGG_TYPER = Set.of(
+    private static final Set<DokumentTypeId> VEDLEGG_TYPER = Set.of(
             I000007,
             I000023,
             I000032,
@@ -77,20 +77,22 @@ public enum DokumentType {
             I000117
     );
 
-    public static final Set<DokumentType> SØKNAD_TYPER = Set.of(
+    public static final Set<DokumentTypeId> FØRSTEGANGSSØKNAD_TYPER = Set.of(
             I000001,
             I000002,
             I000003,
             I000004,
             I000005,
-            I000006,
-            I000050
+            I000006
     );
+
+
+    public static final Set<DokumentTypeId> ENDRINGSSØKNAD_TYPER = Set.of(I000050);
 
 
     private final String tittel;
 
-    DokumentType(String tittel) {
+    DokumentTypeId(String tittel) {
         this.tittel = tittel;
     }
 
@@ -98,8 +100,12 @@ public enum DokumentType {
         return tittel;
     }
 
-    public boolean erSøknad() {
-        return SØKNAD_TYPER.contains(this);
+    public boolean erFørstegangssøknad() {
+        return FØRSTEGANGSSØKNAD_TYPER.contains(this);
+    }
+
+    public boolean erEndringssøknad() {
+        return ENDRINGSSØKNAD_TYPER.contains(this);
     }
 
     public boolean erVedlegg() {
