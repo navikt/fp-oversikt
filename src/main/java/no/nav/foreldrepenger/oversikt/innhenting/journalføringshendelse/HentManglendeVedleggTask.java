@@ -14,15 +14,15 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
 @ProsessTask("hent.manglendeVedlegg")
-public class HentMangledeVedleggTask implements ProsessTaskHandler {
+public class HentManglendeVedleggTask implements ProsessTaskHandler {
 
-    private static final Logger LOG = LoggerFactory.getLogger(HentMangledeVedleggTask.class);
+    private static final Logger LOG = LoggerFactory.getLogger(HentManglendeVedleggTask.class);
 
     private final FpsakTjeneste fpsakTjeneste;
     private final ManglendeVedleggRepository manglendeVedleggRepository;
 
     @Inject
-    public HentMangledeVedleggTask(FpsakTjeneste fpsakTjeneste, ManglendeVedleggRepository manglendeVedleggRepository) {
+    public HentManglendeVedleggTask(FpsakTjeneste fpsakTjeneste, ManglendeVedleggRepository manglendeVedleggRepository) {
         this.fpsakTjeneste = fpsakTjeneste;
         this.manglendeVedleggRepository = manglendeVedleggRepository;
     }
@@ -30,12 +30,16 @@ public class HentMangledeVedleggTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
-        var manglendeVedlegg = fpsakTjeneste.hentMangelendeVedlegg(saksnummer);
+        hentOgLagre(fpsakTjeneste, manglendeVedleggRepository, saksnummer);
+    }
+
+    public static void hentOgLagre(FpsakTjeneste fpsakTjeneste1, ManglendeVedleggRepository repository, Saksnummer saksnummer) {
+        var manglendeVedlegg = fpsakTjeneste1.hentMangelendeVedlegg(saksnummer);
         LOG.info("Hentet manglende vedlegg for sak {}: {}", saksnummer.value(), manglendeVedlegg);
         if (manglendeVedlegg.isEmpty()) {
-            manglendeVedleggRepository.slett(saksnummer);
+            repository.slett(saksnummer);
         } else {
-            manglendeVedleggRepository.lagreManglendeVedleggPåSak(saksnummer, manglendeVedlegg);
+            repository.lagreManglendeVedleggPåSak(saksnummer, manglendeVedlegg);
         }
     }
 }

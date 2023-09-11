@@ -35,7 +35,7 @@ public class BehandlingMigreringConsumer implements LiveAndReadinessAware, Contr
 
     @Inject
     public BehandlingMigreringConsumer(@KonfigVerdi(value = "kafka.migerering.topic", defaultVerdi = "teamforeldrepenger.fpoversikt-migrering-v1") String topicName,
-                                       BehandlingHendelseHåndterer behandlingHendelseHåndterer) {
+                                       BehandlingMigreringHåndterer behandlingHendelseHåndterer) {
         this.topicName = topicName;
 
         final Consumed<String, String> consumed = Consumed.with(Topology.AutoOffsetReset.EARLIEST);

@@ -41,9 +41,13 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
+        var journalpostId = prosessTaskData.getPropertyValue(JOURNALPOST_ID);
+        hentOgLagre(fpsakTjeneste, inntektsmeldingerRepository, saksnummer, journalpostId);
+    }
+
+    public static void hentOgLagre(FpsakTjeneste fpsakTjeneste, InntektsmeldingerRepository repository, Saksnummer saksnummer, String journalpostId) {
         var inntektsmeldinger = fpsakTjeneste.hentInntektsmeldinger(saksnummer);
         LOG.info("Hentet inntektsmeldinger for sak {} {}", saksnummer, inntektsmeldinger);
-        var journalpostId = prosessTaskData.getPropertyValue(JOURNALPOST_ID);
         if (journalpostId != null && !imKnyttetTilJournalpost(inntektsmeldinger, journalpostId)) {
             throw new IntegrasjonException("FPOVERSIKT-IM",
                     "Finner ikke inntektsmelding med journalpostId " + journalpostId + " på sak " + saksnummer);
@@ -52,9 +56,9 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
             inntektsmeldinger.stream().map(HentInntektsmeldingerTask::map).collect(Collectors.toSet());
 
         if (inntektsmeldinger.isEmpty()) {
-            inntektsmeldingerRepository.slett(saksnummer);
+            repository.slett(saksnummer);
         } else {
-            inntektsmeldingerRepository.lagre(saksnummer, mapped);
+            repository.lagre(saksnummer, mapped);
         }
     }
 
