@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentArkivTjeneste;
+import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostId;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -71,7 +72,7 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             prosessTaskTjeneste.lagre(i);
         }
 
-        if (dokumentType.omhandlerTilbakekreving()) {
+        if (dokumentType.erUttalelseOmTilbakekreving() || erUtgåendeFraFptilbake(journalpost)) {
             var t = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
             t.setSaksnummer(saksnummer);
             t.setCallIdFraEksisterende();
@@ -80,6 +81,11 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             t.medNesteKjøringEtter(LocalDateTime.now().plus(HentTilbakekrevingTask.TASK_DELAY));
             prosessTaskTjeneste.lagre(t);
         }
+    }
+
+    private static boolean erUtgåendeFraFptilbake(EnkelJournalpost journalpost) {
+        return journalpost.journalposttype() == EnkelJournalpost.Journalposttype.UTGÅENDE
+            && journalpost.kildeSystem() == EnkelJournalpost.KildeSystem.FPTILBAKE;
     }
 
 }

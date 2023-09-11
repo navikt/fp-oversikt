@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -85,7 +84,6 @@ public class BehandlingHendelseHåndterer {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
-        task.medNesteKjøringEtter(LocalDateTime.now());
         task.setGruppe(saksnummer.value());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
@@ -100,7 +98,6 @@ public class BehandlingHendelseHåndterer {
         var task = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
-        task.medNesteKjøringEtter(LocalDateTime.now().plusMinutes(1)); //TODO trenger ikke denne delayen når vi leser utgående varselsbrev fra topic
         task.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer.value()));
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
