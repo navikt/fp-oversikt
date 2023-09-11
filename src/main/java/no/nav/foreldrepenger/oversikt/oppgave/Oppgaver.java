@@ -44,12 +44,12 @@ public class Oppgaver {
             .collect(Collectors.toSet());
 
         return tilbakekrevingRepository.hentFor(saker).stream()
-            .filter(Tilbakekreving::varsleBrukerOmTilbakekreving)
+            .filter(Tilbakekreving::trengerSvarFraBruker)
             .map(Oppgaver::tilDto)
             .collect(Collectors.toSet());
     }
 
     private static TilbakekrevingsInnslag tilDto(Tilbakekreving tilbakekreving) {
-        return new TilbakekrevingsInnslag(tilbakekreving.saksnummer());
+        return new TilbakekrevingsInnslag(tilbakekreving.saksnummer(), tilbakekreving.varselDato());
     }
 }

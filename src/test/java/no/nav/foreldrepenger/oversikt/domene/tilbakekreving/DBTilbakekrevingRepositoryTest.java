@@ -19,7 +19,8 @@ class DBTilbakekrevingRepositoryTest {
     void roundtrip(EntityManager entityManager) {
         var repository = new DBTilbakekrevingRepository(entityManager);
         var saksnummer = Saksnummer.dummy();
-        var før = new TilbakekrevingV1(saksnummer, new TilbakekrevingV1.Varsel(true, true), true, LocalDateTime.now());
+        var utsendtTidspunkt = LocalDateTime.now();
+        var før = new TilbakekrevingV1(saksnummer, new TilbakekrevingV1.Varsel(utsendtTidspunkt, true), true, LocalDateTime.now());
         repository.lagre(før);
 
         var tilbakekrevinger = repository.hentFor(Set.of(saksnummer));
@@ -28,7 +29,7 @@ class DBTilbakekrevingRepositoryTest {
         var tilbakekreving = (TilbakekrevingV1) tilbakekrevinger.stream().findFirst().orElseThrow();
         assertThat(tilbakekreving.saksnummer()).isEqualTo(før.saksnummer());
         assertThat(tilbakekreving.harVerge()).isEqualTo(før.harVerge());
-        assertThat(tilbakekreving.varsel().sendt()).isEqualTo(før.varsel().sendt());
+        assertThat(tilbakekreving.varsel().utsendtTidspunkt()).isEqualTo(før.varsel().utsendtTidspunkt());
         assertThat(tilbakekreving.varsel().besvart()).isEqualTo(før.varsel().besvart());
 
         repository.slett(saksnummer);
