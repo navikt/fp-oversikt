@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -29,6 +30,8 @@ public class DokumentArkivTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(DokumentArkivTjeneste.class);
 
     private static final String FP_DOK_TYPE = "fp_innholdtype";
+    private static final String BEHANDLINGTEMA_TILBAKEBETALING = "ab0007";
+
     private Saf safKlient;
 
     DokumentArkivTjeneste() {
@@ -49,6 +52,7 @@ public class DokumentArkivTjeneste {
                     .fagsaksystem())
             .journalpostId()
             .journalposttype()
+            .behandlingstema()
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
             .dokumenter(new DokumentInfoResponseProjection()
                     .tittel()
@@ -74,7 +78,23 @@ public class DokumentArkivTjeneste {
             journalpost.getJournalpostId(), antallDokumenter, journalpost.getSak().getFagsaksystem(),
             doktypeFraTilleggsopplysning);
         LOG.info(msg);
-        return new EnkelJournalpost(saksnummer, tilDokumentType(doktypeFraTilleggsopplysning));
+        var dokumentTypeId = tilDokumentType(doktypeFraTilleggsopplysning);
+        var kildeSystem = tilKildeSystem(journalpost);
+        var journalposttype = tilJournalposttype(journalpost);
+        return new EnkelJournalpost(saksnummer, dokumentTypeId, journalposttype, kildeSystem);
+    }
+
+    private static EnkelJournalpost.Journalposttype tilJournalposttype(Journalpost journalpost) {
+        return switch (journalpost.getJournalposttype()) {
+            case I -> EnkelJournalpost.Journalposttype.INNGÅENDE;
+            case U -> EnkelJournalpost.Journalposttype.UTGÅENDE;
+            case N -> EnkelJournalpost.Journalposttype.NOTAT;
+        };
+    }
+
+    private static EnkelJournalpost.KildeSystem tilKildeSystem(Journalpost journalpost) {
+        return Objects.equals(journalpost.getBehandlingstema(), BEHANDLINGTEMA_TILBAKEBETALING) ? EnkelJournalpost.KildeSystem.FPTILBAKE :
+            EnkelJournalpost.KildeSystem.ANNET;
     }
 
     private static Set<DokumentType> tilDokumentType(Set<String> doktypeFraTilleggsopplysning) {
