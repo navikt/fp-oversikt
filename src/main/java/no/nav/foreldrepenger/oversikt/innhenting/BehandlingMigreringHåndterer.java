@@ -65,7 +65,7 @@ public class BehandlingMigreringHåndterer {
         LOG.info("Lest fra : topic={}", topic);
         try {
             var hendelse = map(payload);
-            hentSak(hendelse);
+//            hentSak(hendelse);
             hentInntektsmeldinger(hendelse);
             hentTilbakekreving(hendelse);
             hentManglendeVedlegg(hendelse);
