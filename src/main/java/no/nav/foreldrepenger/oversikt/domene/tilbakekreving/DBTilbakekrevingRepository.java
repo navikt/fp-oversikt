@@ -58,6 +58,11 @@ public class DBTilbakekrevingRepository implements TilbakekrevingRepository {
     }
 
     @Override
+    public Optional<Tilbakekreving> hentFor(Saksnummer saksnummer) {
+        return hentTilbakekreving(saksnummer).map(TilbakekrevingEntitet::map);
+    }
+
+    @Override
     public void slett(Saksnummer saksnummer) {
         hentTilbakekreving(saksnummer).ifPresent(tbk -> {
             LOG.info("Sletter tilbakekreving for sak {}", saksnummer);

@@ -27,4 +27,9 @@ public class RepositoryStub implements SakRepository {
     public boolean erSakKobletTilAktør(Saksnummer saksnummer, AktørId aktørId) {
         return sakList.stream().anyMatch(sak -> sak.saksnummer().equals(saksnummer) && sak.aktørId().equals(aktørId));
     }
+
+    @Override
+    public Sak hentFor(Saksnummer saksnummer) {
+        return sakList.stream().filter(s -> s.saksnummer().equals(saksnummer)).findFirst().orElseThrow();
+    }
 }

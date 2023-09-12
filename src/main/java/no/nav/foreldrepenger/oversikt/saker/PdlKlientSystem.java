@@ -4,6 +4,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.pdl.Adressebeskyttelse;
 import no.nav.pdl.AdressebeskyttelseGradering;
@@ -22,6 +23,11 @@ import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
     scopesDefault = "api://prod-fss.pdl.pdl-api/.default")
 @Dependent
 public class PdlKlientSystem extends AbstractPersonKlient implements AdresseBeskyttelseOppslag {
+
+    public Fødselsnummer hentFnrFor(AktørId aktørId) {
+        var s = hentPersonIdentForAktørId(aktørId.value()).orElseThrow();
+        return new Fødselsnummer(s);
+    }
 
     @Override
     public AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) {

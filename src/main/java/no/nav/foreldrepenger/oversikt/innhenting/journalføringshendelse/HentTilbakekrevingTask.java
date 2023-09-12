@@ -13,6 +13,7 @@ import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingReposi
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingV1;
 import no.nav.foreldrepenger.oversikt.innhenting.tilbakekreving.FptilbakeTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.tilbakekreving.Tilbakekreving;
+import no.nav.foreldrepenger.oversikt.oppgave.OppgaveTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -25,11 +26,15 @@ public class HentTilbakekrevingTask implements ProsessTaskHandler {
 
     private final FptilbakeTjeneste fptilbakeTjeneste;
     private final TilbakekrevingRepository tilbakekrevingRepository;
+    private final OppgaveTjeneste oppgaveTjeneste;
 
     @Inject
-    public HentTilbakekrevingTask(FptilbakeTjeneste fptilbakeTjeneste, TilbakekrevingRepository tilbakekrevingRepository) {
+    public HentTilbakekrevingTask(FptilbakeTjeneste fptilbakeTjeneste,
+                                  TilbakekrevingRepository tilbakekrevingRepository,
+                                  OppgaveTjeneste oppgaveTjeneste) {
         this.fptilbakeTjeneste = fptilbakeTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
+        this.oppgaveTjeneste = oppgaveTjeneste;
     }
 
     public static String taskGruppeFor(String saksnummer) {
@@ -40,6 +45,7 @@ public class HentTilbakekrevingTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData prosessTaskData) {
         var saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
         hentOgLagre(fptilbakeTjeneste, tilbakekrevingRepository, saksnummer);
+        oppgaveTjeneste.opprettOppdaterOppgaveTask(saksnummer);
     }
 
     public static void hentOgLagre(FptilbakeTjeneste fptilbakeTjeneste, TilbakekrevingRepository repository, Saksnummer saksnummer) {
