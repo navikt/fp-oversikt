@@ -27,7 +27,7 @@
         <fp-kontrakter.version>7.0.0</fp-kontrakter.version>
         <fpsoknad-felles.version>2.5.0</fpsoknad-felles.version>
         <fp-tidsserie.version>2.6.8</fp-tidsserie.version>
-        <teamdokumenthandtering-avro-schemas.version>873c5cdd</teamdokumenthandtering-avro-schemas.version>
+        <teamdokumenthandtering-avro-schemas.version>08271806</teamdokumenthandtering-avro-schemas.version>
     </properties>
 
     <dependencyManagement>
