@@ -136,7 +136,7 @@ public class DokumentArkivTjeneste {
             tilDato(journalpost),
             dokumenttypeFraTilleggsopplysninger(journalpost),
             tilKildeSystem(journalpost),
-            tilDokumenter(pdfDokument)
+            tilDokumenter(pdfDokument, journalpost.getJournalposttype())
         );
     }
 
@@ -152,24 +152,27 @@ public class DokumentArkivTjeneste {
         };
     }
 
-    private static List<EnkelJournalpost.Dokument> tilDokumenter(List<DokumentInfo> pdfDokument) {
+    private static List<EnkelJournalpost.Dokument> tilDokumenter(List<DokumentInfo> pdfDokument, Journalposttype journalposttype) {
         return pdfDokument.stream()
-            .map(DokumentArkivTjeneste::tilDokument)
+            .map(d -> tilDokument(d, journalposttype))
             .toList();
     }
 
-    private static EnkelJournalpost.Dokument tilDokument(DokumentInfo dokumentInfo) {
-        return new EnkelJournalpost.Dokument(
-            dokumentInfo.getDokumentInfoId(),
-            tilDokumentTypeFraTittel(dokumentInfo.getTittel()),
-            tilBrevKode(dokumentInfo.getBrevkode()));
+    private static EnkelJournalpost.Dokument tilDokument(DokumentInfo dokumentInfo, Journalposttype journalposttype) {
+        if (journalposttype.equals(Journalposttype.I)) {
+            return new EnkelJournalpost.Dokument(
+                dokumentInfo.getDokumentInfoId(),
+                tilDokumentTypeFraTittel(dokumentInfo.getTittel()),
+                null);
+        } else {
+            return new EnkelJournalpost.Dokument(
+                dokumentInfo.getDokumentInfoId(),
+                null,
+                tilBrevKode(dokumentInfo.getBrevkode()));
+        }
     }
 
     private static EnkelJournalpost.Brevkode tilBrevKode(String brevkode) {
-        if (brevkode == null) { // Gjelder samtlige inngående dokumenter
-            return EnkelJournalpost.Brevkode.UKJENT;
-        }
-
         try {
             return EnkelJournalpost.Brevkode.fraKode(brevkode);
         } catch (Exception e) {
@@ -214,7 +217,7 @@ public class DokumentArkivTjeneste {
         try {
             return DokumentTypeId.valueOf(dokumentType);
         } catch (Exception e) {
-            LOG.info("Ukjent/urelevant dokumentTypeId fra SAF: {}", dokumentType);
+            LOG.info("Ukjent/urelevant dokumentTypeId fra SAF tilleggsopplysninger: {}", dokumentType);
             return DokumentTypeId.URELEVANT;
         }
     }
@@ -223,7 +226,7 @@ public class DokumentArkivTjeneste {
         try {
             return DokumentTypeId.fraTittel(dokumentType);
         } catch (Exception e) {
-            LOG.info("Ukjent/urelevant dokumentTypeId fra SAF: {}", dokumentType);
+            LOG.info("Ukjent/urelevant dokumentTypeId fra SAF tittel: {}", dokumentType);
             return DokumentTypeId.URELEVANT;
         }
     }
