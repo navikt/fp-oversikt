@@ -207,7 +207,7 @@ public class DokumentArkivTjeneste {
             .map(Tilleggsopplysning::getVerdi)
             .map(DokumentArkivTjeneste::tilDokumentType)
             .findFirst()
-            .orElse(DokumentTypeId.URELEVANT);
+            .orElse(null);
     }
 
     private static DokumentTypeId tilDokumentType(String dokumentType) {

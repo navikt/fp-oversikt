@@ -137,7 +137,7 @@ public class TidslinjeTjeneste {
             TidslinjeHendelseDto.TidslinjeHendelseType.INNTEKTSMELDING,
             null,
             new Arbeidsgiver(inntektsmelding.arbeidsgiver().identifikator(), arbeidsgiverType),
-            null
+            List.of()
         );
     }
 
