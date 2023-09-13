@@ -1,7 +1,11 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -16,6 +20,8 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 @ApplicationScoped
 @ProsessTask(value = "oppdater.dittnav")
 class OppdaterDittNavTask implements ProsessTaskHandler {
+
+    private static final Logger LOG = LoggerFactory.getLogger(OppdaterDittNavTask.class);
 
     private final PdlKlientSystem pdlKlient;
     private final SakRepository sakRepository;
@@ -44,7 +50,9 @@ class OppdaterDittNavTask implements ProsessTaskHandler {
         if (!oppgaverSomMåAvsluttes.isEmpty()) {
             dittNav.avslutt(fnr, saksnummer, oppgaverSomMåAvsluttes);
             for (var o : oppgaverSomMåAvsluttes) {
-                oppgaveRepository.oppdaterStatus(o.id(), OppgaveStatus.AVSLUTTET_DITT_NAV);
+                var nyStatus = new Oppgave.StatusDittNav(o.dittNavStatus().opprettetTidspunkt(), LocalDateTime.now());
+                LOG.info("Avslutter dittnav oppave {} - {}", o, nyStatus);
+                oppgaveRepository.lagreStatusDittNav(o.id(), nyStatus);
             }
         }
     }
@@ -54,21 +62,25 @@ class OppdaterDittNavTask implements ProsessTaskHandler {
         if (!oppgaverSomMåOpprettes.isEmpty()) {
             dittNav.opprett(fnr, saksnummer, oppgaverSomMåOpprettes);
             for (var o : oppgaverSomMåOpprettes) {
-                oppgaveRepository.oppdaterStatus(o.id(), OppgaveStatus.OPPRETTET_DITT_NAV);
+                var nyStatus = new Oppgave.StatusDittNav(LocalDateTime.now(), null);
+                LOG.info("Oppretter dittnav oppave {} - {}", o, nyStatus);
+                oppgaveRepository.lagreStatusDittNav(o.id(), nyStatus);
             }
         }
     }
 
     private Set<Oppgave> finnOppgaverSomMåOpprettes(Saksnummer saksnummer) {
-        return hentOppgaverMedStatus(saksnummer, OppgaveStatus.OPPRETTET);
+        return oppgaveRepository.hentFor(saksnummer)
+            .stream()
+            .filter(o -> o.status().opprettetTidspunkt() != null && o.dittNavStatus().opprettetTidspunkt() == null && o.status().avsluttetTidspunkt() == null)
+            .collect(Collectors.toSet());
     }
 
     private Set<Oppgave> finnOppgaverSomMåAvsluttes(Saksnummer saksnummer) {
-        return hentOppgaverMedStatus(saksnummer, OppgaveStatus.AVSLUTTET);
-    }
-
-    private Set<Oppgave> hentOppgaverMedStatus(Saksnummer saksnummer, OppgaveStatus status) {
-        return oppgaveRepository.hentFor(saksnummer).stream().filter(o -> o.status() == status).collect(Collectors.toSet());
+        return oppgaveRepository.hentFor(saksnummer)
+            .stream()
+            .filter(o -> o.status().avsluttetTidspunkt() != null && o.dittNavStatus().avsluttetTidspunkt() == null)
+            .collect(Collectors.toSet());
     }
 
     private Fødselsnummer finnFødselsnummer(Saksnummer saksnummer) {

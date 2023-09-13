@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.Tilbakekreving;
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
 
 final class OppgaveUtleder {
 
@@ -16,7 +16,7 @@ final class OppgaveUtleder {
 
     }
 
-    public static Optional<OppgaveType> utledFor(List<DokumentType> manglendeVedlegg) {
+    public static Optional<OppgaveType> utledFor(List<DokumentTypeId> manglendeVedlegg) {
         return !manglendeVedlegg.isEmpty() ? Optional.of(OppgaveType.LAST_OPP_MANGLENDE_VEDLEGG) : Optional.empty();
     }
 }

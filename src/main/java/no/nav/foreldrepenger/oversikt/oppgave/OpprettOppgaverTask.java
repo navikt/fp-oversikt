@@ -12,17 +12,17 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = "oppgave")
-class OppgaveTask implements ProsessTaskHandler {
+@ProsessTask(value = "opprett.oppgaver")
+class OpprettOppgaverTask implements ProsessTaskHandler {
 
     private final OppgaveTjeneste oppgaveTjeneste;
     private final TilbakekrevingRepository tilbakekrevingRepository;
     private final ManglendeVedleggRepository manglendeVedleggRepository;
 
     @Inject
-    OppgaveTask(OppgaveTjeneste oppgaveTjeneste,
-                TilbakekrevingRepository tilbakekrevingRepository,
-                ManglendeVedleggRepository manglendeVedleggRepository) {
+    OpprettOppgaverTask(OppgaveTjeneste oppgaveTjeneste,
+                        TilbakekrevingRepository tilbakekrevingRepository,
+                        ManglendeVedleggRepository manglendeVedleggRepository) {
         this.oppgaveTjeneste = oppgaveTjeneste;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
         this.manglendeVedleggRepository = manglendeVedleggRepository;

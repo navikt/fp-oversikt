@@ -10,8 +10,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 
 @Entity(name = "oppgave")
@@ -28,35 +26,30 @@ class OppgaveEntitet {
     @Enumerated(EnumType.STRING)
     private OppgaveType type;
 
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private OppgaveStatus status;
-
-    @Column(name = "opprettet_tid", nullable = false, updatable = false)
+    @Column(name = "opprettet_tid")
     private LocalDateTime opprettetTidspunkt;
 
-    @Column(name = "endret_tid")
-    private LocalDateTime endretTidspunkt;
+    @Column(name = "opprettet_tid_dittnav")
+    private LocalDateTime opprettetTidspunktDittNav;
 
-    public OppgaveEntitet(UUID id, String saksnummer, OppgaveType type, OppgaveStatus status) {
-        this.id = id;
-        this.saksnummer = saksnummer;
-        this.type = type;
-        this.status = status;
+    @Column(name = "avsluttet_tid")
+    private LocalDateTime avsluttetTidspunkt;
+
+    @Column(name = "avsluttet_tid_dittnav")
+    private LocalDateTime avsluttetTidspunktDittNav;
+
+    public OppgaveEntitet(Oppgave oppgave) {
+        this.id = oppgave.id();
+        this.saksnummer = oppgave.saksnummer().value();
+        this.type = oppgave.type();
+        this.opprettetTidspunkt = oppgave.status().opprettetTidspunkt();
+        this.avsluttetTidspunkt = oppgave.status().avsluttetTidspunkt();
+        this.opprettetTidspunktDittNav = oppgave.dittNavStatus().opprettetTidspunkt();
+        this.avsluttetTidspunktDittNav = oppgave.dittNavStatus().avsluttetTidspunkt();
     }
 
     protected OppgaveEntitet() {
 
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.opprettetTidspunkt = opprettetTidspunkt != null ? opprettetTidspunkt : LocalDateTime.now();
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        endretTidspunkt = LocalDateTime.now();
     }
 
     public String getSaksnummer() {
@@ -71,12 +64,36 @@ class OppgaveEntitet {
         return type;
     }
 
-    public OppgaveStatus getStatus() {
-        return status;
+    public LocalDateTime getOpprettetTidspunkt() {
+        return opprettetTidspunkt;
     }
 
-    public void endreStatus(OppgaveStatus nyStatus) {
-        status = nyStatus;
+    public LocalDateTime getOpprettetTidspunktDittNav() {
+        return opprettetTidspunktDittNav;
+    }
+
+    public LocalDateTime getAvsluttetTidspunkt() {
+        return avsluttetTidspunkt;
+    }
+
+    public LocalDateTime getAvsluttetTidspunktDittNav() {
+        return avsluttetTidspunktDittNav;
+    }
+
+    public void setOpprettetTidspunkt(LocalDateTime opprettetTidspunkt) {
+        this.opprettetTidspunkt = opprettetTidspunkt;
+    }
+
+    public void setOpprettetTidspunktDittNav(LocalDateTime opprettetTidspunktDittNav) {
+        this.opprettetTidspunktDittNav = opprettetTidspunktDittNav;
+    }
+
+    public void setAvsluttetTidspunkt(LocalDateTime avsluttetTidspunkt) {
+        this.avsluttetTidspunkt = avsluttetTidspunkt;
+    }
+
+    public void setAvsluttetTidspunktDittNav(LocalDateTime avsluttetTidspunktDittNav) {
+        this.avsluttetTidspunktDittNav = avsluttetTidspunktDittNav;
     }
 
     @Override

@@ -29,14 +29,27 @@ class OppgaveRepository {
             .setParameter("saksnummer", saksnummer.value())
             .getResultList()
             .stream()
-            .map(e -> new Oppgave(new Saksnummer(e.getSaksnummer()), e.getId(), e.getType(), e.getStatus()))
+            .map(e -> {
+                var status = new Oppgave.Status(e.getOpprettetTidspunkt(), e.getAvsluttetTidspunkt());
+                var dittNavStatus = new Oppgave.StatusDittNav(e.getOpprettetTidspunktDittNav(), e.getAvsluttetTidspunktDittNav());
+                return new Oppgave(new Saksnummer(e.getSaksnummer()), e.getId(), e.getType(), status, dittNavStatus);
+            })
             .collect(Collectors.toSet());
     }
 
-    void oppdaterStatus(UUID oppgaveId, OppgaveStatus nyStatus) {
+    void lagreStatus(UUID oppgaveId, Oppgave.Status status) {
         var entitet = hentOppgave(oppgaveId);
-        entitet.endreStatus(nyStatus);
-        entityManager.persist(entitet);
+        entitet.setOpprettetTidspunkt(status.opprettetTidspunkt());
+        entitet.setAvsluttetTidspunkt(status.avsluttetTidspunkt());
+        entityManager.merge(entitet);
+        entityManager.flush();
+    }
+
+    void lagreStatusDittNav(UUID oppgaveId, Oppgave.StatusDittNav status) {
+        var entitet = hentOppgave(oppgaveId);
+        entitet.setOpprettetTidspunktDittNav(status.opprettetTidspunkt());
+        entitet.setAvsluttetTidspunktDittNav(status.avsluttetTidspunkt());
+        entityManager.merge(entitet);
         entityManager.flush();
     }
 
@@ -47,7 +60,7 @@ class OppgaveRepository {
 
     void opprett(Set<Oppgave> oppgaver) {
         for (var oppgave : oppgaver) {
-            var entitet = new OppgaveEntitet(oppgave.id(), oppgave.saksnummer().value(), oppgave.type(), OppgaveStatus.OPPRETTET);
+            var entitet = new OppgaveEntitet(oppgave);
             entityManager.persist(entitet);
         }
         entityManager.flush();
