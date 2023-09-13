@@ -38,6 +38,9 @@ import no.nav.saf.Tilleggsopplysning;
 import no.nav.saf.TilleggsopplysningResponseProjection;
 import no.nav.vedtak.felles.integrasjon.saf.Saf;
 
+/**
+ * Dokumentasjon av SAF: https://confluence.adeo.no/display/BOA/saf+-+GraphQL+API+v1
+ */
 @ApplicationScoped
 public class DokumentArkivTjeneste {
 
