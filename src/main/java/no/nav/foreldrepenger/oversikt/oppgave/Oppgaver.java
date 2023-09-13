@@ -13,7 +13,7 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.Tilbakekreving;
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende.ManglendeVedleggRepository;
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentType;
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
 
 @ApplicationScoped
 public class Oppgaver {
@@ -34,7 +34,7 @@ public class Oppgaver {
     public Oppgaver() {
     }
 
-    List<DokumentType> manglendeVedlegg(Saksnummer saksnummer) {
+    List<DokumentTypeId> manglendeVedlegg(Saksnummer saksnummer) {
         return manglendeVedleggRepository.hentFor(saksnummer);
     }
 
