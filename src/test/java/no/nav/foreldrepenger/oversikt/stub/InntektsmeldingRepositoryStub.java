@@ -1,8 +1,10 @@
 package no.nav.foreldrepenger.oversikt.stub;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmelding;
@@ -14,19 +16,12 @@ public class InntektsmeldingRepositoryStub implements InntektsmeldingerRepositor
 
     @Override
     public void lagre(Saksnummer saksnummer, Set<Inntektsmelding> im) {
-        inntektsmeldinger.put(saksnummer, im);
+        inntektsmeldinger.put(saksnummer, new HashSet<>(im));
     }
 
     @Override
     public Set<Inntektsmelding> hentFor(Set<Saksnummer> saksnummer) {
-        var IM = new java.util.HashSet<Inntektsmelding>();
-        for (var sak: saksnummer) {
-            var inntektsmeldingerPåSak = inntektsmeldinger.get(sak);
-            if (inntektsmeldingerPåSak != null) {
-                IM.addAll(inntektsmeldingerPåSak);
-            }
-        }
-        return IM;
+        return saksnummer.stream().flatMap(s -> inntektsmeldinger.getOrDefault(s, Set.of()).stream()).collect(Collectors.toSet());
     }
 
     @Override

@@ -25,9 +25,6 @@ import no.nav.foreldrepenger.oversikt.stub.InntektsmeldingRepositoryStub;
 
 class TidslinjeTjenesteTest {
 
-    private static final String ORGNUMMER_DUMMY = "99999999";
-    private static final Saksnummer SAKSNUMMER_DUMMY = Saksnummer.dummy();
-
     private TidslinjeTjeneste tjeneste;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
     private InntektsmeldingerRepository inntektsmeldingerRepository;
@@ -41,12 +38,13 @@ class TidslinjeTjenesteTest {
 
     @Test
     void søknadOgInntektmeldingTidslije() {
-        var søknadMedVedlegg = søknadMedVedlegg();
+        var saksnummer = Saksnummer.dummy();
+        var søknadMedVedlegg = søknadMedVedlegg(saksnummer);
         var inntektsmelding = standardInntektsmelding();
-        when(dokumentArkivTjeneste.hentAlleJournalposter(SAKSNUMMER_DUMMY)).thenReturn(List.of(søknadMedVedlegg));
-        inntektsmeldingerRepository.lagre(SAKSNUMMER_DUMMY, Set.of(inntektsmelding));
+        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(søknadMedVedlegg));
+        inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(SAKSNUMMER_DUMMY);
+        var tidslinje = tjeneste.tidslinje(saksnummer);
 
         assertThat(tidslinje)
             .hasSize(2)
@@ -59,13 +57,14 @@ class TidslinjeTjenesteTest {
 
     @Test
     void søknadEtterlysIMOgVedtak() {
-        var søknadMedVedlegg = søknadMedVedlegg();
-        var etterlysIM = etterlysIM();
-        var vedtak = utgåendeVedtak();
-        when(dokumentArkivTjeneste.hentAlleJournalposter(SAKSNUMMER_DUMMY)).thenReturn(
+        var saksnummer = Saksnummer.dummy();
+        var søknadMedVedlegg = søknadMedVedlegg(saksnummer);
+        var etterlysIM = etterlysIM(saksnummer);
+        var vedtak = utgåendeVedtak(saksnummer);
+        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, etterlysIM, vedtak));
 
-        var tidslinje = tjeneste.tidslinje(SAKSNUMMER_DUMMY);
+        var tidslinje = tjeneste.tidslinje(saksnummer);
 
         assertThat(tidslinje)
             .hasSize(3)
@@ -79,18 +78,19 @@ class TidslinjeTjenesteTest {
 
     @Test
     void søknadIMEttersendingVedtakEndringssøknadOgDeretterNyttVedtak() {
-        var søknadMedVedlegg = søknadMedVedlegg();
+        var saksnummer = Saksnummer.dummy();
+        var søknadMedVedlegg = søknadMedVedlegg(saksnummer);
         var inntektsmelding = standardInntektsmelding();
-        var innhentOpplysningsBrev = innhentOpplysningsBrev();
-        var ettersending = ettersenderVedlegg();
-        var vedtak = utgåendeVedtak();
-        var endringssøknad = endringssøknadUtenVedlegg();
-        var vedtakEndring = utgåendeVedtak();
-        when(dokumentArkivTjeneste.hentAlleJournalposter(SAKSNUMMER_DUMMY)).thenReturn(
+        var innhentOpplysningsBrev = innhentOpplysningsBrev(saksnummer);
+        var ettersending = ettersenderVedlegg(saksnummer);
+        var vedtak = utgåendeVedtak(saksnummer);
+        var endringssøknad = endringssøknadUtenVedlegg(saksnummer);
+        var vedtakEndring = utgåendeVedtak(saksnummer);
+        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, innhentOpplysningsBrev, ettersending, vedtak, endringssøknad, vedtakEndring));
-        inntektsmeldingerRepository.lagre(SAKSNUMMER_DUMMY, Set.of(inntektsmelding));
+        inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(SAKSNUMMER_DUMMY);
+        var tidslinje = tjeneste.tidslinje(saksnummer);
 
         assertThat(tidslinje)
             .hasSize(7)
@@ -108,14 +108,15 @@ class TidslinjeTjenesteTest {
 
     @Test
     void skalFiltrereBortInnteksmeldingFraJoark() {
-        var søknadMedVedlegg = søknadMedVedlegg();
-        var innteksmeldingJournalpost = innteksmeldingJournalpost();
+        var saksnummer = Saksnummer.dummy();
+        var søknadMedVedlegg = søknadMedVedlegg(saksnummer);
+        var innteksmeldingJournalpost = innteksmeldingJournalpost(saksnummer);
         var inntektsmelding = standardInntektsmelding();
-        when(dokumentArkivTjeneste.hentAlleJournalposter(SAKSNUMMER_DUMMY)).thenReturn(
+        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, innteksmeldingJournalpost));
-        inntektsmeldingerRepository.lagre(SAKSNUMMER_DUMMY, Set.of(inntektsmelding));
+        inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(SAKSNUMMER_DUMMY);
+        var tidslinje = tjeneste.tidslinje(saksnummer);
 
         assertThat(tidslinje)
             .hasSize(2)
@@ -128,13 +129,14 @@ class TidslinjeTjenesteTest {
 
     @Test
     void tidslinjenSorteresEtterOpprettetTidspunkt() {
+        var saksnummer = Saksnummer.dummy();
         var inntektsmelding = standardInntektsmelding();
-        var søknadMedVedlegg = søknadMedVedlegg();
-        var vedtak = utgåendeVedtak();
-        when(dokumentArkivTjeneste.hentAlleJournalposter(SAKSNUMMER_DUMMY)).thenReturn(List.of(vedtak, søknadMedVedlegg)); // Reversert med vilje
-        inntektsmeldingerRepository.lagre(SAKSNUMMER_DUMMY, Set.of(inntektsmelding));
+        var søknadMedVedlegg = søknadMedVedlegg(saksnummer);
+        var vedtak = utgåendeVedtak(saksnummer);
+        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(vedtak, søknadMedVedlegg)); // Reversert med vilje
+        inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(SAKSNUMMER_DUMMY);
+        var tidslinje = tjeneste.tidslinje(saksnummer);
 
         assertThat(tidslinje)
             .hasSize(3)
@@ -145,11 +147,11 @@ class TidslinjeTjenesteTest {
                 TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK);
     }
 
-    private static EnkelJournalpost søknadMedVedlegg() {
+    private static EnkelJournalpost søknadMedVedlegg(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             DokumentTypeId.I000003.getTittel(),
             "1",
-            SAKSNUMMER_DUMMY.value(),
+            saksnummer.value(),
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
             LocalDateTime.now(),
@@ -162,11 +164,11 @@ class TidslinjeTjenesteTest {
         );
     }
 
-    private static EnkelJournalpost endringssøknadUtenVedlegg() {
+    private static EnkelJournalpost endringssøknadUtenVedlegg(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             DokumentTypeId.I000050.getTittel(),
             "2",
-            SAKSNUMMER_DUMMY.value(),
+            saksnummer.value(),
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
             LocalDateTime.now(),
@@ -178,11 +180,11 @@ class TidslinjeTjenesteTest {
         );
     }
 
-    private static EnkelJournalpost ettersenderVedlegg() {
+    private static EnkelJournalpost ettersenderVedlegg(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             DokumentTypeId.I000036.getTittel(),
             "3",
-            SAKSNUMMER_DUMMY.value(),
+            saksnummer.value(),
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
             LocalDateTime.now(),
@@ -195,12 +197,12 @@ class TidslinjeTjenesteTest {
         );
     }
 
-    private static EnkelJournalpost innteksmeldingJournalpost() {
+    private static EnkelJournalpost innteksmeldingJournalpost(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             DokumentTypeId.I000067.getTittel(),
             "4",
-            SAKSNUMMER_DUMMY.value(),
-            new EnkelJournalpost.Bruker(ORGNUMMER_DUMMY, EnkelJournalpost.Bruker.Type.ORGNR),
+            saksnummer.value(),
+            new EnkelJournalpost.Bruker(Arbeidsgiver.dummy().identifikator(), EnkelJournalpost.Bruker.Type.ORGNR),
             EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
             LocalDateTime.now(),
             DokumentTypeId.I000067,
@@ -212,11 +214,11 @@ class TidslinjeTjenesteTest {
     }
 
 
-    private static EnkelJournalpost utgåendeVedtak() {
+    private static EnkelJournalpost utgåendeVedtak(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             "Innvilgelsesbrev foreldrepenger",
             "5",
-            SAKSNUMMER_DUMMY.value(),
+            saksnummer.value(),
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT,
             LocalDateTime.now(),
@@ -229,11 +231,11 @@ class TidslinjeTjenesteTest {
     }
 
 
-    private static EnkelJournalpost innhentOpplysningsBrev() {
+    private static EnkelJournalpost innhentOpplysningsBrev(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             "Innhente opplysninger",
             "5",
-            SAKSNUMMER_DUMMY.value(),
+            saksnummer.value(),
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT,
             LocalDateTime.now(),
@@ -246,11 +248,11 @@ class TidslinjeTjenesteTest {
     }
 
 
-    private static EnkelJournalpost etterlysIM() {
+    private static EnkelJournalpost etterlysIM(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             "Etterlys inntektsmelding",
             "6",
-            SAKSNUMMER_DUMMY.value(),
+            saksnummer.value(),
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT,
             LocalDateTime.now(),
@@ -263,6 +265,6 @@ class TidslinjeTjenesteTest {
     }
 
     private static Inntektsmelding standardInntektsmelding() {
-        return new InntektsmeldingV1("7", new Arbeidsgiver(ORGNUMMER_DUMMY), LocalDateTime.now(), Beløp.ZERO);
+        return new InntektsmeldingV1("7", Arbeidsgiver.dummy(), LocalDateTime.now(), Beløp.ZERO);
     }
 }
