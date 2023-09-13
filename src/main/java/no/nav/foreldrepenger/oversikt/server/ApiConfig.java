@@ -19,6 +19,7 @@ import jakarta.ws.rs.core.Application;
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.drift.ManuellOppdateringAvSakDriftTjeneste;
 import no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste;
+import no.nav.foreldrepenger.oversikt.innhenting.tidslinje.TidslinjeRest;
 import no.nav.foreldrepenger.oversikt.oppgave.OppgaveRest;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
@@ -55,7 +56,7 @@ public class ApiConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         // eksponert grensesnitt bak sikkerhet
-        return Set.of(OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class, OpenApiResource.class, GeneralRestExceptionMapper.class);
+        return Set.of(TidslinjeRest.class, OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class, OpenApiResource.class, GeneralRestExceptionMapper.class);
     }
 
     @Override
