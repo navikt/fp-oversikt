@@ -223,7 +223,7 @@ class TidslinjeTjenesteTest {
             null, // Todo: Dokumentet har vel ikke en hovedtype her? Elller?
             EnkelJournalpost.KildeSystem.ANNET,
             List.of(
-                new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.INVFOR)
+                new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.FORELDREPENGER_INNVILGELSE)
             )
         );
     }
@@ -240,7 +240,7 @@ class TidslinjeTjenesteTest {
             null, // Todo: Dokumentet har vel ikke en hovedtype her? Elller?
             EnkelJournalpost.KildeSystem.ANNET,
             List.of(
-                new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.INNOPP)
+                new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.INNHENTE_OPPLYSNINGER)
             )
         );
     }
@@ -257,7 +257,7 @@ class TidslinjeTjenesteTest {
             null, // Todo: Dokumentet har vel ikke en hovedtype her? Elller?
             EnkelJournalpost.KildeSystem.ANNET,
             List.of(
-                new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.ELYSIM)
+                new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.ETTERLYS_INNTEKTSMELDING)
             )
         );
     }

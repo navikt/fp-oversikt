@@ -45,9 +45,9 @@ public class TidslinjeTjeneste {
     private static TidslinjeHendelseDto tilTidslinjeHendelse(EnkelJournalpost enkelJournalpost) {
         if (enkelJournalpost.type().equals(EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT)) {
             return switch (enkelJournalpost.dokumenter().stream().findFirst().orElseThrow().brevkode()) { // Alltid bare ett dokument!
-                case ANUFOR, AVSFOR, OPPSVP, INNVES, AVSSVP, INVFOR, AVSLES, OPPFOR, INVSVP -> vedtakshendelse(enkelJournalpost);
-                case INNOPP -> innhentOpplysningsBrev(enkelJournalpost);
-                case ELYSIM -> etterlysInntektsmelding(enkelJournalpost);
+                case FORELDREPENGER_ANNULLERT, FORELDREPENGER_AVSLAG, SVANGERSKAPSPENGER_OPPHØR, ENGANGSSTØNAD_INNVILGELSE, SVANGERSKAPSPENGER_AVSLAG, FORELDREPENGER_INNVILGELSE, ENGANGSSTØNAD_AVSLAG, FORELDREPENGER_OPPHØR, SVANGERSKAPSPENGER_INNVILGELSE -> vedtakshendelse(enkelJournalpost);
+                case INNHENTE_OPPLYSNINGER -> innhentOpplysningsBrev(enkelJournalpost);
+                case ETTERLYS_INNTEKTSMELDING -> etterlysInntektsmelding(enkelJournalpost);
                 default -> throw new IllegalStateException("Ukjent brevkode. What to do?"); // TODO: Skal vel ikke være mulig å ikke ha brevkode for utgående dokumenter?
             };
         } else if (enkelJournalpost.type().equals(INNGÅENDE_DOKUMENT)) {
