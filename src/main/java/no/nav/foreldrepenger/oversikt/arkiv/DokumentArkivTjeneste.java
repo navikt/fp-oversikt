@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-import static no.nav.saf.Datotype.DATO_OPPRETTET;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -32,7 +31,6 @@ import no.nav.saf.Journalpost;
 import no.nav.saf.JournalpostQueryRequest;
 import no.nav.saf.JournalpostResponseProjection;
 import no.nav.saf.Journalposttype;
-import no.nav.saf.RelevantDato;
 import no.nav.saf.SakResponseProjection;
 import no.nav.saf.Tilleggsopplysning;
 import no.nav.saf.TilleggsopplysningResponseProjection;
@@ -180,12 +178,7 @@ public class DokumentArkivTjeneste {
     }
 
     private static LocalDateTime tilDato(Journalpost journalpost) {
-        return journalpost.getRelevanteDatoer().stream()
-            .filter(r -> DATO_OPPRETTET.equals(r.getDatotype()))
-            .findFirst()
-            .map(RelevantDato::getDato)
-            .map(DokumentArkivTjeneste::tilLocalDateTime)
-            .orElseThrow(() -> new IllegalStateException("Utviklerfeil: journalposter skal ha opprettet tidspunkt"));
+        return tilLocalDateTime(journalpost.getDatoOpprettet());
     }
 
     private static LocalDateTime tilLocalDateTime(Date date) {
