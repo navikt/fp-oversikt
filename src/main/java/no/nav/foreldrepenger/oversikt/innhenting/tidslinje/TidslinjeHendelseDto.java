@@ -40,7 +40,7 @@ public record TidslinjeHendelseDto(LocalDateTime opprettet,
         UTGÅENDE_ETTERLYS_INNTEKTSMELDING
     }
 
-    public record Dokument(String dokumentId, String dokumentTypeId) {
+    public record Dokument(String dokumentId, String tittel) {
     }
 
     @Override
