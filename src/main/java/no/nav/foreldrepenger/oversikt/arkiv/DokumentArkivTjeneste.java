@@ -7,7 +7,6 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -50,7 +49,6 @@ public class DokumentArkivTjeneste {
     private static final List<String> GYLDIGE_FILFORMAT = List.of("PDF");
 //    private static final List<String> GYLDIGE_FILFORMAT = List.of("PDF", "JPG", "PNG"); // TODO
     static final String FP_DOK_TYPE = "fp_innholdtype";
-    private static final String BEHANDLINGTEMA_TILBAKEBETALING = "ab0007";
 
     private Saf safKlient;
 
@@ -108,7 +106,6 @@ public class DokumentArkivTjeneste {
             .tittel()
             .journalpostId()
             .journalposttype()
-            .behandlingstema()
             .datoOpprettet()
             .sak(new SakResponseProjection()
                 .fagsakId()
@@ -135,7 +132,6 @@ public class DokumentArkivTjeneste {
             tilType(journalpost.getJournalposttype()),
             tilDato(journalpost),
             dokumenttypeFraTilleggsopplysninger(journalpost),
-            tilKildeSystem(journalpost),
             tilDokumenter(pdfDokument, journalpost.getJournalposttype())
         );
     }
@@ -197,14 +193,6 @@ public class DokumentArkivTjeneste {
             case U -> EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT;
             case N -> throw new IllegalStateException("Utviklerfeil: Skal filterer bort notater før mapping!");
         };
-    }
-
-    private static EnkelJournalpost.KildeSystem tilKildeSystem(Journalpost journalpost) {
-        if (Objects.equals(journalpost.getBehandlingstema(), BEHANDLINGTEMA_TILBAKEBETALING)) {
-            return EnkelJournalpost.KildeSystem.FPTILBAKE;
-        }
-        LOG.info("Ukjent behanldingstema for journalpost {}", journalpost.getBehandlingstema());
-        return EnkelJournalpost.KildeSystem.ANNET;
     }
 
     private static DokumentTypeId dokumenttypeFraTilleggsopplysninger(Journalpost journalpost) {

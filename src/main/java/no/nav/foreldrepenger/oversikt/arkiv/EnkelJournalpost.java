@@ -13,7 +13,6 @@ public record EnkelJournalpost(String tittel,
                                DokumentType type,
                                LocalDateTime mottatt,
                                DokumentTypeId hovedtype,
-                               KildeSystem kildeSystem,
                                List<Dokument> dokumenter) {
     public record Bruker(String id, Type type) {
         public enum Type {
@@ -32,10 +31,6 @@ public record EnkelJournalpost(String tittel,
     public enum DokumentType {
         INNGÅENDE_DOKUMENT,
         UTGÅENDE_DOKUMENT
-    }
-
-    public enum KildeSystem {
-        FPTILBAKE, ANNET
     }
 
     public record Dokument(String dokumentId, String tittel, Brevkode brevkode) {

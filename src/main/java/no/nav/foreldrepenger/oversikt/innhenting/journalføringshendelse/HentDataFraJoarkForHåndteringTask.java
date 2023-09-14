@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentArkivTjeneste;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostId;
-import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -67,22 +66,17 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             i.setGruppe(saksnummer + "-I");
             i.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
             prosessTaskTjeneste.lagre(i);
-        } else if (dokumentType.erUttalelseOmTilbakekreving() || erUtgåendeFraFptilbake(journalpost)) {
+        } else if (dokumentType.erUttalelseOmTilbakekreving()) {
             var t = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
             t.setSaksnummer(saksnummer);
             t.setCallIdFraEksisterende();
             t.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
             t.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer));
-            t.medNesteKjøringEtter(LocalDateTime.now().plus(HentTilbakekrevingTask.TASK_DELAY));
+            t.medNesteKjøringEtter(LocalDateTime.now().plusSeconds(10));
             prosessTaskTjeneste.lagre(t);
         } else {
             LOG.info("Journalføringshendelse av dokumenttypen {} på sak {} ignoreres", dokumentType, saksnummer);
         }
     }
-
-    private static boolean erUtgåendeFraFptilbake(EnkelJournalpost journalpost) {
-        return EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT.equals(journalpost.type()) && EnkelJournalpost.KildeSystem.FPTILBAKE.equals(journalpost.kildeSystem());
-    }
-
 }
 

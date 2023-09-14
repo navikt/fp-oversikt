@@ -183,7 +183,6 @@ class TidslinjeTjenesteTest {
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT, mottatt,
             DokumentTypeId.I000003,
-            EnkelJournalpost.KildeSystem.ANNET,
             List.of(
                 new EnkelJournalpost.Dokument("1", DokumentTypeId.I000003.getTittel(), null),
                 new EnkelJournalpost.Dokument("2", DokumentTypeId.I000036.getTittel(), null)
@@ -200,7 +199,6 @@ class TidslinjeTjenesteTest {
             EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
             tidspunkt,
             DokumentTypeId.I000050,
-            EnkelJournalpost.KildeSystem.ANNET,
             List.of(
                 new EnkelJournalpost.Dokument("1", DokumentTypeId.I000050.getTittel(), null)
             )
@@ -215,7 +213,6 @@ class TidslinjeTjenesteTest {
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT, tidspunkt,
             DokumentTypeId.I000023,
-            EnkelJournalpost.KildeSystem.ANNET,
             List.of(
                 new EnkelJournalpost.Dokument("1", DokumentTypeId.I000023.getTittel(), null),
                 new EnkelJournalpost.Dokument("2", DokumentTypeId.I000036.getTittel(), null)
@@ -232,7 +229,6 @@ class TidslinjeTjenesteTest {
             EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
             LocalDateTime.now(),
             DokumentTypeId.I000067,
-            EnkelJournalpost.KildeSystem.ANNET,
             List.of(
                 new EnkelJournalpost.Dokument("1", DokumentTypeId.I000067.getTittel(), null)
             )
@@ -248,7 +244,6 @@ class TidslinjeTjenesteTest {
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT, mottatt,
             null, // Todo: Dokumentet har vel ikke en hovedtype her? Elller?
-            EnkelJournalpost.KildeSystem.ANNET,
             List.of(
                 new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.FORELDREPENGER_INNVILGELSE)
             )
@@ -264,7 +259,6 @@ class TidslinjeTjenesteTest {
             new EnkelJournalpost.Bruker(AktørId.dummy().value(), EnkelJournalpost.Bruker.Type.AKTOERID),
             EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT, tidspunkt,
             null, // Todo: Dokumentet har vel ikke en hovedtype her? Elller?
-            EnkelJournalpost.KildeSystem.ANNET,
             List.of(
                 new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.INNHENTE_OPPLYSNINGER)
             )
@@ -281,7 +275,6 @@ class TidslinjeTjenesteTest {
             EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT,
             LocalDateTime.now(),
             null, // Todo: Dokumentet har vel ikke en hovedtype her? Elller?
-            EnkelJournalpost.KildeSystem.ANNET,
             List.of(
                 new EnkelJournalpost.Dokument("1", null, EnkelJournalpost.Brevkode.ETTERLYS_INNTEKTSMELDING)
             )
