@@ -108,6 +108,32 @@ class TidslinjeTjenesteTest {
     }
 
     @Test
+    void nyeSøknaderFørVedtakSkalFåTypeFørstegangssøknadNY() {
+        var saksnummer = Saksnummer.dummy();
+        var tidspunkt = LocalDateTime.now();
+        var søknadMedVedlegg = søknadMedVedlegg(saksnummer, tidspunkt);
+        var inntektsmelding = standardInntektsmelding(tidspunkt.plusDays(1));
+        var ettersending = ettersenderVedlegg(saksnummer, tidspunkt.plusDays(2));
+        var nySøknadMedVedlegg = søknadMedVedlegg(saksnummer, tidspunkt.plusDays(3));
+        var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(4));
+        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(søknadMedVedlegg, ettersending, nySøknadMedVedlegg, vedtak));
+        inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
+
+        var tidslinje = tjeneste.tidslinje(saksnummer);
+
+        assertThat(tidslinje)
+            .hasSize(5)
+            .extracting(TidslinjeHendelseDto::tidslinjeHendelseType)
+            .containsExactly(
+                TidslinjeHendelseDto.TidslinjeHendelseType.FØRSTEGANGSSØKNAD,
+                TidslinjeHendelseDto.TidslinjeHendelseType.INNTEKTSMELDING,
+                TidslinjeHendelseDto.TidslinjeHendelseType.ETTERSENDING,
+                TidslinjeHendelseDto.TidslinjeHendelseType.FØRSTEGANGSSØKNAD_NY,
+                TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK
+            );
+    }
+
+    @Test
     void skalFiltrereBortInnteksmeldingFraJoark() {
         var saksnummer = Saksnummer.dummy();
         var søknadMedVedlegg = søknadMedVedlegg(saksnummer, LocalDateTime.now());

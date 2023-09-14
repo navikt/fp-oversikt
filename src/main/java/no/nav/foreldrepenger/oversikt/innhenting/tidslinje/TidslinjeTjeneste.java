@@ -12,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.innsyn.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentArkivTjeneste;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -36,87 +35,78 @@ public class TidslinjeTjeneste {
     }
 
     public List<TidslinjeHendelseDto> tidslinje(Saksnummer saksnummer) {
-        var dokumenter = arkivTjeneste.hentAlleJournalposter(saksnummer).stream()
+        var alleDokumenterFraSaf = arkivTjeneste.hentAlleJournalposter(saksnummer).stream()
             .filter(journalpost -> !(INNGÅENDE_DOKUMENT.equals(journalpost.type()) && journalpost.hovedtype().erInntektsmelding()))
-            .map(TidslinjeTjeneste::tilTidslinjeHendelse)
+            .toList();
+        var mappedeDokumenter = alleDokumenterFraSaf.stream()
+            .map(journalpost -> tilTidslinjeHendelse(journalpost, alleDokumenterFraSaf))
             .flatMap(Optional::stream);
-        var inntektsmeldinger = inntektsmeldingerRepository.hentFor(Set.of(saksnummer)).stream()
+        var mappedeInntektsmeldinger = inntektsmeldingerRepository.hentFor(Set.of(saksnummer)).stream()
             .map(TidslinjeTjeneste::tilTidslinjeHendelse);
-        return Stream.concat(dokumenter, inntektsmeldinger)
+        return Stream.concat(mappedeDokumenter, mappedeInntektsmeldinger)
             .sorted()
             .toList();
     }
 
-    private static Optional<TidslinjeHendelseDto> tilTidslinjeHendelse(EnkelJournalpost enkelJournalpost) {
+    private static Optional<TidslinjeHendelseDto> tilTidslinjeHendelse(EnkelJournalpost enkelJournalpost, List<EnkelJournalpost> alleDokumentene) {
         if (enkelJournalpost.type().equals(EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT)) {
-            return switch (enkelJournalpost.dokumenter().stream().findFirst().orElseThrow().brevkode()) { // Alltid bare ett dokument!
-                case FORELDREPENGER_ANNULLERT, FORELDREPENGER_AVSLAG, SVANGERSKAPSPENGER_OPPHØR, ENGANGSSTØNAD_INNVILGELSE, SVANGERSKAPSPENGER_AVSLAG, FORELDREPENGER_INNVILGELSE, ENGANGSSTØNAD_AVSLAG, FORELDREPENGER_OPPHØR, SVANGERSKAPSPENGER_INNVILGELSE -> vedtakshendelse(enkelJournalpost);
-                case INNHENTE_OPPLYSNINGER -> innhentOpplysningsBrev(enkelJournalpost);
-                case ETTERLYS_INNTEKTSMELDING -> etterlysInntektsmelding(enkelJournalpost);
-                default -> {
-                    LOG.info("Journalpost med ukjent brevkode: {}", enkelJournalpost);
-                    yield Optional.empty();
-                }
-            };
+            return tidslinjeHendelseTypeUtgåendeDokument(enkelJournalpost)
+                .map(hendelseType -> new TidslinjeHendelseDto(
+                    enkelJournalpost.mottatt(),
+                    enkelJournalpost.journalpostId(),
+                    TidslinjeHendelseDto.AktørType.NAV,
+                    hendelseType,
+                    tilDokumenter(enkelJournalpost.dokumenter())
+            ));
         } else if (enkelJournalpost.type().equals(INNGÅENDE_DOKUMENT)) {
-            if (enkelJournalpost.hovedtype().erFørstegangssøknad() || enkelJournalpost.hovedtype().erEndringssøknad()) {
-                return Optional.of(new TidslinjeHendelseDto(
-                    enkelJournalpost.mottatt(),
-                    enkelJournalpost.journalpostId(),
-                    TidslinjeHendelseDto.AktørType.BRUKER,
-                    enkelJournalpost.hovedtype().erFørstegangssøknad() ? TidslinjeHendelseDto.TidslinjeHendelseType.FØRSTEGANGSSØKNAD : TidslinjeHendelseDto.TidslinjeHendelseType.ENDRINGSSØKNAD,
-                    null,
-                    tilDokumenter(enkelJournalpost.dokumenter())
-                ));
-
-            } else if (enkelJournalpost.hovedtype().erVedlegg()) {
-                return Optional.of(new TidslinjeHendelseDto(
-                    enkelJournalpost.mottatt(),
-                    enkelJournalpost.journalpostId(),
-                    TidslinjeHendelseDto.AktørType.BRUKER,
-                    TidslinjeHendelseDto.TidslinjeHendelseType.ETTERSENDING,
-                    null,
-                    tilDokumenter(enkelJournalpost.dokumenter())
-                ));
-            } else {
+            var tidslinjeHendelseType = tidslinjehendelsetype(enkelJournalpost, alleDokumentene);
+            if (tidslinjeHendelseType.isEmpty()) {
                 LOG.info("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype: {}", enkelJournalpost);
                 return Optional.empty();
             }
+            return Optional.of(new TidslinjeHendelseDto(
+                enkelJournalpost.mottatt(),
+                enkelJournalpost.journalpostId(),
+                TidslinjeHendelseDto.AktørType.BRUKER,
+                tidslinjeHendelseType.get(),
+                tilDokumenter(enkelJournalpost.dokumenter())
+            ));
         }
         throw new IllegalStateException("Utviklerfeil: Noe annet enn utgående eller inngående dokumenter skal ikke mappes og vises til bruker!");
     }
 
-    private static Optional<TidslinjeHendelseDto> etterlysInntektsmelding(EnkelJournalpost enkelJournalpost) {
-        return Optional.of(new TidslinjeHendelseDto(
-            enkelJournalpost.mottatt(),
-            enkelJournalpost.journalpostId(),
-            TidslinjeHendelseDto.AktørType.NAV,
-            TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_ETTERLYS_INNTEKTSMELDING,
-            null,
-            tilDokumenter(enkelJournalpost.dokumenter())
-        ));
+    private static Optional<TidslinjeHendelseDto.TidslinjeHendelseType> tidslinjeHendelseTypeUtgåendeDokument(EnkelJournalpost enkelJournalpost) {
+        return switch (enkelJournalpost.dokumenter().stream().findFirst().orElseThrow().brevkode()) { // Alltid bare ett dokument!
+            case FORELDREPENGER_ANNULLERT, FORELDREPENGER_AVSLAG, SVANGERSKAPSPENGER_OPPHØR, ENGANGSSTØNAD_INNVILGELSE, SVANGERSKAPSPENGER_AVSLAG, FORELDREPENGER_INNVILGELSE, ENGANGSSTØNAD_AVSLAG, FORELDREPENGER_OPPHØR, SVANGERSKAPSPENGER_INNVILGELSE ->
+                Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK);
+            case INNHENTE_OPPLYSNINGER -> Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_INNHENT_OPPLYSNINGER);
+            case ETTERLYS_INNTEKTSMELDING -> Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_ETTERLYS_INNTEKTSMELDING);
+            default -> {
+                LOG.info("Journalpost med ukjent brevkode: {}", enkelJournalpost);
+                yield Optional.empty();
+            }
+        };
     }
 
-    private static Optional<TidslinjeHendelseDto> innhentOpplysningsBrev(EnkelJournalpost enkelJournalpost) {
-        return Optional.of(new TidslinjeHendelseDto(
-            enkelJournalpost.mottatt(),
-            enkelJournalpost.journalpostId(),
-            TidslinjeHendelseDto.AktørType.NAV,
-            TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_INNHENT_OPPLYSNINGER,
-            null,
-            tilDokumenter(enkelJournalpost.dokumenter())
-        ));
+    private static Optional<TidslinjeHendelseDto.TidslinjeHendelseType> tidslinjehendelsetype(EnkelJournalpost enkelJournalpost, List<EnkelJournalpost> alleDokumentene) {
+        if (enkelJournalpost.hovedtype().erFørstegangssøknad()) {
+            return Optional.of(erNyFørstegangssøknad(enkelJournalpost, alleDokumentene) ?
+                TidslinjeHendelseDto.TidslinjeHendelseType.FØRSTEGANGSSØKNAD_NY :
+                TidslinjeHendelseDto.TidslinjeHendelseType.FØRSTEGANGSSØKNAD);
+        } else if (enkelJournalpost.hovedtype().erEndringssøknad()) {
+            return Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.ENDRINGSSØKNAD);
+        } else if (enkelJournalpost.hovedtype().erVedlegg()) {
+            return  Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.ETTERSENDING);
+        } else {
+            return Optional.empty();
+        }
     }
 
-    private static Optional<TidslinjeHendelseDto> vedtakshendelse(EnkelJournalpost enkelJournalpost) {
-        return Optional.of(new TidslinjeHendelseDto(
-            enkelJournalpost.mottatt(),
-            enkelJournalpost.journalpostId(),
-            TidslinjeHendelseDto.AktørType.NAV,
-            TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK,
-            TidslinjeHendelseDto.VedtakType.INNVILGELSE,
-            tilDokumenter(enkelJournalpost.dokumenter())
-        ));
+    private static boolean erNyFørstegangssøknad(EnkelJournalpost enkelJournalpost, List<EnkelJournalpost> alleDokumentene) {
+        return alleDokumentene.stream()
+            .filter(j -> INNGÅENDE_DOKUMENT.equals(j.type()))
+            .filter(journalpost -> journalpost.hovedtype().erFørstegangssøknad())
+            .anyMatch(journalpost -> journalpost.mottatt().isBefore(enkelJournalpost.mottatt()));
     }
 
     private static List<TidslinjeHendelseDto.Dokument> tilDokumenter(List<EnkelJournalpost.Dokument> dokumenter) {
@@ -130,18 +120,12 @@ public class TidslinjeTjeneste {
     }
 
     private static TidslinjeHendelseDto tilTidslinjeHendelse(Inntektsmelding inntektsmelding) {
-        var arbeidsgiverType = inntektsmelding.arbeidsgiver().identifikator().length() != 11
-            ? Arbeidsgiver.ArbeidsgiverType.ORGANISASJON
-            : Arbeidsgiver.ArbeidsgiverType.PRIVAT;
         return new TidslinjeHendelseDto(
             inntektsmelding.innsendingstidspunkt(),
             inntektsmelding.journalpostId(),
             TidslinjeHendelseDto.AktørType.ARBEIDSGIVER,
             TidslinjeHendelseDto.TidslinjeHendelseType.INNTEKTSMELDING,
-            null,
             List.of()
         );
     }
-
-
 }

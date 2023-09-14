@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import java.util.Arrays;
 import java.util.Set;
 
 public enum DokumentTypeId {
@@ -98,13 +97,6 @@ public enum DokumentTypeId {
 
     DokumentTypeId(String tittel) {
         this.tittel = tittel;
-    }
-
-    public static DokumentTypeId fraTittel(String tittel) {
-        return Arrays.stream(values())
-            .filter(dokumentTypeId -> dokumentTypeId.getTittel().equals(tittel))
-            .findFirst()
-            .orElseThrow();
     }
 
     public String getTittel() {

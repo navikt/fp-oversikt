@@ -8,7 +8,6 @@ public record TidslinjeHendelseDto(LocalDateTime opprettet,
                                    String journalpostId,
                                    AktørType aktørType,
                                    TidslinjeHendelseType tidslinjeHendelseType,
-                                   VedtakType vedtakType, // Unik for vedtak
                                    List<Dokument> dokumenter) implements Comparable<TidslinjeHendelseDto> {
 
     enum AktørType {
