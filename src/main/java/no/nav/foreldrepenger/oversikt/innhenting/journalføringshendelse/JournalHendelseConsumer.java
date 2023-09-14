@@ -56,7 +56,7 @@ public class JournalHendelseConsumer implements LiveAndReadinessAware, Controlla
         final StreamsBuilder builder = new StreamsBuilder();
         builder.stream(topic.topic(), consumed)
             .filter((key, value) -> TEMA_FOR.equals(value.getTemaNytt()))
-            .peek((key, value) -> LOG.info("Mottok hendelse {} med id {} fra kanal {} journalpostId", value.getHendelsesType(), value.getKanalReferanseId(), value.getMottaksKanal(), value.getJournalpostId()))
+            .peek((key, value) -> LOG.info("Mottok hendelse {} med id {} fra kanal {} journalpostId {}", value.getHendelsesType(), value.getKanalReferanseId(), value.getMottaksKanal(), value.getJournalpostId()))
             .filter((key, value) -> MOTTAKSKANAL_ALTINN.equals(value.getMottaksKanal()) || MOTTAKSKANAL_SELVBETJENING.equals(value.getMottaksKanal()))
             .filter((key, value) -> HENDELSE_ENDELIG_JOURNALFØRT.equals(value.getHendelsesType()))
             .foreach((key, value) -> journalføringHendelseHåndterer.handleMessage(value));
