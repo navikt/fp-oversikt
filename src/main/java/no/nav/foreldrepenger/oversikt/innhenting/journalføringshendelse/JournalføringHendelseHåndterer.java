@@ -36,8 +36,14 @@ public class JournalføringHendelseHåndterer {
 
     private void lagreHentFraJoarkTask(String journalpostId, String kanalreferanse) {
         var task = ProsessTaskData.forProsessTask(HentDataFraJoarkForHåndteringTask.class);
-        task.setCallId(kanalreferanse);
+        if (harVerdi(kanalreferanse)) {
+            task.setCallId(kanalreferanse);
+        }
         task.setProperty(JOURNALPOST_ID, journalpostId);
         taskTjeneste.lagre(task);
+    }
+
+    private static boolean harVerdi(String kanalreferanse) {
+        return kanalreferanse != null && !kanalreferanse.isEmpty() && !kanalreferanse.isBlank();
     }
 }
