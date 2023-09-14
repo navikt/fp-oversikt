@@ -59,17 +59,13 @@ public class TidslinjeTjeneste {
                     tilDokumenter(enkelJournalpost.dokumenter())
             ));
         } else if (enkelJournalpost.type().equals(INNGÅENDE_DOKUMENT)) {
-            var tidslinjeHendelseType = tidslinjehendelsetype(enkelJournalpost, alleDokumentene);
-            if (tidslinjeHendelseType.isEmpty()) {
-                LOG.info("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype: {}", enkelJournalpost);
-                return Optional.empty();
-            }
-            return Optional.of(new TidslinjeHendelseDto(
-                enkelJournalpost.mottatt(),
-                enkelJournalpost.journalpostId(),
-                TidslinjeHendelseDto.AktørType.BRUKER,
-                tidslinjeHendelseType.get(),
-                tilDokumenter(enkelJournalpost.dokumenter())
+            return tidslinjehendelsetype(enkelJournalpost, alleDokumentene)
+                .map(hendelseType -> new TidslinjeHendelseDto(
+                    enkelJournalpost.mottatt(),
+                    enkelJournalpost.journalpostId(),
+                    TidslinjeHendelseDto.AktørType.BRUKER,
+                    hendelseType,
+                    tilDokumenter(enkelJournalpost.dokumenter())
             ));
         }
         throw new IllegalStateException("Utviklerfeil: Noe annet enn utgående eller inngående dokumenter skal ikke mappes og vises til bruker!");
@@ -98,6 +94,7 @@ public class TidslinjeTjeneste {
         } else if (enkelJournalpost.hovedtype().erVedlegg()) {
             return  Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.ETTERSENDING);
         } else {
+            LOG.info("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype: {}", enkelJournalpost);
             return Optional.empty();
         }
     }
