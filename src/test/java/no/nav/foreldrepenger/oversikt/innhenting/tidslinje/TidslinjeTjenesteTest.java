@@ -159,8 +159,8 @@ class TidslinjeTjenesteTest {
             DokumentTypeId.I000003,
             EnkelJournalpost.KildeSystem.ANNET,
             List.of(
-                new EnkelJournalpost.Dokument("1", DokumentTypeId.I000003, null),
-                new EnkelJournalpost.Dokument("2", DokumentTypeId.I000036, null)
+                new EnkelJournalpost.Dokument("1", DokumentTypeId.I000003.getTittel(), null),
+                new EnkelJournalpost.Dokument("2", DokumentTypeId.I000036.getTittel(), null)
             )
         );
     }
@@ -176,7 +176,7 @@ class TidslinjeTjenesteTest {
             DokumentTypeId.I000050,
             EnkelJournalpost.KildeSystem.ANNET,
             List.of(
-                new EnkelJournalpost.Dokument("1", DokumentTypeId.I000050, null)
+                new EnkelJournalpost.Dokument("1", DokumentTypeId.I000050.getTittel(), null)
             )
         );
     }
@@ -191,8 +191,8 @@ class TidslinjeTjenesteTest {
             DokumentTypeId.I000023,
             EnkelJournalpost.KildeSystem.ANNET,
             List.of(
-                new EnkelJournalpost.Dokument("1", DokumentTypeId.I000023, null),
-                new EnkelJournalpost.Dokument("2", DokumentTypeId.I000036, null)
+                new EnkelJournalpost.Dokument("1", DokumentTypeId.I000023.getTittel(), null),
+                new EnkelJournalpost.Dokument("2", DokumentTypeId.I000036.getTittel(), null)
             )
         );
     }
@@ -208,7 +208,7 @@ class TidslinjeTjenesteTest {
             DokumentTypeId.I000067,
             EnkelJournalpost.KildeSystem.ANNET,
             List.of(
-                new EnkelJournalpost.Dokument("1", DokumentTypeId.I000067, null)
+                new EnkelJournalpost.Dokument("1", DokumentTypeId.I000067.getTittel(), null)
             )
         );
     }

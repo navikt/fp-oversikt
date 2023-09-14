@@ -130,8 +130,7 @@ public class TidslinjeTjeneste {
     }
 
     private static TidslinjeHendelseDto.Dokument tilDokument(EnkelJournalpost.Dokument dokument) {
-        var dokumentTypeId = dokument.dokumentTypeId() != null ? dokument.dokumentTypeId().name() : null;
-        return new TidslinjeHendelseDto.Dokument(dokument.dokumentId(), dokumentTypeId);
+        return new TidslinjeHendelseDto.Dokument(dokument.dokumentId(), dokument.tittel());
     }
 
     private static TidslinjeHendelseDto tilTidslinjeHendelse(Inntektsmelding inntektsmelding) {

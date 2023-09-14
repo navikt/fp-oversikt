@@ -38,7 +38,7 @@ public record EnkelJournalpost(String tittel,
         FPTILBAKE, ANNET
     }
 
-    public record Dokument(String dokumentId, DokumentTypeId dokumentTypeId, Brevkode brevkode) {
+    public record Dokument(String dokumentId, String tittel, Brevkode brevkode) {
     }
 
     public enum Brevkode {

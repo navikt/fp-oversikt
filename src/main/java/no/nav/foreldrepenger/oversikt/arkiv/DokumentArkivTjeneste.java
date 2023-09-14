@@ -159,16 +159,16 @@ public class DokumentArkivTjeneste {
     }
 
     private static EnkelJournalpost.Dokument tilDokument(DokumentInfo dokumentInfo, Journalposttype journalposttype) {
-        if (journalposttype.equals(Journalposttype.I)) {
+        if (journalposttype.equals(Journalposttype.U)) {
             return new EnkelJournalpost.Dokument(
                 dokumentInfo.getDokumentInfoId(),
-                tilDokumentTypeFraTittel(dokumentInfo.getTittel()),
-                null);
+                dokumentInfo.getTittel(),
+                tilBrevKode(dokumentInfo.getBrevkode()));
         } else {
             return new EnkelJournalpost.Dokument(
                 dokumentInfo.getDokumentInfoId(),
-                null,
-                tilBrevKode(dokumentInfo.getBrevkode()));
+                dokumentInfo.getTittel(),
+                EnkelJournalpost.Brevkode.UKJENT);
         }
     }
 
@@ -221,15 +221,6 @@ public class DokumentArkivTjeneste {
             return DokumentTypeId.valueOf(dokumentType);
         } catch (Exception e) {
             LOG.info("Ukjent/urelevant dokumentTypeId fra SAF tilleggsopplysninger: {}", dokumentType);
-            return DokumentTypeId.URELEVANT;
-        }
-    }
-
-    private static DokumentTypeId tilDokumentTypeFraTittel(String dokumentType) {
-        try {
-            return DokumentTypeId.fraTittel(dokumentType);
-        } catch (Exception e) {
-            LOG.info("Ukjent/urelevant dokumentTypeId fra SAF tittel: {}", dokumentType);
             return DokumentTypeId.URELEVANT;
         }
     }
