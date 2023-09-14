@@ -58,9 +58,7 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             m.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
             m.setGruppe(saksnummer + "-V");
             prosessTaskTjeneste.lagre(m);
-        }
-
-        if (dokumentType.erInntektsmelding()) {
+        } else if (dokumentType.erInntektsmelding()) {
             var i = ProsessTaskData.forProsessTask(HentInntektsmeldingerTask.class);
             i.setSaksnummer(saksnummer);
             i.setProperty(HentInntektsmeldingerTask.JOURNALPOST_ID, journalpostId);
@@ -69,9 +67,7 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             i.setGruppe(saksnummer + "-I");
             i.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
             prosessTaskTjeneste.lagre(i);
-        }
-
-        if (dokumentType.erUttalelseOmTilbakekreving() || erUtgåendeFraFptilbake(journalpost)) {
+        } else if (dokumentType.erUttalelseOmTilbakekreving() || erUtgåendeFraFptilbake(journalpost)) {
             var t = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
             t.setSaksnummer(saksnummer);
             t.setCallIdFraEksisterende();
@@ -79,6 +75,8 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             t.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer));
             t.medNesteKjøringEtter(LocalDateTime.now().plus(HentTilbakekrevingTask.TASK_DELAY));
             prosessTaskTjeneste.lagre(t);
+        } else {
+            LOG.info("Journalføringshendelse av dokumenttypen {} på sak {} ignoreres", dokumentType, saksnummer);
         }
     }
 
