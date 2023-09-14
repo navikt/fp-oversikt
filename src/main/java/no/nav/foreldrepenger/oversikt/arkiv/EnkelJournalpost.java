@@ -21,6 +21,12 @@ public record EnkelJournalpost(String tittel,
             FNR,
             ORGNR
         }
+
+        @Override
+        public String toString() {
+            return "Bruker{" + "type=" + type + '}';
+        }
+
     }
 
     public enum DokumentType {

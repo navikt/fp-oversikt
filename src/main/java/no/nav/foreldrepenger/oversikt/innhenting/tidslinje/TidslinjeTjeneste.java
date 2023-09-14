@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.innhenting.tidslinje;
 import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -37,7 +38,8 @@ public class TidslinjeTjeneste {
     public List<TidslinjeHendelseDto> tidslinje(Saksnummer saksnummer) {
         var dokumenter = arkivTjeneste.hentAlleJournalposter(saksnummer).stream()
             .filter(journalpost -> !(INNGÅENDE_DOKUMENT.equals(journalpost.type()) && journalpost.hovedtype().erInntektsmelding()))
-            .map(TidslinjeTjeneste::tilTidslinjeHendelse);
+            .map(TidslinjeTjeneste::tilTidslinjeHendelse)
+            .flatMap(Optional::stream);
         var inntektsmeldinger = inntektsmeldingerRepository.hentFor(Set.of(saksnummer)).stream()
             .map(TidslinjeTjeneste::tilTidslinjeHendelse);
         return Stream.concat(dokumenter, inntektsmeldinger)
@@ -45,17 +47,20 @@ public class TidslinjeTjeneste {
             .toList();
     }
 
-    private static TidslinjeHendelseDto tilTidslinjeHendelse(EnkelJournalpost enkelJournalpost) {
+    private static Optional<TidslinjeHendelseDto> tilTidslinjeHendelse(EnkelJournalpost enkelJournalpost) {
         if (enkelJournalpost.type().equals(EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT)) {
             return switch (enkelJournalpost.dokumenter().stream().findFirst().orElseThrow().brevkode()) { // Alltid bare ett dokument!
                 case FORELDREPENGER_ANNULLERT, FORELDREPENGER_AVSLAG, SVANGERSKAPSPENGER_OPPHØR, ENGANGSSTØNAD_INNVILGELSE, SVANGERSKAPSPENGER_AVSLAG, FORELDREPENGER_INNVILGELSE, ENGANGSSTØNAD_AVSLAG, FORELDREPENGER_OPPHØR, SVANGERSKAPSPENGER_INNVILGELSE -> vedtakshendelse(enkelJournalpost);
                 case INNHENTE_OPPLYSNINGER -> innhentOpplysningsBrev(enkelJournalpost);
                 case ETTERLYS_INNTEKTSMELDING -> etterlysInntektsmelding(enkelJournalpost);
-                default -> throw new IllegalStateException("Journalpost med ukjent brevkode: " + enkelJournalpost);
+                default -> {
+                    LOG.info("Journalpost med ukjent brevkode: {}", enkelJournalpost);
+                    yield Optional.empty();
+                }
             };
         } else if (enkelJournalpost.type().equals(INNGÅENDE_DOKUMENT)) {
             if (enkelJournalpost.hovedtype().erFørstegangssøknad() || enkelJournalpost.hovedtype().erEndringssøknad()) {
-                return new TidslinjeHendelseDto(
+                return Optional.of(new TidslinjeHendelseDto(
                     enkelJournalpost.mottatt(),
                     enkelJournalpost.journalpostId(),
                     TidslinjeHendelseDto.AktørType.BRUKER,
@@ -63,10 +68,10 @@ public class TidslinjeTjeneste {
                     null,
                     null,
                     tilDokumenter(enkelJournalpost.dokumenter())
-                );
+                ));
 
             } else if (enkelJournalpost.hovedtype().erVedlegg()) {
-                return new TidslinjeHendelseDto(
+                return Optional.of(new TidslinjeHendelseDto(
                     enkelJournalpost.mottatt(),
                     enkelJournalpost.journalpostId(),
                     TidslinjeHendelseDto.AktørType.BRUKER,
@@ -74,7 +79,7 @@ public class TidslinjeTjeneste {
                     null,
                     null,
                     tilDokumenter(enkelJournalpost.dokumenter())
-                );
+                ));
             } else {
                 throw new IllegalStateException("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype " + enkelJournalpost);
             }
@@ -82,8 +87,8 @@ public class TidslinjeTjeneste {
         throw new IllegalStateException("Utviklerfeil: Noe annet enn utgående eller inngående dokumenter skal ikke mappes og vises til bruker!");
     }
 
-    private static TidslinjeHendelseDto etterlysInntektsmelding(EnkelJournalpost enkelJournalpost) {
-        return new TidslinjeHendelseDto(
+    private static Optional<TidslinjeHendelseDto> etterlysInntektsmelding(EnkelJournalpost enkelJournalpost) {
+        return Optional.of(new TidslinjeHendelseDto(
             enkelJournalpost.mottatt(),
             enkelJournalpost.journalpostId(),
             TidslinjeHendelseDto.AktørType.NAV,
@@ -91,11 +96,11 @@ public class TidslinjeTjeneste {
             null,
             null,
             tilDokumenter(enkelJournalpost.dokumenter())
-        );
+        ));
     }
 
-    private static TidslinjeHendelseDto innhentOpplysningsBrev(EnkelJournalpost enkelJournalpost) {
-        return new TidslinjeHendelseDto(
+    private static Optional<TidslinjeHendelseDto> innhentOpplysningsBrev(EnkelJournalpost enkelJournalpost) {
+        return Optional.of(new TidslinjeHendelseDto(
             enkelJournalpost.mottatt(),
             enkelJournalpost.journalpostId(),
             TidslinjeHendelseDto.AktørType.NAV,
@@ -103,11 +108,11 @@ public class TidslinjeTjeneste {
             null,
             null,
             tilDokumenter(enkelJournalpost.dokumenter())
-        );
+        ));
     }
 
-    private static TidslinjeHendelseDto vedtakshendelse(EnkelJournalpost enkelJournalpost) {
-        return new TidslinjeHendelseDto(
+    private static Optional<TidslinjeHendelseDto> vedtakshendelse(EnkelJournalpost enkelJournalpost) {
+        return Optional.of(new TidslinjeHendelseDto(
             enkelJournalpost.mottatt(),
             enkelJournalpost.journalpostId(),
             TidslinjeHendelseDto.AktørType.NAV,
@@ -115,7 +120,7 @@ public class TidslinjeTjeneste {
             TidslinjeHendelseDto.VedtakType.INNVILGELSE,
             null,
             tilDokumenter(enkelJournalpost.dokumenter())
-        );
+        ));
     }
 
     private static List<TidslinjeHendelseDto.Dokument> tilDokumenter(List<EnkelJournalpost.Dokument> dokumenter) {
