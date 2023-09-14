@@ -56,16 +56,12 @@ public class JournalHendelseConsumer implements LiveAndReadinessAware, Controlla
         final StreamsBuilder builder = new StreamsBuilder();
         builder.stream(topic.topic(), consumed)
             .filter((key, value) -> TEMA_FOR.equals(value.getTemaNytt()))
-            .filter((key, value) -> MOTTAKSKANAL_ALTINN.equals(value.getMottaksKanal()) || MOTTAKSKANAL_SELVBETJENING.equals(value.getMottaksKanal()) || erJournalførtAvSaksbehandlerSystem(value.getMottaksKanal()))
-            .peek((key, value) -> LOG.info("Mottok hendelse {} med id {} fra kanal {}", value.getHendelsesType(), value.getKanalReferanseId(), value.getMottaksKanal()))
+            .peek((key, value) -> LOG.info("Mottok hendelse {} med id {} fra kanal {} journalpostId", value.getHendelsesType(), value.getKanalReferanseId(), value.getMottaksKanal(), value.getJournalpostId()))
+            .filter((key, value) -> MOTTAKSKANAL_ALTINN.equals(value.getMottaksKanal()) || MOTTAKSKANAL_SELVBETJENING.equals(value.getMottaksKanal()))
             .filter((key, value) -> HENDELSE_ENDELIG_JOURNALFØRT.equals(value.getHendelsesType()))
             .foreach((key, value) -> journalføringHendelseHåndterer.handleMessage(value));
 
         return new KafkaStreams(builder.build(), KafkaProperties.forStreamsGenericValue(APPLICATION_ID, topic.serdeValue()));
-    }
-
-    private static boolean erJournalførtAvSaksbehandlerSystem(String mottaksKanal) {
-        return mottaksKanal == null || mottaksKanal.isBlank() || mottaksKanal.isEmpty();
     }
 
     private void addShutdownHooks() {
