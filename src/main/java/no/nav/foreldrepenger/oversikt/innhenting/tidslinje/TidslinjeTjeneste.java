@@ -81,7 +81,8 @@ public class TidslinjeTjeneste {
                     tilDokumenter(enkelJournalpost.dokumenter())
                 ));
             } else {
-                throw new IllegalStateException("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype " + enkelJournalpost);
+                LOG.info("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype: {}", enkelJournalpost);
+                return Optional.empty();
             }
         }
         throw new IllegalStateException("Utviklerfeil: Noe annet enn utgående eller inngående dokumenter skal ikke mappes og vises til bruker!");
