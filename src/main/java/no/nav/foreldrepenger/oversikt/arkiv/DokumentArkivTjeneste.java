@@ -210,7 +210,7 @@ public class DokumentArkivTjeneste {
             .map(Tilleggsopplysning::getVerdi)
             .map(DokumentArkivTjeneste::tilDokumentTypeFraTilleggsopplysninger)
             .findFirst()
-            .orElse(null);
+            .orElse(DokumentTypeId.URELEVANT);
     }
 
     private static DokumentTypeId tilDokumentTypeFraTilleggsopplysninger(String dokumentType) {

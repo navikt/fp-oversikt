@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.innsyn.Arbeidsgiver;
@@ -17,7 +20,7 @@ import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmeldinger
 
 @ApplicationScoped
 public class TidslinjeTjeneste {
-
+    private static final Logger LOG = LoggerFactory.getLogger(TidslinjeTjeneste.class);
     private DokumentArkivTjeneste arkivTjeneste;
     private InntektsmeldingerRepository inntektsmeldingerRepository;
 
@@ -48,7 +51,7 @@ public class TidslinjeTjeneste {
                 case FORELDREPENGER_ANNULLERT, FORELDREPENGER_AVSLAG, SVANGERSKAPSPENGER_OPPHØR, ENGANGSSTØNAD_INNVILGELSE, SVANGERSKAPSPENGER_AVSLAG, FORELDREPENGER_INNVILGELSE, ENGANGSSTØNAD_AVSLAG, FORELDREPENGER_OPPHØR, SVANGERSKAPSPENGER_INNVILGELSE -> vedtakshendelse(enkelJournalpost);
                 case INNHENTE_OPPLYSNINGER -> innhentOpplysningsBrev(enkelJournalpost);
                 case ETTERLYS_INNTEKTSMELDING -> etterlysInntektsmelding(enkelJournalpost);
-                default -> throw new IllegalStateException("Ukjent brevkode. What to do?"); // TODO: Skal vel ikke være mulig å ikke ha brevkode for utgående dokumenter?
+                default -> throw new IllegalStateException("Journalpost med ukjent brevkode: " + enkelJournalpost);
             };
         } else if (enkelJournalpost.type().equals(INNGÅENDE_DOKUMENT)) {
             if (enkelJournalpost.hovedtype().erFørstegangssøknad() || enkelJournalpost.hovedtype().erEndringssøknad()) {
@@ -73,7 +76,7 @@ public class TidslinjeTjeneste {
                     tilDokumenter(enkelJournalpost.dokumenter())
                 );
             } else {
-                throw new IllegalStateException("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype " + enkelJournalpost.hovedtype());
+                throw new IllegalStateException("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype " + enkelJournalpost);
             }
         }
         throw new IllegalStateException("Utviklerfeil: Noe annet enn utgående eller inngående dokumenter skal ikke mappes og vises til bruker!");
