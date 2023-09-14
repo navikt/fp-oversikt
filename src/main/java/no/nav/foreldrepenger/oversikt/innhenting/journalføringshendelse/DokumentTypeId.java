@@ -13,6 +13,9 @@ public enum DokumentTypeId {
     I000006("Utsettelse eller gradert uttak av foreldrepenger (fleksibelt uttak)"),
     I000050("Søknad om endring av uttak av foreldrepenger eller overføring av kvote"),
 
+    // Klage
+    I000027("Klage/anke"),
+
     // Tilbakekreving
     I000114("Uttalelse tilbakekreving"),
 
