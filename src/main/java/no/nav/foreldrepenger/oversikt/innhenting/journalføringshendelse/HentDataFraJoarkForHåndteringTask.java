@@ -81,8 +81,7 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
     }
 
     private static boolean erUtgåendeFraFptilbake(EnkelJournalpost journalpost) {
-        return journalpost.type() == EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT
-            && journalpost.kildeSystem() == EnkelJournalpost.KildeSystem.FPTILBAKE;
+        return EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT.equals(journalpost.type()) && EnkelJournalpost.KildeSystem.FPTILBAKE.equals(journalpost.kildeSystem());
     }
 
 }

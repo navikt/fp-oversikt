@@ -200,8 +200,11 @@ public class DokumentArkivTjeneste {
     }
 
     private static EnkelJournalpost.KildeSystem tilKildeSystem(Journalpost journalpost) {
-        return Objects.equals(journalpost.getBehandlingstema(), BEHANDLINGTEMA_TILBAKEBETALING) ? EnkelJournalpost.KildeSystem.FPTILBAKE :
-            EnkelJournalpost.KildeSystem.ANNET;
+        if (Objects.equals(journalpost.getBehandlingstema(), BEHANDLINGTEMA_TILBAKEBETALING)) {
+            return EnkelJournalpost.KildeSystem.FPTILBAKE;
+        }
+        LOG.info("Ukjent behanldingstema for journalpost {}", journalpost.getBehandlingstema());
+        return EnkelJournalpost.KildeSystem.ANNET;
     }
 
     private static DokumentTypeId dokumenttypeFraTilleggsopplysninger(Journalpost journalpost) {
