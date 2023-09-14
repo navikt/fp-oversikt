@@ -68,7 +68,7 @@ public class BehandlingMigreringHåndterer {
 //            hentSak(hendelse);
             hentInntektsmeldinger(hendelse);
             hentTilbakekreving(hendelse);
-            hentManglendeVedlegg(hendelse);
+//            hentManglendeVedlegg(hendelse);
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
         }
