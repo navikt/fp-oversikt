@@ -4,14 +4,11 @@ package no.nav.foreldrepenger.oversikt.innhenting.tidslinje;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import no.nav.foreldrepenger.common.innsyn.Arbeidsgiver;
-
 public record TidslinjeHendelseDto(LocalDateTime opprettet,
                                    String journalpostId,
                                    AktørType aktørType,
                                    TidslinjeHendelseType tidslinjeHendelseType,
                                    VedtakType vedtakType, // Unik for vedtak
-                                   Arbeidsgiver arbeidsgiver, // Unik for IM
                                    List<Dokument> dokumenter) implements Comparable<TidslinjeHendelseDto> {
 
     enum AktørType {

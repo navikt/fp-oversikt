@@ -66,7 +66,6 @@ public class TidslinjeTjeneste {
                     TidslinjeHendelseDto.AktørType.BRUKER,
                     enkelJournalpost.hovedtype().erFørstegangssøknad() ? TidslinjeHendelseDto.TidslinjeHendelseType.FØRSTEGANGSSØKNAD : TidslinjeHendelseDto.TidslinjeHendelseType.ENDRINGSSØKNAD,
                     null,
-                    null,
                     tilDokumenter(enkelJournalpost.dokumenter())
                 ));
 
@@ -76,7 +75,6 @@ public class TidslinjeTjeneste {
                     enkelJournalpost.journalpostId(),
                     TidslinjeHendelseDto.AktørType.BRUKER,
                     TidslinjeHendelseDto.TidslinjeHendelseType.ETTERSENDING,
-                    null,
                     null,
                     tilDokumenter(enkelJournalpost.dokumenter())
                 ));
@@ -95,7 +93,6 @@ public class TidslinjeTjeneste {
             TidslinjeHendelseDto.AktørType.NAV,
             TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_ETTERLYS_INNTEKTSMELDING,
             null,
-            null,
             tilDokumenter(enkelJournalpost.dokumenter())
         ));
     }
@@ -106,7 +103,6 @@ public class TidslinjeTjeneste {
             enkelJournalpost.journalpostId(),
             TidslinjeHendelseDto.AktørType.NAV,
             TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_INNHENT_OPPLYSNINGER,
-            null,
             null,
             tilDokumenter(enkelJournalpost.dokumenter())
         ));
@@ -119,7 +115,6 @@ public class TidslinjeTjeneste {
             TidslinjeHendelseDto.AktørType.NAV,
             TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK,
             TidslinjeHendelseDto.VedtakType.INNVILGELSE,
-            null,
             tilDokumenter(enkelJournalpost.dokumenter())
         ));
     }
@@ -144,7 +139,6 @@ public class TidslinjeTjeneste {
             TidslinjeHendelseDto.AktørType.ARBEIDSGIVER,
             TidslinjeHendelseDto.TidslinjeHendelseType.INNTEKTSMELDING,
             null,
-            new Arbeidsgiver(inntektsmelding.arbeidsgiver().identifikator(), arbeidsgiverType),
             List.of()
         );
     }
