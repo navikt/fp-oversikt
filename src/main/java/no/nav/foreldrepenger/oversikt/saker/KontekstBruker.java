@@ -30,7 +30,7 @@ public class KontekstBruker implements InnloggetBruker {
     public AktørId aktørId() {
         var fnr = KontekstHolder.getKontekst().getUid();
         var aktørId = pdlKlient.hentAktørIdForPersonIdent(fnr).orElseThrow();
-        LOG.info("Mapper fnr til aktørId");
+        LOG.debug("Mapper fnr til aktørId");
         return new AktørId(aktørId);
     }
 
