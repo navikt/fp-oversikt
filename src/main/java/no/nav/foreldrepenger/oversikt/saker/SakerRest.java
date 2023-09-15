@@ -38,7 +38,7 @@ public class SakerRest {
     public no.nav.foreldrepenger.common.innsyn.Saker hent() {
         sjekkAtKallErFraBorger();
         tilgangssjekkMyndighetsalder();
-        LOG.info("Kall mot saker endepunkt");
+        LOG.debug("Kall mot saker endepunkt");
         var aktørId = innloggetBruker.aktørId();
         return saker.hent(aktørId);
     }
