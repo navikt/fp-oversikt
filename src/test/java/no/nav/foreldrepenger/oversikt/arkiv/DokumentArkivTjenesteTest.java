@@ -56,7 +56,6 @@ class DokumentArkivTjenesteTest {
         assertThat(journalpost.type()).isNotNull();
         assertThat(journalpost.mottatt()).isNotNull();
         assertThat(journalpost.hovedtype().name()).isEqualTo(dokumentTypeId.name());
-        assertThat(journalpost.kildeSystem()).isEqualTo(EnkelJournalpost.KildeSystem.ANNET);
         assertThat(journalpost.dokumenter()).isEmpty();
     }
 

@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
@@ -49,7 +50,7 @@ public class BehandlingHendelseHåndterer {
                 var saksnummer = new Saksnummer(hendelse.getSaksnummer());
                 lagreHentSakTask(hendelseUuid, saksnummer);
                 if (hendelse.getKildesystem() == Kildesystem.FPTILBAKE) {
-                    lagreHentTilbakekrevingTask(hendelseUuid, saksnummer);
+                    lagreHentTilbakekrevingTask(hendelseUuid, saksnummer, hendelse.getHendelse());
                 }
             }
         } catch (Exception e) {
@@ -71,17 +72,20 @@ public class BehandlingHendelseHåndterer {
         return task;
     }
 
-    private void lagreHentTilbakekrevingTask(UUID hendelseUuid, Saksnummer saksnummer) {
-        var task = opprettHentTilbakekrevingTask(hendelseUuid, saksnummer);
+    private void lagreHentTilbakekrevingTask(UUID hendelseUuid, Saksnummer saksnummer, Hendelse hendelse) {
+        var task = opprettHentTilbakekrevingTask(hendelseUuid, saksnummer, hendelse);
         taskTjeneste.lagre(task);
     }
 
-    public static ProsessTaskData opprettHentTilbakekrevingTask(UUID hendelseUuid, Saksnummer saksnummer) {
+    public static ProsessTaskData opprettHentTilbakekrevingTask(UUID hendelseUuid, Saksnummer saksnummer, Hendelse hendelse) {
         var task = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
         task.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer.value()));
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+        if (hendelse == Hendelse.VENTETILSTAND) { //Venter her for at fptilbake skal rekke å sende ut varslingsbrev
+            task.setNesteKjøringEtter(LocalDateTime.now().plusSeconds(60));
+        }
         return task;
     }
 

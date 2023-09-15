@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -21,8 +20,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 @ApplicationScoped
 @ProsessTask("hent.tilbakekreving")
 public class HentTilbakekrevingTask implements ProsessTaskHandler {
-
-    public static final Duration TASK_DELAY = Duration.ofSeconds(10);
 
     private static final Logger LOG = LoggerFactory.getLogger(HentTilbakekrevingTask.class);
 
