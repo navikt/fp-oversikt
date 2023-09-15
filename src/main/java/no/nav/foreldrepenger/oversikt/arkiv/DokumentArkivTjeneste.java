@@ -124,14 +124,15 @@ public class DokumentArkivTjeneste {
     }
 
     private static EnkelJournalpost mapTilJournalpost(Journalpost journalpost, List<DokumentInfo> pdfDokument) {
+        var innsendingstype = tilType(journalpost.getJournalposttype());
         return new EnkelJournalpost(
             journalpost.getTittel(),
             journalpost.getJournalpostId(),
             journalpost.getSak().getFagsakId(),
             tilBruker(journalpost.getBruker()),
-            tilType(journalpost.getJournalposttype()),
+            innsendingstype,
             tilDato(journalpost),
-            dokumenttypeFraTilleggsopplysninger(journalpost),
+            innsendingstype.equals(EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : DokumentTypeId.URELEVANT,
             tilDokumenter(pdfDokument, journalpost.getJournalposttype())
         );
     }
@@ -164,7 +165,7 @@ public class DokumentArkivTjeneste {
             return new EnkelJournalpost.Dokument(
                 dokumentInfo.getDokumentInfoId(),
                 dokumentInfo.getTittel(),
-                EnkelJournalpost.Brevkode.UKJENT);
+                EnkelJournalpost.Brevkode.URELEVANT);
         }
     }
 
@@ -201,15 +202,25 @@ public class DokumentArkivTjeneste {
             .map(Tilleggsopplysning::getVerdi)
             .map(DokumentArkivTjeneste::tilDokumentTypeFraTilleggsopplysninger)
             .findFirst()
-            .orElse(DokumentTypeId.URELEVANT);
+            .orElse(utledFraTittel(journalpost.getTittel()))
+            .orElse(DokumentTypeId.UKJENT);
     }
 
-    private static DokumentTypeId tilDokumentTypeFraTilleggsopplysninger(String dokumentType) {
+    private static Optional<DokumentTypeId> tilDokumentTypeFraTilleggsopplysninger(String dokumentType) {
         try {
-            return DokumentTypeId.valueOf(dokumentType);
+            return Optional.of(DokumentTypeId.valueOf(dokumentType));
         } catch (Exception e) {
             LOG.info("Ukjent/urelevant dokumentTypeId fra SAF tilleggsopplysninger: {}", dokumentType);
-            return DokumentTypeId.URELEVANT;
+            return Optional.empty();
+        }
+    }
+
+    private static Optional<DokumentTypeId> utledFraTittel(String tittel) {
+        try {
+            return Optional.of(DokumentTypeId.fraTittel(tittel));
+        } catch (Exception e) {
+            LOG.info("Klarte ikke utlede dokumentTypeId fra SAF tittel: {}", tittel);
+            return Optional.empty();
         }
     }
 }

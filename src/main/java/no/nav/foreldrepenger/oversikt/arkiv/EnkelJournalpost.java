@@ -48,6 +48,7 @@ public record EnkelJournalpost(String tittel,
         SVANGERSKAPSPENGER_INNVILGELSE("INVSVP"),
         INNHENTE_OPPLYSNINGER("INNOPP"),
         ETTERLYS_INNTEKTSMELDING("ELYSIM"),
+        FRITEKSTBREV("FRITEK"),
 
         // Gamle/utdaterte brevkoder funnet i Joark
         VEDTAK_POSITIVT_OLD("000048"),
@@ -56,6 +57,7 @@ public record EnkelJournalpost(String tittel,
         VEDTAK_AVSLAG_FORELDREPENGER_OLD("000080"),
         INNHENTE_OPPLYSNINGER_OLD("000049"),
         ETTERLYS_INNTEKTSMELDING_OLD("000096"),
+
 
         // Annet
         FORELDREPENGER_INFO_TIL_ANNEN_FORELDER("INFOAF"),
@@ -70,9 +72,9 @@ public record EnkelJournalpost(String tittel,
         KLAGE_AVVIST("KGEAVV"),
         KLAGE_OMGJORT("KGEOMG"),
         KLAGE_OVERSENDT("KGEOVE"),
-        FRITEKSTBREV("FRITEK"),
 
-        UKJENT("UKJENT");
+        UKJENT("UKJENT"),
+        URELEVANT("URELEVANT");
 
         private String kode;
 
