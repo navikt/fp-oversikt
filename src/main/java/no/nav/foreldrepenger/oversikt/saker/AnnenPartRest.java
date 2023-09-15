@@ -52,7 +52,7 @@ public class AnnenPartRest {
             return null;
         }
 
-        LOG.info("Kall mot annenPart endepunkt");
+        LOG.debug("Kall mot annenPart endepunkt");
         var søkerAktørId = innloggetBruker.aktørId();
         var annenPartAktørId = aktørIdOppslag.forFnr(request.annenPartFødselsnummer());
         var barnAktørId = request.barnFødselsnummer() == null ? null : aktørIdOppslag.forFnr(request.barnFødselsnummer());

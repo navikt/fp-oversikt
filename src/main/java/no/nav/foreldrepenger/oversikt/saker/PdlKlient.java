@@ -30,20 +30,20 @@ public class PdlKlient extends AbstractPersonKlient implements FødselsnummerOpp
 
     @Override
     public String forAktørId(AktørId aktørId) {
-        LOG.info("Mapper aktørId til fnr");
+        LOG.debug("Mapper aktørId til fnr");
         return hentPersonIdentForAktørId(aktørId.value()).orElseThrow();
     }
 
     @Override
     public AktørId forFnr(Fødselsnummer fnr) {
-        LOG.info("Mapper fnr til aktørId");
+        LOG.debug("Mapper fnr til aktørId");
         var a = hentAktørIdForPersonIdent(fnr.value()).orElseThrow();
         return new AktørId(a);
     }
 
     @Override
     public LocalDate fødselsdato(String fnr) {
-        LOG.info("Henter fødselsdato");
+        LOG.debug("Henter fødselsdato");
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr);
         var projection = new PersonResponseProjection()
