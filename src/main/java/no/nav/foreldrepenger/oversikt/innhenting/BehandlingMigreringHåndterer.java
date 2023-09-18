@@ -67,7 +67,7 @@ public class BehandlingMigreringHåndterer {
             var hendelse = map(payload);
 //            hentSak(hendelse);
             hentInntektsmeldinger(hendelse);
-//            hentTilbakekreving(hendelse);
+            hentTilbakekreving(hendelse);
 //            hentManglendeVedlegg(hendelse);
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
@@ -77,7 +77,7 @@ public class BehandlingMigreringHåndterer {
     private void hentInntektsmeldinger(BehandlingHendelseV1 hendelse) {
         var saksnummer = new Saksnummer(hendelse.getSaksnummer());
         try {
-            HentInntektsmeldingerTask.hentOgLagre(fpSakKlient, inntektsmeldingerRepository, saksnummer, null);
+            HentInntektsmeldingerTask.hentOgLagre(fpSakKlient, inntektsmeldingerRepository, saksnummer);
         } catch (Exception e) {
             LOG.info("Direkte henting av inntektsmeldinger feilet {}", saksnummer.value(), e);
             lagreHentInntektsmeldingTask(hendelse.getHendelseUuid(), saksnummer);
