@@ -15,4 +15,5 @@ public interface Inntektsmelding {
     String journalpostId();
     Arbeidsgiver arbeidsgiver();
     LocalDateTime innsendingstidspunkt();
+    LocalDateTime mottattTidspunkt();
 }

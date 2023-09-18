@@ -10,6 +10,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentArkivTjeneste;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostId;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -71,7 +72,7 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             t.setSaksnummer(saksnummer);
             t.setCallIdFraEksisterende();
             t.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
-            t.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer));
+            t.setGruppe(HentTilbakekrevingTask.taskGruppeFor(new Saksnummer(saksnummer)));
             t.medNesteKjøringEtter(LocalDateTime.now().plusSeconds(10));
             prosessTaskTjeneste.lagre(t);
         } else {

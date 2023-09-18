@@ -281,7 +281,7 @@ class TidslinjeTjenesteTest {
         );
     }
 
-    private static Inntektsmelding standardInntektsmelding(LocalDateTime innsendingstidspunkt) {
-        return new InntektsmeldingV1("7", Arbeidsgiver.dummy(), innsendingstidspunkt, Beløp.ZERO);
+    private static Inntektsmelding standardInntektsmelding(LocalDateTime mottattTidspunkt) {
+        return new InntektsmeldingV1("7", Arbeidsgiver.dummy(), mottattTidspunkt, Beløp.ZERO, mottattTidspunkt);
     }
 }

@@ -32,7 +32,7 @@ public class HentTilbakekrevingTask implements ProsessTaskHandler {
         this.tilbakekrevingRepository = tilbakekrevingRepository;
     }
 
-    public static String taskGruppeFor(String saksnummer) {
+    public static String taskGruppeFor(Saksnummer saksnummer) {
         return saksnummer + "-T";
     }
 

@@ -120,7 +120,7 @@ public class TidslinjeTjeneste {
 
     private static TidslinjeHendelseDto tilTidslinjeHendelse(Inntektsmelding inntektsmelding) {
         return new TidslinjeHendelseDto(
-            inntektsmelding.innsendingstidspunkt(),
+            inntektsmelding.mottattTidspunkt() == null ? inntektsmelding.innsendingstidspunkt() : inntektsmelding.mottattTidspunkt(),
             inntektsmelding.journalpostId(),
             TidslinjeHendelseDto.AktørType.ARBEIDSGIVER,
             TidslinjeHendelseDto.TidslinjeHendelseType.INNTEKTSMELDING,

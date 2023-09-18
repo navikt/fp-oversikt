@@ -38,6 +38,10 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
         this.inntektsmeldingerRepository = inntektsmeldingerRepository;
     }
 
+    public static String taskGruppeFor(Saksnummer saksnummer) {
+        return saksnummer + "-I";
+    }
+
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
@@ -64,7 +68,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
 
     static InntektsmeldingV1 map(Inntektsmelding inntektsmelding) {
         return new InntektsmeldingV1(inntektsmelding.journalpostId(), inntektsmelding.arbeidsgiver(), inntektsmelding.innsendingstidspunkt(),
-            inntektsmelding.inntekt());
+            inntektsmelding.inntekt(), inntektsmelding.mottattTidspunkt());
     }
 
     private static boolean imKnyttetTilJournalpost(List<Inntektsmelding> inntektsmeldinger, String journalpostId) {
