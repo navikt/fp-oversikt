@@ -13,6 +13,7 @@ import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentInntektsmeldingerTask;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
@@ -45,17 +46,37 @@ public class BehandlingHendelseHåndterer {
         LOG.info("Lest fra : topic={}", topic);
         try {
             var hendelse = map(payload);
-            if (!IGNORE.contains(hendelse.getHendelse())) {
+            var hendelseType = hendelse.getHendelse();
+            if (!IGNORE.contains(hendelseType)) {
                 var hendelseUuid = hendelse.getHendelseUuid();
                 var saksnummer = new Saksnummer(hendelse.getSaksnummer());
                 lagreHentSakTask(hendelseUuid, saksnummer);
+                if (hendelseType == Hendelse.AVSLUTTET) {
+                    // Henter inntektsmeldinger her pga sære caser der IM ikke behandles i fpsak rett etter journalføring.
+                    // Feks ved IM på henlagte saker der det opprettes vurder dokument oppgave
+                    lagreHentInntektsmeldingerSak(hendelseUuid, saksnummer);
+                }
                 if (hendelse.getKildesystem() == Kildesystem.FPTILBAKE) {
-                    lagreHentTilbakekrevingTask(hendelseUuid, saksnummer, hendelse.getHendelse());
+                    lagreHentTilbakekrevingTask(hendelseUuid, saksnummer, hendelseType);
                 }
             }
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
         }
+    }
+
+    private void lagreHentInntektsmeldingerSak(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = opprettHentInntektsmeldingerTask(hendelseUuid, saksnummer);
+        taskTjeneste.lagre(task);
+    }
+
+    private static ProsessTaskData opprettHentInntektsmeldingerTask(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = ProsessTaskData.forProsessTask(HentInntektsmeldingerTask.class);
+        task.setCallId(hendelseUuid.toString());
+        task.setSaksnummer(saksnummer.value());
+        task.setGruppe(HentInntektsmeldingerTask.taskGruppeFor(saksnummer));
+        task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+        return task;
     }
 
     private void lagreHentSakTask(UUID hendelseUuid, Saksnummer saksnummer) {
@@ -81,7 +102,7 @@ public class BehandlingHendelseHåndterer {
         var task = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
-        task.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer.value()));
+        task.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer));
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         if (hendelse == Hendelse.VENTETILSTAND) { //Venter her for at fptilbake skal rekke å sende ut varslingsbrev
             task.setNesteKjøringEtter(LocalDateTime.now().plusSeconds(60));

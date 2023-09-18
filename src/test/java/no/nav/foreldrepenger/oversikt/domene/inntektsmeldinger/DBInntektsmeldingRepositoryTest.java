@@ -20,7 +20,7 @@ class DBInntektsmeldingRepositoryTest {
     @Test
     void roundtrip(EntityManager entityManager) {
         var repository = new DBInntektsmeldingerRepository(entityManager);
-        var før = new InntektsmeldingV1("123", Arbeidsgiver.dummy(), LocalDateTime.now(), Beløp.ZERO);
+        var før = new InntektsmeldingV1("123", Arbeidsgiver.dummy(), LocalDateTime.now(), Beløp.ZERO, LocalDateTime.now().plusDays(1));
         var saksnummer = Saksnummer.dummy();
         repository.lagre(saksnummer, Set.of(før));
 
@@ -32,6 +32,7 @@ class DBInntektsmeldingRepositoryTest {
         assertThat(tilbakekreving.inntekt()).isEqualTo(før.inntekt());
         assertThat(tilbakekreving.arbeidsgiver()).isEqualTo(før.arbeidsgiver());
         assertThat(tilbakekreving.innsendingstidspunkt()).isEqualTo(før.innsendingstidspunkt());
+        assertThat(tilbakekreving.mottattTidspunkt()).isEqualTo(før.mottattTidspunkt());
 
         repository.slett(saksnummer);
         assertThat(repository.hentFor(Set.of(saksnummer))).isEmpty();

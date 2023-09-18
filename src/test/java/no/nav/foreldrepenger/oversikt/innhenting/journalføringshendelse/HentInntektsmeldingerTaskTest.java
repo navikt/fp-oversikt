@@ -14,12 +14,13 @@ class HentInntektsmeldingerTaskTest {
 
     @Test
     void map() {
-        var fraFpsak = new Inntektsmelding("123", Arbeidsgiver.dummy(), LocalDateTime.now(), new Beløp(100));
+        var fraFpsak = new Inntektsmelding("123", Arbeidsgiver.dummy(), LocalDateTime.now(), new Beløp(100), LocalDateTime.now().minusWeeks(1));
         var resultat = HentInntektsmeldingerTask.map(fraFpsak);
 
         assertThat(resultat.innsendingstidspunkt()).isEqualTo(fraFpsak.innsendingstidspunkt());
         assertThat(resultat.journalpostId()).isEqualTo(fraFpsak.journalpostId());
         assertThat(resultat.inntekt()).isEqualTo(fraFpsak.inntekt());
         assertThat(resultat.arbeidsgiver()).isEqualTo(fraFpsak.arbeidsgiver());
+        assertThat(resultat.mottattTidspunkt()).isEqualTo(fraFpsak.mottattTidspunkt());
     }
 }

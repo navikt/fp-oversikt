@@ -10,5 +10,6 @@ import no.nav.foreldrepenger.oversikt.domene.Beløp;
 public record InntektsmeldingV1(@JsonProperty("journalpostId") String journalpostId,
                                 @JsonProperty("arbeidsgiver") Arbeidsgiver arbeidsgiver,
                                 @JsonProperty("innsendingstidspunkt") LocalDateTime innsendingstidspunkt,
-                                @JsonProperty("inntekt") Beløp inntekt) implements Inntektsmelding {
+                                @JsonProperty("inntekt") Beløp inntekt,
+                                @JsonProperty("mottattTidspunkt") LocalDateTime mottattTidspunkt) implements Inntektsmelding {
 }
