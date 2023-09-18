@@ -93,7 +93,7 @@ public class TidslinjeTjeneste {
                 TidslinjeHendelseDto.TidslinjeHendelseType.FØRSTEGANGSSØKNAD);
         } else if (enkelJournalpost.hovedtype().erEndringssøknad()) {
             return Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.ENDRINGSSØKNAD);
-        } else if (enkelJournalpost.hovedtype().erVedlegg()) {
+        } else if (enkelJournalpost.hovedtype().erVedlegg() || enkelJournalpost.hovedtype().erUttalelseOmTilbakekreving()) {
             return  Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.ETTERSENDING);
         } else {
             LOG.info("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype: {}", enkelJournalpost);
