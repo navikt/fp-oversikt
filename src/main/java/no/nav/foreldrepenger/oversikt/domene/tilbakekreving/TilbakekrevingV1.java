@@ -14,7 +14,11 @@ public record TilbakekrevingV1(@JsonProperty("saksnummer") Saksnummer saksnummer
 
     @Override
     public boolean trengerSvarFraBruker() {
-        return varsel != null && !varsel.besvart && !harVerge;
+        if (varsel == null || varsel.besvart || harVerge) {
+            return false;
+        }
+        var tidsfrist = varsel.utsendtTidspunkt.plusWeeks(3); //TODO synce denne med avslutte oppgaver i dittnav
+        return LocalDateTime.now().isBefore(tidsfrist);
     }
 
     @Override
