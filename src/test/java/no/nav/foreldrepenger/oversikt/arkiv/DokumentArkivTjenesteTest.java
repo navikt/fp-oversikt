@@ -118,6 +118,27 @@ class DokumentArkivTjenesteTest {
         assertThat(journalførtSøkad.hovedtype()).isEqualTo(dokumentTypeId);
     }
 
+    @Test
+    void skalUtledeFraDokumentTittelHvisAltEllersFeiler() {
+        var dokumentTypeId = DokumentTypeId.I000001;
+        var journalposterFraSaf = List.of(journalpostUgyldigTittelUtenTilleggsinfoMenRiktigDokumentTittel(dokumentTypeId));
+        var dokumentoversikt = new Dokumentoversikt(journalposterFraSaf, null);
+        when(saf.dokumentoversiktFagsak(any(), any())).thenReturn(dokumentoversikt);
+
+        var journalposter = arkivTjeneste.hentAlleJournalposter(Saksnummer.dummy());
+
+        assertThat(journalposter)
+            .hasSize(journalposterFraSaf.size())
+            .extracting(EnkelJournalpost::dokumenter)
+            .noneMatch(List::isEmpty);
+
+        var journalførtSøkad = journalposter.stream()
+            .filter(j -> j.hovedtype().erFørstegangssøknad())
+            .findFirst()
+            .orElseThrow();
+        assertThat(journalførtSøkad.hovedtype()).isEqualTo(dokumentTypeId);
+    }
+
     private static Journalpost notat() {
         var journalførtNotat = new Journalpost();
         journalførtNotat.setJournalposttype(Journalposttype.N);
@@ -148,6 +169,23 @@ class DokumentArkivTjenesteTest {
         journalpost.setJournalstatus(Journalstatus.MOTTATT);
         journalpost.setSkjerming("FEIL");
         journalpost.setTittel(dokumentTypeId.getTittel());
+        journalpost.setJournalpostId("123");
+        var sak = new Sak();
+        sak.setFagsakId(Saksnummer.dummy().value());
+        journalpost.setSak(sak);
+        journalpost.setBruker(new Bruker(AktørId.dummy().value(), BrukerIdType.AKTOERID));
+        journalpost.setDatoOpprettet(Date.from(Instant.now()));
+        journalpost.setBehandlingstema("ab000123");
+        journalpost.setDokumenter(List.of(pdfDokument(dokumentTypeId), xmlDokument(dokumentTypeId)));
+        return journalpost;
+    }
+
+    private static Journalpost journalpostUgyldigTittelUtenTilleggsinfoMenRiktigDokumentTittel(DokumentTypeId dokumentTypeId) {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.I);
+        journalpost.setJournalstatus(Journalstatus.MOTTATT);
+        journalpost.setSkjerming("FEIL");
+        journalpost.setTittel("FEIL_TITTEL");
         journalpost.setJournalpostId("123");
         var sak = new Sak();
         sak.setFagsakId(Saksnummer.dummy().value());

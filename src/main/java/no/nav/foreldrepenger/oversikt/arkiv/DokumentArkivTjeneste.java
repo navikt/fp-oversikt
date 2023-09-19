@@ -202,7 +202,8 @@ public class DokumentArkivTjeneste {
             .map(Tilleggsopplysning::getVerdi)
             .map(DokumentArkivTjeneste::tilDokumentTypeFraTilleggsopplysninger)
             .findFirst()
-            .orElse(utledFraTittel(journalpost.getTittel()))
+            .map(d -> utledFraTittel(journalpost.getTittel()))
+            .orElse(utledFraTittel(journalpost.getDokumenter().stream().findFirst().orElseThrow().getTittel()))
             .orElse(DokumentTypeId.UKJENT);
     }
 

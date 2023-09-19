@@ -80,7 +80,7 @@ public class TidslinjeTjeneste {
             case INNHENTE_OPPLYSNINGER, INNHENTE_OPPLYSNINGER_OLD -> Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_INNHENT_OPPLYSNINGER);
             case ETTERLYS_INNTEKTSMELDING, ETTERLYS_INNTEKTSMELDING_OLD -> Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_ETTERLYS_INNTEKTSMELDING);
             default -> {
-                LOG.info("Journalpost med ukjent brevkode: {}", enkelJournalpost);
+                LOG.info("Ignorerer utgåpende journalpost med brevkode: {}", enkelJournalpost);
                 yield Optional.empty();
             }
         };
@@ -96,7 +96,7 @@ public class TidslinjeTjeneste {
         } else if (enkelJournalpost.hovedtype().erVedlegg() || enkelJournalpost.hovedtype().erUttalelseOmTilbakekreving()) {
             return  Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.ETTERSENDING);
         } else {
-            LOG.info("Utviklerfeil: Hentet en journalpost av typen INNGÅENDE_DOKUMENT med ukjent dokumenttype: {}", enkelJournalpost);
+            LOG.info("Ignorer inngående journalpost med dokumenttype: {}", enkelJournalpost);
             return Optional.empty();
         }
     }
