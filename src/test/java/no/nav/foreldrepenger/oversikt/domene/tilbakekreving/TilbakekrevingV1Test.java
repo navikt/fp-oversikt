@@ -17,9 +17,9 @@ class TilbakekrevingV1Test {
     }
 
     @Test
-    void trenger_ikke_svar_hvis_er_besvart() {
+    void trenger_svar_selv_om_allerede_besvart() {
         var tk = new TilbakekrevingV1(Saksnummer.dummy(), new TilbakekrevingV1.Varsel(LocalDateTime.now(), true), false, LocalDateTime.now());
-        assertThat(tk.trengerSvarFraBruker()).isFalse();
+        assertThat(tk.trengerSvarFraBruker()).isTrue();
     }
 
     @Test
