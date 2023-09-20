@@ -5,20 +5,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record TidslinjeHendelseDto(LocalDateTime opprettet,
-                                   String journalpostId,
                                    AktørType aktørType,
                                    TidslinjeHendelseType tidslinjeHendelseType,
-                                   List<Dokument> dokumenter) implements Comparable<TidslinjeHendelseDto> {
+                                   List<Dokument> dokumenter) {
 
     enum AktørType {
         BRUKER,
         NAV,
         ARBEIDSGIVER
-    }
-
-    enum VedtakType {
-        INNVILGELSE,
-        REVURDERING
     }
 
     enum TidslinjeHendelseType {
@@ -36,12 +30,7 @@ public record TidslinjeHendelseDto(LocalDateTime opprettet,
         UTGÅENDE_ETTERLYS_INNTEKTSMELDING
     }
 
-    public record Dokument(String dokumentId, String tittel) {
-    }
-
-    @Override
-    public int compareTo(TidslinjeHendelseDto o) {
-        return opprettet.compareTo(o.opprettet);
+    public record Dokument(String journalpostId, String dokumentId, String tittel) {
     }
 
 }

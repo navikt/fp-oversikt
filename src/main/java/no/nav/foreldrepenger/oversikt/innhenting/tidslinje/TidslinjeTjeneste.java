@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.innhenting.tidslinje;
 
 import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -44,7 +45,7 @@ public class TidslinjeTjeneste {
         var mappedeInntektsmeldinger = inntektsmeldingerRepository.hentFor(Set.of(saksnummer)).stream()
             .map(TidslinjeTjeneste::tilTidslinjeHendelse);
         return Stream.concat(mappedeDokumenter, mappedeInntektsmeldinger)
-            .sorted()
+            .sorted(Comparator.comparing(TidslinjeHendelseDto::opprettet))
             .toList();
     }
 
@@ -53,19 +54,17 @@ public class TidslinjeTjeneste {
             return tidslinjeHendelseTypeUtgåendeDokument(enkelJournalpost)
                 .map(hendelseType -> new TidslinjeHendelseDto(
                     enkelJournalpost.mottatt(),
-                    enkelJournalpost.journalpostId(),
                     TidslinjeHendelseDto.AktørType.NAV,
                     hendelseType,
-                    tilDokumenter(enkelJournalpost.dokumenter())
+                    tilDokumenter(enkelJournalpost.dokumenter(), enkelJournalpost.journalpostId())
             ));
         } else if (enkelJournalpost.type().equals(INNGÅENDE_DOKUMENT)) {
             return tidslinjehendelsetype(enkelJournalpost, alleDokumentene)
                 .map(hendelseType -> new TidslinjeHendelseDto(
                     enkelJournalpost.mottatt(),
-                    enkelJournalpost.journalpostId(),
                     TidslinjeHendelseDto.AktørType.BRUKER,
                     hendelseType,
-                    tilDokumenter(enkelJournalpost.dokumenter())
+                    tilDokumenter(enkelJournalpost.dokumenter(), enkelJournalpost.journalpostId())
             ));
         }
         throw new IllegalStateException("Utviklerfeil: Noe annet enn utgående eller inngående dokumenter skal ikke mappes og vises til bruker!");
@@ -108,20 +107,19 @@ public class TidslinjeTjeneste {
             .anyMatch(journalpost -> journalpost.mottatt().isBefore(enkelJournalpost.mottatt()));
     }
 
-    private static List<TidslinjeHendelseDto.Dokument> tilDokumenter(List<EnkelJournalpost.Dokument> dokumenter) {
+    private static List<TidslinjeHendelseDto.Dokument> tilDokumenter(List<EnkelJournalpost.Dokument> dokumenter, String journalpostId) {
         return dokumenter.stream()
-            .map(TidslinjeTjeneste::tilDokument)
+            .map(dokument -> tilDokument(dokument, journalpostId))
             .toList();
     }
 
-    private static TidslinjeHendelseDto.Dokument tilDokument(EnkelJournalpost.Dokument dokument) {
-        return new TidslinjeHendelseDto.Dokument(dokument.dokumentId(), dokument.tittel());
+    private static TidslinjeHendelseDto.Dokument tilDokument(EnkelJournalpost.Dokument dokument, String journalpostId) {
+        return new TidslinjeHendelseDto.Dokument(journalpostId, dokument.dokumentId(), dokument.tittel());
     }
 
     private static TidslinjeHendelseDto tilTidslinjeHendelse(Inntektsmelding inntektsmelding) {
         return new TidslinjeHendelseDto(
             inntektsmelding.mottattTidspunkt() == null ? inntektsmelding.innsendingstidspunkt() : inntektsmelding.mottattTidspunkt(),
-            inntektsmelding.journalpostId(),
             TidslinjeHendelseDto.AktørType.ARBEIDSGIVER,
             TidslinjeHendelseDto.TidslinjeHendelseType.INNTEKTSMELDING,
             List.of()
