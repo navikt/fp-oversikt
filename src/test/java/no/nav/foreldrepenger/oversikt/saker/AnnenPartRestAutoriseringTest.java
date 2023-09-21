@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 class AnnenPartRestAutoriseringTest {
 
@@ -24,7 +25,8 @@ class AnnenPartRestAutoriseringTest {
     void sjekkAtEndepunktReturnereNullNårDetErBeskyttetAdresse() {
         innloggetBorger();
         when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
-        var annenPartRest = new AnnenPartRest(null, null, null, adresseBeskyttelseOppslag);
+        var tilgangKontrollTjeneste = new TilgangKontrollTjeneste(null, null, adresseBeskyttelseOppslag);
+        var annenPartRest = new AnnenPartRest(null, tilgangKontrollTjeneste, null, null);
 
         var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);
 
@@ -35,7 +37,8 @@ class AnnenPartRestAutoriseringTest {
     void innloggetAnsattSkalIkkeHenteAnnenpartsVedtakEndepunktet() {
         innloggetSaksbehandlerUtenDrift();
         when(adresseBeskyttelseOppslag.adresseBeskyttelse(any())).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.UGRADERT)));
-        var annenPartRest = new AnnenPartRest(null, null, null, adresseBeskyttelseOppslag);
+        var tilgangKontrollTjeneste = new TilgangKontrollTjeneste(null, null, adresseBeskyttelseOppslag);
+        var annenPartRest = new AnnenPartRest(null, tilgangKontrollTjeneste, null, null);
 
         var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);
 

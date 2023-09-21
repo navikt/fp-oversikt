@@ -25,7 +25,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
 
 @ApplicationScoped
-class AnnenPartVedtakTjeneste {
+public class AnnenPartVedtakTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(AnnenPartVedtakTjeneste.class);
 

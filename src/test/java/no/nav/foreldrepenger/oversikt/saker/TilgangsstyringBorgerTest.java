@@ -1,19 +1,42 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Set;
+
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.SakRepository;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import no.nav.vedtak.sikkerhet.kontekst.IdentType;
 import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 class TilgangsstyringBorgerTest {
 
+    private SakRepository sakRepository;
+    private InnloggetBruker innloggetBruker;
+    private AdresseBeskyttelseOppslag adressebeskyttelse;
+    private TilgangKontrollTjeneste tilgangkontroll;
+
+    @BeforeEach
+    void setUp() {
+        sakRepository = mock(SakRepository.class);
+        innloggetBruker = mock(InnloggetBruker.class);
+        adressebeskyttelse = mock(AdresseBeskyttelseOppslag.class);
+        tilgangkontroll = new TilgangKontrollTjeneste(sakRepository, innloggetBruker, adressebeskyttelse);
+    }
 
     @Test
     void internBrukerBlirRejectedAvBorgerSjekk() {
@@ -22,7 +45,7 @@ class TilgangsstyringBorgerTest {
         when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
         KontekstHolder.setKontekst(kontekst);
 
-        assertThatThrownBy(TilgangsstyringBorger::sjekkAtKallErFraBorger).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraBorger()).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
 
@@ -33,6 +56,48 @@ class TilgangsstyringBorgerTest {
         when(kontekst.getIdentType()).thenReturn(IdentType.EksternBruker);
         KontekstHolder.setKontekst(kontekst);
 
-        assertThatCode(TilgangsstyringBorger::sjekkAtKallErFraBorger).doesNotThrowAnyException();
+        assertThatCode(() -> tilgangkontroll.sjekkAtKallErFraBorger()).doesNotThrowAnyException();
+    }
+
+    @Test
+    void tilgangTilSakHvisSakErKoblet() {
+        when(innloggetBruker.aktørId()).thenReturn(AktørId.dummy());
+        when(sakRepository.erSakKobletTilAktør(any(), any())).thenReturn(true);
+        assertThatCode(() -> tilgangkontroll.sakKobletTilAktørGuard(Saksnummer.dummy())).doesNotThrowAnyException();
+    }
+
+    @Test
+    void skalHiveExceptionHvisSaksnummerIkkeErKobletTilAktørId() {
+        when(innloggetBruker.aktørId()).thenReturn(AktørId.dummy());
+        when(sakRepository.erSakKobletTilAktør(any(), any())).thenReturn(false);
+        assertThatThrownBy(() -> tilgangkontroll.sakKobletTilAktørGuard(Saksnummer.dummy())).isExactlyInstanceOf(ManglerTilgangException.class);
+    }
+
+
+    @Test
+    void skalHiveExceptionVedUmyndig() {
+        when(innloggetBruker.erMyndig()).thenReturn(false);
+        assertThatThrownBy(() -> tilgangkontroll.tilgangssjekkMyndighetsalder())
+            .isExactlyInstanceOf(ManglerTilgangException.class);
+    }
+
+    @Test
+    void tilgangHvisMynding() {
+        when(innloggetBruker.erMyndig()).thenReturn(true);
+        assertThatCode(() -> tilgangkontroll.tilgangssjekkMyndighetsalder()).doesNotThrowAnyException();
+    }
+
+    @Test
+    void harBeskyttetAdresseHvisGradert() {
+        var dummyFnr = new Fødselsnummer("123456789");
+        when(adressebeskyttelse.adresseBeskyttelse(dummyFnr)).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
+        assertThat(tilgangkontroll.harPersonBeskyttetAdresse(dummyFnr)).isTrue();
+    }
+
+    @Test
+    void harIkkeBeskyttetAdresseHvisUgradert() {
+        var dummyFnr = new Fødselsnummer("123456789");
+        when(adressebeskyttelse.adresseBeskyttelse(dummyFnr)).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.UGRADERT)));
+        assertThat(tilgangkontroll.harPersonBeskyttetAdresse(dummyFnr)).isFalse();
     }
 }
