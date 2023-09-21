@@ -39,6 +39,10 @@ public class ArkivRest {
         this.innloggetBruker = innloggetBruker;
     }
 
+    ArkivRest() {
+        // CDI
+    }
+
     @GET
     @Path("/alle")
     @Produces(MediaType.APPLICATION_JSON)
