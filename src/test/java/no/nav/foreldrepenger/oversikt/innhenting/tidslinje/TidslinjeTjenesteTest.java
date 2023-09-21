@@ -23,7 +23,7 @@ import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmeldinger
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
 import no.nav.foreldrepenger.oversikt.stub.InntektsmeldingRepositoryStub;
 
-class TidslinjeTjenesteTest {
+public class TidslinjeTjenesteTest {
 
     private TidslinjeTjeneste tjeneste;
     private DokumentArkivTjeneste dokumentArkivTjeneste;
@@ -39,7 +39,7 @@ class TidslinjeTjenesteTest {
     @Test
     void søknadOgInntektmeldingTidslije() {
         var saksnummer = Saksnummer.dummy();
-        var søknadMedVedlegg = søknadMedVedlegg(saksnummer, LocalDateTime.now());
+        var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var inntektsmelding = standardInntektsmelding(LocalDateTime.now());
         when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(søknadMedVedlegg));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
@@ -58,7 +58,7 @@ class TidslinjeTjenesteTest {
     @Test
     void søknadEtterlysIMOgVedtak() {
         var saksnummer = Saksnummer.dummy();
-        var søknadMedVedlegg = søknadMedVedlegg(saksnummer, LocalDateTime.now());
+        var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var etterlysIM = etterlysIM(saksnummer);
         var vedtak = utgåendeVedtak(saksnummer, LocalDateTime.now());
         when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(
@@ -80,10 +80,10 @@ class TidslinjeTjenesteTest {
     void søknadIMEttersendingVedtakEndringssøknadOgDeretterNyttVedtak() {
         var saksnummer = Saksnummer.dummy();
         var tidspunkt = LocalDateTime.now();
-        var søknadMedVedlegg = søknadMedVedlegg(saksnummer, tidspunkt);
+        var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt);
         var inntektsmelding = standardInntektsmelding(tidspunkt.plusDays(1));
         var innhentOpplysningsBrev = innhentOpplysningsBrev(saksnummer, tidspunkt.plusDays(2));
-        var ettersending = ettersenderVedlegg(saksnummer, tidspunkt.plusDays(3));
+        var ettersending = ettersender2Vedlegg(saksnummer, tidspunkt.plusDays(3));
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(4));
         var endringssøknad = endringssøknadUtenVedlegg(saksnummer, tidspunkt.plusDays(4));
         var vedtakEndring = utgåendeVedtak(saksnummer, tidspunkt.plusDays(5));
@@ -111,10 +111,10 @@ class TidslinjeTjenesteTest {
     void nyeSøknaderFørVedtakSkalFåTypeFørstegangssøknadNY() {
         var saksnummer = Saksnummer.dummy();
         var tidspunkt = LocalDateTime.now();
-        var søknadMedVedlegg = søknadMedVedlegg(saksnummer, tidspunkt);
+        var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt);
         var inntektsmelding = standardInntektsmelding(tidspunkt.plusDays(1));
-        var ettersending = ettersenderVedlegg(saksnummer, tidspunkt.plusDays(2));
-        var nySøknadMedVedlegg = søknadMedVedlegg(saksnummer, tidspunkt.plusDays(3));
+        var ettersending = ettersender2Vedlegg(saksnummer, tidspunkt.plusDays(2));
+        var nySøknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt.plusDays(3));
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(4));
         when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(søknadMedVedlegg, ettersending, nySøknadMedVedlegg, vedtak));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
@@ -136,7 +136,7 @@ class TidslinjeTjenesteTest {
     @Test
     void skalFiltrereBortInnteksmeldingFraJoark() {
         var saksnummer = Saksnummer.dummy();
-        var søknadMedVedlegg = søknadMedVedlegg(saksnummer, LocalDateTime.now());
+        var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var innteksmeldingJournalpost = innteksmeldingJournalpost(saksnummer);
         var inntektsmelding = standardInntektsmelding(LocalDateTime.now());
         when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(
@@ -159,7 +159,7 @@ class TidslinjeTjenesteTest {
         var saksnummer = Saksnummer.dummy();
         var tidspunkt = LocalDateTime.now();
         var inntektsmelding = standardInntektsmelding(tidspunkt);
-        var søknadMedVedlegg = søknadMedVedlegg(saksnummer, tidspunkt.plusSeconds(1));
+        var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt.plusSeconds(1));
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusSeconds(2));
         when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(vedtak, søknadMedVedlegg)); // Reversert med vilje
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
@@ -175,7 +175,7 @@ class TidslinjeTjenesteTest {
                 TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK);
     }
 
-    private static EnkelJournalpost søknadMedVedlegg(Saksnummer saksnummer, LocalDateTime mottatt) {
+    public static EnkelJournalpost søknadMed1Vedlegg(Saksnummer saksnummer, LocalDateTime mottatt) {
         return new EnkelJournalpost(
             DokumentTypeId.I000003.getTittel(),
             "1",
@@ -190,7 +190,7 @@ class TidslinjeTjenesteTest {
         );
     }
 
-    private static EnkelJournalpost endringssøknadUtenVedlegg(Saksnummer saksnummer, LocalDateTime tidspunkt) {
+    public static EnkelJournalpost endringssøknadUtenVedlegg(Saksnummer saksnummer, LocalDateTime tidspunkt) {
         return new EnkelJournalpost(
             DokumentTypeId.I000050.getTittel(),
             "2",
@@ -205,7 +205,7 @@ class TidslinjeTjenesteTest {
         );
     }
 
-    private static EnkelJournalpost ettersenderVedlegg(Saksnummer saksnummer, LocalDateTime tidspunkt) {
+    public static EnkelJournalpost ettersender2Vedlegg(Saksnummer saksnummer, LocalDateTime tidspunkt) {
         return new EnkelJournalpost(
             DokumentTypeId.I000036.getTittel(),
             "3",
@@ -220,7 +220,7 @@ class TidslinjeTjenesteTest {
         );
     }
 
-    private static EnkelJournalpost innteksmeldingJournalpost(Saksnummer saksnummer) {
+    public static EnkelJournalpost innteksmeldingJournalpost(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             DokumentTypeId.I000067.getTittel(),
             "4",
@@ -236,7 +236,7 @@ class TidslinjeTjenesteTest {
     }
 
 
-    private static EnkelJournalpost utgåendeVedtak(Saksnummer saksnummer, LocalDateTime mottatt) {
+    public static EnkelJournalpost utgåendeVedtak(Saksnummer saksnummer, LocalDateTime mottatt) {
         return new EnkelJournalpost(
             "Innvilgelsesbrev foreldrepenger",
             "5",
@@ -251,7 +251,7 @@ class TidslinjeTjenesteTest {
     }
 
 
-    private static EnkelJournalpost innhentOpplysningsBrev(Saksnummer saksnummer, LocalDateTime tidspunkt) {
+    public static EnkelJournalpost innhentOpplysningsBrev(Saksnummer saksnummer, LocalDateTime tidspunkt) {
         return new EnkelJournalpost(
             "Innhente opplysninger",
             "5",
@@ -266,7 +266,7 @@ class TidslinjeTjenesteTest {
     }
 
 
-    private static EnkelJournalpost etterlysIM(Saksnummer saksnummer) {
+    public static EnkelJournalpost etterlysIM(Saksnummer saksnummer) {
         return new EnkelJournalpost(
             "Etterlys inntektsmelding",
             "6",
@@ -281,7 +281,7 @@ class TidslinjeTjenesteTest {
         );
     }
 
-    private static Inntektsmelding standardInntektsmelding(LocalDateTime mottattTidspunkt) {
+    public static Inntektsmelding standardInntektsmelding(LocalDateTime mottattTidspunkt) {
         return new InntektsmeldingV1("7", Arbeidsgiver.dummy(), mottattTidspunkt, Beløp.ZERO, mottattTidspunkt);
     }
 }
