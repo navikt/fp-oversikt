@@ -13,7 +13,6 @@ import no.nav.vedtak.felles.integrasjon.saf.AbstractSafKlient;
     scopesProperty = "saf.scopes",
     scopesDefault = "api://prod-fss.teamdokumenthandtering.saf/.default")
 @Dependent
-// Sakogarkiv klient
 public class SafKlient extends AbstractSafKlient {
 
     public SafKlient() {

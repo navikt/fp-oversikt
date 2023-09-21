@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.innhenting.tidslinje;
 
+import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -11,8 +12,8 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentArkivTjeneste;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
+import no.nav.foreldrepenger.oversikt.arkiv.SafselvbetjeningTjeneste;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Beløp;
@@ -26,25 +27,26 @@ import no.nav.foreldrepenger.oversikt.stub.InntektsmeldingRepositoryStub;
 public class TidslinjeTjenesteTest {
 
     private TidslinjeTjeneste tjeneste;
-    private DokumentArkivTjeneste dokumentArkivTjeneste;
+    private SafselvbetjeningTjeneste safselvbetjeningTjeneste;
     private InntektsmeldingerRepository inntektsmeldingerRepository;
 
     @BeforeEach
     void setUp() {
-        dokumentArkivTjeneste = mock(DokumentArkivTjeneste.class);
+        safselvbetjeningTjeneste = mock(SafselvbetjeningTjeneste.class);
         inntektsmeldingerRepository = new InntektsmeldingRepositoryStub();
-        tjeneste = new TidslinjeTjeneste(dokumentArkivTjeneste, inntektsmeldingerRepository);
+        tjeneste = new TidslinjeTjeneste(safselvbetjeningTjeneste, inntektsmeldingerRepository);
     }
 
     @Test
     void søknadOgInntektmeldingTidslije() {
         var saksnummer = Saksnummer.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var inntektsmelding = standardInntektsmelding(LocalDateTime.now());
-        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(søknadMedVedlegg));
+        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(søknadMedVedlegg));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(saksnummer);
+        var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
 
         assertThat(tidslinje)
             .hasSize(2)
@@ -58,13 +60,14 @@ public class TidslinjeTjenesteTest {
     @Test
     void søknadEtterlysIMOgVedtak() {
         var saksnummer = Saksnummer.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var etterlysIM = etterlysIM(saksnummer);
         var vedtak = utgåendeVedtak(saksnummer, LocalDateTime.now());
-        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(
+        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, etterlysIM, vedtak));
 
-        var tidslinje = tjeneste.tidslinje(saksnummer);
+        var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
 
         assertThat(tidslinje)
             .hasSize(3)
@@ -79,6 +82,7 @@ public class TidslinjeTjenesteTest {
     @Test
     void søknadIMEttersendingVedtakEndringssøknadOgDeretterNyttVedtak() {
         var saksnummer = Saksnummer.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var tidspunkt = LocalDateTime.now();
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt);
         var inntektsmelding = standardInntektsmelding(tidspunkt.plusDays(1));
@@ -87,11 +91,11 @@ public class TidslinjeTjenesteTest {
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(4));
         var endringssøknad = endringssøknadUtenVedlegg(saksnummer, tidspunkt.plusDays(4));
         var vedtakEndring = utgåendeVedtak(saksnummer, tidspunkt.plusDays(5));
-        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(
+        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, innhentOpplysningsBrev, ettersending, vedtak, endringssøknad, vedtakEndring));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(saksnummer);
+        var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
 
         assertThat(tidslinje)
             .hasSize(7)
@@ -110,16 +114,17 @@ public class TidslinjeTjenesteTest {
     @Test
     void nyeSøknaderFørVedtakSkalFåTypeFørstegangssøknadNY() {
         var saksnummer = Saksnummer.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var tidspunkt = LocalDateTime.now();
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt);
         var inntektsmelding = standardInntektsmelding(tidspunkt.plusDays(1));
         var ettersending = ettersender2Vedlegg(saksnummer, tidspunkt.plusDays(2));
         var nySøknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt.plusDays(3));
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(4));
-        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(søknadMedVedlegg, ettersending, nySøknadMedVedlegg, vedtak));
+        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(søknadMedVedlegg, ettersending, nySøknadMedVedlegg, vedtak));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(saksnummer);
+        var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
 
         assertThat(tidslinje)
             .hasSize(5)
@@ -136,14 +141,15 @@ public class TidslinjeTjenesteTest {
     @Test
     void skalFiltrereBortInnteksmeldingFraJoark() {
         var saksnummer = Saksnummer.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var innteksmeldingJournalpost = innteksmeldingJournalpost(saksnummer);
         var inntektsmelding = standardInntektsmelding(LocalDateTime.now());
-        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(
+        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, innteksmeldingJournalpost));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(saksnummer);
+        var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
 
         assertThat(tidslinje)
             .hasSize(2)
@@ -157,14 +163,15 @@ public class TidslinjeTjenesteTest {
     @Test
     void tidslinjenSorteresEtterOpprettetTidspunkt() {
         var saksnummer = Saksnummer.dummy();
+        var innloggetBruker = myndigInnloggetBruker();
         var tidspunkt = LocalDateTime.now();
         var inntektsmelding = standardInntektsmelding(tidspunkt);
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt.plusSeconds(1));
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusSeconds(2));
-        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(vedtak, søknadMedVedlegg)); // Reversert med vilje
+        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(vedtak, søknadMedVedlegg)); // Reversert med vilje
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
-        var tidslinje = tjeneste.tidslinje(saksnummer);
+        var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
 
         assertThat(tidslinje)
             .hasSize(3)

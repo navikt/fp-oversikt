@@ -9,24 +9,26 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 @ApplicationScoped
 public class ArkivTjeneste {
 
-    private DokumentArkivTjeneste arkivTjeneste;
+    private SafselvbetjeningTjeneste safselvbetjeningTjeneste;
 
     @Inject
-    public ArkivTjeneste(DokumentArkivTjeneste arkivTjeneste) {
-        this.arkivTjeneste = arkivTjeneste;
+    public ArkivTjeneste(SafselvbetjeningTjeneste safselvbetjeningTjeneste) {
+        this.safselvbetjeningTjeneste = safselvbetjeningTjeneste;
     }
 
     public ArkivTjeneste() {
         //CDI
     }
 
-    public List<ArkivDokumentDto> alle(Saksnummer saksnummer) {
-        return arkivTjeneste.hentAlleJournalposter(saksnummer).stream()
+    public List<ArkivDokumentDto> alle(Fødselsnummer fnr, Saksnummer saksnummer) {
+        return safselvbetjeningTjeneste.hentAlleJournalposter(fnr, saksnummer).stream()
+            .filter(j -> j.saksnummer().equals(saksnummer.value()))
             .flatMap(enkelJournalpost -> enkelJournalpost.dokumenter().stream()
                 .map(dokument -> tilArkivdokumenter(dokument, enkelJournalpost))
             )

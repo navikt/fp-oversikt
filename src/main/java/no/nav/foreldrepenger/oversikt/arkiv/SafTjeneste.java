@@ -4,28 +4,22 @@ import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
 import no.nav.saf.Bruker;
 import no.nav.saf.BrukerIdType;
 import no.nav.saf.BrukerResponseProjection;
 import no.nav.saf.DokumentInfo;
 import no.nav.saf.DokumentInfoResponseProjection;
-import no.nav.saf.DokumentoversiktFagsakQueryRequest;
-import no.nav.saf.DokumentoversiktResponseProjection;
 import no.nav.saf.DokumentvariantResponseProjection;
-import no.nav.saf.FagsakInput;
 import no.nav.saf.Journalpost;
 import no.nav.saf.JournalpostQueryRequest;
 import no.nav.saf.JournalpostResponseProjection;
@@ -36,61 +30,22 @@ import no.nav.saf.TilleggsopplysningResponseProjection;
 import no.nav.vedtak.felles.integrasjon.saf.Saf;
 
 /**
- * Dokumentasjon av SAF: https://confluence.adeo.no/display/BOA/saf+-+GraphQL+API+v1
+ * Dokumentasjon av SAF: https://confluence.adeo.no/display/BOA/saf
  */
 @ApplicationScoped
-public class DokumentArkivTjeneste {
+public class SafTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DokumentArkivTjeneste.class);
-    private static final Set<Journalposttype> INKLUDER_JOURNALPOSTTYPER = Set.of(Journalposttype.I, Journalposttype.U);
-//    private static final Set<Journalstatus> INKLUDER_STATUS = Set.of(Journalstatus.MOTTATT); TODO
-//    private static final String EKSKLUDER_DOKUMENT_MERKERT_FOR_SLETTING = "FEIL"; TODO
-    private static final String FAGSAKSYSTEM_FPSAK_KODE = "FS36";
-    private static final List<String> GYLDIGE_FILFORMAT = List.of("PDF");
-//    private static final List<String> GYLDIGE_FILFORMAT = List.of("PDF", "JPG", "PNG"); // TODO
+    private static final Logger LOG = LoggerFactory.getLogger(SafTjeneste.class);
     static final String FP_DOK_TYPE = "fp_innholdtype";
 
     private Saf safKlient;
 
-    DokumentArkivTjeneste() {
+    SafTjeneste() {
     }
 
     @Inject
-    public DokumentArkivTjeneste(Saf safKlient) {
+    public SafTjeneste(Saf safKlient) {
         this.safKlient = safKlient;
-    }
-
-
-    public List<EnkelJournalpost> hentAlleJournalposter(Saksnummer saksnummer) {
-        // TODO: Implementer cache?
-
-        var query = new DokumentoversiktFagsakQueryRequest();
-        query.setFagsak(new FagsakInput(saksnummer.value(), FAGSAKSYSTEM_FPSAK_KODE));
-        query.setFoerste(1000);
-
-        var projection = new DokumentoversiktResponseProjection()
-            .journalposter(journalpostProjeksjon());
-
-        var resultat = safKlient.dokumentoversiktFagsak(query, projection);
-
-        var journalposter = resultat.getJournalposter().stream()
-            .filter(j -> INKLUDER_JOURNALPOSTTYPER.contains(j.getJournalposttype()))
-            // .filter(j -> INKLUDER_JOURNALSTATUS.contains(j.getJournalstatus())) TODO
-            // .filter(j -> !EKSKLUDER_DOKUMENT_MERKERT_FOR_SLETTING.equals(j.getSkjerming())) TODO
-            .toList();
-
-        var dokumenter = new ArrayList<EnkelJournalpost>();
-        for (var journalpost : journalposter) {
-            var pdfDokumenter = journalpost.getDokumenter().stream()
-                .filter(dokumentInfo -> dokumentInfo.getDokumentvarianter().stream()
-                    .anyMatch(dokumentvariant -> GYLDIGE_FILFORMAT.contains(dokumentvariant.getFiltype())))
-                .toList();
-
-            if (!pdfDokumenter.isEmpty()) {
-                dokumenter.add(mapTilJournalpost(journalpost, pdfDokumenter));
-            }
-        }
-        return dokumenter;
     }
 
     public Optional<EnkelJournalpost> hentJournalpostUtenDokument(JournalpostId journalpostId) {
@@ -113,7 +68,6 @@ public class DokumentArkivTjeneste {
             .bruker(new BrukerResponseProjection()
                 .id()
                 .type())
-            // .skjerming()
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
             .dokumenter(new DokumentInfoResponseProjection()
                 .tittel()
@@ -200,7 +154,7 @@ public class DokumentArkivTjeneste {
         return safeStream(journalpost.getTilleggsopplysninger())
             .filter(to -> FP_DOK_TYPE.equals(to.getNokkel()))
             .map(Tilleggsopplysning::getVerdi)
-            .map(DokumentArkivTjeneste::tilDokumentTypeFraTilleggsopplysninger)
+            .map(SafTjeneste::tilDokumentTypeFraTilleggsopplysninger)
             .findFirst()
             .map(d -> utledFraTittel(journalpost.getTittel()))
             .orElse(utledFraTittel(journalpost.getDokumenter().stream().findFirst().orElseThrow().getTittel()))

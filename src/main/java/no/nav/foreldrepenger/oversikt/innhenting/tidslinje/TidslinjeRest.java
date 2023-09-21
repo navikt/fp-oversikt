@@ -50,7 +50,7 @@ public class TidslinjeRest {
         tilgangssjekkMyndighetsalder();
         sakKobletTilAktørGuard(saksnummer);
         LOG.info("Henter tidslinje sak {}", saksnummer);
-        return tidslinjeTjeneste.tidslinje(new Saksnummer(saksnummer));
+        return tidslinjeTjeneste.tidslinje(innloggetBruker.fødselsnummer(), new Saksnummer(saksnummer));
     }
 
     private void tilgangssjekkMyndighetsalder() {
