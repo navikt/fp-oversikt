@@ -37,17 +37,25 @@ class ArkivTjenesteTest {
     void enJournalpostMed2DokumenterMappesTil2Arkivdokumenter() {
         var saksnummer = Saksnummer.dummy();
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
+        var dokumenterFraSøknad = søknadMedVedlegg.dokumenter();
+        var dokument1 = dokumenterFraSøknad.get(0);
+        var dokument2 = dokumenterFraSøknad.get(1);
         when(dokumentArkivTjeneste.hentAlleJournalposter(any())).thenReturn(List.of(søknadMedVedlegg));
 
         var dokumenter = arkivTjeneste.alle(saksnummer.value());
 
         assertThat(dokumenter).hasSameSizeAs(søknadMedVedlegg.dokumenter());
+        assertThat(dokumenter)
+            .extracting(ArkivDokumentDto::tittel)
+            .containsExactly(dokument1.tittel(), dokument2.tittel());
+        assertThat(dokumenter)
+            .extracting(ArkivDokumentDto::dokumentId)
+            .containsExactly(dokument1.dokumentId(), dokument2.dokumentId());
+
         for (var dokument : dokumenter) {
-            assertThat(dokument.tittel()).isEqualTo(søknadMedVedlegg.tittel());
             assertThat(dokument.type()).isEqualTo(INNGÅENDE_DOKUMENT);
             assertThat(dokument.journalpostId()).isEqualTo(søknadMedVedlegg.journalpostId());
             assertThat(dokument.mottatt()).isEqualTo(søknadMedVedlegg.mottatt());
-            assertThat(dokument.dokumentId()).isNotNull();
         }
     }
 
