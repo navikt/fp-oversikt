@@ -7,9 +7,11 @@ import static no.nav.foreldrepenger.oversikt.arkiv.ArkivDokumentDto.Type.UTGÅEN
 import java.util.Comparator;
 import java.util.List;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
+@ApplicationScoped
 public class ArkivTjeneste {
 
     private DokumentArkivTjeneste arkivTjeneste;
@@ -17,6 +19,10 @@ public class ArkivTjeneste {
     @Inject
     public ArkivTjeneste(DokumentArkivTjeneste arkivTjeneste) {
         this.arkivTjeneste = arkivTjeneste;
+    }
+
+    public ArkivTjeneste() {
+        //CDI
     }
 
     public List<ArkivDokumentDto> alle(String saksnummer) {
