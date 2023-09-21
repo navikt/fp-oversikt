@@ -22,7 +22,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = "hent.inntektsmeldinger", maxFailedRuns = HentInntektsmeldingerTask.MAX_FAILED_RUNS, thenDelay = 120)
+@ProsessTask(value = "hent.inntektsmeldinger", maxFailedRuns = HentInntektsmeldingerTask.MAX_FAILED_RUNS, thenDelay = 60 * 15)
 public class HentInntektsmeldingerTask implements ProsessTaskHandler {
 
     public static final Duration TASK_DELAY = Duration.ofSeconds(30);
