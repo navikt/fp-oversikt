@@ -25,8 +25,8 @@ public class ArkivTjeneste {
         //CDI
     }
 
-    public List<ArkivDokumentDto> alle(String saksnummer) {
-        return arkivTjeneste.hentAlleJournalposter(new Saksnummer(saksnummer)).stream()
+    public List<ArkivDokumentDto> alle(Saksnummer saksnummer) {
+        return arkivTjeneste.hentAlleJournalposter(saksnummer).stream()
             .flatMap(enkelJournalpost -> enkelJournalpost.dokumenter().stream()
                 .map(dokument -> tilArkivdokumenter(dokument, enkelJournalpost))
             )

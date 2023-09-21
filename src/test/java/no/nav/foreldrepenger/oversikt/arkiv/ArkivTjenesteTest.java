@@ -42,7 +42,7 @@ class ArkivTjenesteTest {
         var dokument2 = dokumenterFraSøknad.get(1);
         when(dokumentArkivTjeneste.hentAlleJournalposter(any())).thenReturn(List.of(søknadMedVedlegg));
 
-        var dokumenter = arkivTjeneste.alle(saksnummer.value());
+        var dokumenter = arkivTjeneste.alle(saksnummer);
 
         assertThat(dokumenter).hasSameSizeAs(søknadMedVedlegg.dokumenter());
         assertThat(dokumenter)
@@ -70,7 +70,7 @@ class ArkivTjenesteTest {
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(2));
         when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(søknadMedVedleggSak1, søknadMedVedleggSak2, vedtak));
 
-        var dokumenter = arkivTjeneste.alle(saksnummer.value());
+        var dokumenter = arkivTjeneste.alle(saksnummer);
         assertThat(dokumenter).hasSize(5);
         assertThat(dokumenter)
             .extracting(ArkivDokumentDto::type)
@@ -100,7 +100,7 @@ class ArkivTjenesteTest {
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(2));
         when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(vedtak, søknadMedVedleggSak1));
 
-        var dokumenter = arkivTjeneste.alle(saksnummer.value());
+        var dokumenter = arkivTjeneste.alle(saksnummer);
 
         assertThat(dokumenter).hasSize(3);
         assertThat(dokumenter)

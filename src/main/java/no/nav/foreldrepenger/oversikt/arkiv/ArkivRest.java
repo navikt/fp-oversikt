@@ -46,7 +46,7 @@ public class ArkivRest {
         sjekkAtKallErFraBorger();
         tilgangssjekkMyndighetsalder();
         sakKobletTilAktørGuard(saksnummer);
-        var alle = arkivTjeneste.alle(saksnummer);
+        var alle = arkivTjeneste.alle(new Saksnummer(saksnummer));
         LOG.info("Hentet {} dokumenter på sak {}", alle.size(), saksnummer);
         return alle;
 
