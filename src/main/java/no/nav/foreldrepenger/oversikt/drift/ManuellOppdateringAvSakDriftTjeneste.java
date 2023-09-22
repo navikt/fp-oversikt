@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
 
-import static no.nav.foreldrepenger.common.domain.validation.InputValideringRegex.BARE_TALL;
 import static no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste.sjekkAtSaksbehandlerHarRollenDrift;
 
 import java.time.Instant;
@@ -21,13 +20,13 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
@@ -59,26 +58,26 @@ public class ManuellOppdateringAvSakDriftTjeneste {
         @ApiResponse(responseCode = "200", description = "HentSakTask opprettet for alle saknsummre"),
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
-    public Response opprettHentSakTaskForSaksnummre(@Parameter(description = "Liste med saksnummre som skal oppdateres") @NotNull List<@Valid @NotNull @Pattern(regexp = BARE_TALL) String> saksnummre) {
+    public Response opprettHentSakTaskForSaksnummre(@Parameter(description = "Liste med saksnummre som skal oppdateres") @Valid @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
         sjekkAtSaksbehandlerHarRollenDrift();
         for (var saksnummer : saksnummre) {
-            LOG.info("Lager task for å oppdatere følgende sak {}", saksnummer);
+            LOG.info("Lager task for å oppdatere følgende sak {}", saksnummer.value());
             lagreHentSakTask(saksnummer);
         }
         return Response.ok().build();
     }
 
-    private void lagreHentSakTask(String saksnummer) {
+    private void lagreHentSakTask(Saksnummer saksnummer) {
         var task = opprettTask(saksnummer);
         taskTjeneste.lagre(task);
     }
 
-    public static ProsessTaskData opprettTask(String saksnummer) {
+    private static ProsessTaskData opprettTask(Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
-        task.setSaksnummer(saksnummer);
+        task.setSaksnummer(saksnummer.value());
         task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
-        task.setGruppe(saksnummer);
+        task.setGruppe(saksnummer.value());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
     }

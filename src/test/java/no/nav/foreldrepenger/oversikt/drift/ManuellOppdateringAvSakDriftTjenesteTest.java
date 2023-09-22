@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
 class ManuellOppdateringAvSakDriftTjenesteTest {
@@ -16,7 +17,7 @@ class ManuellOppdateringAvSakDriftTjenesteTest {
     void verifiserSaksbehandlerUtenDriftRolleIkkeFårTilgang() {
         innloggetSaksbehandlerUtenDrift();
         var manuellOppdateringAvSakDriftTjeneste = new ManuellOppdateringAvSakDriftTjeneste(null);
-        List<String> saksnummer = List.of();
+        List<Saksnummer> saksnummer = List.of();
         assertThatThrownBy(() -> manuellOppdateringAvSakDriftTjeneste.opprettHentSakTaskForSaksnummre(saksnummer))
             .isExactlyInstanceOf(ManglerTilgangException.class);
     }
@@ -25,7 +26,7 @@ class ManuellOppdateringAvSakDriftTjenesteTest {
     void verifiserAtBorgerIkkeFårTilgang() {
         innloggetBorger();
         var manuellOppdateringAvSakDriftTjeneste = new ManuellOppdateringAvSakDriftTjeneste(null);
-        List<String> saksnummer = List.of();
+        List<Saksnummer> saksnummer = List.of();
         assertThatThrownBy(() -> manuellOppdateringAvSakDriftTjeneste.opprettHentSakTaskForSaksnummre(saksnummer))
             .isExactlyInstanceOf(ManglerTilgangException.class);
     }

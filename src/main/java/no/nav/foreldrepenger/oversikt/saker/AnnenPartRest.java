@@ -1,8 +1,6 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 
-import static no.nav.foreldrepenger.oversikt.saker.TilgangsstyringBorger.sjekkAtKallErFraBorger;
-
 import java.time.LocalDate;
 
 import org.slf4j.Logger;
@@ -19,7 +17,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.AnnenPartVedtak;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 @Path("/annenPart")
 @ApplicationScoped
@@ -29,16 +27,16 @@ public class AnnenPartRest {
     private static final Logger LOG = LoggerFactory.getLogger(AnnenPartRest.class);
 
     private AnnenPartVedtakTjeneste annenPartVedtakTjeneste;
+    private TilgangKontrollTjeneste tilgangkontroll;
     private InnloggetBruker innloggetBruker;
     private AktørIdOppslag aktørIdOppslag;
-    private AdresseBeskyttelseOppslag adresseBeskyttelseOppslag;
 
     @Inject
-    public AnnenPartRest(AnnenPartVedtakTjeneste annenPartVedtakTjeneste, InnloggetBruker innloggetBruker, AktørIdOppslag aktørIdOppslag, AdresseBeskyttelseOppslag adresseBeskyttelseOppslag) {
+    public AnnenPartRest(AnnenPartVedtakTjeneste annenPartVedtakTjeneste, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker, AktørIdOppslag aktørIdOppslag) {
         this.annenPartVedtakTjeneste = annenPartVedtakTjeneste;
+        this.tilgangkontroll = tilgangkontroll;
         this.innloggetBruker = innloggetBruker;
         this.aktørIdOppslag = aktørIdOppslag;
-        this.adresseBeskyttelseOppslag = adresseBeskyttelseOppslag;
     }
 
     AnnenPartRest() {
@@ -47,8 +45,8 @@ public class AnnenPartRest {
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartVedtak hent(@Valid @NotNull AnnenPartVedtakRequest request) {
-        sjekkAtKallErFraBorger();
-        if (harAnnenpartBeskyttetAdresseEllerFinnesIkkeIPDL(request.annenPartFødselsnummer())) {
+        tilgangkontroll.sjekkAtKallErFraBorger();
+        if (tilgangkontroll.harPersonBeskyttetAdresse(request.annenPartFødselsnummer())) {
             return null;
         }
 
@@ -64,17 +62,6 @@ public class AnnenPartRest {
         return vedtak.orElse(null);
     }
 
-    private boolean harAnnenpartBeskyttetAdresseEllerFinnesIkkeIPDL(Fødselsnummer fnr) {
-        AdresseBeskyttelse adresseBeskyttelse;
-        try {
-            adresseBeskyttelse = adresseBeskyttelseOppslag.adresseBeskyttelse(fnr);
-        } catch (BrukerIkkeFunnetIPdlException e) {
-            return true;
-        }
-
-        return adresseBeskyttelse.harBeskyttetAdresse();
-    }
-
-    record AnnenPartVedtakRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer, LocalDate familiehendelse) {
+    public record AnnenPartVedtakRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer, LocalDate familiehendelse) {
     }
 }

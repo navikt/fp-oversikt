@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 class SakerRestTilgangssjekkTest {
 
@@ -21,21 +22,25 @@ class SakerRestTilgangssjekkTest {
     @Test
     void myndig_innlogget_bruker_skal_ikke_gi_exception() {
         innloggetBorger();
-        var myndigCase = new SakerRest(saker, myndigInnloggetBruker());
+        var myndigCase = new SakerRest(saker, myndigInnloggetBruker(), mock(TilgangKontrollTjeneste.class));
         assertThatCode(myndigCase::hent).doesNotThrowAnyException();
     }
 
     @Test
     void innlogget_saksbehandler_skal_ikke_få_tilgang_til_saker() {
         innloggetSaksbehandlerUtenDrift();
-        var myndigCase = new SakerRest(saker, myndigInnloggetBruker());
+        var innloggetBruker = myndigInnloggetBruker();
+        var tilgangskontroll = new TilgangKontrollTjeneste(null, innloggetBruker, null);
+        var myndigCase = new SakerRest(saker, innloggetBruker, tilgangskontroll);
         assertThatThrownBy(myndigCase::hent).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
     @Test
     void umyndig_innlogget_bruker_skal_kaste_umyndigbruker_exception() {
         innloggetBorger();
-        var umyndigCase = new SakerRest(saker, umyndigInnloggetBruker());
+        var innloggetBruker = umyndigInnloggetBruker();
+        var tilgangskontroll = new TilgangKontrollTjeneste(null, innloggetBruker, null);
+        var umyndigCase = new SakerRest(saker, innloggetBruker, tilgangskontroll);
         assertThatThrownBy(umyndigCase::hent)
             .isInstanceOf(ManglerTilgangException.class)
             .extracting("feilKode")
