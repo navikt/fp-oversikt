@@ -153,6 +153,17 @@ class SafselvbetjeningTjenesteTest {
         assertThat(journalposter).hasSameSizeAs(journalposterFraSaf);
     }
 
+    @Test
+    void skalReturnerJournalposterSomIkkeHarEnSakstilknyning() {
+        var journalposterFraSaf = List.of(journalpostUtenSakstilknytning(DokumentTypeId.I000001));
+        var dokumentoversikt = new Dokumentoversikt(null, null, journalposterFraSaf);
+        when(saf.dokumentoversiktSelvbetjening(any(), any())).thenReturn(dokumentoversikt);
+
+        var journalposter = safselvbetjeningTjeneste.alle(DUMMY_FNR);
+
+        assertThat(journalposter).hasSameSizeAs(journalposterFraSaf);
+    }
+
 
     private static Journalpost notat() {
         var journalførtNotat = new Journalpost();
@@ -211,6 +222,17 @@ class SafselvbetjeningTjenesteTest {
         var sak = new Sak();
         sak.setFagsakId(DUMMY_SAKSNUMMER.value());
         journalpost.setSak(sak);
+        journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
+        journalpost.setDokumenter(List.of(pdfDokument(dokumentTypeId), xmlDokument(dokumentTypeId)));
+        return journalpost;
+    }
+
+    private static Journalpost journalpostUtenSakstilknytning(DokumentTypeId dokumentTypeId) {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.I);
+        journalpost.setJournalstatus(Journalstatus.MOTTATT);
+        journalpost.setTittel("FEIL_TITTEL");
+        journalpost.setJournalpostId("123");
         journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
         journalpost.setDokumenter(List.of(pdfDokument(dokumentTypeId), xmlDokument(dokumentTypeId)));
         return journalpost;

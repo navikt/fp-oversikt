@@ -48,6 +48,7 @@ public class ArkivTjeneste {
         return new ArkivDokumentDto(
             dokument.tittel() != null ? dokument.tittel() : enkelJournalpost.tittel(),
             tilType(enkelJournalpost.type()),
+            enkelJournalpost.saksnummer(),
             enkelJournalpost.journalpostId(),
             dokument.dokumentId(),
             enkelJournalpost.mottatt()

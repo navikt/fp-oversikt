@@ -126,7 +126,7 @@ public class SafselvbetjeningTjeneste {
         return new EnkelJournalpost(
             journalpost.getTittel(),
             journalpost.getJournalpostId(),
-            journalpost.getSak().getFagsakId(),
+            journalpost.getSak() != null ? journalpost.getSak().getFagsakId() : null,
             null,
             innsendingstype,
             tilOpprettetDato(journalpost.getRelevanteDatoer()),
