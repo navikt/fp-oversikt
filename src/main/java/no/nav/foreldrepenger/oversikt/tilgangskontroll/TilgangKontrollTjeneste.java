@@ -26,6 +26,10 @@ public class TilgangKontrollTjeneste {
         this.adresseBeskyttelseOppslag = adresseBeskyttelseOppslag;
     }
 
+    TilgangKontrollTjeneste() {
+        // CDI
+    }
+
     public void tilgangssjekkMyndighetsalder() {
         if (!innloggetBruker.erMyndig()) {
             throw new ManglerTilgangException(FeilKode.IKKE_TILGANG_UMYNDIG);
