@@ -27,25 +27,24 @@ public class ArkivTjeneste {
     }
 
     public List<ArkivDokumentDto> alle(Fødselsnummer fnr, Saksnummer saksnummer) {
-        return safselvbetjeningTjeneste.alle(fnr, saksnummer).stream()
-            .flatMap(enkelJournalpost -> enkelJournalpost.dokumenter().stream()
-                .map(dokument -> tilArkivdokumenter(dokument, enkelJournalpost))
-            )
-            .sorted(Comparator.comparing(ArkivDokumentDto::mottatt))
-            .toList();
+        return tilArkivDokumenter(safselvbetjeningTjeneste.alle(fnr, saksnummer));
     }
 
     public List<ArkivDokumentDto> alle(Fødselsnummer fødselsnummer) {
-        return safselvbetjeningTjeneste.alle(fødselsnummer).stream()
-            .flatMap(enkelJournalpost -> enkelJournalpost.dokumenter().stream()
-                .map(dokument -> tilArkivdokumenter(dokument, enkelJournalpost))
-            )
-            .sorted(Comparator.comparing(ArkivDokumentDto::mottatt))
-            .toList();
+        return tilArkivDokumenter(safselvbetjeningTjeneste.alle(fødselsnummer));
 
     }
 
-    private static ArkivDokumentDto tilArkivdokumenter(EnkelJournalpost.Dokument dokument, EnkelJournalpost enkelJournalpost) {
+    private List<ArkivDokumentDto> tilArkivDokumenter(List<EnkelJournalpost> journalposter) {
+        return journalposter.stream()
+            .flatMap(enkelJournalpost -> enkelJournalpost.dokumenter().stream()
+                .map(dokument -> tilArkivdokument(dokument, enkelJournalpost))
+            )
+            .sorted(Comparator.comparing(ArkivDokumentDto::mottatt))
+            .toList();
+    }
+
+    private static ArkivDokumentDto tilArkivdokument(EnkelJournalpost.Dokument dokument, EnkelJournalpost enkelJournalpost) {
         return new ArkivDokumentDto(
             dokument.tittel() != null ? dokument.tittel() : enkelJournalpost.tittel(),
             tilType(enkelJournalpost.type()),
