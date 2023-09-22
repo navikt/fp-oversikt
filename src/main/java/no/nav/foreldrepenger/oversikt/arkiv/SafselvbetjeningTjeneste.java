@@ -21,6 +21,7 @@ import no.nav.safselvbetjening.DokumentInfoResponseProjection;
 import no.nav.safselvbetjening.DokumentoversiktResponseProjection;
 import no.nav.safselvbetjening.DokumentoversiktSelvbetjeningQueryRequest;
 import no.nav.safselvbetjening.DokumentvariantResponseProjection;
+import no.nav.safselvbetjening.FagsakResponseProjection;
 import no.nav.safselvbetjening.Journalpost;
 import no.nav.safselvbetjening.JournalpostResponseProjection;
 import no.nav.safselvbetjening.Journalposttype;
@@ -56,7 +57,7 @@ public class SafselvbetjeningTjeneste {
         query.setTema(List.of(Tema.FOR));
 
         var projection = new DokumentoversiktResponseProjection()
-            .journalposter(journalpostProjeksjon());
+            .fagsak(fagsakProjektsjon());
 
         var resultat = safKlient.dokumentoversiktSelvbetjening(query, projection);
 
@@ -78,6 +79,13 @@ public class SafselvbetjeningTjeneste {
             }
         }
         return dokumenter;
+    }
+
+    private FagsakResponseProjection fagsakProjektsjon() {
+        return new FagsakResponseProjection()
+            .fagsakId()
+            .fagsaksystem()
+            .journalposter(journalpostProjeksjon());
     }
 
     private static JournalpostResponseProjection journalpostProjeksjon() {
