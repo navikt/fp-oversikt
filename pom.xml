@@ -21,6 +21,7 @@
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
         <io.confluent.version>7.5.0</io.confluent.version>
+        <graphql-java-codegen.version>5.8.0</graphql-java-codegen.version>
 
         <felles.version>5.1.1</felles.version>
         <prosesstask.version>4.0.0</prosesstask.version>
@@ -315,6 +316,35 @@
                         </manifest>
                     </archive>
                 </configuration>
+            </plugin>
+            <plugin>
+                <groupId>io.github.kobylynskyi</groupId>
+                <artifactId>graphql-codegen-maven-plugin</artifactId>
+                <version>${graphql-java-codegen.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <phase>validate</phase>
+                        <configuration>
+                            <graphqlSchemaPaths>${project.basedir}/src/main/resources/safselvbetjening/schema.graphql</graphqlSchemaPaths>
+                            <outputDir>${project.build.directory}/generated-sources</outputDir>
+                            <modelPackageName>no.nav.safselvbetjening</modelPackageName>
+                            <customTypesMapping>
+                                <DateTime>java.util.Date</DateTime>
+                            </customTypesMapping>
+                            <generateClient>true</generateClient>
+                            <generateApis>false</generateApis>
+                            <generateBuilder>false</generateBuilder>
+                            <generateToString>true</generateToString>
+                            <generateParameterizedFieldsResolvers>false</generateParameterizedFieldsResolvers>
+                            <addGeneratedAnnotation>true</addGeneratedAnnotation>
+                            <generatedAnnotation>jakarta.annotation.Generated</generatedAnnotation>
+                            <modelValidationAnnotation>@jakarta.validation.constraints.NotNull</modelValidationAnnotation>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

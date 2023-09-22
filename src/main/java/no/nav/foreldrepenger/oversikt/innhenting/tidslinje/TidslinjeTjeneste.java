@@ -13,8 +13,9 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentArkivTjeneste;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
+import no.nav.foreldrepenger.oversikt.arkiv.SafselvbetjeningTjeneste;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmelding;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerRepository;
@@ -22,12 +23,12 @@ import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmeldinger
 @ApplicationScoped
 public class TidslinjeTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(TidslinjeTjeneste.class);
-    private DokumentArkivTjeneste arkivTjeneste;
+    private SafselvbetjeningTjeneste safselvbetjening;
     private InntektsmeldingerRepository inntektsmeldingerRepository;
 
     @Inject
-    public TidslinjeTjeneste(DokumentArkivTjeneste arkivTjeneste, InntektsmeldingerRepository inntektsmeldingerRepository) {
-        this.arkivTjeneste = arkivTjeneste;
+    public TidslinjeTjeneste(SafselvbetjeningTjeneste safselvbetjening, InntektsmeldingerRepository inntektsmeldingerRepository) {
+        this.safselvbetjening = safselvbetjening;
         this.inntektsmeldingerRepository = inntektsmeldingerRepository;
     }
 
@@ -35,8 +36,8 @@ public class TidslinjeTjeneste {
         // CDI
     }
 
-    public List<TidslinjeHendelseDto> tidslinje(Saksnummer saksnummer) {
-        var alleDokumenterFraSaf = arkivTjeneste.hentAlleJournalposter(saksnummer).stream()
+    public List<TidslinjeHendelseDto> tidslinje(Fødselsnummer fødselsnummer, Saksnummer saksnummer) {
+        var alleDokumenterFraSaf = safselvbetjening.hentAlleJournalposter(fødselsnummer, saksnummer).stream()
             .filter(journalpost -> !(INNGÅENDE_DOKUMENT.equals(journalpost.type()) && journalpost.hovedtype().erInntektsmelding()))
             .toList();
         var mappedeDokumenter = alleDokumenterFraSaf.stream()

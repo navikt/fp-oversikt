@@ -10,6 +10,7 @@ import static no.nav.foreldrepenger.oversikt.innhenting.tidslinje.TidslinjeTjene
 import static no.nav.foreldrepenger.oversikt.innhenting.tidslinje.TidslinjeTjenesteTest.utgåendeVedtak;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,17 +20,18 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
-class ArkivTjenesteTest {
+class SafselvbetjeningTjenesteTest {
 
-
-    private DokumentArkivTjeneste dokumentArkivTjeneste;
+    private static final Fødselsnummer DUMMY_FNR = new Fødselsnummer("11111111");
+    private SafselvbetjeningTjeneste dokumentArkivTjeneste;
     private ArkivTjeneste arkivTjeneste;
 
     @BeforeEach
     void setUp() {
-        dokumentArkivTjeneste = mock(DokumentArkivTjeneste.class);
+        dokumentArkivTjeneste = mock(SafselvbetjeningTjeneste.class);
         arkivTjeneste = new ArkivTjeneste(dokumentArkivTjeneste);
     }
 
@@ -40,9 +42,9 @@ class ArkivTjenesteTest {
         var dokumenterFraSøknad = søknadMedVedlegg.dokumenter();
         var dokument1 = dokumenterFraSøknad.get(0);
         var dokument2 = dokumenterFraSøknad.get(1);
-        when(dokumentArkivTjeneste.hentAlleJournalposter(any())).thenReturn(List.of(søknadMedVedlegg));
+        when(dokumentArkivTjeneste.hentAlleJournalposter(any(), eq(saksnummer))).thenReturn(List.of(søknadMedVedlegg));
 
-        var dokumenter = arkivTjeneste.alle(saksnummer);
+        var dokumenter = arkivTjeneste.alle(DUMMY_FNR, saksnummer);
 
         assertThat(dokumenter).hasSameSizeAs(søknadMedVedlegg.dokumenter());
         assertThat(dokumenter)
@@ -68,9 +70,9 @@ class ArkivTjenesteTest {
         var søknadMedVedleggSak1 = søknadMed1Vedlegg(saksnummer, tidspunkt);
         var søknadMedVedleggSak2 = ettersender2Vedlegg(saksnummer, tidspunkt.plusDays(1));
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(2));
-        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(søknadMedVedleggSak1, søknadMedVedleggSak2, vedtak));
+        when(dokumentArkivTjeneste.hentAlleJournalposter(DUMMY_FNR, saksnummer)).thenReturn(List.of(søknadMedVedleggSak1, søknadMedVedleggSak2, vedtak));
 
-        var dokumenter = arkivTjeneste.alle(saksnummer);
+        var dokumenter = arkivTjeneste.alle(DUMMY_FNR, saksnummer);
         assertThat(dokumenter).hasSize(5);
         assertThat(dokumenter)
             .extracting(ArkivDokumentDto::type)
@@ -98,9 +100,9 @@ class ArkivTjenesteTest {
         var tidspunkt = LocalDateTime.now().minusWeeks(4);
         var søknadMedVedleggSak1 = søknadMed1Vedlegg(saksnummer, tidspunkt);
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(2));
-        when(dokumentArkivTjeneste.hentAlleJournalposter(saksnummer)).thenReturn(List.of(vedtak, søknadMedVedleggSak1));
+        when(dokumentArkivTjeneste.hentAlleJournalposter(DUMMY_FNR, saksnummer)).thenReturn(List.of(vedtak, søknadMedVedleggSak1));
 
-        var dokumenter = arkivTjeneste.alle(saksnummer);
+        var dokumenter = arkivTjeneste.alle(DUMMY_FNR, saksnummer);
 
         assertThat(dokumenter).hasSize(3);
         assertThat(dokumenter)
