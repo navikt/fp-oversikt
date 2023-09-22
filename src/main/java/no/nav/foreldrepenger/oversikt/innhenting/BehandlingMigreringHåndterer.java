@@ -87,7 +87,7 @@ public class BehandlingMigreringHåndterer {
     private void hentTilbakekreving(BehandlingHendelseV1 hendelse) {
         var saksnummer = new Saksnummer(hendelse.getSaksnummer());
         try {
-            HentTilbakekrevingTask.hentOgLagre(fptilbakeTjeneste, tilbakekrevingRepository, saksnummer);
+            HentTilbakekrevingTask.hentOgLagre(fptilbakeTjeneste, tilbakekrevingRepository, saksnummer, false, 0);
         } catch (Exception e) {
             LOG.info("Direkte henting av tilbakekreving feilet {}", saksnummer.value(), e);
             lagreHentTilbakekrevingTask(hendelse.getHendelseUuid(), saksnummer);
