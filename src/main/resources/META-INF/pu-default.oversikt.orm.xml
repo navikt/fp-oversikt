@@ -13,5 +13,6 @@
     <entity class="no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende.ManglendeVedleggEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerEntitet" />
+    <entity class="no.nav.foreldrepenger.oversikt.oppgave.OppgaveEntitet" />
 
 </entity-mappings>

@@ -29,6 +29,7 @@
         <fpsoknad-felles.version>2.5.0</fpsoknad-felles.version>
         <fp-tidsserie.version>2.6.8</fp-tidsserie.version>
         <teamdokumenthandtering-avro-schemas.version>873c5cdd</teamdokumenthandtering-avro-schemas.version>
+        <brukernotifikasjon-schemas.version>2.5.2</brukernotifikasjon-schemas.version>
     </properties>
 
     <dependencyManagement>
@@ -187,6 +188,13 @@
             <groupId>no.nav.teamdokumenthandtering</groupId>
             <artifactId>teamdokumenthandtering-avro-schemas</artifactId>
             <version>${teamdokumenthandtering-avro-schemas.version}</version>
+        </dependency>
+
+        <!--Ditt nav -->
+        <dependency>
+            <groupId>com.github.navikt</groupId>
+            <artifactId>brukernotifikasjon-schemas</artifactId>
+            <version>${brukernotifikasjon-schemas.version}</version>
         </dependency>
 
         <dependency>
@@ -365,6 +373,11 @@
         <repository>
             <id>dok-github</id>
             <url>https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas</url>
+        </repository>
+        <!--Ditt nav brukernotifikasjoner-->
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
         </repository>
     </repositories>
 </project>

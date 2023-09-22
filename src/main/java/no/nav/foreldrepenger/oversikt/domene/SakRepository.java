@@ -9,4 +9,6 @@ public interface SakRepository {
     List<Sak> hentFor(AktørId aktørId);
 
     boolean erSakKobletTilAktør(Saksnummer saksnummer, AktørId aktørId);
+
+    Sak hentFor(Saksnummer saksnummer);
 }

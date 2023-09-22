@@ -1,8 +1,10 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
+import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentEksaktResultat;
 import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -21,8 +23,7 @@ public class DBSakRepository implements SakRepository {
 
     @Override
     public void lagre(Sak sak) {
-        var query = hentSak(sak.saksnummer());
-        var eksisterendeSak = hentUniktResultat(query);
+        var eksisterendeSak = hentSak(sak.saksnummer());
         if (eksisterendeSak.isEmpty()) {
             entityManager.persist(new SakEntitet(sak));
         } else {
@@ -32,7 +33,12 @@ public class DBSakRepository implements SakRepository {
         entityManager.flush();
     }
 
-    private TypedQuery<SakEntitet> hentSak(Saksnummer saksnummer) {
+    private Optional<SakEntitet> hentSak(Saksnummer saksnummer) {
+        var query = hentSakQuery(saksnummer);
+        return hentUniktResultat(query);
+    }
+
+    private TypedQuery<SakEntitet> hentSakQuery(Saksnummer saksnummer) {
         return entityManager.createQuery("from sak where saksnummer =:saksnummer", SakEntitet.class)
             .setParameter("saksnummer", saksnummer.value());
     }
@@ -54,5 +60,11 @@ public class DBSakRepository implements SakRepository {
         nativeQuery.setParameter("saksnummer", saksnummer.value());
         var rader = (Integer) nativeQuery.getSingleResult();
         return rader == 1;
+    }
+
+    @Override
+    public Sak hentFor(Saksnummer saksnummer) {
+        var query = hentSakQuery(saksnummer);
+        return hentEksaktResultat(query).map();
     }
 }
