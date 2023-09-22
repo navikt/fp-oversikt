@@ -14,6 +14,7 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentInntektsmeldingerTask;
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentManglendeVedleggTask;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
@@ -55,6 +56,8 @@ public class BehandlingHendelseHåndterer {
                     // Henter inntektsmeldinger her pga sære caser der IM ikke behandles i fpsak rett etter journalføring.
                     // Feks ved IM på henlagte saker der det opprettes vurder dokument oppgave
                     lagreHentInntektsmeldingerSak(hendelseUuid, saksnummer);
+                    //Henter vedlegg for å fjerne manglende vedlegg etter vedtak
+                    lagreHentManglendeVedlegg(hendelseUuid, saksnummer);
                 }
                 if (hendelse.getKildesystem() == Kildesystem.FPTILBAKE) {
                     lagreHentTilbakekrevingTask(hendelseUuid, saksnummer, hendelseType);
@@ -74,7 +77,7 @@ public class BehandlingHendelseHåndterer {
         var task = ProsessTaskData.forProsessTask(HentInntektsmeldingerTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
-        task.setGruppe(HentInntektsmeldingerTask.taskGruppeFor(saksnummer));
+        task.setGruppe(saksnummer + "-I");
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
     }
@@ -98,15 +101,29 @@ public class BehandlingHendelseHåndterer {
         taskTjeneste.lagre(task);
     }
 
+    private void lagreHentManglendeVedlegg(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = opprettHentManglendeVedleggTask(hendelseUuid, saksnummer);
+        taskTjeneste.lagre(task);
+    }
+
     public static ProsessTaskData opprettHentTilbakekrevingTask(UUID hendelseUuid, Saksnummer saksnummer, Hendelse hendelse) {
         var task = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
-        task.setGruppe(HentTilbakekrevingTask.taskGruppeFor(saksnummer));
+        task.setGruppe(saksnummer + "-T");
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         if (hendelse == Hendelse.VENTETILSTAND) { //Venter her for at fptilbake skal rekke å sende ut varslingsbrev
             task.setNesteKjøringEtter(LocalDateTime.now().plusSeconds(60));
         }
+        return task;
+    }
+
+    public static ProsessTaskData opprettHentManglendeVedleggTask(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = ProsessTaskData.forProsessTask(HentManglendeVedleggTask.class);
+        task.setCallId(hendelseUuid.toString());
+        task.setSaksnummer(saksnummer.value());
+        task.setGruppe(saksnummer + "-V");
+        task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
     }
 

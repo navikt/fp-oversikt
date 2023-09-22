@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.arkiv.SafTjeneste;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostId;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -71,9 +70,8 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             var t = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
             t.setSaksnummer(saksnummer);
             t.setCallIdFraEksisterende();
-            t.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
-            t.setGruppe(HentTilbakekrevingTask.taskGruppeFor(new Saksnummer(saksnummer)));
-            t.medNesteKjøringEtter(LocalDateTime.now().plusSeconds(10));
+            t.setProperty(HentTilbakekrevingTask.FORVENTER_BESVART_VARSEL, "true");
+            //Setter ikke gruppe/seksvens for unngå at tasken blokkeres av task som venter at varselbrev sendes
             prosessTaskTjeneste.lagre(t);
         } else {
             LOG.info("Journalføringshendelse av dokumenttypen {} på sak {} ignoreres", dokumentType, saksnummer);

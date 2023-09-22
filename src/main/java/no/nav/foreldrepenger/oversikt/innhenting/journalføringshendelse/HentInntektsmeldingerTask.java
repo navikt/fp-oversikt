@@ -39,10 +39,6 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
         this.inntektsmeldingerRepository = inntektsmeldingerRepository;
     }
 
-    public static String taskGruppeFor(Saksnummer saksnummer) {
-        return saksnummer + "-I";
-    }
-
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
         var saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
@@ -61,23 +57,35 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
                                     int failedRuns) {
         var inntektsmeldinger = fpsakTjeneste.hentInntektsmeldinger(saksnummer);
         LOG.info("Hentet inntektsmeldinger for sak {} {}", saksnummer, inntektsmeldinger);
-        if (journalpostId != null && !imKnyttetTilJournalpost(inntektsmeldinger, journalpostId)) {
-            if (failedRuns >= MAX_FAILED_RUNS - 1) {
-                //IM kan være journalført på sak, men ikke oppdatert i fpsak. Feks IM på henlagt/opphørt sak
-                LOG.info("Feilet å hente inntektsmelding med journalpostId {} etter {} forsøk. Ignorerer IM på saksnummer {}", journalpostId,
-                    MAX_FAILED_RUNS, saksnummer);
-                return;
-            }
-            throw new IntegrasjonException("FPOVERSIKT-IM",
-                    "Finner ikke inntektsmelding med journalpostId " + journalpostId + " på sak " + saksnummer);
+
+        if (journalpostId != null) {
+            feilHvisInntektsmeldingIkkeMottatt(saksnummer, journalpostId, failedRuns, inntektsmeldinger);
         }
-        Set<no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmelding> mapped =
-            inntektsmeldinger.stream().map(HentInntektsmeldingerTask::map).collect(Collectors.toSet());
+
+        Set<no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmelding> mapped = inntektsmeldinger.stream()
+            .map(HentInntektsmeldingerTask::map)
+            .collect(Collectors.toSet());
 
         if (inntektsmeldinger.isEmpty()) {
             repository.slett(saksnummer);
         } else {
             repository.lagre(saksnummer, mapped);
+        }
+    }
+
+    private static void feilHvisInntektsmeldingIkkeMottatt(Saksnummer saksnummer,
+                                                           String journalpostId,
+                                                           int failedRuns,
+                                                           List<Inntektsmelding> inntektsmeldinger) {
+        if (!imKnyttetTilJournalpost(inntektsmeldinger, journalpostId)) {
+            if (failedRuns >= MAX_FAILED_RUNS - 1) {
+                //IM kan være journalført på sak, men ikke oppdatert i fpsak. Feks IM på henlagt/opphørt sak
+                LOG.info("Feilet å hente inntektsmelding med journalpostId {} etter {} forsøk. Ignorerer IM på saksnummer {}", journalpostId,
+                    MAX_FAILED_RUNS, saksnummer);
+            } else {
+                throw new IntegrasjonException("FPOVERSIKT-IM",
+                    "Finner ikke inntektsmelding med journalpostId " + journalpostId + " på sak " + saksnummer);
+            }
         }
     }
 
