@@ -1,20 +1,12 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
-import static no.nav.foreldrepenger.oversikt.arkiv.ArkivDokumentDto.Type.INNGÅENDE_DOKUMENT;
-import static no.nav.foreldrepenger.oversikt.arkiv.ArkivDokumentDto.Type.UTGÅENDE_DOKUMENT;
-import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId.I000003;
-import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId.I000023;
-import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId.I000036;
-import static no.nav.foreldrepenger.oversikt.innhenting.tidslinje.TidslinjeTjenesteTest.ettersender2Vedlegg;
-import static no.nav.foreldrepenger.oversikt.innhenting.tidslinje.TidslinjeTjenesteTest.søknadMed1Vedlegg;
-import static no.nav.foreldrepenger.oversikt.innhenting.tidslinje.TidslinjeTjenesteTest.utgåendeVedtak;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.Date;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -22,96 +14,298 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
+import no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker;
+import no.nav.safselvbetjening.Datotype;
+import no.nav.safselvbetjening.DokumentInfo;
+import no.nav.safselvbetjening.Dokumentoversikt;
+import no.nav.safselvbetjening.Dokumentvariant;
+import no.nav.safselvbetjening.Fagsak;
+import no.nav.safselvbetjening.Journalpost;
+import no.nav.safselvbetjening.Journalposttype;
+import no.nav.safselvbetjening.Journalstatus;
+import no.nav.safselvbetjening.RelevantDato;
+import no.nav.safselvbetjening.Sak;
 
 class SafselvbetjeningTjenesteTest {
 
-    private static final Fødselsnummer DUMMY_FNR = new Fødselsnummer("11111111");
-    private SafselvbetjeningTjeneste dokumentArkivTjeneste;
-    private ArkivTjeneste arkivTjeneste;
+    private static final Fødselsnummer DUMMY_FNR = DummyInnloggetTestbruker.myndigInnloggetBruker().fødselsnummer();
+    private static final Saksnummer DUMMY_SAKSNUMMER = Saksnummer.dummy();
+
+    private SafSelvbetjening saf;
+    private SafselvbetjeningTjeneste safselvbetjeningTjeneste;
 
     @BeforeEach
     void setUp() {
-        dokumentArkivTjeneste = mock(SafselvbetjeningTjeneste.class);
-        arkivTjeneste = new ArkivTjeneste(dokumentArkivTjeneste);
+        saf = mock(SafSelvbetjening.class);
+        safselvbetjeningTjeneste = new SafselvbetjeningTjeneste(saf);
     }
 
     @Test
-    void enJournalpostMed2DokumenterMappesTil2Arkivdokumenter() {
-        var saksnummer = Saksnummer.dummy();
-        var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
-        var dokumenterFraSøknad = søknadMedVedlegg.dokumenter();
-        var dokument1 = dokumenterFraSøknad.get(0);
-        var dokument2 = dokumenterFraSøknad.get(1);
-        when(dokumentArkivTjeneste.hentAlleJournalposter(any(), eq(saksnummer))).thenReturn(List.of(søknadMedVedlegg));
+    void skalIkkeReturnereJournalposterAvTypenNotat() {
+        var journalførtSøknad = journalførtSøknad(DokumentTypeId.I000001);
+        var journalførtNotat = notat();
+        var journalposterFraSaf = List.of(journalførtSøknad, journalførtNotat);
+        var fagsak = new Fagsak(journalposterFraSaf, DUMMY_SAKSNUMMER.value(), null, null);
+        var dokumentoversikt = new Dokumentoversikt(null, List.of(fagsak), null);
+        when(saf.dokumentoversiktSelvbetjening(any(), any())).thenReturn(dokumentoversikt);
 
-        var dokumenter = arkivTjeneste.alle(DUMMY_FNR, saksnummer);
+        var journalposter = safselvbetjeningTjeneste.alle(DUMMY_FNR, DUMMY_SAKSNUMMER);
 
-        assertThat(dokumenter).hasSameSizeAs(søknadMedVedlegg.dokumenter());
-        assertThat(dokumenter)
-            .extracting(ArkivDokumentDto::tittel)
-            .containsExactly(dokument1.tittel(), dokument2.tittel());
-        assertThat(dokumenter)
-            .extracting(ArkivDokumentDto::dokumentId)
-            .containsExactly(dokument1.dokumentId(), dokument2.dokumentId());
-
-        for (var dokument : dokumenter) {
-            assertThat(dokument.type()).isEqualTo(INNGÅENDE_DOKUMENT);
-            assertThat(dokument.journalpostId()).isEqualTo(søknadMedVedlegg.journalpostId());
-            assertThat(dokument.mottatt()).isEqualTo(søknadMedVedlegg.mottatt());
-        }
+        assertThat(journalposter).hasSize(1);
     }
 
 
+    @Test
+    void skalBareReturnerJournalposterMedDokumenterAvTypenPDF() {
+        var journalførtSøknad = journalførtSøknad(DokumentTypeId.I000001);
+        var journalførtEttersending = journalførtEttersending();
+        var journalførtVedtak = journalførtVedtak();
+        var journalførtDokumentBareXML = journalførtDokumentBareXML();
+        var journalposterFraSaf = List.of(journalførtSøknad, journalførtEttersending, journalførtVedtak, journalførtDokumentBareXML);
+        var fagsak = new Fagsak(journalposterFraSaf, DUMMY_SAKSNUMMER.value(), null, null);
+        var dokumentoversikt = new Dokumentoversikt(null, List.of(fagsak), null);
+        when(saf.dokumentoversiktSelvbetjening(any(), any())).thenReturn(dokumentoversikt);
+
+        var journalposter = safselvbetjeningTjeneste.alle(DUMMY_FNR, DUMMY_SAKSNUMMER);
+
+        assertThat(journalposter)
+            .hasSize(journalposterFraSaf.size() - 1)
+            .extracting(EnkelJournalpost::dokumenter)
+            .noneMatch(List::isEmpty);
+        var journalførtSøkad = journalposter.stream()
+            .filter(j -> j.hovedtype().erFørstegangssøknad())
+            .findFirst()
+            .orElseThrow();
+        assertThat(journalførtSøkad.dokumenter()).hasSize(1); // XML dokument skal ikke returneres
+    }
+
 
     @Test
-    void søknadMed1VedlaggEttersending2VedleggOgVedtakProduserer5ArkivDokumenterMedKorrektTittel() {
-        var saksnummer = Saksnummer.dummy();
-        var tidspunkt = LocalDateTime.now().minusWeeks(4);
-        var søknadMedVedleggSak1 = søknadMed1Vedlegg(saksnummer, tidspunkt);
-        var søknadMedVedleggSak2 = ettersender2Vedlegg(saksnummer, tidspunkt.plusDays(1));
-        var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(2));
-        when(dokumentArkivTjeneste.hentAlleJournalposter(DUMMY_FNR, saksnummer)).thenReturn(List.of(søknadMedVedleggSak1, søknadMedVedleggSak2, vedtak));
+    void skalUtledeDokumentTypeIdFraTittelPåDokumentetHvisIkkeJournalpostTittelenTreffer() {
+        var dokumentTypeId = DokumentTypeId.I000001;
+        var journalposterFraSaf = List.of(journalførtSøknadRarTittelPåJournalpostRiktigTittelPåDokument(dokumentTypeId));
+        var fagsak = new Fagsak(journalposterFraSaf, DUMMY_SAKSNUMMER.value(), null, null);
+        var dokumentoversikt = new Dokumentoversikt(null, List.of(fagsak), null);
+        when(saf.dokumentoversiktSelvbetjening(any(), any())).thenReturn(dokumentoversikt);
 
-        var dokumenter = arkivTjeneste.alle(DUMMY_FNR, saksnummer);
-        assertThat(dokumenter).hasSize(5);
-        assertThat(dokumenter)
-            .extracting(ArkivDokumentDto::type)
-            .containsExactly(
-                INNGÅENDE_DOKUMENT,
-                INNGÅENDE_DOKUMENT,
-                INNGÅENDE_DOKUMENT,
-                INNGÅENDE_DOKUMENT,
-                UTGÅENDE_DOKUMENT
-            );
-        assertThat(dokumenter)
-            .extracting(ArkivDokumentDto::tittel)
-            .containsExactly(
-                I000003.getTittel(),
-                I000036.getTittel(),
-                I000023.getTittel(),
-                I000036.getTittel(),
-                vedtak.tittel()
-            );
+        var journalposter = safselvbetjeningTjeneste.alle(DUMMY_FNR, DUMMY_SAKSNUMMER);
+
+        assertThat(journalposter)
+            .hasSize(journalposterFraSaf.size())
+            .extracting(EnkelJournalpost::dokumenter)
+            .noneMatch(List::isEmpty);
+
+
+        var journalførtSøkad = journalposter.stream()
+            .filter(j -> j.hovedtype().erFørstegangssøknad())
+            .findFirst()
+            .orElseThrow();
+        assertThat(journalførtSøkad.hovedtype()).isEqualTo(dokumentTypeId);
     }
 
     @Test
-    void arkivDokumenteneSkalSorteresEtterMottattTidspunkt() {
-        var saksnummer = Saksnummer.dummy();
-        var tidspunkt = LocalDateTime.now().minusWeeks(4);
-        var søknadMedVedleggSak1 = søknadMed1Vedlegg(saksnummer, tidspunkt);
-        var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(2));
-        when(dokumentArkivTjeneste.hentAlleJournalposter(DUMMY_FNR, saksnummer)).thenReturn(List.of(vedtak, søknadMedVedleggSak1));
+    void skalUtledeFraDokumentTittelHvisAltEllersFeiler() {
+        var dokumentTypeId = DokumentTypeId.I000001;
+        var journalposterFraSaf = List.of(journalpostUgyldigTittelUtenTilleggsinfoMenRiktigDokumentTittel(dokumentTypeId));
+        var fagsak = new Fagsak(journalposterFraSaf, DUMMY_SAKSNUMMER.value(), null, null);
+        var dokumentoversikt = new Dokumentoversikt(null, List.of(fagsak), null);
+        when(saf.dokumentoversiktSelvbetjening(any(), any())).thenReturn(dokumentoversikt);
 
-        var dokumenter = arkivTjeneste.alle(DUMMY_FNR, saksnummer);
+        var journalposter = safselvbetjeningTjeneste.alle(DUMMY_FNR, DUMMY_SAKSNUMMER);
 
-        assertThat(dokumenter).hasSize(3);
-        assertThat(dokumenter)
-            .extracting(ArkivDokumentDto::type)
-            .containsExactly(
-                INNGÅENDE_DOKUMENT,
-                INNGÅENDE_DOKUMENT,
-                UTGÅENDE_DOKUMENT
-            );
+        assertThat(journalposter)
+            .hasSize(journalposterFraSaf.size())
+            .extracting(EnkelJournalpost::dokumenter)
+            .noneMatch(List::isEmpty);
+
+        var journalførtSøkad = journalposter.stream()
+            .filter(j -> j.hovedtype().erFørstegangssøknad())
+            .findFirst()
+            .orElseThrow();
+        assertThat(journalførtSøkad.hovedtype()).isEqualTo(dokumentTypeId);
+    }
+
+    @Test
+    void skalIkkeReturnereDokumenterHvorBrukerIkkeHarTilgang() {
+        var dokumentTypeId = DokumentTypeId.I000001;
+        var journalposterFraSaf = List.of(journalførtDokumentBrukerIkkeTilgang(dokumentTypeId));
+        var fagsak = new Fagsak(journalposterFraSaf, DUMMY_SAKSNUMMER.value(), null, null);
+        var dokumentoversikt = new Dokumentoversikt(null, List.of(fagsak), null);
+        when(saf.dokumentoversiktSelvbetjening(any(), any())).thenReturn(dokumentoversikt);
+
+        var journalposter = safselvbetjeningTjeneste.alle(DUMMY_FNR, DUMMY_SAKSNUMMER);
+
+        assertThat(journalposter).isEmpty();
+    }
+
+    @Test
+    void skalReturnerAlleJournalposterUavhengigAvSaksnummer() {
+        var journalpostMedSaksnummer = journalførtSøknad(DokumentTypeId.I000001);
+        var journalpostMedAnnnetSaksnummer = journalførtSøknad(DokumentTypeId.I000001);
+        journalpostMedAnnnetSaksnummer.setSak(new Sak(Saksnummer.dummy().value(), null, null));
+        var journalposterFraSaf = List.of(journalpostMedSaksnummer, journalpostMedAnnnetSaksnummer);
+        var dokumentoversikt = new Dokumentoversikt(null, null, journalposterFraSaf);
+        when(saf.dokumentoversiktSelvbetjening(any(), any())).thenReturn(dokumentoversikt);
+
+        var journalposter = safselvbetjeningTjeneste.alle(DUMMY_FNR);
+
+        assertThat(journalposter).hasSameSizeAs(journalposterFraSaf);
+    }
+
+
+    private static Journalpost notat() {
+        var journalførtNotat = new Journalpost();
+        journalførtNotat.setJournalposttype(Journalposttype.N);
+        return journalførtNotat;
+    }
+
+    private static Journalpost journalførtSøknad(DokumentTypeId dokumentTypeId) {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.I);
+        journalpost.setJournalstatus(Journalstatus.MOTTATT);
+        journalpost.setTittel(dokumentTypeId.getTittel());
+        journalpost.setJournalpostId("123");
+        var sak = new Sak();
+        sak.setFagsakId(DUMMY_SAKSNUMMER.value());
+        journalpost.setSak(sak);
+        journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
+        journalpost.setDokumenter(List.of(pdfDokument(dokumentTypeId), xmlDokument(dokumentTypeId)));
+        return journalpost;
+    }
+
+    private static Journalpost journalførtDokumentBrukerIkkeTilgang(DokumentTypeId dokumentTypeId) {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.I);
+        journalpost.setJournalstatus(Journalstatus.MOTTATT);
+        journalpost.setTittel(dokumentTypeId.getTittel());
+        journalpost.setJournalpostId("123");
+        var sak = new Sak();
+        sak.setFagsakId(DUMMY_SAKSNUMMER.value());
+        journalpost.setSak(sak);
+        journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
+        journalpost.setDokumenter(List.of(pdfDokumentBrukerIkkeTilgang(dokumentTypeId)));
+        return journalpost;
+    }
+
+    private static Journalpost journalførtSøknadRarTittelPåJournalpostRiktigTittelPåDokument(DokumentTypeId dokumentTypeId) {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.I);
+        journalpost.setJournalstatus(Journalstatus.MOTTATT);
+        journalpost.setTittel("EN UGYLDIG TITTEL");
+        journalpost.setJournalpostId("123");
+        var sak = new Sak();
+        sak.setFagsakId(DUMMY_SAKSNUMMER.value());
+        journalpost.setSak(sak);
+        journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
+        journalpost.setDokumenter(List.of(pdfDokument(dokumentTypeId), xmlDokument(dokumentTypeId)));
+        return journalpost;
+    }
+
+    private static Journalpost journalpostUgyldigTittelUtenTilleggsinfoMenRiktigDokumentTittel(DokumentTypeId dokumentTypeId) {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.I);
+        journalpost.setJournalstatus(Journalstatus.MOTTATT);
+        journalpost.setTittel("FEIL_TITTEL");
+        journalpost.setJournalpostId("123");
+        var sak = new Sak();
+        sak.setFagsakId(DUMMY_SAKSNUMMER.value());
+        journalpost.setSak(sak);
+        journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
+        journalpost.setDokumenter(List.of(pdfDokument(dokumentTypeId), xmlDokument(dokumentTypeId)));
+        return journalpost;
+    }
+
+    private static Journalpost journalførtEttersending() {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.I);
+        journalpost.setJournalstatus(Journalstatus.MOTTATT);
+        var dokumentType = DokumentTypeId.I000042;
+        journalpost.setTittel(dokumentType.getTittel());
+        journalpost.setJournalpostId("123");
+        var sak = new Sak();
+        sak.setFagsakId(DUMMY_SAKSNUMMER.value());
+        journalpost.setSak(sak);
+        journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
+        journalpost.setDokumenter(List.of(pdfDokument(dokumentType), pdfDokument(DokumentTypeId.I000045)));
+        return journalpost;
+    }
+
+    private static Journalpost journalførtVedtak() {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.U);
+        journalpost.setJournalstatus(Journalstatus.EKSPEDERT);
+        journalpost.setTittel("Vedtak");
+        journalpost.setJournalpostId("123");
+        var sak = new Sak();
+        sak.setFagsakId(DUMMY_SAKSNUMMER.value());
+        journalpost.setSak(sak);
+        journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
+        journalpost.setDokumenter(List.of(pdfDokument("INVFOR")));
+        return journalpost;
+    }
+
+    private static Journalpost journalførtDokumentBareXML() {
+        var journalpost = new Journalpost();
+        journalpost.setJournalposttype(Journalposttype.I);
+        journalpost.setJournalstatus(Journalstatus.MOTTATT);
+        var dokumentType = DokumentTypeId.I000060;
+        journalpost.setTittel(dokumentType.getTittel());
+        journalpost.setJournalpostId("123");
+        var sak = new Sak();
+        sak.setFagsakId(DUMMY_SAKSNUMMER.value());
+        journalpost.setSak(sak);
+        journalpost.setRelevanteDatoer(List.of(new RelevantDato(Date.from(Instant.now()), Datotype.DATO_OPPRETTET)));
+        journalpost.setDokumenter(List.of(xmlDokument(dokumentType)));
+        return journalpost;
+    }
+
+    private static DokumentInfo pdfDokument(String brevKode) {
+        var dokument = new DokumentInfo();
+        dokument.setDokumentInfoId("123");
+        dokument.setTittel("Innvilgelsesbrev Foreldrepenger");
+        dokument.setBrevkode(brevKode);
+        var dokumentvariant = new Dokumentvariant();
+        dokumentvariant.setFiltype("PDF");
+        dokumentvariant.setBrukerHarTilgang(true);
+        dokument.setDokumentvarianter(List.of(dokumentvariant));
+        return dokument;
+    }
+
+    private static DokumentInfo pdfDokument(DokumentTypeId dokumentTypeId) {
+        var dokument = new DokumentInfo();
+        dokument.setDokumentInfoId("123");
+        dokument.setTittel(dokumentTypeId.getTittel());
+        dokument.setBrevkode(null);
+        var dokumentvariant = new Dokumentvariant();
+        dokumentvariant.setFiltype("PDF");
+        dokumentvariant.setBrukerHarTilgang(true);
+        dokument.setDokumentvarianter(List.of(dokumentvariant));
+        return dokument;
+    }
+
+    private static DokumentInfo pdfDokumentBrukerIkkeTilgang(DokumentTypeId dokumentTypeId) {
+        var dokument = new DokumentInfo();
+        dokument.setDokumentInfoId("123");
+        dokument.setTittel(dokumentTypeId.getTittel());
+        dokument.setBrevkode(null);
+        var dokumentvariant = new Dokumentvariant();
+        dokumentvariant.setFiltype("PDF");
+        dokumentvariant.setBrukerHarTilgang(false);
+        dokument.setDokumentvarianter(List.of(dokumentvariant));
+        return dokument;
+    }
+
+    private static DokumentInfo xmlDokument(DokumentTypeId dokumentTypeId) {
+        var dokument = new DokumentInfo();
+        dokument.setDokumentInfoId("456");
+        dokument.setTittel(dokumentTypeId.getTittel());
+        dokument.setBrevkode(null);
+        var dokumentvariant = new Dokumentvariant();
+        dokumentvariant.setFiltype("XML");
+        dokumentvariant.setBrukerHarTilgang(true);
+        dokument.setDokumentvarianter(List.of(dokumentvariant));
+        return dokument;
     }
 
 }

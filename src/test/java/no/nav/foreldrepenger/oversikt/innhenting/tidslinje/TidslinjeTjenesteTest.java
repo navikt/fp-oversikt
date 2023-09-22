@@ -43,7 +43,7 @@ public class TidslinjeTjenesteTest {
         var innloggetBruker = myndigInnloggetBruker();
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var inntektsmelding = standardInntektsmelding(LocalDateTime.now());
-        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(søknadMedVedlegg));
+        when(safselvbetjeningTjeneste.alle(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(søknadMedVedlegg));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
         var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
@@ -64,7 +64,7 @@ public class TidslinjeTjenesteTest {
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var etterlysIM = etterlysIM(saksnummer);
         var vedtak = utgåendeVedtak(saksnummer, LocalDateTime.now());
-        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
+        when(safselvbetjeningTjeneste.alle(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, etterlysIM, vedtak));
 
         var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
@@ -91,7 +91,7 @@ public class TidslinjeTjenesteTest {
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(4));
         var endringssøknad = endringssøknadUtenVedlegg(saksnummer, tidspunkt.plusDays(4));
         var vedtakEndring = utgåendeVedtak(saksnummer, tidspunkt.plusDays(5));
-        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
+        when(safselvbetjeningTjeneste.alle(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, innhentOpplysningsBrev, ettersending, vedtak, endringssøknad, vedtakEndring));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
@@ -121,7 +121,7 @@ public class TidslinjeTjenesteTest {
         var ettersending = ettersender2Vedlegg(saksnummer, tidspunkt.plusDays(2));
         var nySøknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt.plusDays(3));
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusDays(4));
-        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(søknadMedVedlegg, ettersending, nySøknadMedVedlegg, vedtak));
+        when(safselvbetjeningTjeneste.alle(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(søknadMedVedlegg, ettersending, nySøknadMedVedlegg, vedtak));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
         var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);
@@ -145,7 +145,7 @@ public class TidslinjeTjenesteTest {
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, LocalDateTime.now());
         var innteksmeldingJournalpost = innteksmeldingJournalpost(saksnummer);
         var inntektsmelding = standardInntektsmelding(LocalDateTime.now());
-        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
+        when(safselvbetjeningTjeneste.alle(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(
             List.of(søknadMedVedlegg, innteksmeldingJournalpost));
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
@@ -168,7 +168,7 @@ public class TidslinjeTjenesteTest {
         var inntektsmelding = standardInntektsmelding(tidspunkt);
         var søknadMedVedlegg = søknadMed1Vedlegg(saksnummer, tidspunkt.plusSeconds(1));
         var vedtak = utgåendeVedtak(saksnummer, tidspunkt.plusSeconds(2));
-        when(safselvbetjeningTjeneste.hentAlleJournalposter(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(vedtak, søknadMedVedlegg)); // Reversert med vilje
+        when(safselvbetjeningTjeneste.alle(innloggetBruker.fødselsnummer(), saksnummer)).thenReturn(List.of(vedtak, søknadMedVedlegg)); // Reversert med vilje
         inntektsmeldingerRepository.lagre(saksnummer, Set.of(inntektsmelding));
 
         var tidslinje = tjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummer);

@@ -27,13 +27,22 @@ public class ArkivTjeneste {
     }
 
     public List<ArkivDokumentDto> alle(Fødselsnummer fnr, Saksnummer saksnummer) {
-        return safselvbetjeningTjeneste.hentAlleJournalposter(fnr, saksnummer).stream()
-            .filter(j -> j.saksnummer().equals(saksnummer.value()))
+        return safselvbetjeningTjeneste.alle(fnr, saksnummer).stream()
             .flatMap(enkelJournalpost -> enkelJournalpost.dokumenter().stream()
                 .map(dokument -> tilArkivdokumenter(dokument, enkelJournalpost))
             )
             .sorted(Comparator.comparing(ArkivDokumentDto::mottatt))
             .toList();
+    }
+
+    public List<ArkivDokumentDto> alle(Fødselsnummer fødselsnummer) {
+        return safselvbetjeningTjeneste.alle(fødselsnummer).stream()
+            .flatMap(enkelJournalpost -> enkelJournalpost.dokumenter().stream()
+                .map(dokument -> tilArkivdokumenter(dokument, enkelJournalpost))
+            )
+            .sorted(Comparator.comparing(ArkivDokumentDto::mottatt))
+            .toList();
+
     }
 
     private static ArkivDokumentDto tilArkivdokumenter(EnkelJournalpost.Dokument dokument, EnkelJournalpost enkelJournalpost) {
@@ -52,4 +61,6 @@ public class ArkivTjeneste {
             case UTGÅENDE_DOKUMENT -> UTGÅENDE_DOKUMENT;
         };
     }
+
+
 }

@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -51,37 +50,49 @@ public class SafselvbetjeningTjeneste {
     }
 
 
-    public List<EnkelJournalpost> hentAlleJournalposter(Fødselsnummer fnr, Saksnummer saksnummer) {
-        var query = new DokumentoversiktSelvbetjeningQueryRequest();
-        query.setIdent(fnr.value());
-        query.setTema(List.of(Tema.FOR));
+    public List<EnkelJournalpost> alle(Fødselsnummer fnr) {
+        var projection = new DokumentoversiktResponseProjection()
+            .journalposter(journalpostProjeksjon());
 
+        return safKlient.dokumentoversiktSelvbetjening(query(fnr), projection).getJournalposter().stream()
+            .filter(j -> INKLUDER_JOURNALPOSTTYPER.contains(j.getJournalposttype()))
+            .map(SafselvbetjeningTjeneste::tilEnkelJournalpost)
+            .flatMap(Optional::stream)
+            .toList();
+    }
+
+    public List<EnkelJournalpost> alle(Fødselsnummer fnr, Saksnummer saksnummer) {
         var projection = new DokumentoversiktResponseProjection()
             .fagsak(fagsakProjektsjon());
 
-        var resultat = safKlient.dokumentoversiktSelvbetjening(query, projection);
-
-        var journalposter = resultat.getFagsak().stream()
+        return safKlient.dokumentoversiktSelvbetjening(query(fnr), projection).getFagsak().stream()
             .filter(fagsak -> saksnummer.value().equals(fagsak.getFagsakId()))
             .flatMap(fagsak -> fagsak.getJournalposter().stream())
             .filter(j -> INKLUDER_JOURNALPOSTTYPER.contains(j.getJournalposttype()))
+            .map(SafselvbetjeningTjeneste::tilEnkelJournalpost)
+            .flatMap(Optional::stream)
             .toList();
-
-        var dokumenter = new ArrayList<EnkelJournalpost>();
-        for (var journalpost : journalposter) {
-            var pdfDokumenter = journalpost.getDokumenter().stream()
-                .filter(dokumentInfo -> dokumentInfo.getDokumentvarianter().stream()
-                    .anyMatch(dokumentvariant -> dokumentvariant.getBrukerHarTilgang() && GYLDIGE_FILFORMAT.contains(dokumentvariant.getFiltype())))
-                .toList();
-
-            if (!pdfDokumenter.isEmpty()) {
-                dokumenter.add(mapTilJournalpost(journalpost, pdfDokumenter));
-            }
-        }
-        return dokumenter;
     }
 
-    private FagsakResponseProjection fagsakProjektsjon() {
+    private static DokumentoversiktSelvbetjeningQueryRequest query(Fødselsnummer fnr) {
+        var query = new DokumentoversiktSelvbetjeningQueryRequest();
+        query.setIdent(fnr.value());
+        query.setTema(List.of(Tema.FOR));
+        return query;
+    }
+
+    private static Optional<EnkelJournalpost> tilEnkelJournalpost(Journalpost journalpost) {
+        var pdfDokumenter = journalpost.getDokumenter().stream()
+            .filter(dokumentInfo -> dokumentInfo.getDokumentvarianter().stream()
+                .anyMatch(dokumentvariant -> dokumentvariant.getBrukerHarTilgang() && GYLDIGE_FILFORMAT.contains(dokumentvariant.getFiltype())))
+            .toList();
+        if (pdfDokumenter.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(mapTilJournalpost(journalpost, pdfDokumenter));
+    }
+
+    private static FagsakResponseProjection fagsakProjektsjon() {
         return new FagsakResponseProjection()
             .fagsakId()
             .fagsaksystem()
