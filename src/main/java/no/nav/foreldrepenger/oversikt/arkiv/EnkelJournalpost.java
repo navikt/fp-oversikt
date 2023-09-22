@@ -58,6 +58,13 @@ public record EnkelJournalpost(String tittel,
         INNHENTE_OPPLYSNINGER_OLD("000049"),
         ETTERLYS_INNTEKTSMELDING_OLD("000096"),
 
+        // Gamle/utdaterte brevkoder med MF_ prefiks funnet i Joark
+        VEDTAK_POSITIVT_OLD_MF("MF_000048"),
+        VEDTAK_AVSLAG_OLD_MF("MF_000051"),
+        VEDTAK_FORELDREPENGER_OLD_MF("MF_000061"),
+        VEDTAK_AVSLAG_FORELDREPENGER_OLD_MF("MF_000080"),
+        INNHENTE_OPPLYSNINGER_OLD_MF("MF_000049"),
+        ETTERLYS_INNTEKTSMELDING_OLD_MF("MF_000096"),
 
         // Annet
         FORELDREPENGER_INFO_TIL_ANNEN_FORELDER("INFOAF"),

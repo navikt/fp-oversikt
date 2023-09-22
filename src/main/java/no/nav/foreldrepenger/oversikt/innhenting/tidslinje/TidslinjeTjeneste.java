@@ -75,10 +75,11 @@ public class TidslinjeTjeneste {
         return switch (enkelJournalpost.dokumenter().stream().findFirst().orElseThrow().brevkode()) { // Alltid bare ett dokument!
             case FORELDREPENGER_ANNULLERT, FORELDREPENGER_AVSLAG, SVANGERSKAPSPENGER_OPPHØR, ENGANGSSTØNAD_INNVILGELSE, SVANGERSKAPSPENGER_AVSLAG,
                 FORELDREPENGER_INNVILGELSE, ENGANGSSTØNAD_AVSLAG, FORELDREPENGER_OPPHØR, SVANGERSKAPSPENGER_INNVILGELSE,
-                VEDTAK_POSITIVT_OLD, VEDTAK_AVSLAG_OLD, VEDTAK_FORELDREPENGER_OLD, VEDTAK_AVSLAG_FORELDREPENGER_OLD ->
+                VEDTAK_POSITIVT_OLD, VEDTAK_AVSLAG_OLD, VEDTAK_FORELDREPENGER_OLD, VEDTAK_AVSLAG_FORELDREPENGER_OLD,
+                VEDTAK_POSITIVT_OLD_MF, VEDTAK_AVSLAG_OLD_MF, VEDTAK_FORELDREPENGER_OLD_MF, VEDTAK_AVSLAG_FORELDREPENGER_OLD_MF->
                     Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK);
-            case INNHENTE_OPPLYSNINGER, INNHENTE_OPPLYSNINGER_OLD -> Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_INNHENT_OPPLYSNINGER);
-            case ETTERLYS_INNTEKTSMELDING, ETTERLYS_INNTEKTSMELDING_OLD -> Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_ETTERLYS_INNTEKTSMELDING);
+            case INNHENTE_OPPLYSNINGER, INNHENTE_OPPLYSNINGER_OLD, INNHENTE_OPPLYSNINGER_OLD_MF -> Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_INNHENT_OPPLYSNINGER);
+            case ETTERLYS_INNTEKTSMELDING, ETTERLYS_INNTEKTSMELDING_OLD, ETTERLYS_INNTEKTSMELDING_OLD_MF -> Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_ETTERLYS_INNTEKTSMELDING);
             default -> {
                 LOG.info("Ignorerer utgåpende journalpost med brevkode: {}", enkelJournalpost);
                 yield Optional.empty();
