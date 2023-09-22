@@ -37,7 +37,7 @@ public class TidslinjeTjeneste {
     }
 
     public List<TidslinjeHendelseDto> tidslinje(Fødselsnummer fødselsnummer, Saksnummer saksnummer) {
-        var alleDokumenterFraSaf = safselvbetjening.hentAlleJournalposter(fødselsnummer, saksnummer).stream()
+        var alleDokumenterFraSaf = safselvbetjening.alle(fødselsnummer, saksnummer).stream()
             .filter(journalpost -> !(INNGÅENDE_DOKUMENT.equals(journalpost.type()) && journalpost.hovedtype().erInntektsmelding()))
             .toList();
         var mappedeDokumenter = alleDokumenterFraSaf.stream()

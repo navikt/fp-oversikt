@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -41,13 +40,18 @@ public class ArkivRest {
     @GET
     @Path("/alle")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<ArkivDokumentDto> alleArkiverteDokumenterPåSak(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
+    public List<ArkivDokumentDto> alleArkiverteDokumenterPåSak(@QueryParam("saksnummer") @Valid Saksnummer saksnummer) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
-        tilgangkontroll.sakKobletTilAktørGuard(saksnummer);
-        var alle = arkivTjeneste.alle(innloggetBruker.fødselsnummer(), saksnummer);
-        LOG.info("Hentet {} dokumenter på sak {}", alle.size(), saksnummer.value());
+        List<ArkivDokumentDto> alle;
+        if (saksnummer != null) {
+            tilgangkontroll.sakKobletTilAktørGuard(saksnummer);
+            alle = arkivTjeneste.alle(innloggetBruker.fødselsnummer(), saksnummer);
+            LOG.info("Hentet {} dokumenter på sak {}", alle.size(), saksnummer.value());
+        } else {
+            alle = arkivTjeneste.alle(innloggetBruker.fødselsnummer());
+            LOG.info("Hentet {} dokumenter på bruker", alle.size());
+        }
         return alle;
-
     }
 }
