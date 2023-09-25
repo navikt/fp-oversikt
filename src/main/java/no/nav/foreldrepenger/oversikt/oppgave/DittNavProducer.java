@@ -4,10 +4,12 @@ import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.apache.kafka.common.serialization.Serializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
+import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
@@ -27,17 +29,23 @@ class DittNavProducer {
 
     private String opprettTopic;
     private String avsluttTopic;
-    private Producer<NokkelInput, SpecificRecord> producer;
+    private Producer<NokkelInput, OppgaveInput> oppgaveProducer;
+    private Producer<NokkelInput, DoneInput> doneProducer;
 
     @Inject
     DittNavProducer(@KonfigVerdi(value = "dittnav.kafka.topic.opprett") String opprettTopic,
                     @KonfigVerdi(value = "dittnav.kafka.topic.avslutt") String avsluttTopic) {
         this.opprettTopic = opprettTopic;
         this.avsluttTopic = avsluttTopic;
-        var properties = KafkaProperties.forProducer();
-        properties.put("schema.registry.url", KafkaProperties.getAvroSchemaRegistryURL());
 
-        this.producer = new KafkaProducer<>(properties, new SpecificAvroSerializer<>(), new SpecificAvroSerializer<>());
+        var schemaRegistryClient = new CachedSchemaRegistryClient(KafkaProperties.getAvroSchemaRegistryURL(), 10);
+        Serializer<OppgaveInput> oppgaveInputSerializer = serializer(schemaRegistryClient);
+        Serializer<DoneInput> doneInputSerializer = serializer(schemaRegistryClient);
+        Serializer<NokkelInput> nokkelInputSerializer = serializer(schemaRegistryClient);
+
+        var properties = KafkaProperties.forProducer();
+        this.oppgaveProducer = new KafkaProducer<>(properties, nokkelInputSerializer, oppgaveInputSerializer);
+        this.doneProducer = new KafkaProducer<>(properties, nokkelInputSerializer, doneInputSerializer);
     }
 
     DittNavProducer() {
@@ -45,14 +53,14 @@ class DittNavProducer {
     }
 
     void sendOpprettOppgave(OppgaveInput oppgaveInput, NokkelInput key) {
-        sendRecord(oppgaveInput, key, opprettTopic);
+        sendRecord(oppgaveInput, key, opprettTopic, oppgaveProducer);
     }
 
     void sendAvsluttOppgave(DoneInput doneInput, NokkelInput key) {
-        sendRecord(doneInput, key, avsluttTopic);
+        sendRecord(doneInput, key, avsluttTopic, doneProducer);
     }
 
-    private void sendRecord(SpecificRecord record, NokkelInput key, String topic) {
+    private static <T extends SpecificRecord> void sendRecord(T record, NokkelInput key, String topic, Producer<NokkelInput, T> producer) {
         if (ENV.isLocal() || ENV.isVTP() || ENV.isProd()) { //TODO prodsett
             LOG.info("Ditt nav kafka er disabled i {}", ENV.clusterName());
             return;
@@ -72,5 +80,11 @@ class DittNavProducer {
 
     private static IntegrasjonException integrasjonException(Exception e) {
         return new IntegrasjonException("FPOVERSIKT-DITTNAV", "Feil ved publisering av melding på kafka", e);
+    }
+
+    private static <T extends SpecificRecord> Serializer<T> serializer(CachedSchemaRegistryClient schemaRegistryClient) {
+        try (var serde = new SpecificAvroSerde<T>(schemaRegistryClient)) {
+            return serde.serializer();
+        }
     }
 }
