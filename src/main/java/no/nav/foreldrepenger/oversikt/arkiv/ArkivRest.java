@@ -16,7 +16,6 @@ import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.http.HttpResponse;
 import java.util.List;
 
 @Path("/arkiv")
@@ -60,8 +59,8 @@ public class ArkivRest {
     @GET
     @Path("/hent-dokument/{journalpostId}/{dokumentId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public HttpResponse<byte[]> dokument(@PathParam("journalpostId") @Valid @NotNull JournalpostId journalpostId,
-                                         @PathParam("dokumentId") @Valid @NotNull DokumentId dokumentId) {
+    public DokumentDto dokument(@PathParam("journalpostId") @Valid @NotNull JournalpostId journalpostId,
+                                @PathParam("dokumentId") @Valid @NotNull DokumentId dokumentId) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         LOG.info("Henter dokument med journalpostid {} og dokumentid {}", journalpostId, dokumentId);

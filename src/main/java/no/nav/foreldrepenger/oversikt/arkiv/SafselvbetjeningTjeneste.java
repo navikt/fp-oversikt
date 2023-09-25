@@ -29,6 +29,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import static jakarta.ws.rs.core.HttpHeaders.CONTENT_DISPOSITION;
+import static jakarta.ws.rs.core.HttpHeaders.CONTENT_TYPE;
+
 /**
  * Dokumentasjon av SAF SELVBETJENING: https://confluence.adeo.no/display/BOA/safselvbetjening
  */
@@ -38,6 +41,8 @@ public class SafselvbetjeningTjeneste {
     private static final Set<Journalposttype> INKLUDER_JOURNALPOSTTYPER = Set.of(Journalposttype.I, Journalposttype.U);
     private static final List<String> GYLDIGE_FILFORMAT = List.of("PDF");
 //    private static final List<String> GYLDIGE_FILFORMAT = List.of("PDF", "JPG", "PNG"); // TODO
+    private static final String DEFAULT_CONTENT_TYPE = "application/pdf";
+    private static final String DEFAULT_CONTENT_DISPOSITION = "filename=dokument.pdf";
 
     private SafSelvbetjening safKlient;
 
@@ -50,8 +55,15 @@ public class SafselvbetjeningTjeneste {
         this.safKlient = safKlient;
     }
 
-    public HttpResponse<byte[]> dokument(JournalpostId journalpostId, DokumentId dokumentId) {
-        return safKlient.dokument(journalpostId, dokumentId);
+    public DokumentDto dokument(JournalpostId journalpostId, DokumentId dokumentId) {
+        return tilDokumentResponsDto(safKlient.dokument(journalpostId, dokumentId));
+    }
+
+    private DokumentDto tilDokumentResponsDto(HttpResponse<byte[]> respons) {
+        var headers = respons.headers();
+        return new DokumentDto(respons.body(),
+                headers.firstValue(CONTENT_TYPE).orElse(DEFAULT_CONTENT_TYPE),
+                headers.firstValue(CONTENT_DISPOSITION).orElse(DEFAULT_CONTENT_DISPOSITION));
     }
 
     public List<EnkelJournalpost> alle(Fødselsnummer fnr) {

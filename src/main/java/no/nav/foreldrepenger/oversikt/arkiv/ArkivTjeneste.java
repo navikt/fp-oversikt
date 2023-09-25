@@ -6,7 +6,6 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
-import java.net.http.HttpResponse;
 import java.util.Comparator;
 import java.util.List;
 
@@ -27,7 +26,7 @@ public class ArkivTjeneste {
         //CDI
     }
 
-    public HttpResponse<byte[]> dokument(JournalpostId journalpostId, DokumentId dokumentId) {
+    public DokumentDto dokument(JournalpostId journalpostId, DokumentId dokumentId) {
         return safselvbetjeningTjeneste.dokument(journalpostId, dokumentId);
     }
 

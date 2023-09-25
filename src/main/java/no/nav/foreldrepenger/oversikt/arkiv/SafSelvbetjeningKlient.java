@@ -30,9 +30,9 @@ import java.net.http.HttpResponse;
     scopesDefault = "api://prod-fss.teamdokumenthandtering.safselvbetjening/.default")
 @Dependent
 public class SafSelvbetjeningKlient implements SafSelvbetjening {
-    private static final String F_240613 = "F-240613";
     private static final String HENT_DOKUMENT_PATH = "/rest/hentdokument/{journalpostId}/{dokumentInfoId}/ARKIV";
     private static final String GRAPHQL_PATH = "/graphql";
+    private static final String F_240613 = "F-240613";
     private final RestClient restKlient;
     private final RestConfig restConfig;
     private final URI graphql;
