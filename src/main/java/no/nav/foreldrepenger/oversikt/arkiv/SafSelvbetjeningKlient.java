@@ -49,8 +49,8 @@ public class SafSelvbetjeningKlient implements SafSelvbetjening {
     public HttpResponse<byte[]> dokument(JournalpostId journalpostId, DokumentId dokumentId) {
         var path = UriBuilder.fromUri(restConfig.endpoint())
             .path(HENT_DOKUMENT_PATH)
-            .resolveTemplate("journalpostId", journalpostId)
-            .resolveTemplate("dokumentInfoId", dokumentId)
+            .resolveTemplate("journalpostId", journalpostId.verdi())
+            .resolveTemplate("dokumentInfoId", dokumentId.verdi())
             .build();
         var request = RestRequest.newGET(path, restConfig);
         return restKlient.sendReturnResponseByteArray(request);
