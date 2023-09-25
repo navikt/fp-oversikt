@@ -1,16 +1,17 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
 
-import static no.nav.foreldrepenger.oversikt.arkiv.ArkivDokumentDto.Type.INNGÅENDE_DOKUMENT;
-import static no.nav.foreldrepenger.oversikt.arkiv.ArkivDokumentDto.Type.UTGÅENDE_DOKUMENT;
-
-import java.util.Comparator;
-import java.util.List;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+
+import java.net.http.HttpResponse;
+import java.util.Comparator;
+import java.util.List;
+
+import static no.nav.foreldrepenger.oversikt.arkiv.ArkivDokumentDto.Type.INNGÅENDE_DOKUMENT;
+import static no.nav.foreldrepenger.oversikt.arkiv.ArkivDokumentDto.Type.UTGÅENDE_DOKUMENT;
 
 @ApplicationScoped
 public class ArkivTjeneste {
@@ -24,6 +25,10 @@ public class ArkivTjeneste {
 
     public ArkivTjeneste() {
         //CDI
+    }
+
+    public HttpResponse<byte[]> dokument(JournalpostId journalpostId, DokumentId dokumentId) {
+        return safselvbetjeningTjeneste.dokument(journalpostId, dokumentId);
     }
 
     public List<ArkivDokumentDto> alle(Fødselsnummer fnr, Saksnummer saksnummer) {
@@ -61,6 +66,5 @@ public class ArkivTjeneste {
             case UTGÅENDE_DOKUMENT -> UTGÅENDE_DOKUMENT;
         };
     }
-
 
 }
