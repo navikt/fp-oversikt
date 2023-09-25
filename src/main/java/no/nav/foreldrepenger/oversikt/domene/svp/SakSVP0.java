@@ -14,6 +14,7 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.YtelseType;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
@@ -53,6 +54,11 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     @Override
     public boolean erUpunchetPapirsøknad() {
         return søknadUnderBehandling().map(s -> s.tilrettelegginger().isEmpty()).orElse(false);
+    }
+
+    @Override
+    public YtelseType ytelse() {
+        return YtelseType.SVANGERSKAPSPENGER;
     }
 
     @Override

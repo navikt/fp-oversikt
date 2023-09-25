@@ -17,6 +17,7 @@ import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.YtelseType;
 import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 
 public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
@@ -41,6 +42,11 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     @Override
     public boolean erUpunchetPapirsøknad() {
         return false;
+    }
+
+    @Override
+    public YtelseType ytelse() {
+        return YtelseType.ENGANGSSTØNAD;
     }
 
     @Override
