@@ -1,8 +1,5 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
-import io.confluent.kafka.serializers.KafkaAvroSerializer;
-import io.confluent.kafka.serializers.KafkaAvroSerializerConfig;
-
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -11,6 +8,8 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
+import io.confluent.kafka.serializers.KafkaAvroSerializer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
@@ -41,9 +40,9 @@ class DittNavProducer {
         var properties = KafkaProperties.forProducer();
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
-        properties.put(KafkaAvroSerializerConfig.USER_INFO_CONFIG, KafkaProperties.getAvroSchemaRegistryBasicAuth());
-        properties.put(KafkaAvroSerializerConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
-        properties.put(KafkaAvroSerializerConfig.SCHEMA_REGISTRY_URL_CONFIG, KafkaProperties.getAvroSchemaRegistryURL());
+        properties.put(AbstractKafkaSchemaSerDeConfig.USER_INFO_CONFIG, KafkaProperties.getAvroSchemaRegistryBasicAuth());
+        properties.put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
+        properties.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, KafkaProperties.getAvroSchemaRegistryURL());
         this.oppgaveProducer = new KafkaProducer<>(properties);
         this.doneProducer = new KafkaProducer<>(properties);
     }
@@ -60,13 +59,13 @@ class DittNavProducer {
         sendRecord(doneInput, key, avsluttTopic, doneProducer);
     }
 
-    private static <T extends SpecificRecord> void sendRecord(T record, NokkelInput key, String topic, Producer<NokkelInput, T> producer) {
+    private static <T extends SpecificRecord> void sendRecord(T dittNavRecord, NokkelInput key, String topic, Producer<NokkelInput, T> producer) {
         if (ENV.isLocal() || ENV.isVTP() || ENV.isProd()) { //TODO prodsett
-            LOG.info("Ditt nav kafka er disabled i {}", ENV.clusterName());
+            LOG.info("Ditt nav kafka er disabled");
             return;
         }
 
-        var melding = new ProducerRecord<>(topic, key, record);
+        var melding = new ProducerRecord<>(topic, key, dittNavRecord);
         try {
             var recordMetadata = producer.send(melding).get();
             LOG.info("Sendte melding til {}, partition {}, offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
