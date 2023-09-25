@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
+import java.util.Map;
+
 import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -9,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import io.confluent.kafka.schemaregistry.client.CachedSchemaRegistryClient;
+import io.confluent.kafka.serializers.AbstractKafkaSchemaSerDeConfig;
 import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerde;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -38,7 +41,8 @@ class DittNavProducer {
         this.opprettTopic = opprettTopic;
         this.avsluttTopic = avsluttTopic;
 
-        var schemaRegistryClient = new CachedSchemaRegistryClient(KafkaProperties.getAvroSchemaRegistryURL(), 10);
+        var schemaRegistryClient = schemaRegistryClient();
+
         Serializer<OppgaveInput> oppgaveInputSerializer = serializer(schemaRegistryClient);
         Serializer<DoneInput> doneInputSerializer = serializer(schemaRegistryClient);
         Serializer<NokkelInput> nokkelInputSerializer = serializer(schemaRegistryClient);
@@ -46,6 +50,14 @@ class DittNavProducer {
         var properties = KafkaProperties.forProducer();
         this.oppgaveProducer = new KafkaProducer<>(properties, nokkelInputSerializer, oppgaveInputSerializer);
         this.doneProducer = new KafkaProducer<>(properties, nokkelInputSerializer, doneInputSerializer);
+    }
+
+    private static CachedSchemaRegistryClient schemaRegistryClient() {
+        var schemaRegistryClientConfig = Map.of(
+            AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO",
+            AbstractKafkaSchemaSerDeConfig.USER_INFO_CONFIG, KafkaProperties.getAvroSchemaRegistryBasicAuth()
+        );
+        return new CachedSchemaRegistryClient(KafkaProperties.getAvroSchemaRegistryURL(), 10, schemaRegistryClientConfig);
     }
 
     DittNavProducer() {
