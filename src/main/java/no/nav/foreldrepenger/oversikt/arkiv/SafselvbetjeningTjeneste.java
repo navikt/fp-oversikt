@@ -1,14 +1,5 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
@@ -28,6 +19,15 @@ import no.nav.safselvbetjening.RelevantDato;
 import no.nav.safselvbetjening.RelevantDatoResponseProjection;
 import no.nav.safselvbetjening.SakResponseProjection;
 import no.nav.safselvbetjening.Tema;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.net.http.HttpResponse;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * Dokumentasjon av SAF SELVBETJENING: https://confluence.adeo.no/display/BOA/safselvbetjening
@@ -42,6 +42,7 @@ public class SafselvbetjeningTjeneste {
     private SafSelvbetjening safKlient;
 
     SafselvbetjeningTjeneste() {
+        // CDI
     }
 
     @Inject
@@ -49,6 +50,9 @@ public class SafselvbetjeningTjeneste {
         this.safKlient = safKlient;
     }
 
+    public HttpResponse<byte[]> dokument(JournalpostId journalpostId, DokumentId dokumentId) {
+        return safKlient.dokument(journalpostId, dokumentId);
+    }
 
     public List<EnkelJournalpost> alle(Fødselsnummer fnr) {
         var projection = new DokumentoversiktResponseProjection()
