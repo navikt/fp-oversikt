@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
@@ -59,7 +60,8 @@ public class ArkivRest {
     @GET
     @Path("/hent-dokument/{journalpostId}/{dokumentId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public HttpResponse<byte[]> dokument(@PathParam("journalpostId") JournalpostId journalpostId, @PathParam("dokumentId") DokumentId dokumentId) {
+    public HttpResponse<byte[]> dokument(@PathParam("journalpostId") @Valid @NotNull JournalpostId journalpostId,
+                                         @PathParam("dokumentId") @Valid @NotNull DokumentId dokumentId) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         LOG.info("Henter dokument med journalpostid {} og dokumentid {}", journalpostId, dokumentId);
