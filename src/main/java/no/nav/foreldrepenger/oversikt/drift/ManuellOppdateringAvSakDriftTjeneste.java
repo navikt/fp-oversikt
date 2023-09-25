@@ -4,7 +4,6 @@ package no.nav.foreldrepenger.oversikt.drift;
 import static no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste.sjekkAtSaksbehandlerHarRollenDrift;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -28,6 +27,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
+import no.nav.foreldrepenger.oversikt.oppgave.OpprettOppgaverTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 
@@ -67,6 +67,35 @@ public class ManuellOppdateringAvSakDriftTjeneste {
         return Response.ok().build();
     }
 
+    @POST
+    @Path("/oppdaterOppgaver")
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Operation(description = "Utleder og oppretter oppgaver på sak", tags = "saker", responses = {
+        @ApiResponse(responseCode = "200", description = "Task for å oppdatere oppgaver er opprettet per sak")
+    })
+    public Response oppdaterOppgaver(@Parameter(description = "Liste med saksnummre som skal oppdateres") @Valid @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
+        sjekkAtSaksbehandlerHarRollenDrift();
+        for (var saksnummer : saksnummre) {
+            LOG.info("Lager task for å oppdatere oppgaver {}", saksnummer.value());
+            lagreOpprettOppgaveTask(saksnummer);
+        }
+        return Response.ok().build();
+    }
+
+    private void lagreOpprettOppgaveTask(Saksnummer saksnummer) {
+        var task = opprettOpprettOppgaveTask(saksnummer);
+        taskTjeneste.lagre(task);
+    }
+
+    private static ProsessTaskData opprettOpprettOppgaveTask(Saksnummer saksnummer) {
+        var task = ProsessTaskData.forProsessTask(OpprettOppgaverTask.class);
+        task.setSaksnummer(saksnummer.value());
+        task.setCallIdFraEksisterende();
+        task.setGruppe(saksnummer.value() + "-oppgave");
+        task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+        return task;
+    }
+
     private void lagreHentSakTask(Saksnummer saksnummer) {
         var task = opprettTask(saksnummer);
         taskTjeneste.lagre(task);
@@ -75,7 +104,6 @@ public class ManuellOppdateringAvSakDriftTjeneste {
     private static ProsessTaskData opprettTask(Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
         task.setSaksnummer(saksnummer.value());
-        task.medNesteKjøringEtter(LocalDateTime.now());
         task.setCallIdFraEksisterende();
         task.setGruppe(saksnummer.value());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));

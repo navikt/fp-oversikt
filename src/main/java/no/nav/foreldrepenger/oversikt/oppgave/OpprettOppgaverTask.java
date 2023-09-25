@@ -13,7 +13,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
 @ProsessTask(value = "opprett.oppgaver")
-class OpprettOppgaverTask implements ProsessTaskHandler {
+public class OpprettOppgaverTask implements ProsessTaskHandler {
 
     private final OppgaveTjeneste oppgaveTjeneste;
     private final TilbakekrevingRepository tilbakekrevingRepository;
