@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.oppgave;
 
 import java.util.Map;
 
+import org.apache.avro.specific.SpecificRecord;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -42,22 +43,13 @@ class DittNavProducer {
 
         var schemaRegistryClient = schemaRegistryClient();
 
-        Serializer<OppgaveInput> result2;
-        try (var serde2 = new SpecificAvroSerde<OppgaveInput>(schemaRegistryClient)) {
-            result2 = serde2.serializer();
-        }
-        Serializer<DoneInput> result1;
-        try (var serde1 = new SpecificAvroSerde<DoneInput>(schemaRegistryClient)) {
-            result1 = serde1.serializer();
-        }
-        Serializer<NokkelInput> result;
-        try (var serde = new SpecificAvroSerde<NokkelInput>(schemaRegistryClient)) {
-            result = serde.serializer();
-        }
+        Serializer<OppgaveInput> oppgaveInputSerializer = serializer(schemaRegistryClient);
+        Serializer<DoneInput> doneInputSerializer = serializer(schemaRegistryClient);
+        Serializer<NokkelInput> nokkelInputSerializer = serializer(schemaRegistryClient);
 
         var properties = KafkaProperties.forProducer();
-        this.oppgaveProducer = new KafkaProducer<>(properties, result, result2);
-        this.doneProducer = new KafkaProducer<>(properties, result, result1);
+        this.oppgaveProducer = new KafkaProducer<>(properties, nokkelInputSerializer, oppgaveInputSerializer);
+        this.doneProducer = new KafkaProducer<>(properties, nokkelInputSerializer, doneInputSerializer);
     }
 
     private static CachedSchemaRegistryClient schemaRegistryClient() {
@@ -73,32 +65,22 @@ class DittNavProducer {
     }
 
     void sendOpprettOppgave(OppgaveInput oppgaveInput, NokkelInput key) {
-        if (ENV.isLocal() || ENV.isVTP() || ENV.isProd()) { //TODO prodsett
-            LOG.info("Ditt nav kafka er disabled i {}", ENV.clusterName());
-            return;
-        }
-
-        var melding = new ProducerRecord<>(opprettTopic, key, oppgaveInput);
-        try {
-            var recordMetadata = oppgaveProducer.send(melding).get();
-            LOG.info("Sendte melding til {}, partition {}, offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw integrasjonException(e);
-        } catch (Exception e) {
-            throw integrasjonException(e);
-        }
+        sendRecord(oppgaveInput, key, opprettTopic, oppgaveProducer);
     }
 
     void sendAvsluttOppgave(DoneInput doneInput, NokkelInput key) {
+        sendRecord(doneInput, key, avsluttTopic, doneProducer);
+    }
+
+    private static <T extends SpecificRecord> void sendRecord(T record, NokkelInput key, String topic, Producer<NokkelInput, T> producer) {
         if (ENV.isLocal() || ENV.isVTP() || ENV.isProd()) { //TODO prodsett
             LOG.info("Ditt nav kafka er disabled i {}", ENV.clusterName());
             return;
         }
 
-        var melding = new ProducerRecord<>(avsluttTopic, key, doneInput);
+        var melding = new ProducerRecord<>(topic, key, record);
         try {
-            var recordMetadata = doneProducer.send(melding).get();
+            var recordMetadata = producer.send(melding).get();
             LOG.info("Sendte melding til {}, partition {}, offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -112,4 +94,9 @@ class DittNavProducer {
         return new IntegrasjonException("FPOVERSIKT-DITTNAV", "Feil ved publisering av melding på kafka", e);
     }
 
+    private static <T extends SpecificRecord> Serializer<T> serializer(CachedSchemaRegistryClient schemaRegistryClient) {
+        try (var serde = new SpecificAvroSerde<T>(schemaRegistryClient)) {
+            return serde.serializer();
+        }
+    }
 }
