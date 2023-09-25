@@ -34,8 +34,10 @@ class DittNavProducer {
                     @KonfigVerdi(value = "dittnav.kafka.topic.avslutt") String avsluttTopic) {
         this.opprettTopic = opprettTopic;
         this.avsluttTopic = avsluttTopic;
-        this.producer = new KafkaProducer<>(KafkaProperties.forProducer(), new SpecificAvroSerializer<>(),
-            new SpecificAvroSerializer<>());
+        var properties = KafkaProperties.forProducer();
+        properties.put("schema.registry.url", KafkaProperties.getAvroSchemaRegistryURL());
+
+        this.producer = new KafkaProducer<>(properties, new SpecificAvroSerializer<>(), new SpecificAvroSerializer<>());
     }
 
     DittNavProducer() {
