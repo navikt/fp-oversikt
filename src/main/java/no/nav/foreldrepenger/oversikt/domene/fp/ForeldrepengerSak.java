@@ -6,6 +6,7 @@ import java.util.Set;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
+import no.nav.foreldrepenger.oversikt.domene.YtelseType;
 
 public interface ForeldrepengerSak extends Sak {
 
@@ -30,5 +31,10 @@ public interface ForeldrepengerSak extends Sak {
     @Override
     default boolean harVedtak() {
         return gjeldendeVedtak().isPresent();
+    }
+
+    @Override
+    default YtelseType ytelse() {
+        return YtelseType.FORELDREPENGER;
     }
 }
