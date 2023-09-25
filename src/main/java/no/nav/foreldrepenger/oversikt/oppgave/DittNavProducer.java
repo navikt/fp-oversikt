@@ -7,6 +7,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import io.confluent.kafka.streams.serdes.avro.SpecificAvroSerializer;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
@@ -33,7 +34,8 @@ class DittNavProducer {
                     @KonfigVerdi(value = "dittnav.kafka.topic.avslutt") String avsluttTopic) {
         this.opprettTopic = opprettTopic;
         this.avsluttTopic = avsluttTopic;
-        this.producer = new KafkaProducer<>(KafkaProperties.forProducer());
+        this.producer = new KafkaProducer<>(KafkaProperties.forProducer(), new SpecificAvroSerializer<>(),
+            new SpecificAvroSerializer<>());
     }
 
     DittNavProducer() {
