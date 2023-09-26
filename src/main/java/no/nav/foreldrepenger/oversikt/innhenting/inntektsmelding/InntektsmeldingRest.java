@@ -35,7 +35,6 @@ public class InntektsmeldingRest {
     }
 
     @GET
-    @Path("/alle")
     @Produces(MediaType.APPLICATION_JSON)
     public List<InntektsmeldingDto> alleInntektsmeldinger(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
         tilgangkontroll.sjekkAtKallErFraBorger();
