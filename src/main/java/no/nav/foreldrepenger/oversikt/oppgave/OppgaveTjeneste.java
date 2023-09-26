@@ -36,10 +36,6 @@ public class OppgaveTjeneste {
 
     public void oppdaterOppgaver(Saksnummer saksnummer, Set<OppgaveType> oppgaver) {
         LOG.info("Oppdaterer oppgaver for {} {}", saksnummer, oppgaver);
-        if (ENV.isProd()) {
-            LOG.info("Oppgaver er disabled");
-            return;
-        }
 
         var eksisterendeOppgaver = hentAktiveOppgaver(saksnummer);
         LOG.info("Hentet eksisterende oppgaver for {} {}", saksnummer, eksisterendeOppgaver);
