@@ -83,4 +83,3 @@ spec:
         - host: fpsak-api.{{environment}}-fss-pub.nais.io
         - host: fptilbake.{{environment}}-fss-pub.nais.io
         - host: saf.{{environment}}-fss-pub.nais.io
-        - host: safselvbetjening.{{environment}}-fss-pub.nais.io

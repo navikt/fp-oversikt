@@ -19,11 +19,11 @@ public class InntektsmeldingTjeneste {
         this.inntektsmeldingerRepository = inntektsmeldingerRepository;
     }
 
-    public InntektsmeldingTjeneste() {
+    InntektsmeldingTjeneste() {
         // CDI
     }
 
-    public List<InntektsmeldingDto> inntektsmeldinger(Saksnummer saksnummer) {
+    List<InntektsmeldingDto> inntektsmeldinger(Saksnummer saksnummer) {
         return inntektsmeldingerRepository.hentFor(Set.of(saksnummer)).stream()
                 .map(InntektsmeldingTjeneste::tilInntektsmeldingDto)
                 .toList();

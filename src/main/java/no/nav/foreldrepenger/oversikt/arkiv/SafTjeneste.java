@@ -2,10 +2,6 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
 import java.util.Optional;
 
 import org.slf4j.Logger;
@@ -13,13 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
-import no.nav.saf.Bruker;
-import no.nav.saf.BrukerIdType;
-import no.nav.saf.BrukerResponseProjection;
-import no.nav.saf.DokumentInfo;
 import no.nav.saf.DokumentInfoResponseProjection;
-import no.nav.saf.DokumentvariantResponseProjection;
 import no.nav.saf.Journalpost;
 import no.nav.saf.JournalpostQueryRequest;
 import no.nav.saf.JournalpostResponseProjection;
@@ -53,93 +43,25 @@ public class SafTjeneste {
         query.setJournalpostId(journalpostId.verdi());
         var resultat = safKlient.hentJournalpostInfo(query, journalpostProjeksjon());
         return Optional.ofNullable(resultat)
-            .map(journalpost -> mapTilJournalpost(journalpost, List.of()));
+            .map(SafTjeneste::mapTilJournalpost);
     }
 
     private static JournalpostResponseProjection journalpostProjeksjon() {
         return new JournalpostResponseProjection()
             .tittel()
-            .journalpostId()
             .journalposttype()
-            .datoOpprettet()
-            .sak(new SakResponseProjection()
-                .fagsakId()
-                .fagsaksystem())
-            .bruker(new BrukerResponseProjection()
-                .id()
-                .type())
+            .sak(new SakResponseProjection().fagsakId())
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
-            .dokumenter(new DokumentInfoResponseProjection()
-                .tittel()
-                .dokumentInfoId()
-                .brevkode()
-                .dokumentvarianter(new DokumentvariantResponseProjection().variantformat().filtype()))
-            .journalstatus();
+            .dokumenter(new DokumentInfoResponseProjection().tittel());
     }
 
-    private static EnkelJournalpost mapTilJournalpost(Journalpost journalpost, List<DokumentInfo> pdfDokument) {
+    private static EnkelJournalpost mapTilJournalpost(Journalpost journalpost) {
         var innsendingstype = tilType(journalpost.getJournalposttype());
         return new EnkelJournalpost(
-            journalpost.getTittel(),
-            journalpost.getJournalpostId(),
             journalpost.getSak().getFagsakId(),
-            tilBruker(journalpost.getBruker()),
             innsendingstype,
-            tilDato(journalpost),
-            innsendingstype.equals(EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : DokumentTypeId.URELEVANT,
-            tilDokumenter(pdfDokument, journalpost.getJournalposttype())
+            innsendingstype.equals(EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : DokumentTypeId.URELEVANT
         );
-    }
-
-    private static EnkelJournalpost.Bruker tilBruker(Bruker bruker) {
-        return new EnkelJournalpost.Bruker(bruker.getId(), tilBrukerType(bruker.getType()));
-    }
-
-    private static EnkelJournalpost.Bruker.Type tilBrukerType(BrukerIdType type) {
-        return switch (type) {
-            case AKTOERID -> EnkelJournalpost.Bruker.Type.AKTOERID;
-            case FNR -> EnkelJournalpost.Bruker.Type.FNR;
-            case ORGNR -> EnkelJournalpost.Bruker.Type.ORGNR;
-        };
-    }
-
-    private static List<EnkelJournalpost.Dokument> tilDokumenter(List<DokumentInfo> pdfDokument, Journalposttype journalposttype) {
-        return pdfDokument.stream()
-            .map(d -> tilDokument(d, journalposttype))
-            .toList();
-    }
-
-    private static EnkelJournalpost.Dokument tilDokument(DokumentInfo dokumentInfo, Journalposttype journalposttype) {
-        if (journalposttype.equals(Journalposttype.U)) {
-            return new EnkelJournalpost.Dokument(
-                dokumentInfo.getDokumentInfoId(),
-                dokumentInfo.getTittel(),
-                tilBrevKode(dokumentInfo.getBrevkode()));
-        } else {
-            return new EnkelJournalpost.Dokument(
-                dokumentInfo.getDokumentInfoId(),
-                dokumentInfo.getTittel(),
-                EnkelJournalpost.Brevkode.URELEVANT);
-        }
-    }
-
-    private static EnkelJournalpost.Brevkode tilBrevKode(String brevkode) {
-        try {
-            return EnkelJournalpost.Brevkode.fraKode(brevkode);
-        } catch (Exception e) {
-            LOG.info("Ukjent brevkode {}", brevkode);
-            return EnkelJournalpost.Brevkode.UKJENT;
-        }
-    }
-
-    private static LocalDateTime tilDato(Journalpost journalpost) {
-        return tilLocalDateTime(journalpost.getDatoOpprettet());
-    }
-
-    private static LocalDateTime tilLocalDateTime(Date date) {
-        return date.toInstant()
-            .atZone(ZoneId.systemDefault())
-            .toLocalDateTime();
     }
 
     private static EnkelJournalpost.DokumentType tilType(Journalposttype journalposttype) {
