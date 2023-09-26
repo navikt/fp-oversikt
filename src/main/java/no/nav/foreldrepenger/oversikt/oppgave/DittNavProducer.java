@@ -60,7 +60,7 @@ class DittNavProducer {
     }
 
     private static <T extends SpecificRecord> void sendRecord(T dittNavRecord, NokkelInput key, String topic, Producer<NokkelInput, T> producer) {
-        if (ENV.isLocal() || ENV.isVTP() || ENV.isProd()) { //TODO prodsett
+        if (ENV.isLocal() || ENV.isVTP()) {
             LOG.info("Ditt nav kafka er disabled");
             return;
         }
