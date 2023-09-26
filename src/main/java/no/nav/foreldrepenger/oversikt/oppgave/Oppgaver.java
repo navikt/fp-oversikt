@@ -13,7 +13,7 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.Tilbakekreving;
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende.ManglendeVedleggRepository;
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 
 @ApplicationScoped
 public class Oppgaver {

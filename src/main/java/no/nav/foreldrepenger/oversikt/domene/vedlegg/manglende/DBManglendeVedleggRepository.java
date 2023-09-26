@@ -13,7 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 
 @ApplicationScoped
 public class DBManglendeVedleggRepository implements ManglendeVedleggRepository {

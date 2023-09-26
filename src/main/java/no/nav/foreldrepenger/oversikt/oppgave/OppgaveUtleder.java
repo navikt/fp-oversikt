@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.Tilbakekreving;
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 
 final class OppgaveUtleder {
 

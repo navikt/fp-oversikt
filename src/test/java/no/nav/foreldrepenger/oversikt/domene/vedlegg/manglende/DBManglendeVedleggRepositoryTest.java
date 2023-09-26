@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import jakarta.persistence.EntityManager;
 import no.nav.foreldrepenger.oversikt.JpaExtension;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.DokumentTypeId;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 
 @ExtendWith(JpaExtension.class)
 class DBManglendeVedleggRepositoryTest {

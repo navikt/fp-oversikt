@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
+package no.nav.foreldrepenger.oversikt.arkiv;
 
 import java.util.Arrays;
 import java.util.Set;
