@@ -55,7 +55,7 @@ public class SafTjeneste {
             .tittel()
             .journalposttype()
             .sak(new SakResponseProjection().fagsakId())
-            .avsenderMottaker(new AvsenderMottakerResponseProjection())
+            .avsenderMottaker(new AvsenderMottakerResponseProjection().id().erLikBruker().type())
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
             .dokumenter(new DokumentInfoResponseProjection().tittel());
     }

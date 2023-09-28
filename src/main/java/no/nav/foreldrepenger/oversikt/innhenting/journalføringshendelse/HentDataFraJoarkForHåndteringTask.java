@@ -22,7 +22,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.ER_ENDRINGSSØKNAD;
 import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.FØDSELSNUMMER;
 import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.YTELSE_TYPE;
-import static no.nav.vedtak.felles.prosesstask.api.CommonTaskProperties.SAKSNUMMER;
 
 @ApplicationScoped
 @ProsessTask("hendelse.hentFraJoark")
@@ -60,7 +59,6 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
         }
 
         if (dokumentType.erFørstegangssøknad() || dokumentType.erEndringssøknad() || dokumentType.erVedlegg()) {
-            sendMinSideBeskjed(journalpost);
             var m = ProsessTaskData.forProsessTask(HentManglendeVedleggTask.class);
             m.setSaksnummer(saksnummer);
             m.setCallIdFraEksisterende();
@@ -86,13 +84,15 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
         } else {
             LOG.info("Journalføringshendelse av dokumenttypen {} på sak {} ignoreres", dokumentType, saksnummer);
         }
+
+        sendBrukernotifikasjonBeskjed(journalpost);
     }
 
-    private void sendMinSideBeskjed(EnkelJournalpost journalpost) {
-        var saksnummer = journalpost.saksnummer();
-        var fødselsnummer = journalpost.fødselsnummerAvsenderMottaker().value();
+    private void sendBrukernotifikasjonBeskjed(EnkelJournalpost journalpost) {
         var dokumentTypeHoveddokument = journalpost.hovedtype();
         if (dokumentTypeHoveddokument.erFørstegangssøknad() || dokumentTypeHoveddokument.erEndringssøknad()) {
+            var saksnummer = journalpost.saksnummer();
+            var fødselsnummer = journalpost.fødselsnummerAvsenderMottaker().value();
             var ytelseType = dokumentTypeHoveddokument.gjelderYtelse();
             var erEndringssøknad = dokumentTypeHoveddokument.erEndringssøknad();
             var task = ProsessTaskData.forProsessTask(BrukernotifikasjonBeskjedVedMottattSøknadTask.class);
@@ -101,7 +101,6 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             task.setProperty(YTELSE_TYPE, ytelseType.name());
             task.setProperty(ER_ENDRINGSSØKNAD, Boolean.toString(erEndringssøknad));
             task.setProperty(FØDSELSNUMMER, fødselsnummer);
-            task.setProperty(SAKSNUMMER, saksnummer);
             prosessTaskTjeneste.lagre(task);
         }
     }

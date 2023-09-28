@@ -19,8 +19,6 @@ public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTa
     public static final String ER_ENDRINGSSØKNAD = "erEndringssøknad";
 
     public static final String FØDSELSNUMMER = "fødselsnummer";
-    private static final String TEMPLATE_ENDRINGSSOKNAD = "Vi mottok en søknad om endring av %s";
-    private static final String TEMPLATE_FØRSTEGANGSSOKNAD = "Vi mottok en søknad om %s";
     private BrukernotifikasjonTjeneste brukernotifikasjonTjeneste;
 
     @Inject
@@ -32,15 +30,9 @@ public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTa
     public void doTask(ProsessTaskData data) {
         var fnr = new Fødselsnummer(data.getPropertyValue(FØDSELSNUMMER));
         var saksnummer = new Saksnummer(data.getPropertyValue(SAKSNUMMER));
-        var tekst = tekst(data);
-        brukernotifikasjonTjeneste.sendBeskjed(tekst, fnr, saksnummer);
-    }
-
-    private static String tekst(ProsessTaskData data) {
-        var ytelseType = YtelseType.valueOf(data.getPropertyValue(YTELSE_TYPE));
         var erEndringssøknad = Boolean.parseBoolean(data.getPropertyValue(ER_ENDRINGSSØKNAD));
-        var template = erEndringssøknad ? TEMPLATE_ENDRINGSSOKNAD : TEMPLATE_FØRSTEGANGSSOKNAD;
-        return String.format(template, ytelseType.name().toLowerCase());
+        var ytelseType = YtelseType.valueOf(data.getPropertyValue(YTELSE_TYPE));
+        brukernotifikasjonTjeneste.sendBeskjedVedInnkommetSøknad(fnr, saksnummer, ytelseType, erEndringssøknad);
     }
 
 }

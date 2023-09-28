@@ -60,8 +60,16 @@ public class BrukernotifikasjonTjeneste {
         //CDI
     }
 
-    public void sendBeskjed(String tekst, Fødselsnummer fnr, Saksnummer saksnummer) {
-        var key = nøkkel(fnr, getCallId(), saksnummer);
+    public void sendBeskjedVedInnkommetSøknad(Fødselsnummer fnr, Saksnummer saksnummer, YtelseType ytelseType, boolean erEndringssøknad) {
+        // ved ny innsending med samme eventId (callId/eksternReferanse fra journalpost) vil den regnes som duplikat av Brukernotifikasjon (ønsket resultat)
+        var eventId = getCallId();
+        var key = nøkkel(fnr, eventId, saksnummer);
+        String tekst;
+        if (erEndringssøknad) {
+            tekst = String.format("Vi mottok en søknad om endring av %s", ytelsetype(ytelseType));
+        } else {
+            tekst = String.format("Vi mottok en søknad om %s", ytelsetype(ytelseType));
+        }
         var beskjed = beskjed(tekst);
         producer.opprettBeskjed(beskjed, key);
     }
