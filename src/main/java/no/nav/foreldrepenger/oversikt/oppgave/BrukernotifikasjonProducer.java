@@ -28,15 +28,18 @@ class BrukernotifikasjonProducer {
 
     private static final Environment ENV = Environment.current();
 
-    private String opprettTopic;
-    private String avsluttTopic;
+    private String oppgaveTopic;
+    private String beskjedTopic;
+    private String doneTopic;
     private Producer<NokkelInput, Object> producer;
 
     @Inject
-    BrukernotifikasjonProducer(@KonfigVerdi(value = "dittnav.kafka.topic.opprett") String opprettTopic,
-                               @KonfigVerdi(value = "dittnav.kafka.topic.avslutt") String avsluttTopic) {
-        this.opprettTopic = opprettTopic;
-        this.avsluttTopic = avsluttTopic;
+    BrukernotifikasjonProducer(@KonfigVerdi(value = "minside.kafka.topic.oppgave") String oppgaveTopic,
+                               @KonfigVerdi(value = "minside.kafka.topic.beskjed") String beskjedTopic,
+                               @KonfigVerdi(value = "minside.kafka.topic.done") String doneTopic) {
+        this.oppgaveTopic = oppgaveTopic;
+        this.beskjedTopic = beskjedTopic;
+        this.doneTopic = doneTopic;
         var properties = KafkaProperties.forProducer();
         properties.setProperty(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
         properties.setProperty(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, KafkaAvroSerializer.class.getName());
@@ -51,15 +54,15 @@ class BrukernotifikasjonProducer {
     }
 
     void opprettBeskjed(BeskjedInput beskjed, NokkelInput nøkkel) {
-        send(beskjed, nøkkel, opprettTopic);
+        send(beskjed, nøkkel, beskjedTopic);
     }
 
     void opprettOppgave(OppgaveInput oppgave, NokkelInput nøkkel) {
-        send(oppgave, nøkkel, opprettTopic);
+        send(oppgave, nøkkel, oppgaveTopic);
     }
 
     void sendDone(DoneInput done, NokkelInput nøkkel) {
-        send(done, nøkkel, avsluttTopic);
+        send(done, nøkkel, doneTopic);
     }
 
     private void send(Object msg, NokkelInput key, String topic) {

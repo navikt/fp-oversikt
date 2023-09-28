@@ -49,7 +49,7 @@ public class BrukernotifikasjonTjeneste {
     public BrukernotifikasjonTjeneste(PdlKlientSystem pdlKlient,
                                       SakRepository sakRepository,
                                       BrukernotifikasjonProducer brukernotifikasjonProducer,
-                                      @KonfigVerdi(value = "dittnav.oppgave.lenke") String innsynLenke) throws MalformedURLException {
+                                      @KonfigVerdi(value = "foreldrepenger.innsynlenke") String innsynLenke) throws MalformedURLException {
         this.pdlKlient = pdlKlient;
         this.sakRepository = sakRepository;
         this.producer = brukernotifikasjonProducer;
