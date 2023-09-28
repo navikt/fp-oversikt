@@ -4,6 +4,10 @@ import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.util.Optional;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.saf.AvsenderMottakerIdType;
+import no.nav.saf.AvsenderMottakerResponseProjection;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,15 +55,19 @@ public class SafTjeneste {
             .tittel()
             .journalposttype()
             .sak(new SakResponseProjection().fagsakId())
+            .avsenderMottaker(new AvsenderMottakerResponseProjection())
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
             .dokumenter(new DokumentInfoResponseProjection().tittel());
     }
 
     private static EnkelJournalpost mapTilJournalpost(Journalpost journalpost) {
         var innsendingstype = tilType(journalpost.getJournalposttype());
+        var avsenderMottaker = journalpost.getAvsenderMottaker();
+        var fnr = avsenderMottaker.getErLikBruker() && avsenderMottaker.getType() == AvsenderMottakerIdType.FNR ? new Fødselsnummer(avsenderMottaker.getId()) : null;
         return new EnkelJournalpost(
             journalpost.getSak().getFagsakId(),
             innsendingstype,
+            fnr,
             innsendingstype.equals(EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : DokumentTypeId.URELEVANT
         );
     }

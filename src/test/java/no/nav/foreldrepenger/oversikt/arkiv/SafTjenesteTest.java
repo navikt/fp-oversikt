@@ -10,6 +10,10 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
+import no.nav.saf.AvsenderMottaker;
+
+import no.nav.saf.AvsenderMottakerIdType;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -74,6 +78,8 @@ class SafTjenesteTest {
         journalpost.setTittel(dokumentTypeId.getTittel());
         journalpost.setTilleggsopplysninger(List.of());
         journalpost.setJournalpostId("123");
+        var avsenderMottaker = new AvsenderMottaker("12345678901", AvsenderMottakerIdType.FNR, null, null, true);
+        journalpost.setAvsenderMottaker(avsenderMottaker);
         var sak = new Sak();
         sak.setFagsakId(Saksnummer.dummy().value());
         journalpost.setSak(sak);
@@ -92,6 +98,8 @@ class SafTjenesteTest {
         journalpost.setTittel(dokumentTypeId.getTittel());
         journalpost.setTilleggsopplysninger(List.of(new Tilleggsopplysning(FP_DOK_TYPE, dokumentTypeId.name())));
         journalpost.setJournalpostId("123");
+        var avsenderMottaker = new AvsenderMottaker("12345678901", AvsenderMottakerIdType.FNR, null, null, true);
+        journalpost.setAvsenderMottaker(avsenderMottaker);
         var sak = new Sak();
         sak.setFagsakId(Saksnummer.dummy().value());
         journalpost.setSak(sak);
