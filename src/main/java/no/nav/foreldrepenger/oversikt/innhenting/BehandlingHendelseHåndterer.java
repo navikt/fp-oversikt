@@ -44,7 +44,7 @@ public class BehandlingHendelseHåndterer {
     }
 
     void handleMessage(String topic, String key, String payload) {
-        LOG.info("Lest fra : topic={}", topic);
+        LOG.debug("Lest fra : topic={}", topic);
         try {
             var hendelse = map(payload);
             var hendelseType = hendelse.getHendelse();

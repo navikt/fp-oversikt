@@ -11,7 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
@@ -20,7 +19,6 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 public class OppgaveTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(OppgaveTjeneste.class);
-    private static final Environment ENV = Environment.current();
 
     private ProsessTaskTjeneste prosessTaskTjeneste;
     private OppgaveRepository oppgaveRepository;
@@ -35,10 +33,10 @@ public class OppgaveTjeneste {
     }
 
     public void oppdaterOppgaver(Saksnummer saksnummer, Set<OppgaveType> oppgaver) {
-        LOG.info("Oppdaterer oppgaver for {} {}", saksnummer, oppgaver);
+        LOG.info("Oppdaterer oppgaver for {} {}", saksnummer.value(), oppgaver);
 
         var eksisterendeOppgaver = hentAktiveOppgaver(saksnummer);
-        LOG.info("Hentet eksisterende oppgaver for {} {}", saksnummer, eksisterendeOppgaver);
+        LOG.info("Hentet eksisterende oppgaver for {} {}", saksnummer.value(), eksisterendeOppgaver);
         avsluttOppgaver(oppgaver, eksisterendeOppgaver);
         opprettOppgaver(saksnummer, oppgaver, eksisterendeOppgaver);
     }
