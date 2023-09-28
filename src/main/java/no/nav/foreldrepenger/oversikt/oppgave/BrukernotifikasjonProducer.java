@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
-import org.apache.avro.specific.SpecificRecord;
+import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
+
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
@@ -21,20 +22,19 @@ import no.nav.vedtak.exception.IntegrasjonException;
 import no.nav.vedtak.felles.integrasjon.kafka.KafkaProperties;
 
 @ApplicationScoped
-class DittNavProducer {
+class BrukernotifikasjonProducer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(DittNavProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(BrukernotifikasjonProducer.class);
 
     private static final Environment ENV = Environment.current();
 
     private String opprettTopic;
     private String avsluttTopic;
-    private Producer<NokkelInput, OppgaveInput> oppgaveProducer;
-    private Producer<NokkelInput, DoneInput> doneProducer;
+    private Producer<NokkelInput, Object> producer;
 
     @Inject
-    DittNavProducer(@KonfigVerdi(value = "dittnav.kafka.topic.opprett") String opprettTopic,
-                    @KonfigVerdi(value = "dittnav.kafka.topic.avslutt") String avsluttTopic) {
+    BrukernotifikasjonProducer(@KonfigVerdi(value = "dittnav.kafka.topic.opprett") String opprettTopic,
+                               @KonfigVerdi(value = "dittnav.kafka.topic.avslutt") String avsluttTopic) {
         this.opprettTopic = opprettTopic;
         this.avsluttTopic = avsluttTopic;
         var properties = KafkaProperties.forProducer();
@@ -43,29 +43,32 @@ class DittNavProducer {
         properties.put(AbstractKafkaSchemaSerDeConfig.USER_INFO_CONFIG, KafkaProperties.getAvroSchemaRegistryBasicAuth());
         properties.put(AbstractKafkaSchemaSerDeConfig.BASIC_AUTH_CREDENTIALS_SOURCE, "USER_INFO");
         properties.put(AbstractKafkaSchemaSerDeConfig.SCHEMA_REGISTRY_URL_CONFIG, KafkaProperties.getAvroSchemaRegistryURL());
-        this.oppgaveProducer = new KafkaProducer<>(properties);
-        this.doneProducer = new KafkaProducer<>(properties);
+        this.producer = new KafkaProducer<>(properties);
     }
 
-    DittNavProducer() {
+    BrukernotifikasjonProducer() {
         //CDI
     }
 
-    void sendOpprettOppgave(OppgaveInput oppgaveInput, NokkelInput key) {
-        sendRecord(oppgaveInput, key, opprettTopic, oppgaveProducer);
+    void opprettBeskjed(BeskjedInput beskjed, NokkelInput nøkkel) {
+        send(beskjed, nøkkel, opprettTopic);
     }
 
-    void sendAvsluttOppgave(DoneInput doneInput, NokkelInput key) {
-        sendRecord(doneInput, key, avsluttTopic, doneProducer);
+    void opprettOppgave(OppgaveInput oppgave, NokkelInput nøkkel) {
+        send(oppgave, nøkkel, opprettTopic);
     }
 
-    private static <T extends SpecificRecord> void sendRecord(T dittNavRecord, NokkelInput key, String topic, Producer<NokkelInput, T> producer) {
+    void sendDone(DoneInput done, NokkelInput nøkkel) {
+        send(done, nøkkel, avsluttTopic);
+    }
+
+    private void send(Object msg, NokkelInput key, String topic) {
         if (ENV.isLocal() || ENV.isVTP()) {
             LOG.info("Ditt nav kafka er disabled");
             return;
         }
 
-        var melding = new ProducerRecord<>(topic, key, dittNavRecord);
+        var melding = new ProducerRecord<>(topic, key, msg);
         try {
             var recordMetadata = producer.send(melding).get();
             LOG.info("Sendte melding til {}, partition {}, offset {}", recordMetadata.topic(), recordMetadata.partition(), recordMetadata.offset());
@@ -78,7 +81,7 @@ class DittNavProducer {
     }
 
     private static IntegrasjonException integrasjonException(Exception e) {
-        return new IntegrasjonException("FPOVERSIKT-DITTNAV", "Feil ved publisering av melding på kafka", e);
+        return new IntegrasjonException("FPOVERSIKT-BRUKERNOTIFIKASJON", "Feil ved publisering av melding på kafka", e);
     }
 
 }
