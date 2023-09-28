@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
+import static no.nav.vedtak.felles.prosesstask.api.CommonTaskProperties.SAKSNUMMER;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
@@ -9,16 +11,14 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
-import static no.nav.vedtak.felles.prosesstask.api.CommonTaskProperties.SAKSNUMMER;
-
 @ApplicationScoped
 @ProsessTask("dittnav.beskjed")
 public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTaskHandler {
 
     public static final String YTELSE_TYPE = "gjelderYtelsetype";
-    public static final String ER_ENDRINGSSØKNAD = "erEndringssøknad";
+    public static final String ER_ENDRINGSSØKNAD = "erEndringssoknad";
 
-    public static final String FØDSELSNUMMER = "fødselsnummer";
+    public static final String FØDSELSNUMMER = "fodselsnummer";
     private BrukernotifikasjonTjeneste brukernotifikasjonTjeneste;
 
     @Inject
