@@ -1,17 +1,19 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
+import no.nav.foreldrepenger.oversikt.domene.YtelseType;
+
 import java.util.Arrays;
 import java.util.Set;
 
 public enum DokumentTypeId {
     // Søknader
-    I000001("Søknad om svangerskapspenger"),
     I000002("Søknad om foreldrepenger ved adopsjon"),
-    I000003("Søknad om engangsstønad ved fødsel"),
-    I000004("Søknad om engangsstønad ved adopsjon"),
     I000005("Søknad om foreldrepenger ved fødsel"),
     I000006("Utsettelse eller gradert uttak av foreldrepenger (fleksibelt uttak)"),
     I000050("Søknad om endring av uttak av foreldrepenger eller overføring av kvote"),
+    I000001("Søknad om svangerskapspenger"),
+    I000003("Søknad om engangsstønad ved fødsel"),
+    I000004("Søknad om engangsstønad ved adopsjon"),
 
     // Klage
     I000027("Klage/anke"),
@@ -130,5 +132,14 @@ public enum DokumentTypeId {
 
     public boolean erUttalelseOmTilbakekreving() {
         return I000114.equals(this);
+    }
+
+    public YtelseType gjelderYtelse() {
+        return switch(this) {
+            case I000001 -> YtelseType.SVANGERSKAPSPENGER;
+            case I000002, I000005,  I000006, I000050 -> YtelseType.FORELDREPENGER;
+            case I000003, I000004 -> YtelseType.ENGANGSSTØNAD;
+            default -> throw new IllegalStateException("Ikke definert relevant ytelse for " + this.name());
+        };
     }
 }

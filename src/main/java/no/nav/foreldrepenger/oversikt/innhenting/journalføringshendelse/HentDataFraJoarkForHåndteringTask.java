@@ -3,6 +3,10 @@ package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
+import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
+
+import no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +18,10 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
+
+import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.ER_ENDRINGSSØKNAD;
+import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.FØDSELSNUMMER;
+import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.YTELSE_TYPE;
 
 @ApplicationScoped
 @ProsessTask("hendelse.hentFraJoark")
@@ -75,6 +83,25 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             prosessTaskTjeneste.lagre(t);
         } else {
             LOG.info("Journalføringshendelse av dokumenttypen {} på sak {} ignoreres", dokumentType, saksnummer);
+        }
+
+        sendBrukernotifikasjonBeskjed(journalpost);
+    }
+
+    private void sendBrukernotifikasjonBeskjed(EnkelJournalpost journalpost) {
+        var dokumentTypeHoveddokument = journalpost.hovedtype();
+        if (dokumentTypeHoveddokument.erFørstegangssøknad() || dokumentTypeHoveddokument.erEndringssøknad()) {
+            var saksnummer = journalpost.saksnummer();
+            var fødselsnummer = journalpost.fødselsnummerAvsenderMottaker().value();
+            var ytelseType = dokumentTypeHoveddokument.gjelderYtelse();
+            var erEndringssøknad = dokumentTypeHoveddokument.erEndringssøknad();
+            var task = ProsessTaskData.forProsessTask(BrukernotifikasjonBeskjedVedMottattSøknadTask.class);
+            task.setSaksnummer(saksnummer);
+            task.setCallIdFraEksisterende();
+            task.setProperty(YTELSE_TYPE, ytelseType.name());
+            task.setProperty(ER_ENDRINGSSØKNAD, Boolean.toString(erEndringssøknad));
+            task.setProperty(FØDSELSNUMMER, fødselsnummer);
+            prosessTaskTjeneste.lagre(task);
         }
     }
 }
