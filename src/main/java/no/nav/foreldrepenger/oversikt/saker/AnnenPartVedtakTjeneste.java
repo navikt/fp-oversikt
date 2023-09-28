@@ -59,7 +59,7 @@ public class AnnenPartVedtakTjeneste {
             return Optional.empty();
         }
         var gjeldendeSak = gjeldendeSakForAnnenPartOpt.get();
-        LOG.info("Fant gjeldende sak for annen part. Saksnummer {}", gjeldendeSak.saksnummer());
+        LOG.info("Fant gjeldende sak for annen part med saksnummer {}", gjeldendeSak.saksnummer().value());
         var gjeldendeVedtak = gjeldendeSak.gjeldendeVedtak();
         if (gjeldendeVedtak.isEmpty()) {
             LOG.info("Annen parts gjeldende sak har ingen gjeldende vedtak. Saksnummer {}", gjeldendeSak.saksnummer());

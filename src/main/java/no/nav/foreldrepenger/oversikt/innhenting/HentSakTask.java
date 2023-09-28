@@ -75,8 +75,7 @@ public class HentSakTask implements ProsessTaskHandler {
 
     public static void hentOgLagreSak(FpsakTjeneste fpsak, SakRepository repository, Saksnummer saksnummer) {
         var sakDto = fpsak.hentSak(saksnummer);
-        LOG.info("Hentet sak fra fpsak {}", saksnummer);
-
+        LOG.info("Hentet sak på {} fra fpsak", saksnummer.value());
         repository.lagre(map(sakDto));
     }
 

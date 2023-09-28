@@ -49,8 +49,9 @@ public class OppgaveRest {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         tilgangkontroll.sakKobletTilAktørGuard(saksnummer);
-        LOG.info("Henter manglede vedlegg for sak {}", saksnummer.value());
-        return oppgaver.manglendeVedlegg(saksnummer);
+        var manglendeVedlegg = oppgaver.manglendeVedlegg(saksnummer);
+        LOG.info("Hentet {} manglede vedlegg for sak {}", manglendeVedlegg.size(), saksnummer.value());
+        return manglendeVedlegg;
     }
 
     @GET

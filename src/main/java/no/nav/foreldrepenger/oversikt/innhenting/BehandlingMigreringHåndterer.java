@@ -65,10 +65,11 @@ public class BehandlingMigreringHåndterer {
         LOG.info("Lest fra : topic={}", topic);
         try {
             var hendelse = map(payload);
-//            hentSak(hendelse);
-//            hentInntektsmeldinger(hendelse);
-//            hentTilbakekreving(hendelse);
+            hentSak(hendelse);
+            hentInntektsmeldinger(hendelse);
+            hentTilbakekreving(hendelse);
             hentManglendeVedlegg(hendelse);
+            // hentOppgave(hendelse);
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
         }
