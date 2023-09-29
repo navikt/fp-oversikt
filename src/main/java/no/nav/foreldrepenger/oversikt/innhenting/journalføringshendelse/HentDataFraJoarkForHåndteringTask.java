@@ -87,10 +87,10 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
             LOG.info("Journalføringshendelse av dokumenttypen {} på sak {} ignoreres", dokumentType, saksnummer);
         }
 
-        sendBrukernotifikasjonBeskjed(journalpost, p);
+        sendBrukernotifikasjonBeskjed(journalpost);
     }
 
-    private void sendBrukernotifikasjonBeskjed(EnkelJournalpost journalpost, ProsessTaskData p) {
+    private void sendBrukernotifikasjonBeskjed(EnkelJournalpost journalpost) {
         var dokumentTypeHoveddokument = journalpost.hovedtype();
 
         if (dokumentTypeHoveddokument.erFørstegangssøknad() || dokumentTypeHoveddokument.erEndringssøknad()) {

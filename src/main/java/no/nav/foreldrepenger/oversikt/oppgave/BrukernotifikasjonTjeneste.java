@@ -64,8 +64,8 @@ public class BrukernotifikasjonTjeneste {
                                               Saksnummer saksnummer,
                                               YtelseType ytelseType,
                                               boolean erEndringssøknad,
-                                              UUID kanalreferanse) {
-        var key = nøkkel(fnr, kanalreferanse.toString(), saksnummer);
+                                              UUID eventId) {
+        var key = nøkkel(fnr, eventId.toString(), saksnummer);
         String tekst;
         if (erEndringssøknad) {
             tekst = String.format("Vi mottok en søknad om endring av %s", ytelsetype(ytelseType));
