@@ -37,7 +37,7 @@ public class FpsakTjenesteStub implements FpsakTjeneste {
     }
 
     @Override
-    public List<DokumentTypeId> hentMangelendeVedlegg(Saksnummer saksnummer) {
+    public List<DokumentTypeId> hentManglendeVedlegg(Saksnummer saksnummer) {
         return manglendeVedlegg.get(saksnummer);
     }
 

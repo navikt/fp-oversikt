@@ -11,7 +11,6 @@ import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 
-
 @ApplicationScoped
 @ActivateRequestContext
 @Transactional

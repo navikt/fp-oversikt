@@ -11,14 +11,16 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
+import java.util.UUID;
+
 @ApplicationScoped
 @ProsessTask("dittnav.beskjed")
 public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTaskHandler {
 
     public static final String YTELSE_TYPE = "gjelderYtelsetype";
     public static final String ER_ENDRINGSSØKNAD = "erEndringssoknad";
-
     public static final String FØDSELSNUMMER = "fodselsnummer";
+    public static final String EVENT_ID = "eventId";
     private BrukernotifikasjonTjeneste brukernotifikasjonTjeneste;
 
     @Inject
@@ -32,7 +34,10 @@ public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTa
         var saksnummer = new Saksnummer(data.getPropertyValue(SAKSNUMMER));
         var erEndringssøknad = Boolean.parseBoolean(data.getPropertyValue(ER_ENDRINGSSØKNAD));
         var ytelseType = YtelseType.valueOf(data.getPropertyValue(YTELSE_TYPE));
-        brukernotifikasjonTjeneste.sendBeskjedVedInnkommetSøknad(fnr, saksnummer, ytelseType, erEndringssøknad);
+        // ved ny innsending med samme eventId (kanalreferanse fra journalpost) vil den regnes som duplikat av Brukernotifikasjon (ønsket resultat)
+        // se https://tms-dokumentasjon.intern.nav.no/varsler/produsere#:~:text=NokkelInput
+        var eventId = UUID.fromString(data.getPropertyValue(EVENT_ID));
+        brukernotifikasjonTjeneste.sendBeskjedVedInnkommetSøknad(fnr, saksnummer, ytelseType, erEndringssøknad, eventId);
     }
 
 }

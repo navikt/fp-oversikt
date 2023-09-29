@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 public interface FpsakTjeneste {
     Sak hentSak(Saksnummer saksnummer);
 
-    List<DokumentTypeId> hentMangelendeVedlegg(Saksnummer saksnummer);
+    List<DokumentTypeId> hentManglendeVedlegg(Saksnummer saksnummer);
 
     List<Inntektsmelding> hentInntektsmeldinger(Saksnummer saksnummer);
 }
