@@ -1,15 +1,26 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-
-public record EnkelJournalpost(String saksnummer,
+public record EnkelJournalpost(String journalpostId,
                                String eksternReferanse,
+                               String saksnummer,
                                DokumentType type,
-                               Fødselsnummer fødselsnummerAvsenderMottaker,
+                               Bruker bruker,
                                DokumentTypeId hovedtype) {
     public enum DokumentType {
         INNGÅENDE_DOKUMENT,
         UTGÅENDE_DOKUMENT
+    }
+
+    public record Bruker(Type type, String ident) {
+        public enum Type {
+            AKTØRID,
+            FNR
+        }
+
+        @Override
+        public String toString() {
+            return "Bruker{" + "type=" + type + '}';
+        }
     }
 }

@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentInntektsmeldingerTask.TASK_TYPE;
+
 import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
@@ -22,9 +24,10 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = "hent.inntektsmeldinger", maxFailedRuns = HentInntektsmeldingerTask.MAX_FAILED_RUNS, thenDelay = 60 * 15)
+@ProsessTask(value = TASK_TYPE, maxFailedRuns = HentInntektsmeldingerTask.MAX_FAILED_RUNS, thenDelay = 60 * 15)
 public class HentInntektsmeldingerTask implements ProsessTaskHandler {
 
+    public static final String TASK_TYPE = "hent.inntektsmeldinger";
     public static final Duration TASK_DELAY = Duration.ofSeconds(30);
     public static final String JOURNALPOST_ID = HentDataFraJoarkForHåndteringTask.JOURNALPOST_ID;
     static final int MAX_FAILED_RUNS = 10;

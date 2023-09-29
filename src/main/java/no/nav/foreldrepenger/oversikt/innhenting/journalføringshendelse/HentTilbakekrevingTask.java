@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
 import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask.MAX_FAILED_RUNS;
+import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask.TASK_TYPE;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -22,9 +23,10 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = "hent.tilbakekreving", maxFailedRuns = MAX_FAILED_RUNS, firstDelay = 5)
+@ProsessTask(value = TASK_TYPE, maxFailedRuns = MAX_FAILED_RUNS, firstDelay = 5)
 public class HentTilbakekrevingTask implements ProsessTaskHandler {
 
+    public static final String TASK_TYPE = "hent.tilbakekreving";
     public static final String FORVENTER_BESVART_VARSEL = "forventerBesvartVarsel";
 
     private static final Logger LOG = LoggerFactory.getLogger(HentTilbakekrevingTask.class);
