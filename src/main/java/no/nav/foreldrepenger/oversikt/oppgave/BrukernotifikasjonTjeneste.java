@@ -1,13 +1,13 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
 import static java.time.ZoneOffset.UTC;
-import static no.nav.vedtak.log.mdc.MDCOperations.getCallId;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import no.nav.brukernotifikasjon.schemas.builders.BeskjedInputBuilder;
 import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
@@ -60,10 +60,12 @@ public class BrukernotifikasjonTjeneste {
         //CDI
     }
 
-    public void sendBeskjedVedInnkommetSøknad(Fødselsnummer fnr, Saksnummer saksnummer, YtelseType ytelseType, boolean erEndringssøknad) {
-        // ved ny innsending med samme eventId (callId/eksternReferanse fra journalpost) vil den regnes som duplikat av Brukernotifikasjon (ønsket resultat)
-        var eventId = getCallId();
-        var key = nøkkel(fnr, eventId, saksnummer);
+    public void sendBeskjedVedInnkommetSøknad(Fødselsnummer fnr,
+                                              Saksnummer saksnummer,
+                                              YtelseType ytelseType,
+                                              boolean erEndringssøknad,
+                                              UUID kanalreferanse) {
+        var key = nøkkel(fnr, kanalreferanse.toString(), saksnummer);
         String tekst;
         if (erEndringssøknad) {
             tekst = String.format("Vi mottok en søknad om endring av %s", ytelsetype(ytelseType));

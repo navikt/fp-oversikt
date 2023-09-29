@@ -54,6 +54,7 @@ public class SafTjeneste {
         return new JournalpostResponseProjection()
             .tittel()
             .journalposttype()
+            .eksternReferanseId()
             .sak(new SakResponseProjection().fagsakId())
             .avsenderMottaker(new AvsenderMottakerResponseProjection().id().erLikBruker().type())
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
@@ -66,6 +67,7 @@ public class SafTjeneste {
         var fnr = avsenderMottaker.getErLikBruker() && avsenderMottaker.getType() == AvsenderMottakerIdType.FNR ? new Fødselsnummer(avsenderMottaker.getId()) : null;
         return new EnkelJournalpost(
             journalpost.getSak().getFagsakId(),
+            journalpost.getEksternReferanseId(),
             innsendingstype,
             fnr,
             innsendingstype.equals(EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : DokumentTypeId.URELEVANT
