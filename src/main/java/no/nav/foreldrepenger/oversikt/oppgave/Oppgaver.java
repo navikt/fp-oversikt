@@ -31,14 +31,14 @@ public class Oppgaver {
         this.sakRepository = sakRepository;
     }
 
-    public Oppgaver() {
+    Oppgaver() {
     }
 
     List<DokumentTypeId> manglendeVedlegg(Saksnummer saksnummer) {
         return manglendeVedleggRepository.hentFor(saksnummer);
     }
 
-    Set<TilbakekrevingsInnslag> tilbakekrevingsuttalelser(AktørId aktørId) {
+    Set<TilbakekrevingUttalelseOppgave> tilbakekrevingsuttalelser(AktørId aktørId) {
         var saker = sakRepository.hentFor(aktørId).stream()
             .map(Sak::saksnummer)
             .collect(Collectors.toSet());
@@ -49,7 +49,7 @@ public class Oppgaver {
             .collect(Collectors.toSet());
     }
 
-    private static TilbakekrevingsInnslag tilDto(Tilbakekreving tilbakekreving) {
-        return new TilbakekrevingsInnslag(tilbakekreving.saksnummer(), tilbakekreving.varselDato());
+    private static TilbakekrevingUttalelseOppgave tilDto(Tilbakekreving tilbakekreving) {
+        return new TilbakekrevingUttalelseOppgave(tilbakekreving.saksnummer(), tilbakekreving.varselDato());
     }
 }
