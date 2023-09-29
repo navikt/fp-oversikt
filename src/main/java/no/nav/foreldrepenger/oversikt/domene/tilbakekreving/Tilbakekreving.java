@@ -18,4 +18,7 @@ public interface Tilbakekreving {
 
     LocalDate varselDato();
 
+    default LocalDate frist() {
+        return varselDato() == null ? null : varselDato().plusWeeks(2); //Samme som frist i brevet fra fptilbake
+    }
 }

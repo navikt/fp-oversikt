@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
@@ -13,7 +14,6 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.Tilbakekreving;
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende.ManglendeVedleggRepository;
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 
 @ApplicationScoped
 public class Oppgaver {
@@ -50,6 +50,6 @@ public class Oppgaver {
     }
 
     private static TilbakekrevingUttalelseOppgave tilDto(Tilbakekreving tilbakekreving) {
-        return new TilbakekrevingUttalelseOppgave(tilbakekreving.saksnummer(), tilbakekreving.varselDato());
+        return new TilbakekrevingUttalelseOppgave(tilbakekreving.saksnummer(), tilbakekreving.varselDato(), tilbakekreving.frist());
     }
 }
