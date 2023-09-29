@@ -1,18 +1,21 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.AKTØRID;
+import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.FNR;
+import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT;
+import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT;
 
 import java.util.Optional;
-
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.saf.AvsenderMottakerIdType;
-import no.nav.saf.AvsenderMottakerResponseProjection;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.saf.Bruker;
+import no.nav.saf.BrukerIdType;
+import no.nav.saf.BrukerResponseProjection;
 import no.nav.saf.DokumentInfoResponseProjection;
 import no.nav.saf.Journalpost;
 import no.nav.saf.JournalpostQueryRequest;
@@ -55,29 +58,43 @@ public class SafTjeneste {
             .tittel()
             .journalposttype()
             .eksternReferanseId()
+            .bruker(new BrukerResponseProjection().type().id())
             .sak(new SakResponseProjection().fagsakId())
-            .avsenderMottaker(new AvsenderMottakerResponseProjection().id().erLikBruker().type())
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
             .dokumenter(new DokumentInfoResponseProjection().tittel());
     }
 
     private static EnkelJournalpost mapTilJournalpost(Journalpost journalpost) {
         var innsendingstype = tilType(journalpost.getJournalposttype());
-        var avsenderMottaker = journalpost.getAvsenderMottaker();
-        var fnr = avsenderMottaker.getErLikBruker() && avsenderMottaker.getType() == AvsenderMottakerIdType.FNR ? new Fødselsnummer(avsenderMottaker.getId()) : null;
         return new EnkelJournalpost(
-            journalpost.getSak().getFagsakId(),
+            journalpost.getJournalpostId(),
             journalpost.getEksternReferanseId(),
+            journalpost.getSak().getFagsakId(),
             innsendingstype,
-            fnr,
-            innsendingstype.equals(EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : DokumentTypeId.URELEVANT
+            tilBruker(journalpost.getBruker()),
+            innsendingstype.equals(INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : DokumentTypeId.URELEVANT
         );
+    }
+
+    private static EnkelJournalpost.Bruker tilBruker(Bruker bruker) {
+        return new EnkelJournalpost.Bruker(
+            tilBrukerType(bruker.getType()),
+            bruker.getId()
+        );
+    }
+
+    private static EnkelJournalpost.Bruker.Type tilBrukerType(BrukerIdType type) {
+        return switch (type) {
+            case AKTOERID -> AKTØRID;
+            case FNR -> FNR;
+            case ORGNR -> throw new IllegalStateException("Innkommende dokument med brukertype " + type);
+        };
     }
 
     private static EnkelJournalpost.DokumentType tilType(Journalposttype journalposttype) {
         return switch (journalposttype) {
-            case I -> EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT;
-            case U -> EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT;
+            case I -> INNGÅENDE_DOKUMENT;
+            case U -> UTGÅENDE_DOKUMENT;
             case N -> throw new IllegalStateException("Utviklerfeil: Skal filterer bort notater før mapping!");
         };
     }

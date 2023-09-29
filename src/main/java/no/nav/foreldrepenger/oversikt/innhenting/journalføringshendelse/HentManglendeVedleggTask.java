@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import static no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentManglendeVedleggTask.TASK_TYPE;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,9 +16,10 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask("hent.manglendeVedlegg")
+@ProsessTask(TASK_TYPE)
 public class HentManglendeVedleggTask implements ProsessTaskHandler {
 
+    public static final String TASK_TYPE = "hent.manglendeVedlegg";
     private static final Logger LOG = LoggerFactory.getLogger(HentManglendeVedleggTask.class);
 
     private final FpsakTjeneste fpsakTjeneste;
