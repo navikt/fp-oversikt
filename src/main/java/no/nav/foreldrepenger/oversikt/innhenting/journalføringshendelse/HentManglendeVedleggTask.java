@@ -40,7 +40,7 @@ public class HentManglendeVedleggTask implements ProsessTaskHandler {
     }
 
     public static void hentOgLagre(FpsakTjeneste fpsak, ManglendeVedleggRepository repository, Saksnummer saksnummer) {
-        var manglendeVedlegg = fpsak.hentMangelendeVedlegg(saksnummer);
+        var manglendeVedlegg = fpsak.hentManglendeVedlegg(saksnummer);
         if (manglendeVedlegg.isEmpty()) {
             repository.slett(saksnummer);
         } else {

@@ -37,7 +37,7 @@ class FpSakRestKlient implements FpsakTjeneste {
     }
 
     @Override
-    public List<DokumentTypeId> hentMangelendeVedlegg(Saksnummer saksnummer) {
+    public List<DokumentTypeId> hentManglendeVedlegg(Saksnummer saksnummer) {
         var uri = uri("/fpoversikt/manglendeVedlegg", saksnummer);
         var request = RestRequest.newGET(uri, restConfig);
         return restClient.sendReturnList(request, DokumentTypeId.class);
