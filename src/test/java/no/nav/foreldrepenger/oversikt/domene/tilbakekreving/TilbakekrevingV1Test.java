@@ -40,4 +40,11 @@ class TilbakekrevingV1Test {
         var tk = new TilbakekrevingV1(Saksnummer.dummy(), null, false, LocalDateTime.now());
         assertThat(tk.trengerSvarFraBruker()).isFalse();
     }
+
+    @Test
+    void frist_er_2_uker_etter_varsel_utsendt() {
+        var utsendtTidspunkt = LocalDateTime.now();
+        var tk = new TilbakekrevingV1(Saksnummer.dummy(), new TilbakekrevingV1.Varsel(utsendtTidspunkt, false), false, LocalDateTime.now());
+        assertThat(tk.frist()).isEqualTo(utsendtTidspunkt.toLocalDate().plusWeeks(2));
+    }
 }
