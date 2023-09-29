@@ -10,11 +10,9 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.YtelseType;
-import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -31,12 +29,10 @@ public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTa
     public static final String EVENT_ID = "eventId";
 
     private BrukernotifikasjonTjeneste brukernotifikasjonTjeneste;
-    private FødselsnummerOppslag fnrOppslag;
 
     @Inject
-    BrukernotifikasjonBeskjedVedMottattSøknadTask(BrukernotifikasjonTjeneste brukernotifikasjonTjeneste, FødselsnummerOppslag fnrOppslag) {
+    BrukernotifikasjonBeskjedVedMottattSøknadTask(BrukernotifikasjonTjeneste brukernotifikasjonTjeneste) {
         this.brukernotifikasjonTjeneste = brukernotifikasjonTjeneste;
-        this.fnrOppslag = fnrOppslag;
     }
 
     BrukernotifikasjonBeskjedVedMottattSøknadTask() {
@@ -46,14 +42,13 @@ public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTa
     @Override
     public void doTask(ProsessTaskData data) {
         var aktørId = new AktørId(data.getPropertyValue(AKTØRID));
-        var fnr = new Fødselsnummer(fnrOppslag.forAktørId(aktørId));
         var saksnummer = new Saksnummer(data.getPropertyValue(SAKSNUMMER));
         var erEndringssøknad = Boolean.parseBoolean(data.getPropertyValue(ER_ENDRINGSSØKNAD));
         var ytelseType = YtelseType.valueOf(data.getPropertyValue(YTELSE_TYPE));
         // ved ny innsending med samme eventId (kanalreferanse fra journalpost) vil den regnes som duplikat av Brukernotifikasjon (ønsket resultat)
         // se https://tms-dokumentasjon.intern.nav.no/varsler/produsere#:~:text=NokkelInput
         var eventId = UUID.fromString(data.getPropertyValue(EVENT_ID));
-        brukernotifikasjonTjeneste.sendBeskjedVedInnkommetSøknad(fnr, saksnummer, ytelseType, erEndringssøknad, eventId);
+        brukernotifikasjonTjeneste.sendBeskjedVedInnkommetSøknad(aktørId, saksnummer, ytelseType, erEndringssøknad, eventId);
         LOG.info("Beskjed om mottatt søknad sendt for saksnummer {}", saksnummer.value());
     }
 

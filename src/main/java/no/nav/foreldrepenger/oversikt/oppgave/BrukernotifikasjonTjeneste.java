@@ -9,26 +9,26 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-import no.nav.brukernotifikasjon.schemas.builders.BeskjedInputBuilder;
-import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.YtelseType;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.brukernotifikasjon.schemas.builders.BeskjedInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.DoneInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.NokkelInputBuilder;
 import no.nav.brukernotifikasjon.schemas.builders.OppgaveInputBuilder;
+import no.nav.brukernotifikasjon.schemas.input.BeskjedInput;
 import no.nav.brukernotifikasjon.schemas.input.DoneInput;
 import no.nav.brukernotifikasjon.schemas.input.NokkelInput;
 import no.nav.brukernotifikasjon.schemas.input.OppgaveInput;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.konfig.KonfigVerdi;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.YtelseType;
 import no.nav.foreldrepenger.oversikt.saker.PdlKlientSystem;
 
 @ApplicationScoped
@@ -60,11 +60,12 @@ public class BrukernotifikasjonTjeneste {
         //CDI
     }
 
-    public void sendBeskjedVedInnkommetSøknad(Fødselsnummer fnr,
+    public void sendBeskjedVedInnkommetSøknad(AktørId aktørId,
                                               Saksnummer saksnummer,
                                               YtelseType ytelseType,
                                               boolean erEndringssøknad,
                                               UUID eventId) {
+        var fnr = pdlKlient.hentFnrFor(aktørId);
         var key = nøkkel(fnr, eventId.toString(), saksnummer);
         String tekst;
         if (erEndringssøknad) {
@@ -84,14 +85,14 @@ public class BrukernotifikasjonTjeneste {
             case SVAR_TILBAKEKREVING -> oppgave("Det mangler svar på varsel om tilbakebetaling");
         };
 
-        var nøkkel = nøkkel(sak, oppgave);
+        var nøkkel = nøkkel(sak, oppgave, sak.aktørId());
         producer.opprettOppgave(brukernotifikasjonOppgave, nøkkel);
     }
 
     public void avslutt(Oppgave oppgave) {
         LOG.info("Avslutter brukernotifikasjonoppgave {}", oppgave);
         var sak = sakRepository.hentFor(oppgave.saksnummer());
-        var nøkkel = nøkkel(sak, oppgave);
+        var nøkkel = nøkkel(sak, oppgave, sak.aktørId());
         producer.sendDone(done(), nøkkel);
     }
 
@@ -103,8 +104,8 @@ public class BrukernotifikasjonTjeneste {
         };
     }
 
-    private NokkelInput nøkkel(Sak sak, Oppgave oppgave) {
-        var fnr = pdlKlient.hentFnrFor(sak.aktørId());
+    private NokkelInput nøkkel(Sak sak, Oppgave oppgave, AktørId aktørId) {
+        var fnr = pdlKlient.hentFnrFor(aktørId);
         var eventId = oppgave.id().toString();
         return nøkkel(fnr, eventId, sak.saksnummer());
     }
