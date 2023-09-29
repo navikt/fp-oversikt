@@ -57,7 +57,7 @@ public class OppgaveRest {
     @GET
     @Path("/tilbakekrevingsuttalelse")
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<TilbakekrevingsInnslag> tilbakekrevingsuttalelser() {
+    public Set<TilbakekrevingUttalelseOppgave> tilbakekrevingsuttalelser() {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         LOG.info("Henter alle uttalelser om tilbakekreving på person");

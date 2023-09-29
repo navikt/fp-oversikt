@@ -4,5 +4,5 @@ import java.time.LocalDate;
 
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
-public record TilbakekrevingsInnslag(Saksnummer saksnummer, LocalDate opprettet) {
+public record TilbakekrevingUttalelseOppgave(Saksnummer saksnummer, LocalDate opprettet) {
 }
