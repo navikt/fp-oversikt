@@ -106,7 +106,7 @@ class SakerDtoMapperTest {
     }
 
     static FødselsnummerOppslag fnrOppslag() {
-        return aktørId -> new Fødselsnummer(aktørId.value());
+        return a -> new Fødselsnummer(a.value());
     }
 
     private static SakES0 esSak() {
