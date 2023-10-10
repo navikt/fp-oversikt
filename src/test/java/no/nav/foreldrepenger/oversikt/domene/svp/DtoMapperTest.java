@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.Set;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
@@ -43,7 +45,7 @@ class DtoMapperTest {
             Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(tilrettelegging))), Set.of(vedtak),
             LocalDateTime.now());
 
-        var dto = sakSVP0.tilSakDto(AktørId::value);
+        var dto = sakSVP0.tilSakDto(a -> new Fødselsnummer(a.value()));
         assertThat(dto.sakAvsluttet()).isFalse();
         assertThat(dto.familiehendelse().antallBarn()).isEqualTo(antallBarn);
         assertThat(dto.familiehendelse().fødselsdato()).isNull();

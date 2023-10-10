@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import java.time.LocalDate;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,7 +9,11 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.Dependent;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FødseldatoOppslag;
+import no.nav.pdl.Adressebeskyttelse;
+import no.nav.pdl.AdressebeskyttelseGradering;
+import no.nav.pdl.AdressebeskyttelseResponseProjection;
 import no.nav.pdl.Foedsel;
 import no.nav.pdl.FoedselResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
@@ -24,14 +29,14 @@ import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
     scopesProperty = "pdl.scopes",
     scopesDefault = "api://prod-fss.pdl.pdl-api/.default")
 @Dependent
-public class PdlKlient extends AbstractPersonKlient implements FødselsnummerOppslag, FødseldatoOppslag, AktørIdOppslag {
+public class PdlKlient extends AbstractPersonKlient implements FødselsnummerOppslag, FødseldatoOppslag, AktørIdOppslag, AdresseBeskyttelseOppslag {
 
     private static final Logger LOG = LoggerFactory.getLogger(PdlKlient.class);
 
     @Override
-    public String forAktørId(AktørId aktørId) {
+    public Fødselsnummer forAktørId(AktørId aktørId) {
         LOG.debug("Mapper aktørId til fnr");
-        return hentPersonIdentForAktørId(aktørId.value()).orElseThrow();
+        return new Fødselsnummer(hentPersonIdentForAktørId(aktørId.value()).orElseThrow());
     }
 
     @Override
@@ -55,4 +60,34 @@ public class PdlKlient extends AbstractPersonKlient implements FødselsnummerOpp
             .map(LocalDate::parse)
             .orElseThrow();
     }
+
+    @Override
+    public AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) {
+        var request = new HentPersonQueryRequest();
+        request.setIdent(fnr.value());
+        var projection = new PersonResponseProjection()
+            .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
+        var person = hentPerson(request, projection, true);
+
+        if (person == null) {
+            throw new BrukerIkkeFunnetIPdlException();
+        }
+
+        var gradering = person.getAdressebeskyttelse().stream()
+            .map(Adressebeskyttelse::getGradering)
+            .map(PdlKlient::tilGradering)
+            .collect(Collectors.toSet());
+        return new AdresseBeskyttelse(gradering);
+    }
+
+    private static AdresseBeskyttelse.Gradering tilGradering(AdressebeskyttelseGradering adressebeskyttelseGradering) {
+        if (adressebeskyttelseGradering == null) {
+            return AdresseBeskyttelse.Gradering.UGRADERT;
+        }
+        return switch (adressebeskyttelseGradering) {
+            case STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, FORTROLIG -> AdresseBeskyttelse.Gradering.GRADERT;
+            case UGRADERT -> AdresseBeskyttelse.Gradering.UGRADERT;
+        };
+    }
+
 }

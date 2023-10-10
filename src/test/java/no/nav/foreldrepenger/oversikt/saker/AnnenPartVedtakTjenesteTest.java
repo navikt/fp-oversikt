@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -37,7 +38,7 @@ class AnnenPartVedtakTjenesteTest {
             termindato.minusWeeks(1));
         repository.lagre(annenPartsSak);
         repository.lagre(annenPartsSakPåAnnetBarn);
-        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, AktørId::value));
+        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, a -> new Fødselsnummer(a.value())));
         var vedtak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, aktørIdBarn, null);
 
         assertThat(vedtak.orElseThrow().termindato()).isEqualTo(termindato);
@@ -55,7 +56,7 @@ class AnnenPartVedtakTjenesteTest {
             termindato.minusYears(1));
         repository.lagre(annenPartsSak);
         repository.lagre(annenPartsSakPåAnnetBarn);
-        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, AktørId::value));
+        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, a -> new Fødselsnummer(a.value())));
         var vedtak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, fødselsdato);
 
         assertThat(vedtak.orElseThrow().termindato()).isEqualTo(termindato);
@@ -70,7 +71,7 @@ class AnnenPartVedtakTjenesteTest {
         var fødselsdato = LocalDate.now();
         var annenPartsSak = sak(aktørIdAnnenPart, tredjePart, null, fødselsdato, now(), fødselsdato);
         repository.lagre(annenPartsSak);
-        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, AktørId::value));
+        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, a -> new Fødselsnummer(a.value())));
         var vedtak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, fødselsdato);
 
         assertThat(vedtak).isEmpty();
@@ -84,7 +85,7 @@ class AnnenPartVedtakTjenesteTest {
         var fødselsdato = LocalDate.now();
         var annenPartsSak = sak(aktørIdAnnenPart, aktørIdSøker, null, fødselsdato, now(), fødselsdato);
         repository.lagre(annenPartsSak);
-        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, AktørId::value));
+        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, a -> new Fødselsnummer(a.value())));
         var vedtak = tjeneste.hentFor(aktørIdSøker, null, null, fødselsdato);
 
         assertThat(vedtak).isEmpty();
@@ -98,7 +99,7 @@ class AnnenPartVedtakTjenesteTest {
         var fødselsdato = LocalDate.now();
         var annenPartsSak = sak(aktørIdAnnenPart, aktørIdSøker, AktørId.dummy(), fødselsdato, now(), fødselsdato, true);
         repository.lagre(annenPartsSak);
-        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, AktørId::value));
+        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, a -> new Fødselsnummer(a.value())));
         var vedtak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, fødselsdato);
 
         assertThat(vedtak).isEmpty();
