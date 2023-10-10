@@ -10,6 +10,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
@@ -105,7 +106,7 @@ class SakerDtoMapperTest {
     }
 
     static FødselsnummerOppslag fnrOppslag() {
-        return AktørId::value;
+        return a -> new Fødselsnummer(a.value());
     }
 
     private static SakES0 esSak() {
