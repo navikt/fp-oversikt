@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.FpSak;
 import no.nav.foreldrepenger.common.innsyn.FpÅpenBehandling;
 import no.nav.foreldrepenger.common.innsyn.Person;
@@ -59,13 +60,14 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             .map(FpVedtak::tilDto)
             .orElse(null);
 
-        var annenPart = annenPartAktørId == null ? null : new Person(fødselsnummerOppslag.forAktørId(annenPartAktørId), null);
+        var annenPart = annenPartAktørId == null ? null : new Person(new Fødselsnummer(fødselsnummerOppslag.forAktørId(annenPartAktørId)), null);
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
         var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
-        var barna = safeStream(fødteBarn)
-            .map(b -> new Person(fødselsnummerOppslag.forAktørId(b), null))
-            .collect(Collectors.toSet());
+        var barna = safeStream(fødteBarn).map(b -> {
+            var fnr = new Fødselsnummer(fødselsnummerOppslag.forAktørId(b));
+            return new Person(fnr, null);
+        }).collect(Collectors.toSet());
         var gjelderAdopsjon = familieHendelse() != null && familieHendelse().gjelderAdopsjon();
         var morUføretrygd = rettigheter != null && rettigheter.morUføretrygd();
         var harAnnenForelderTilsvarendeRettEØS = rettigheter != null && rettigheter.annenForelderTilsvarendeRettEØS();

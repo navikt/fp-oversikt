@@ -29,7 +29,7 @@ import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.YtelseType;
-import no.nav.foreldrepenger.oversikt.saker.PdlKlient;
+import no.nav.foreldrepenger.oversikt.saker.PdlKlientSystem;
 
 @ApplicationScoped
 public class BrukernotifikasjonTjeneste {
@@ -42,11 +42,11 @@ public class BrukernotifikasjonTjeneste {
     private static final String NAMESPACE = "teamforeldrepenger";
     private URL innsynLenke;
     private BrukernotifikasjonProducer producer;
-    private PdlKlient pdlKlient;
+    private PdlKlientSystem pdlKlient;
     private SakRepository sakRepository;
 
     @Inject
-    public BrukernotifikasjonTjeneste(PdlKlient pdlKlient,
+    public BrukernotifikasjonTjeneste(PdlKlientSystem pdlKlient,
                                       SakRepository sakRepository,
                                       BrukernotifikasjonProducer brukernotifikasjonProducer,
                                       @KonfigVerdi(value = "foreldrepenger.innsynlenke") String innsynLenke) throws MalformedURLException {
@@ -65,7 +65,7 @@ public class BrukernotifikasjonTjeneste {
                                               YtelseType ytelseType,
                                               boolean erEndringssøknad,
                                               UUID eventId) {
-        var fnr = pdlKlient.forAktørId(aktørId);
+        var fnr = pdlKlient.hentFnrFor(aktørId);
         var key = nøkkel(fnr, eventId.toString(), saksnummer);
         String tekst;
         if (erEndringssøknad) {
@@ -105,7 +105,7 @@ public class BrukernotifikasjonTjeneste {
     }
 
     private NokkelInput nøkkel(Sak sak, Oppgave oppgave, AktørId aktørId) {
-        var fnr = pdlKlient.forAktørId(aktørId);
+        var fnr = pdlKlient.hentFnrFor(aktørId);
         var eventId = oppgave.id().toString();
         return nøkkel(fnr, eventId, sak.saksnummer());
     }

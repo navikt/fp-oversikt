@@ -13,7 +13,6 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -40,7 +39,7 @@ class SakerTest {
         repository.lagre(fpSakUtenSøknad(aktørId));
         repository.lagre(svpSak(aktørId));
         repository.lagre(esSak(aktørId));
-        var saker = new Saker(repository, a -> new Fødselsnummer(a.value()));
+        var saker = new Saker(repository, AktørId::value);
 
         var sakerDto = saker.hent(aktørId);
 
@@ -65,7 +64,7 @@ class SakerTest {
         repository.lagre(henlagtSvpSak);
         repository.lagre(henlagtEsSak);
 
-        var saker = new Saker(repository, a -> new Fødselsnummer(a.value()));
+        var saker = new Saker(repository, AktørId::value);
         var sakerDto = saker.hentSaker(aktørId);
 
         assertThat(sakerDto).isEmpty();
