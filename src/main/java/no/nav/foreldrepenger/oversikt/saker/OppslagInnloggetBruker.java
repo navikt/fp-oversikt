@@ -12,18 +12,18 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 @ApplicationScoped
-public class KontekstBruker implements InnloggetBruker {
+public class OppslagInnloggetBruker implements InnloggetBruker {
 
-    private static final Logger LOG = LoggerFactory.getLogger(KontekstBruker.class);
+    private static final Logger LOG = LoggerFactory.getLogger(OppslagInnloggetBruker.class);
 
     private PdlKlient pdlKlient;
 
     @Inject
-    public KontekstBruker(PdlKlient pdlKlient) {
+    public OppslagInnloggetBruker(PdlKlient pdlKlient) {
         this.pdlKlient = pdlKlient;
     }
 
-    KontekstBruker() {
+    OppslagInnloggetBruker() {
         //CDI
     }
 

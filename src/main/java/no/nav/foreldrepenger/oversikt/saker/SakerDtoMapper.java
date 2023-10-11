@@ -13,9 +13,9 @@ final class SakerDtoMapper {
     private SakerDtoMapper() {
     }
 
-    static no.nav.foreldrepenger.common.innsyn.Saker tilDto(List<Sak> saker, FødselsnummerOppslag fnrOppslag) {
+    static no.nav.foreldrepenger.common.innsyn.Saker tilDto(List<Sak> saker, PersonOppslagSystem personOppslagSystem) {
         var sakerDtoer = saker.stream()
-            .map(s -> s.tilSakDto(fnrOppslag))
+            .map(s -> s.tilSakDto(personOppslagSystem))
             .collect(Collectors.toSet());
 
         var foreldrepenger = sakerDtoer.stream()

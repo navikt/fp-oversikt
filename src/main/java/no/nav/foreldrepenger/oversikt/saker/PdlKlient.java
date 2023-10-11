@@ -6,9 +6,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.FødseldatoOppslag;
 import no.nav.pdl.Foedsel;
 import no.nav.pdl.FoedselResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
@@ -24,25 +21,11 @@ import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
     scopesProperty = "pdl.scopes",
     scopesDefault = "api://prod-fss.pdl.pdl-api/.default")
 @Dependent
-public class PdlKlient extends AbstractPersonKlient implements FødselsnummerOppslag, FødseldatoOppslag, AktørIdOppslag {
+class PdlKlient extends AbstractPersonKlient {
 
     private static final Logger LOG = LoggerFactory.getLogger(PdlKlient.class);
 
-    @Override
-    public String forAktørId(AktørId aktørId) {
-        LOG.debug("Mapper aktørId til fnr");
-        return hentPersonIdentForAktørId(aktørId.value()).orElseThrow();
-    }
-
-    @Override
-    public AktørId forFnr(Fødselsnummer fnr) {
-        LOG.debug("Mapper fnr til aktørId");
-        var a = hentAktørIdForPersonIdent(fnr.value()).orElseThrow();
-        return new AktørId(a);
-    }
-
-    @Override
-    public LocalDate fødselsdato(String fnr) {
+    LocalDate fødselsdato(String fnr) {
         LOG.debug("Henter fødselsdato");
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr);

@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import static java.time.LocalDateTime.now;
+import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -42,7 +43,7 @@ class SakerDtoMapperTest {
     void verifiser_at_fordeles_på_riktig_() {
         List<Sak> saker = List.of(fpSak(), fpSak(), svpSak(), esSak());
 
-        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, annenpartUbeskyttetAdresse());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(2);
         assertThat(sakerDto.svangerskapspenger()).hasSize(1);
@@ -53,7 +54,7 @@ class SakerDtoMapperTest {
     void skal_ikke_feile_ved_ingen_svp_saker() {
         List<Sak> saker = List.of(fpSak(), esSak());
 
-        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, annenpartUbeskyttetAdresse());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(1);
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -64,7 +65,7 @@ class SakerDtoMapperTest {
     void skal_ikke_feile_ved_bare_fp_saker() {
         List<Sak> saker = List.of(fpSak(), fpSak());
 
-        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, annenpartUbeskyttetAdresse());
 
         assertThat(sakerDto.foreldrepenger()).hasSize(2);
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -75,7 +76,7 @@ class SakerDtoMapperTest {
     void skal_ikke_feile_ved_bare_svp_sak() {
         List<Sak> saker = List.of(svpSak(), svpSak());
 
-        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, annenpartUbeskyttetAdresse());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).hasSize(2);
@@ -86,7 +87,7 @@ class SakerDtoMapperTest {
     void skal_ikke_feile_ved_bare_es_sak() {
         List<Sak> saker = List.of(esSak());
 
-        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, annenpartUbeskyttetAdresse());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
@@ -97,15 +98,11 @@ class SakerDtoMapperTest {
     void skal_ikke_feile_ved_ingen_saker() {
         List<Sak> saker = List.of();
 
-        var sakerDto = SakerDtoMapper.tilDto(saker, fnrOppslag());
+        var sakerDto = SakerDtoMapper.tilDto(saker, annenpartUbeskyttetAdresse());
 
         assertThat(sakerDto.foreldrepenger()).isEmpty();
         assertThat(sakerDto.svangerskapspenger()).isEmpty();
         assertThat(sakerDto.engangsstønad()).isEmpty();
-    }
-
-    static FødselsnummerOppslag fnrOppslag() {
-        return AktørId::value;
     }
 
     private static SakES0 esSak() {

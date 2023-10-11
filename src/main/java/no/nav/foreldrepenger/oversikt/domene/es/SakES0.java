@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.YtelseType;
-import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                      @JsonProperty("aktørId") AktørId aktørId,
@@ -50,7 +50,7 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.EsSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
+    public no.nav.foreldrepenger.common.innsyn.EsSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
         var familiehendelse = familieHendelse == null ? null : familieHendelse.tilDto();
         return new EsSak(saksnummer.tilDto(), familiehendelse, avsluttet, tilÅpenBehandling(), false, oppdatertTidspunkt());
     }

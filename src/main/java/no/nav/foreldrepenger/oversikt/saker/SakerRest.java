@@ -19,13 +19,11 @@ public class SakerRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SakerRest.class);
     private Saker saker;
-    private InnloggetBruker innloggetBruker;
     private TilgangKontrollTjeneste tilgangkontroll;
 
     @Inject
-    public SakerRest(Saker saker, InnloggetBruker innloggetBruker, TilgangKontrollTjeneste tilgangkontroll) {
+    public SakerRest(Saker saker, TilgangKontrollTjeneste tilgangkontroll) {
         this.saker = saker;
-        this.innloggetBruker = innloggetBruker;
         this.tilgangkontroll = tilgangkontroll;
     }
 
@@ -38,7 +36,6 @@ public class SakerRest {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         LOG.debug("Kall mot saker endepunkt");
-        var aktørId = innloggetBruker.aktørId();
-        return saker.hent(aktørId);
+        return saker.hent();
     }
 }
