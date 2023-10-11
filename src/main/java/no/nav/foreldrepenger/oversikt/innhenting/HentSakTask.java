@@ -322,6 +322,8 @@ public class HentSakTask implements ProsessTaskHandler {
                 case AVVENT_DOKUMTANSJON -> Aksjonspunkt.Venteårsak.AVVENT_DOKUMTANSJON;
                 case AVVENT_FØDSEL -> Aksjonspunkt.Venteårsak.AVVENT_FØDSEL;
                 case AVVENT_RESPONS_REVURDERING -> Aksjonspunkt.Venteårsak.AVVENT_RESPONS_REVURDERING;
+                case BRUKERTILBAKEMELDING -> Aksjonspunkt.Venteårsak.BRUKERTILBAKEMELDING;
+                case UTLAND_TRYGD -> Aksjonspunkt.Venteårsak.UTLAND_TRYGD;
                 case FOR_TIDLIG_SOKNAD -> Aksjonspunkt.Venteårsak.FOR_TIDLIG_SOKNAD;
                 case UTVIDET_FRIST -> Aksjonspunkt.Venteårsak.UTVIDET_FRIST;
                 case INNTEKT_RAPPORTERINGSFRIST -> Aksjonspunkt.Venteårsak.INNTEKT_RAPPORTERINGSFRIST;
