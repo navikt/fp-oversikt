@@ -22,11 +22,16 @@ import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
     scopesProperty = "pdl.scopes",
     scopesDefault = "api://prod-fss.pdl.pdl-api/.default")
 @Dependent
-public class PdlKlientSystem extends AbstractPersonKlient implements AdresseBeskyttelseOppslag {
+class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSystem {
 
-    public Fødselsnummer hentFnrFor(AktørId aktørId) {
-        var s = hentPersonIdentForAktørId(aktørId.value()).orElseThrow();
-        return new Fødselsnummer(s);
+    @Override
+    public Fødselsnummer fødselsnummer(AktørId aktørId) {
+        return new Fødselsnummer(hentPersonIdentForAktørId(aktørId.value()).orElseThrow());
+    }
+
+    @Override
+    public AktørId aktørId(Fødselsnummer fnr) {
+        return new AktørId(hentAktørIdForPersonIdent(fnr.value()).orElseThrow());
     }
 
     @Override

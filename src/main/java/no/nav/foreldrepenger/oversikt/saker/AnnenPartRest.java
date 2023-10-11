@@ -29,14 +29,15 @@ public class AnnenPartRest {
     private AnnenPartVedtakTjeneste annenPartVedtakTjeneste;
     private TilgangKontrollTjeneste tilgangkontroll;
     private InnloggetBruker innloggetBruker;
-    private AktørIdOppslag aktørIdOppslag;
+    private PersonOppslagSystem personOppslagSystem;
 
     @Inject
-    public AnnenPartRest(AnnenPartVedtakTjeneste annenPartVedtakTjeneste, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker, AktørIdOppslag aktørIdOppslag) {
+    public AnnenPartRest(AnnenPartVedtakTjeneste annenPartVedtakTjeneste, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker,
+                         PersonOppslagSystem personOppslagSystem) {
         this.annenPartVedtakTjeneste = annenPartVedtakTjeneste;
         this.tilgangkontroll = tilgangkontroll;
         this.innloggetBruker = innloggetBruker;
-        this.aktørIdOppslag = aktørIdOppslag;
+        this.personOppslagSystem = personOppslagSystem;
     }
 
     AnnenPartRest() {
@@ -46,14 +47,14 @@ public class AnnenPartRest {
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartVedtak hent(@Valid @NotNull AnnenPartVedtakRequest request) {
         tilgangkontroll.sjekkAtKallErFraBorger();
-        if (tilgangkontroll.harPersonBeskyttetAdresse(request.annenPartFødselsnummer())) {
+        if (personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer()).harBeskyttetAdresse()) {
             return null;
         }
 
         LOG.debug("Kall mot annenPart endepunkt");
         var søkerAktørId = innloggetBruker.aktørId();
-        var annenPartAktørId = aktørIdOppslag.forFnr(request.annenPartFødselsnummer());
-        var barnAktørId = request.barnFødselsnummer() == null ? null : aktørIdOppslag.forFnr(request.barnFødselsnummer());
+        var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
+        var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
         var vedtak = annenPartVedtakTjeneste.hentFor(søkerAktørId, annenPartAktørId, barnAktørId, familieHendelse);
         if (vedtak.isPresent()) {

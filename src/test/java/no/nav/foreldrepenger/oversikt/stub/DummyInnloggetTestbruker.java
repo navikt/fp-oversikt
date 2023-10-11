@@ -8,6 +8,10 @@ public record DummyInnloggetTestbruker(AktørId aktørId, Fødselsnummer fødsel
 
     private static final Fødselsnummer DUMMY_FNR = new Fødselsnummer("11111111111");
 
+    public static DummyInnloggetTestbruker myndigInnloggetBruker(AktørId aktørId) {
+        return new DummyInnloggetTestbruker(aktørId, DUMMY_FNR,true);
+    }
+
     public static DummyInnloggetTestbruker myndigInnloggetBruker() {
         return new DummyInnloggetTestbruker(AktørId.dummy(), DUMMY_FNR,true);
     }
