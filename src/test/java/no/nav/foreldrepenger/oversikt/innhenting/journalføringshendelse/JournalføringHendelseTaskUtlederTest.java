@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
+import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
@@ -21,7 +22,7 @@ class JournalføringHendelseTaskUtlederTest {
 
     @BeforeEach
     void setUp() {
-        journalføringHendelseTaskUtleder = new JournalføringHendelseTaskUtleder(fnr -> AktørId.dummy());
+        journalføringHendelseTaskUtleder = new JournalføringHendelseTaskUtleder(annenpartUbeskyttetAdresse());
     }
 
     @Test

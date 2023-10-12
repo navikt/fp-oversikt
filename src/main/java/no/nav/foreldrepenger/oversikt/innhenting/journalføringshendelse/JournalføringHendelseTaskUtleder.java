@@ -20,17 +20,17 @@ import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask;
-import no.nav.foreldrepenger.oversikt.saker.AktørIdOppslag;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
 @ApplicationScoped
 public class JournalføringHendelseTaskUtleder {
     private static final Logger LOG = LoggerFactory.getLogger(JournalføringHendelseTaskUtleder.class);
-    private AktørIdOppslag aktørIdOppslag;
+    private PersonOppslagSystem personOppslagSystem;
 
     @Inject
-    JournalføringHendelseTaskUtleder(AktørIdOppslag aktørIdOppslag) {
-        this.aktørIdOppslag = aktørIdOppslag;
+    JournalføringHendelseTaskUtleder(PersonOppslagSystem personOppslagSystem) {
+        this.personOppslagSystem = personOppslagSystem;
     }
 
     JournalføringHendelseTaskUtleder() {
@@ -105,6 +105,6 @@ public class JournalføringHendelseTaskUtleder {
         if (EnkelJournalpost.Bruker.Type.AKTØRID.equals(bruker.type())) {
             return new AktørId(bruker.ident());
         }
-        return aktørIdOppslag.forFnr(new Fødselsnummer(bruker.ident()));
+        return personOppslagSystem.aktørId(new Fødselsnummer(bruker.ident()));
     }
 }

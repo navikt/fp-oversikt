@@ -15,11 +15,13 @@ import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 public class Saker {
 
     private SakRepository sakRepository;
-    private FødselsnummerOppslag fødselsnummerOppslag;
+    private InnloggetBruker innloggetBruker;
+    private PersonOppslagSystem fødselsnummerOppslag;
 
     @Inject
-    public Saker(SakRepository sakRepository, FødselsnummerOppslag fødselsnummerOppslag) {
+    public Saker(SakRepository sakRepository, InnloggetBruker innloggetBruker, PersonOppslagSystem fødselsnummerOppslag) {
         this.sakRepository = sakRepository;
+        this.innloggetBruker = innloggetBruker;
         this.fødselsnummerOppslag = fødselsnummerOppslag;
     }
 
@@ -27,8 +29,8 @@ public class Saker {
         //CDI
     }
 
-    public no.nav.foreldrepenger.common.innsyn.Saker hent(AktørId aktørId) {
-        var saker = hentSaker(aktørId);
+    public no.nav.foreldrepenger.common.innsyn.Saker hent() {
+        var saker = hentSaker(innloggetBruker.aktørId());
         return tilDto(saker, fødselsnummerOppslag);
     }
 

@@ -6,6 +6,8 @@ import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapperTest.fh;
 import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapperTest.fpSak;
 import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapperTest.fpSakUtenSøknad;
 import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapperTest.svpSak;
+import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
+import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -39,9 +41,10 @@ class SakerTest {
         repository.lagre(fpSakUtenSøknad(aktørId));
         repository.lagre(svpSak(aktørId));
         repository.lagre(esSak(aktørId));
-        var saker = new Saker(repository, AktørId::value);
+        var innloggetBruker = myndigInnloggetBruker(aktørId);
+        var saker = new Saker(repository, innloggetBruker, annenpartUbeskyttetAdresse());
 
-        var sakerDto = saker.hent(aktørId);
+        var sakerDto = saker.hent();
 
         assertThat(sakerDto.foreldrepenger()).hasSize(2);
         assertThat(sakerDto.svangerskapspenger()).hasSize(1);
@@ -64,7 +67,7 @@ class SakerTest {
         repository.lagre(henlagtSvpSak);
         repository.lagre(henlagtEsSak);
 
-        var saker = new Saker(repository, AktørId::value);
+        var saker = new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse());
         var sakerDto = saker.hentSaker(aktørId);
 
         assertThat(sakerDto).isEmpty();

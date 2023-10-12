@@ -16,9 +16,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
-import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 @Path("/oppgaver")
@@ -29,13 +28,11 @@ public class OppgaveRest {
     private static final Logger LOG = LoggerFactory.getLogger(OppgaveRest.class);
     private Oppgaver oppgaver;
     private TilgangKontrollTjeneste tilgangkontroll;
-    private InnloggetBruker innloggetBruker;
 
     @Inject
-    public OppgaveRest(Oppgaver oppgaver, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker) {
+    public OppgaveRest(Oppgaver oppgaver, TilgangKontrollTjeneste tilgangkontroll) {
         this.oppgaver = oppgaver;
         this.tilgangkontroll = tilgangkontroll;
-        this.innloggetBruker = innloggetBruker;
     }
 
     OppgaveRest() {
@@ -61,6 +58,6 @@ public class OppgaveRest {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         LOG.info("Henter alle uttalelser om tilbakekreving på person");
-        return oppgaver.tilbakekrevingsuttalelser(innloggetBruker.aktørId());
+        return oppgaver.tilbakekrevingsuttalelser();
     }
 }

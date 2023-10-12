@@ -13,7 +13,6 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.FpSak;
 import no.nav.foreldrepenger.common.innsyn.FpÅpenBehandling;
 import no.nav.foreldrepenger.common.innsyn.Person;
@@ -24,7 +23,7 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 
 public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
@@ -52,7 +51,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag) {
+    public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
         var sisteSøknad = sisteSøknad();
         var gjeldendeVedtak = gjeldendeVedtak();
         var dekningsgrad = dekningsgrad();
@@ -60,12 +59,12 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             .map(FpVedtak::tilDto)
             .orElse(null);
 
-        var annenPart = annenPartAktørId == null ? null : new Person(new Fødselsnummer(fødselsnummerOppslag.forAktørId(annenPartAktørId)), null);
+        var annenPart = annenPartAktørId == null ? null : new Person(personOppslagSystem.fødselsnummer(annenPartAktørId), null);
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
         var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
         var barna = safeStream(fødteBarn).map(b -> {
-            var fnr = new Fødselsnummer(fødselsnummerOppslag.forAktørId(b));
+            var fnr = personOppslagSystem.fødselsnummer(b);
             return new Person(fnr, null);
         }).collect(Collectors.toSet());
         var gjelderAdopsjon = familieHendelse() != null && familieHendelse().gjelderAdopsjon();

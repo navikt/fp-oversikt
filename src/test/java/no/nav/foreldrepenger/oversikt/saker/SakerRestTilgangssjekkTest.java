@@ -22,7 +22,7 @@ class SakerRestTilgangssjekkTest {
     @Test
     void myndig_innlogget_bruker_skal_ikke_gi_exception() {
         innloggetBorger();
-        var myndigCase = new SakerRest(saker, myndigInnloggetBruker(), mock(TilgangKontrollTjeneste.class));
+        var myndigCase = new SakerRest(saker, mock(TilgangKontrollTjeneste.class));
         assertThatCode(myndigCase::hent).doesNotThrowAnyException();
     }
 
@@ -30,8 +30,8 @@ class SakerRestTilgangssjekkTest {
     void innlogget_saksbehandler_skal_ikke_få_tilgang_til_saker() {
         innloggetSaksbehandlerUtenDrift();
         var innloggetBruker = myndigInnloggetBruker();
-        var tilgangskontroll = new TilgangKontrollTjeneste(null, innloggetBruker, null);
-        var myndigCase = new SakerRest(saker, innloggetBruker, tilgangskontroll);
+        var tilgangskontroll = new TilgangKontrollTjeneste(null, innloggetBruker);
+        var myndigCase = new SakerRest(saker, tilgangskontroll);
         assertThatThrownBy(myndigCase::hent).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
@@ -39,8 +39,8 @@ class SakerRestTilgangssjekkTest {
     void umyndig_innlogget_bruker_skal_kaste_umyndigbruker_exception() {
         innloggetBorger();
         var innloggetBruker = umyndigInnloggetBruker();
-        var tilgangskontroll = new TilgangKontrollTjeneste(null, innloggetBruker, null);
-        var umyndigCase = new SakerRest(saker, innloggetBruker, tilgangskontroll);
+        var tilgangskontroll = new TilgangKontrollTjeneste(null, innloggetBruker);
+        var umyndigCase = new SakerRest(saker, tilgangskontroll);
         assertThatThrownBy(umyndigCase::hent)
             .isInstanceOf(ManglerTilgangException.class)
             .extracting("feilKode")

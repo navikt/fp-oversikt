@@ -7,27 +7,30 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.Tilbakekreving;
 import no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingRepository;
 import no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende.ManglendeVedleggRepository;
+import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 
 @ApplicationScoped
 public class Oppgaver {
 
     private ManglendeVedleggRepository manglendeVedleggRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
+    private InnloggetBruker innloggetBruker;
     private SakRepository sakRepository;
 
     @Inject
     public Oppgaver(ManglendeVedleggRepository manglendeVedleggRepository,
                     TilbakekrevingRepository tilbakekrevingRepository,
+                    InnloggetBruker innloggetBruker,
                     SakRepository sakRepository) {
         this.manglendeVedleggRepository = manglendeVedleggRepository;
         this.tilbakekrevingRepository = tilbakekrevingRepository;
+        this.innloggetBruker = innloggetBruker;
         this.sakRepository = sakRepository;
     }
 
@@ -38,7 +41,8 @@ public class Oppgaver {
         return manglendeVedleggRepository.hentFor(saksnummer);
     }
 
-    Set<TilbakekrevingUttalelseOppgave> tilbakekrevingsuttalelser(AktørId aktørId) {
+    Set<TilbakekrevingUttalelseOppgave> tilbakekrevingsuttalelser() {
+        var aktørId = innloggetBruker.aktørId();
         var saker = sakRepository.hentFor(aktørId).stream()
             .map(Sak::saksnummer)
             .collect(Collectors.toSet());

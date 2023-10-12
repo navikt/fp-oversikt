@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import no.nav.foreldrepenger.oversikt.domene.es.SakES0;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.svp.SakSVP0;
-import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 @JsonSubTypes({
@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.oversikt.saker.FødselsnummerOppslag;
 })
 public interface Sak {
 
-    no.nav.foreldrepenger.common.innsyn.Sak tilSakDto(FødselsnummerOppslag fødselsnummerOppslag);
+    no.nav.foreldrepenger.common.innsyn.Sak tilSakDto(PersonOppslagSystem personOppslagSystem);
 
     Saksnummer saksnummer();
 
