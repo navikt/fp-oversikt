@@ -39,6 +39,7 @@ public final class BehandlingTilstandUtleder {
         if (venterPåInntektsmelding(opprettetAksjonspunkt)) {
             return BehandlingTilstand.VENT_INNTEKTSMELDING;
         }
+        // TODO utvid med tilstand VENT_UTLAND_TRYGD basert på venteårsak UTLAND_TRYGD
         return BehandlingTilstand.UNDER_BEHANDLING;
     }
 
