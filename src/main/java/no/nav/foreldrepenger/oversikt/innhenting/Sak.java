@@ -36,6 +36,8 @@ public interface Sak {
             AVVENT_DOKUMTANSJON,
             AVVENT_FØDSEL,
             AVVENT_RESPONS_REVURDERING,
+            BRUKERTILBAKEMELDING,
+            UTLAND_TRYGD,
             FOR_TIDLIG_SOKNAD,
             UTVIDET_FRIST,
             INNTEKT_RAPPORTERINGSFRIST,
