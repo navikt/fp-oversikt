@@ -82,7 +82,6 @@ public class BrukernotifikasjonTjeneste {
         var sak = sakRepository.hentFor(oppgave.saksnummer());
         var brukernotifikasjonOppgave = switch (oppgave.type()) {
             case LAST_OPP_MANGLENDE_VEDLEGG -> oppgave(String.format("Det mangler vedlegg i søknaden din om %s", ytelsetype(sak.ytelse())));
-            case SVAR_TILBAKEKREVING -> oppgave("Det mangler svar på varsel om tilbakebetaling");
         };
 
         var nøkkel = nøkkel(sak, oppgave, sak.aktørId());
