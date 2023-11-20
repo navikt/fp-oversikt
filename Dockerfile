@@ -1,4 +1,4 @@
-FROM gcr.io/distroless/java21:nonroot
+FROM gcr.io/distroless/java21-debian12:nonroot
 LABEL org.opencontainers.image.source=https://github.com/navikt/fp-oversikt
 # Healtcheck lokalt/test
 COPY --from=busybox:stable-musl /bin/wget /usr/bin/wget
