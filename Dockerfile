@@ -1,5 +1,14 @@
 FROM gcr.io/distroless/java21:nonroot
 LABEL org.opencontainers.image.source=https://github.com/navikt/fp-oversikt
+# Healtcheck lokalt/test
+COPY --from=busybox:stable-musl /bin/wget /usr/bin/wget
+
+# Working dir for RUN, CMD, ENTRYPOINT, COPY and ADD (required because of nonroot user cannot run commands in root)
+WORKDIR /app
+
+COPY target/classes/logback*.xml conf/
+COPY target/lib/*.jar lib/
+COPY target/app.jar .
 
 ENV TZ=Europe/Oslo
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 \
@@ -7,13 +16,5 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 \
     -Djava.security.egd=file:/dev/urandom \
     -Duser.timezone=Europe/Oslo \
     -Dlogback.configurationFile=conf/logback.xml"
-
-# Config
-COPY target/classes/logback*.xml ./conf/
-# Application Container (Jetty)
-COPY target/lib/*.jar ./lib/
-COPY target/app.jar ./
-# Healtcheck lokalt/test
-COPY --from=busybox:stable-musl /bin/wget /usr/bin/wget
 
 CMD ["app.jar"]
