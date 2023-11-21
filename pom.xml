@@ -27,7 +27,7 @@
         <fpsoknad-felles.version>3.0.0</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.1</fp-tidsserie.version>
         <teamdokumenthandtering-avro-schemas.version>873c5cdd</teamdokumenthandtering-avro-schemas.version>
-        <brukernotifikasjon-schemas.version>2.5.2</brukernotifikasjon-schemas.version>
+        <brukernotifikasjon-schemas.version>3.0.0</brukernotifikasjon-schemas.version>
     </properties>
 
     <dependencyManagement>
