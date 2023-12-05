@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-import org.hibernate.type.FormatMapper;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.JavaType;
-import org.hibernate.type.jackson.JacksonJsonFormatMapper;
+import org.hibernate.type.format.FormatMapper;
+import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
