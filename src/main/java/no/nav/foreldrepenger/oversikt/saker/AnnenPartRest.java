@@ -47,7 +47,13 @@ public class AnnenPartRest {
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartVedtak hent(@Valid @NotNull AnnenPartVedtakRequest request) {
         tilgangkontroll.sjekkAtKallErFraBorger();
-        if (personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer()).harBeskyttetAdresse()) {
+        try {
+            var adresseBeskyttelse = personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer());
+            if (adresseBeskyttelse.harBeskyttetAdresse()) {
+                return null;
+            }
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            LOG.info("Klarer ikke å finne adressebeskyttelse for annen part, person ikke funnet i pdl. Returnerer ingen vedtak for annen part", e);
             return null;
         }
 

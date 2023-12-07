@@ -9,5 +9,5 @@ public interface PersonOppslagSystem {
 
     Fødselsnummer fødselsnummer(AktørId aktørId);
 
-    AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr);
+    AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException;
 }
