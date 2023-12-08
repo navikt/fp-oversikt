@@ -1,4 +1,4 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-public class BrukerIkkeFunnetIPdlException extends RuntimeException {
+public class BrukerIkkeFunnetIPdlException extends Exception {
 }

@@ -35,7 +35,7 @@ class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSyste
     }
 
     @Override
-    public AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) {
+    public AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException {
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr.value());
         var projection = new PersonResponseProjection()

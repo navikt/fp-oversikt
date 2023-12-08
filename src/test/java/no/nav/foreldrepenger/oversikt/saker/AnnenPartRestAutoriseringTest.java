@@ -11,6 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
@@ -23,7 +24,7 @@ class AnnenPartRestAutoriseringTest {
         var tilgangKontrollTjeneste = new TilgangKontrollTjeneste(null, innloggetBruker);
         var annenPartRest = new AnnenPartRest(null, tilgangKontrollTjeneste, innloggetBruker, annenbrukerBeskyttetAdresse());
 
-        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);
+        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("1"), null, null);
 
         assertThat(annenPartRest.hent(request)).isNull();
     }
@@ -34,9 +35,22 @@ class AnnenPartRestAutoriseringTest {
         var tilgangKontrollTjeneste = new TilgangKontrollTjeneste(null, null);
         var annenPartRest = new AnnenPartRest(null, tilgangKontrollTjeneste, null, annenpartUbeskyttetAdresse());
 
-        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("12345678910"), null, null);
+        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("1"), null, null);
 
         assertThatThrownBy(() -> annenPartRest.hent(request)).isExactlyInstanceOf(ManglerTilgangException.class);
     }
+
+    @Test
+    void sjekkAtEndepunktReturnereNullNårUkjentFnr() {
+        innloggetBorger();
+        var innloggetBruker = myndigInnloggetBruker();
+        var tilgangKontrollTjeneste = new TilgangKontrollTjeneste(null, innloggetBruker);
+        var annenPartRest = new AnnenPartRest(null, tilgangKontrollTjeneste, innloggetBruker, DummyPersonOppslagSystemTest.annenbrukerBeskyttetAdresse(new BrukerIkkeFunnetIPdlException()));
+
+        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("1"), null, null);
+
+        assertThat(annenPartRest.hent(request)).isNull();
+    }
+
 
 }
