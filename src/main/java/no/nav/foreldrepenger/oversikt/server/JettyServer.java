@@ -66,7 +66,16 @@ public class JettyServer {
         var ctx = new WebAppContext();
         ctx.setParentLoaderPriority(true);
 
-        ctx.setBaseResourceAsString(".");
+        String descriptor;
+        String baseResource;
+        try (var factory = ResourceFactory.closeable()) {
+            var resource = factory.newClassLoaderResource("/WEB-INF/web.xml", false);
+            descriptor = resource.getURI().toURL().toExternalForm();
+            baseResource = factory.newResource(".").getRealURI().toURL().toExternalForm();
+        }
+        ctx.setDescriptor(descriptor);
+        ctx.setBaseResourceAsString(baseResource);
+
         ctx.setInitParameter("org.eclipse.jetty.servlet.Default.dirAllowed", "false");
         ctx.setInitParameter("pathInfoOnly", "true");
 
@@ -77,10 +86,6 @@ public class JettyServer {
         ctx.setInitParameter(CdiServletContainerInitializer.CDI_INTEGRATION_ATTRIBUTE, CdiDecoratingListener.MODE);
         ctx.addServletContainerInitializer(new CdiServletContainerInitializer());
         ctx.addServletContainerInitializer(new org.jboss.weld.environment.servlet.EnhancedListener());
-
-        var resource = ResourceFactory.of(ctx).newClassLoaderResource("/WEB-INF/web.xml", false);
-        var descriptor = resource.getURI().toURL().toExternalForm();
-        ctx.setDescriptor(descriptor);
 
         ctx.setSecurityHandler(createSecurityHandler());
         ctx.setThrowUnavailableOnStartupException(true);
