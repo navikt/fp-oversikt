@@ -7,12 +7,20 @@
     "dbDiskAutoresize": "false",
     "dbHighAvailability": "false",
     "dbPointInTimeRecovery": "false",
-    "minReplicas": "2",
+    "minReplicas": "1",
     "maxReplicas": "2",
     "ingresses": [
         "https://fpoversikt.intern.dev.nav.no"
     ],
     "groups": [
         "f1b82579-c5b5-4617-9673-8ace5ff67f63"
-    ]
+    ],
+    "limits": {
+        "cpu": "2",
+        "mem": "2048Mi"
+    },
+    "requests": {
+        "cpu": "200m",
+        "mem": "512Mi"
+    }
 }
