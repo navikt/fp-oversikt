@@ -7,7 +7,7 @@
     "dbDiskAutoresize": "true",
     "dbHighAvailability": "true",
     "dbPointInTimeRecovery": "true",
-    "minReplicas": "3",
+    "minReplicas": "2",
     "maxReplicas": "4",
     "ingresses": [
         "https://fpoversikt.intern.nav.no"
