@@ -11,10 +11,7 @@ COPY target/lib/*.jar lib/
 COPY target/app.jar .
 
 ENV TZ=Europe/Oslo
-ENV JAVA_OPTS="-XX:MaxRAMPercentage=75 \
-    -XX:+PrintCommandLineFlags \
-    -Djava.security.egd=file:/dev/urandom \
-    -Duser.timezone=Europe/Oslo \
+ENV JAVA_OPTS="-Djava.security.egd=file:/dev/urandom \
     -Dlogback.configurationFile=conf/logback.xml"
 
 CMD ["app.jar"]
