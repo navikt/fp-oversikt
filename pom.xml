@@ -19,7 +19,7 @@
         <sonar.projectName>fp-oversikt</sonar.projectName>
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
-        <io.confluent.version>7.5.2</io.confluent.version>
+        <io.confluent.version>7.5.3</io.confluent.version>
 
         <felles.version>7.0.4</felles.version>
         <prosesstask.version>5.0.4</prosesstask.version>
@@ -27,7 +27,7 @@
         <fpsoknad-felles.version>3.0.2</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.1</fp-tidsserie.version>
         <teamdokumenthandtering-avro-schemas.version>873c5cdd</teamdokumenthandtering-avro-schemas.version>
-        <brukernotifikasjon-schemas.version>2.5.2</brukernotifikasjon-schemas.version>
+        <brukernotifikasjon-schemas.version>3.0.0</brukernotifikasjon-schemas.version>
     </properties>
 
     <dependencyManagement>
