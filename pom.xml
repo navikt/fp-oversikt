@@ -277,6 +277,12 @@
             <artifactId>felles-testutilities</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>no.nav.tms.varsel</groupId>
+            <artifactId>java-builder</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>
