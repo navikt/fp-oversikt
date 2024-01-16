@@ -45,8 +45,7 @@ public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTa
         var saksnummer = new Saksnummer(data.getPropertyValue(SAKSNUMMER));
         var erEndringssøknad = Boolean.parseBoolean(data.getPropertyValue(ER_ENDRINGSSØKNAD));
         var ytelseType = YtelseType.valueOf(data.getPropertyValue(YTELSE_TYPE));
-        // ved ny innsending med samme eventId (kanalreferanse fra journalpost) vil den regnes som duplikat av Brukernotifikasjon (ønsket resultat)
-        // se https://tms-dokumentasjon.intern.nav.no/varsler/produsere#:~:text=NokkelInput
+        // eventuell ny innsending med samme eventId (kanalreferanse fra journalpost) regnes som duplikat og ignoreres av MinSideVarsel
         var eventId = UUID.fromString(data.getPropertyValue(EVENT_ID));
         brukernotifikasjonTjeneste.sendBeskjedVedInnkommetSøknad(aktørId, saksnummer, ytelseType, erEndringssøknad, eventId);
         LOG.info("Beskjed om mottatt søknad sendt for saksnummer {}", saksnummer.value());
