@@ -64,6 +64,24 @@ class AnnenPartVedtakTjenesteTest {
     }
 
     @Test
+    void henter_annen_parts_vedtak_på_omsorgsovertakelse_i_stedet_for_fødselsdato() {
+        var repository = new RepositoryStub();
+        var aktørIdAnnenPart = AktørId.dummy();
+        var aktørIdSøker = AktørId.dummy();
+        var fødselsdato = LocalDate.now();
+        var omsorgsovertakelse = LocalDate.now().plusWeeks(1);
+        var dekningsgrad = Dekningsgrad.HUNDRE;
+        var annenPartsSak = new SakFP0(Saksnummer.dummy(), aktørIdAnnenPart, true, Set.of(new FpVedtak(now(), List.of(), dekningsgrad)), aktørIdSøker,
+            new FamilieHendelse(fødselsdato, null, 1, omsorgsovertakelse), Set.of(), Set.of(new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(), dekningsgrad)), BrukerRolle.MOR,
+            Set.of(), new Rettigheter(false, false, false), false, now());
+        repository.lagre(annenPartsSak);
+        var tjeneste = new AnnenPartVedtakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var vedtak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, omsorgsovertakelse);
+
+        assertThat(vedtak).isPresent();
+    }
+
+    @Test
     void henter_ikke_annen_parts_hvis_oppgitt_annen_annen_part() {
         var repository = new RepositoryStub();
         var aktørIdAnnenPart = AktørId.dummy();

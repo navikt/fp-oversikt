@@ -112,9 +112,9 @@ public class AnnenPartVedtakTjeneste {
     }
 
     private static boolean isEquals(LocalDate dato, FamilieHendelse fh) {
+        if (fh.omsorgsovertakelse() != null) return fh.omsorgsovertakelse().equals(dato);
         if (fh.fødselsdato() != null) return fh.fødselsdato().equals(dato);
-        if (fh.termindato() != null) return fh.termindato().equals(dato);
-        return Objects.equals(fh.omsorgsovertakelse(), dato);
+        return Objects.equals(fh.termindato(), dato);
     }
 }
 
