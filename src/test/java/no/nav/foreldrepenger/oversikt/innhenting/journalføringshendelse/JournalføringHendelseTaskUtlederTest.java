@@ -12,7 +12,7 @@ import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask;
+import no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.TaskType;
 
@@ -35,7 +35,7 @@ class JournalføringHendelseTaskUtlederTest {
             .extracting(TaskType::value)
             .containsExactly(
                 HentManglendeVedleggTask.TASK_TYPE,
-                BrukernotifikasjonBeskjedVedMottattSøknadTask.TASK_TYPE
+                MinSideBeskjedVedMottattSøknadTask.TASK_TYPE
             );
     }
 

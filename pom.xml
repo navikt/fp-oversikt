@@ -26,8 +26,8 @@
         <fp-kontrakter.version>9.0.2</fp-kontrakter.version>
         <fpsoknad-felles.version>3.0.2</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.1</fp-tidsserie.version>
+        <mittnav-varsler.version>1.0.0</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>873c5cdd</teamdokumenthandtering-avro-schemas.version>
-        <brukernotifikasjon-schemas.version>2.5.2</brukernotifikasjon-schemas.version>
     </properties>
 
     <dependencyManagement>
@@ -187,12 +187,10 @@
             <artifactId>teamdokumenthandtering-avro-schemas</artifactId>
             <version>${teamdokumenthandtering-avro-schemas.version}</version>
         </dependency>
-
-        <!--Ditt nav -->
         <dependency>
-            <groupId>com.github.navikt</groupId>
-            <artifactId>brukernotifikasjon-schemas</artifactId>
-            <version>${brukernotifikasjon-schemas.version}</version>
+            <groupId>no.nav.tms.varsel</groupId>
+            <artifactId>java-builder</artifactId>
+            <version>${mittnav-varsler.version}</version>
         </dependency>
 
         <dependency>
@@ -276,12 +274,6 @@
             <groupId>no.nav.foreldrepenger.felles</groupId>
             <artifactId>felles-testutilities</artifactId>
             <scope>test</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>no.nav.tms.varsel</groupId>
-            <artifactId>java-builder</artifactId>
-            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

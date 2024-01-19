@@ -9,16 +9,16 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = "dittnav.opprett")
-class BrukernotifikasjonOpprettOppgaveTask implements ProsessTaskHandler {
+@ProsessTask(value = "dittnav.avslutt")
+class MinSideAvsluttOppgaveTask implements ProsessTaskHandler {
 
     static final String OPPGAVE_ID = "oppgaveId";
-    private final BrukernotifikasjonTjeneste brukernotifikasjonTjeneste;
+    private final MinSideTjeneste minSideTjeneste;
     private final OppgaveRepository oppgaveRepository;
 
     @Inject
-    BrukernotifikasjonOpprettOppgaveTask(BrukernotifikasjonTjeneste brukernotifikasjonTjeneste, OppgaveRepository oppgaveRepository) {
-        this.brukernotifikasjonTjeneste = brukernotifikasjonTjeneste;
+    MinSideAvsluttOppgaveTask(MinSideTjeneste minSideTjeneste, OppgaveRepository oppgaveRepository) {
+        this.minSideTjeneste = minSideTjeneste;
         this.oppgaveRepository = oppgaveRepository;
     }
 
@@ -26,6 +26,6 @@ class BrukernotifikasjonOpprettOppgaveTask implements ProsessTaskHandler {
     public void doTask(ProsessTaskData prosessTaskData) {
         var oppgaveId = UUID.fromString(prosessTaskData.getPropertyValue(OPPGAVE_ID));
         var oppgave = oppgaveRepository.hent(oppgaveId);
-        brukernotifikasjonTjeneste.opprett(oppgave);
+        minSideTjeneste.avslutt(oppgave);
     }
 }

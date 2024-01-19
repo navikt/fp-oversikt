@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
-import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.TASK_TYPE;
+import static no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask.TASK_TYPE;
 import static no.nav.vedtak.felles.prosesstask.api.CommonTaskProperties.SAKSNUMMER;
 
 import java.util.UUID;
@@ -19,8 +19,8 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
 @ProsessTask(TASK_TYPE)
-public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTaskHandler {
-    private static final Logger LOG = LoggerFactory.getLogger(BrukernotifikasjonBeskjedVedMottattSøknadTask.class);
+public class MinSideBeskjedVedMottattSøknadTask implements ProsessTaskHandler {
+    private static final Logger LOG = LoggerFactory.getLogger(MinSideBeskjedVedMottattSøknadTask.class);
 
     public static final String TASK_TYPE = "dittnav.beskjed";
     public static final String YTELSE_TYPE = "gjelderYtelsetype";
@@ -28,14 +28,14 @@ public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTa
     public static final String AKTØRID = "aktorid";
     public static final String EVENT_ID = "eventId";
 
-    private BrukernotifikasjonTjeneste brukernotifikasjonTjeneste;
+    private MinSideTjeneste minSideTjeneste;
 
     @Inject
-    BrukernotifikasjonBeskjedVedMottattSøknadTask(BrukernotifikasjonTjeneste brukernotifikasjonTjeneste) {
-        this.brukernotifikasjonTjeneste = brukernotifikasjonTjeneste;
+    MinSideBeskjedVedMottattSøknadTask(MinSideTjeneste minSideTjeneste) {
+        this.minSideTjeneste = minSideTjeneste;
     }
 
-    BrukernotifikasjonBeskjedVedMottattSøknadTask() {
+    MinSideBeskjedVedMottattSøknadTask() {
         // CDI
     }
 
@@ -47,7 +47,7 @@ public class BrukernotifikasjonBeskjedVedMottattSøknadTask implements ProsessTa
         var ytelseType = YtelseType.valueOf(data.getPropertyValue(YTELSE_TYPE));
         // eventuell ny innsending med samme eventId (kanalreferanse fra journalpost) regnes som duplikat og ignoreres av MinSideVarsel
         var eventId = UUID.fromString(data.getPropertyValue(EVENT_ID));
-        brukernotifikasjonTjeneste.sendBeskjedVedInnkommetSøknad(aktørId, saksnummer, ytelseType, erEndringssøknad, eventId);
+        minSideTjeneste.sendBeskjedVedInnkommetSøknad(aktørId, ytelseType, erEndringssøknad, eventId);
         LOG.info("Beskjed om mottatt søknad sendt for saksnummer {}", saksnummer.value());
     }
 

@@ -16,21 +16,21 @@ import org.slf4j.LoggerFactory;
 import java.util.UUID;
 
 @ApplicationScoped
-class MinSideVarselProducer {
+public class MinSideProducer {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MinSideVarselProducer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(MinSideProducer.class);
 
     private static final Environment ENV = Environment.current();
     private String topic;
     private Producer<String, String> producer;
 
     @Inject
-    MinSideVarselProducer(@KonfigVerdi(value = "minside.kafka.varseltopic") String varselTopic) {
+    MinSideProducer(@KonfigVerdi(value = "kafka.topic.minside.brukervarsel") String varselTopic) {
         this.topic = varselTopic;
         this.producer = new KafkaProducer<>(KafkaProperties.forProducer());
     }
 
-    MinSideVarselProducer() {
+    MinSideProducer() {
         //CDI
     }
 
@@ -40,7 +40,7 @@ class MinSideVarselProducer {
 
     private void send(String topic, UUID key, String msg) {
         if (ENV.isLocal() || ENV.isVTP()) {
-            LOG.info("Dummy MinSideVarsel-producer sender msg {}", msg);
+            LOG.info("Dummy MinSideVarsel-producer sender {}", msg);
             return;
         }
 
