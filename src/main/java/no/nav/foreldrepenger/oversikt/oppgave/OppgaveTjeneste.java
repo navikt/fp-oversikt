@@ -70,18 +70,18 @@ public class OppgaveTjeneste {
     }
 
     private void opprettOpprettDittNavOppgaveTask(UUID id) {
-        var task = ProsessTaskData.forProsessTask(BrukernotifikasjonOpprettOppgaveTask.class);
+        var task = ProsessTaskData.forProsessTask(MinSideOpprettOppgaveTask.class);
         task.setCallIdFraEksisterende();
-        task.setProperty(BrukernotifikasjonOpprettOppgaveTask.OPPGAVE_ID, id.toString());
+        task.setProperty(MinSideOpprettOppgaveTask.OPPGAVE_ID, id.toString());
         task.setGruppe(id.toString());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         prosessTaskTjeneste.lagre(task);
     }
 
     private void opprettAvsluttDittNavOppgaveTask(UUID id) {
-        var task = ProsessTaskData.forProsessTask(BrukernotifikasjonAvsluttOppgaveTask.class);
+        var task = ProsessTaskData.forProsessTask(MinSideAvsluttOppgaveTask.class);
         task.setCallIdFraEksisterende();
-        task.setProperty(BrukernotifikasjonAvsluttOppgaveTask.OPPGAVE_ID, id.toString());
+        task.setProperty(MinSideAvsluttOppgaveTask.OPPGAVE_ID, id.toString());
         task.setGruppe(id.toString());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         prosessTaskTjeneste.lagre(task);

@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.AKTØRID;
-import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.ER_ENDRINGSSØKNAD;
-import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.EVENT_ID;
-import static no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask.YTELSE_TYPE;
+import static no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask.AKTØRID;
+import static no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask.ER_ENDRINGSSØKNAD;
+import static no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask.EVENT_ID;
+import static no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask.YTELSE_TYPE;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.oppgave.BrukernotifikasjonBeskjedVedMottattSøknadTask;
+import no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
@@ -83,7 +83,7 @@ public class JournalføringHendelseTaskUtleder {
     }
 
     private ProsessTaskData lagSendBrukernotifikasjonBeskjedTask(String saksnummer, DokumentTypeId dokumentType, EnkelJournalpost journalpost) {
-        var b = ProsessTaskData.forProsessTask(BrukernotifikasjonBeskjedVedMottattSøknadTask.class);
+        var b = ProsessTaskData.forProsessTask(MinSideBeskjedVedMottattSøknadTask.class);
         b.setSaksnummer(saksnummer);
         b.setCallIdFraEksisterende();
         b.setProperty(YTELSE_TYPE, dokumentType.gjelderYtelse().name());
