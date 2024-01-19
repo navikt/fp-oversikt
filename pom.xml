@@ -24,9 +24,9 @@
         <felles.version>7.0.4</felles.version>
         <prosesstask.version>5.0.4</prosesstask.version>
         <fp-kontrakter.version>9.0.2</fp-kontrakter.version>
-        <fpsoknad-felles.version>3.0.2</fpsoknad-felles.version>
+        <fpsoknad-felles.version>3.0.4</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.1</fp-tidsserie.version>
-        <mittnav-varsler.version>1.0.0</mittnav-varsler.version>
+        <mittnav-varsler.version>1.0.1</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>873c5cdd</teamdokumenthandtering-avro-schemas.version>
     </properties>
 
