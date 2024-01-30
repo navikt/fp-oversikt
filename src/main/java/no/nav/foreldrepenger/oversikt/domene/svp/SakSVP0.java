@@ -52,8 +52,8 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public boolean erUpunchetPapirsøknad() {
-        return søknadUnderBehandling().map(s -> s.tilrettelegginger().isEmpty()).orElse(false);
+    public boolean erKomplettForVisning() {
+        return søknadUnderBehandling().map(s -> s.tilrettelegginger().isEmpty()).orElse(false) || familieHendelse == null;
     }
 
     @Override

@@ -46,8 +46,8 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public boolean erUpunchetPapirsøknad() {
-        return søknadUnderBehandling().map(s -> s.perioder().isEmpty()).orElse(false);
+    public boolean erKomplettForVisning() {
+        return søknadUnderBehandling().map(s -> s.perioder().isEmpty()).orElse(false) || familieHendelse == null;
     }
 
     @Override
@@ -62,6 +62,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var annenPart = annenPartAktørId == null ? null : new Person(personOppslagSystem.fødselsnummer(annenPartAktørId), null);
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
+
         var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
         var barna = safeStream(fødteBarn).map(b -> {
             var fnr = personOppslagSystem.fødselsnummer(b);

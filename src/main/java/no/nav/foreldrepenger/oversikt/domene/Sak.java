@@ -32,7 +32,7 @@ public interface Sak {
 
     boolean avsluttet();
 
-    boolean erUpunchetPapirsøknad();
+    boolean erKomplettForVisning();
 
     YtelseType ytelse();
 
