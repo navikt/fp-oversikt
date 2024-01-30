@@ -40,8 +40,8 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public boolean erUpunchetPapirsøknad() {
-        return false;
+    public boolean erKomplettForVisning() {
+        return familieHendelse == null;
     }
 
     @Override
