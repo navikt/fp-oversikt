@@ -389,6 +389,8 @@ public class HentSakTask implements ProsessTaskHandler {
     private static Uttaksperiode.Resultat.Årsak map(FpSak.Uttaksperiode.Resultat.Årsak årsak) {
         return switch (årsak) {
             case AVSLAG_HULL_I_UTTAKSPLAN -> Uttaksperiode.Resultat.Årsak.AVSLAG_HULL_I_UTTAKSPLAN;
+            case AVSLAG_UTSETTELSE_TILBAKE_I_TID -> Uttaksperiode.Resultat.Årsak.AVSLAG_UTSETTELSE_TILBAKE_I_TID;
+            case INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID -> Uttaksperiode.Resultat.Årsak.INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID;
             case AVSLAG_FRATREKK_PLEIEPENGER -> Uttaksperiode.Resultat.Årsak.AVSLAG_FRATREKK_PLEIEPENGER;
             case ANNET -> Uttaksperiode.Resultat.Årsak.ANNET;
         };

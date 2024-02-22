@@ -82,12 +82,16 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
         public enum Årsak {
             AVSLAG_HULL_I_UTTAKSPLAN,
             AVSLAG_FRATREKK_PLEIEPENGER,
+            AVSLAG_UTSETTELSE_TILBAKE_I_TID,
+            INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID,
             ANNET;
 
             public UttakPeriodeResultat.Årsak tilDto() {
                 return switch (this) {
                     case AVSLAG_HULL_I_UTTAKSPLAN -> UttakPeriodeResultat.Årsak.AVSLAG_HULL_MELLOM_FORELDRENES_PERIODER;
                     case AVSLAG_FRATREKK_PLEIEPENGER -> UttakPeriodeResultat.Årsak.AVSLAG_FRATREKK_PLEIEPENGER;
+                    case AVSLAG_UTSETTELSE_TILBAKE_I_TID -> UttakPeriodeResultat.Årsak.AVSLAG_UTSETTELSE_TILBAKE_I_TID;
+                    case INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID -> UttakPeriodeResultat.Årsak.INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID;
                     case ANNET -> UttakPeriodeResultat.Årsak.ANNET;
                 };
             }
