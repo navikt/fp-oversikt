@@ -1,9 +1,9 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
-import no.nav.foreldrepenger.oversikt.domene.YtelseType;
-
 import java.util.Arrays;
 import java.util.Set;
+
+import no.nav.foreldrepenger.oversikt.domene.YtelseType;
 
 public enum DokumentTypeId {
     // Søknader
@@ -20,6 +20,7 @@ public enum DokumentTypeId {
 
     // Tilbakekreving
     I000114("Uttalelse tilbakekreving"),
+    I000119("Uttalelse om tilbakebetaling"),
 
     // Inntekt
     I000067("Inntektsmelding"),
@@ -52,6 +53,19 @@ public enum DokumentTypeId {
     I000116("Bekreftelse på øvelse eller tjeneste i Forsvaret eller Sivilforsvaret"),
     I000117("Bekreftelse på tiltak i regi av Arbeids- og velferdsetaten"),
 
+    I000118("Begrunnelse for sen søknad"),
+    I000120("Dokumentasjon på at mor er innlagt på sykehus"),
+    I000121("Dokumentasjon på at mor er syk"),
+    I000122("Dokumentasjon på at far/medmor er innlagt på sykehus"),
+    I000123("Dokumentasjon på at far/medmor er syk"),
+    I000124("Dokumentasjon på at barnet er innlagt på sykehus"),
+    I000130("Dokumentasjon på at mor studerer og arbeider til sammen heltid"),
+    I000131("Dokumentasjon på at mor studerer på heltid"),
+    I000132("Dokumentasjon på at mor er i arbeid"),
+    I000133("Dokumentasjon av mors deltakelse i kvalifiseringsprogrammet"),
+    I000140("Skattemelding"),
+    I000141("Terminbekreftelse"),
+
     UKJENT("Ukjent"),
     URELEVANT("Urelevant");
 
@@ -81,7 +95,19 @@ public enum DokumentTypeId {
             I000111,
             I000112,
             I000116,
-            I000117
+            I000117,
+            I000118,
+            I000120,
+            I000121,
+            I000122,
+            I000123,
+            I000124,
+            I000130,
+            I000131,
+            I000132,
+            I000133,
+            I000140,
+            I000141
     );
 
     public static final Set<DokumentTypeId> FØRSTEGANGSSØKNAD_TYPER = Set.of(
@@ -131,7 +157,7 @@ public enum DokumentTypeId {
     }
 
     public boolean erUttalelseOmTilbakekreving() {
-        return I000114.equals(this);
+        return I000114.equals(this) || I000119.equals(this);
     }
 
     public YtelseType gjelderYtelse() {
