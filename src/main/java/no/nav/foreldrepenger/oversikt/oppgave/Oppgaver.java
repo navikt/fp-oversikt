@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -37,7 +37,7 @@ public class Oppgaver {
     Oppgaver() {
     }
 
-    List<DokumentTypeId> manglendeVedlegg(Saksnummer saksnummer) {
+    List<DokumentType> manglendeVedlegg(Saksnummer saksnummer) {
         return manglendeVedleggRepository.hentFor(saksnummer);
     }
 

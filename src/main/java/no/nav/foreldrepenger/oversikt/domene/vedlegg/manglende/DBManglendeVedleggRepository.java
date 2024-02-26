@@ -12,8 +12,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 
 @ApplicationScoped
 public class DBManglendeVedleggRepository implements ManglendeVedleggRepository {
@@ -27,7 +27,7 @@ public class DBManglendeVedleggRepository implements ManglendeVedleggRepository 
     }
 
     @Override
-    public void lagreManglendeVedleggPåSak(Saksnummer saksnummer, List<DokumentTypeId> manglendeVedlegg) {
+    public void lagreManglendeVedleggPåSak(Saksnummer saksnummer, List<DokumentType> manglendeVedlegg) {
         var query = hentManglendeVedlegg(saksnummer);
         var eksisterendeManglendeVedlegg = hentUniktResultat(query);
         if (eksisterendeManglendeVedlegg.isEmpty()) {
@@ -45,7 +45,7 @@ public class DBManglendeVedleggRepository implements ManglendeVedleggRepository 
     }
 
     @Override
-    public List<DokumentTypeId> hentFor(Saksnummer saksnummer) {
+    public List<DokumentType> hentFor(Saksnummer saksnummer) {
         var manglendeVedleggEntitet = hent(saksnummer);
         return manglendeVedleggEntitet.map(ManglendeVedleggEntitet::manglendeVedlegg).orElse(List.of());
     }

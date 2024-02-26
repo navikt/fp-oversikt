@@ -3,8 +3,8 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.AKTØRID;
 import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.FNR;
-import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT;
-import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.DokumentType.UTGÅENDE_DOKUMENT;
+import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Type.INNGÅENDE_DOKUMENT;
+import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Type.UTGÅENDE_DOKUMENT;
 
 import java.util.Optional;
 
@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.saf.Bruker;
 import no.nav.saf.BrukerIdType;
 import no.nav.saf.BrukerResponseProjection;
@@ -72,7 +73,7 @@ public class SafTjeneste {
             journalpost.getSak().getFagsakId(),
             innsendingstype,
             tilBruker(journalpost.getBruker()),
-            innsendingstype.equals(INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : DokumentTypeId.URELEVANT
+            innsendingstype.equals(INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : null
         );
     }
 
@@ -91,7 +92,7 @@ public class SafTjeneste {
         };
     }
 
-    private static EnkelJournalpost.DokumentType tilType(Journalposttype journalposttype) {
+    private static EnkelJournalpost.Type tilType(Journalposttype journalposttype) {
         return switch (journalposttype) {
             case I -> INNGÅENDE_DOKUMENT;
             case U -> UTGÅENDE_DOKUMENT;
@@ -99,7 +100,7 @@ public class SafTjeneste {
         };
     }
 
-    private static DokumentTypeId dokumenttypeFraTilleggsopplysninger(Journalpost journalpost) {
+    private static DokumentType dokumenttypeFraTilleggsopplysninger(Journalpost journalpost) {
         return safeStream(journalpost.getTilleggsopplysninger())
             .filter(to -> FP_DOK_TYPE.equals(to.getNokkel()))
             .map(Tilleggsopplysning::getVerdi)
@@ -107,21 +108,21 @@ public class SafTjeneste {
             .findFirst()
             .map(d -> utledFraTittel(journalpost.getTittel()))
             .orElse(utledFraTittel(journalpost.getDokumenter().stream().findFirst().orElseThrow().getTittel()))
-            .orElse(DokumentTypeId.UKJENT);
+            .orElse(null);
     }
 
-    private static Optional<DokumentTypeId> tilDokumentTypeFraTilleggsopplysninger(String dokumentType) {
+    private static Optional<DokumentType> tilDokumentTypeFraTilleggsopplysninger(String dokumentType) {
         try {
-            return Optional.of(DokumentTypeId.valueOf(dokumentType));
+            return Optional.of(DokumentType.valueOf(dokumentType));
         } catch (Exception e) {
             LOG.info("Ukjent/urelevant dokumentTypeId fra SAF tilleggsopplysninger: {}", dokumentType);
             return Optional.empty();
         }
     }
 
-    private static Optional<DokumentTypeId> utledFraTittel(String tittel) {
+    private static Optional<DokumentType> utledFraTittel(String tittel) {
         try {
-            return Optional.of(DokumentTypeId.fraTittel(tittel));
+            return Optional.of(DokumentType.fraTittel(tittel));
         } catch (Exception e) {
             LOG.info("Klarte ikke utlede dokumentTypeId fra SAF tittel: {}", tittel);
             return Optional.empty();

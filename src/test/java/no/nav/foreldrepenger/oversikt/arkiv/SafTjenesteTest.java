@@ -10,15 +10,14 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
-import no.nav.saf.AvsenderMottaker;
-
-import no.nav.saf.AvsenderMottakerIdType;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.saf.AvsenderMottaker;
+import no.nav.saf.AvsenderMottakerIdType;
 import no.nav.saf.Bruker;
 import no.nav.saf.BrukerIdType;
 import no.nav.saf.DokumentInfo;
@@ -43,7 +42,7 @@ class SafTjenesteTest {
 
     @Test
     void verifiserInnholdMappesKorrektForJournalpost() {
-        var dokumentTypeId = DokumentTypeId.I000001;
+        var dokumentTypeId = DokumentType.I000001;
         var journalførtSøknad = journalførtSøknad(dokumentTypeId);
         when(saf.hentJournalpostInfo(any(), any())).thenReturn(journalførtSøknad);
 
@@ -58,7 +57,7 @@ class SafTjenesteTest {
 
     @Test
     void verifiserAtDokumentIdUtledesFraTittelVedManglendeTilleggopplysningsfelt() {
-        var dokumentTypeId = DokumentTypeId.I000001;
+        var dokumentTypeId = DokumentType.I000001;
         var journalpostUtenTilleggsopplysninger = journalpostUtenTilleggsopplysninger(dokumentTypeId);
         when(saf.hentJournalpostInfo(any(), any())).thenReturn(journalpostUtenTilleggsopplysninger);
 
@@ -70,7 +69,7 @@ class SafTjenesteTest {
     }
 
 
-    private static Journalpost journalpostUtenTilleggsopplysninger(DokumentTypeId dokumentTypeId) {
+    private static Journalpost journalpostUtenTilleggsopplysninger(DokumentType dokumentTypeId) {
         var journalpost = new Journalpost();
         journalpost.setJournalposttype(Journalposttype.I);
         journalpost.setJournalstatus(Journalstatus.MOTTATT);
@@ -90,7 +89,7 @@ class SafTjenesteTest {
         return journalpost;
     }
 
-    private static Journalpost journalførtSøknad(DokumentTypeId dokumentTypeId) {
+    private static Journalpost journalførtSøknad(DokumentType dokumentTypeId) {
         var journalpost = new Journalpost();
         journalpost.setJournalposttype(Journalposttype.I);
         journalpost.setJournalstatus(Journalstatus.MOTTATT);
@@ -110,7 +109,7 @@ class SafTjenesteTest {
         return journalpost;
     }
 
-    private static DokumentInfo pdfDokument(DokumentTypeId dokumentTypeId) {
+    private static DokumentInfo pdfDokument(DokumentType dokumentTypeId) {
         var dokument = new DokumentInfo();
         dokument.setDokumentInfoId("123");
         dokument.setTittel(dokumentTypeId.getTittel());
@@ -120,7 +119,7 @@ class SafTjenesteTest {
         return dokument;
     }
 
-    private static DokumentInfo xmlDokument(DokumentTypeId dokumentTypeId) {
+    private static DokumentInfo xmlDokument(DokumentType dokumentTypeId) {
         var dokument = new DokumentInfo();
         dokument.setDokumentInfoId("456");
         dokument.setTittel(dokumentTypeId.getTittel());

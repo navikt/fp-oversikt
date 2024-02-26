@@ -1,13 +1,15 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
 
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+
 public record EnkelJournalpost(String journalpostId,
                                String eksternReferanse,
                                String saksnummer,
-                               DokumentType type,
+                               Type type,
                                Bruker bruker,
-                               DokumentTypeId hovedtype) {
-    public enum DokumentType {
+                               DokumentType hovedtype) {
+    public enum Type {
         INNGÅENDE_DOKUMENT,
         UTGÅENDE_DOKUMENT
     }

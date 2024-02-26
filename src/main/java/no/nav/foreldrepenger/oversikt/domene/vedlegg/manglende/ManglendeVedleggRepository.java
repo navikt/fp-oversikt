@@ -2,14 +2,14 @@ package no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende;
 
 import java.util.List;
 
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 
 public interface ManglendeVedleggRepository {
 
-    void lagreManglendeVedleggPåSak(Saksnummer saksnummer, List<DokumentTypeId> manglendeVedlegg);
+    void lagreManglendeVedleggPåSak(Saksnummer saksnummer, List<DokumentType> manglendeVedlegg);
 
-    List<DokumentTypeId> hentFor(Saksnummer saksnummer);
+    List<DokumentType> hentFor(Saksnummer saksnummer);
 
     void slett(Saksnummer saksnummer);
 }
