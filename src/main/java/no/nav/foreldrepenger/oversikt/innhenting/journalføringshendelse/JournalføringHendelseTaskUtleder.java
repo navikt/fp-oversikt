@@ -16,9 +16,10 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.YtelseType;
 import no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -40,6 +41,10 @@ public class JournalføringHendelseTaskUtleder {
     List<ProsessTaskData> utledProsesstask(EnkelJournalpost journalpost) {
         var saksnummer = journalpost.saksnummer();
         var dokumenttype = journalpost.hovedtype();
+        if (dokumenttype == null) {
+            return List.of();
+        }
+
         if (dokumenttype.erFørstegangssøknad() || dokumenttype.erEndringssøknad()) {
             return List.of(lagHentManglendeVedleggTask(saksnummer), lagSendBrukernotifikasjonBeskjedTask(saksnummer, dokumenttype, journalpost));
         } else if (dokumenttype.erVedlegg()) {
@@ -82,11 +87,11 @@ public class JournalføringHendelseTaskUtleder {
         return t;
     }
 
-    private ProsessTaskData lagSendBrukernotifikasjonBeskjedTask(String saksnummer, DokumentTypeId dokumentType, EnkelJournalpost journalpost) {
+    private ProsessTaskData lagSendBrukernotifikasjonBeskjedTask(String saksnummer, DokumentType dokumentType, EnkelJournalpost journalpost) {
         var b = ProsessTaskData.forProsessTask(MinSideBeskjedVedMottattSøknadTask.class);
         b.setSaksnummer(saksnummer);
         b.setCallIdFraEksisterende();
-        b.setProperty(YTELSE_TYPE, dokumentType.gjelderYtelse().name());
+        b.setProperty(YTELSE_TYPE, gjelderYtelse(dokumentType).name());
         b.setProperty(ER_ENDRINGSSØKNAD, Boolean.toString(dokumentType.erEndringssøknad()));
         b.setProperty(AKTØRID, tilAktørid(journalpost.bruker()).value());
         b.setProperty(EVENT_ID, kanalreferanseTilUuid(journalpost.eksternReferanse()).toString());
@@ -106,5 +111,14 @@ public class JournalføringHendelseTaskUtleder {
             return new AktørId(bruker.ident());
         }
         return personOppslagSystem.aktørId(new Fødselsnummer(bruker.ident()));
+    }
+
+    private static YtelseType gjelderYtelse(DokumentType dokumentType) {
+        return switch (dokumentType) {
+            case I000001 -> YtelseType.SVANGERSKAPSPENGER;
+            case I000002, I000005,  I000006, I000050 -> YtelseType.FORELDREPENGER;
+            case I000003, I000004 -> YtelseType.ENGANGSSTØNAD;
+            default -> throw new IllegalStateException("Ikke definert relevant ytelse for " + dokumentType.name());
+        };
     }
 }

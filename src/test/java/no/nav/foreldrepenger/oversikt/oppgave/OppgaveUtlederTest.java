@@ -6,14 +6,14 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 
 
 class OppgaveUtlederTest {
 
     @Test
     void oppgave_hvis_manglende_vedlegg() {
-        var utledet = OppgaveUtleder.utledFor(List.of(DokumentTypeId.I000061));
+        var utledet = OppgaveUtleder.utledFor(List.of(DokumentType.I000061));
         assertThat(utledet).contains(OppgaveType.LAST_OPP_MANGLENDE_VEDLEGG);
     }
 

@@ -16,7 +16,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
@@ -42,7 +42,7 @@ public class OppgaveRest {
     @GET
     @Path("/manglendevedlegg")
     @Produces(MediaType.APPLICATION_JSON)
-    public List<DokumentTypeId> manglendeVedlegg(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
+    public List<DokumentType> manglendeVedlegg(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         tilgangkontroll.sakKobletTilAktørGuard(saksnummer);

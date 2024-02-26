@@ -4,16 +4,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.Sak;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.Inntektsmelding;
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
 
 public class FpsakTjenesteStub implements FpsakTjeneste {
 
     private final Map<Saksnummer, Sak> saker = new ConcurrentHashMap<>();
-    private final Map<Saksnummer, List<DokumentTypeId>> manglendeVedlegg = new ConcurrentHashMap<>();
+    private final Map<Saksnummer, List<DokumentType>> manglendeVedlegg = new ConcurrentHashMap<>();
     private final Map<Saksnummer, List<Inntektsmelding>> inntektsmeldinger = new ConcurrentHashMap<>();
 
     public FpsakTjenesteStub leggTilSak(Sak sak) {
@@ -21,7 +21,7 @@ public class FpsakTjenesteStub implements FpsakTjeneste {
         return this;
     }
 
-    public FpsakTjenesteStub leggTilManglendeVedlegg(Saksnummer saksnummer, List<DokumentTypeId> vedlegg) {
+    public FpsakTjenesteStub leggTilManglendeVedlegg(Saksnummer saksnummer, List<DokumentType> vedlegg) {
         manglendeVedlegg.put(saksnummer, List.copyOf(vedlegg));
         return this;
     }
@@ -37,7 +37,7 @@ public class FpsakTjenesteStub implements FpsakTjeneste {
     }
 
     @Override
-    public List<DokumentTypeId> hentManglendeVedlegg(Saksnummer saksnummer) {
+    public List<DokumentType> hentManglendeVedlegg(Saksnummer saksnummer) {
         return manglendeVedlegg.get(saksnummer);
     }
 

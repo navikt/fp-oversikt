@@ -8,7 +8,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeId;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -83,9 +83,9 @@ class JournalføringHendelseTaskUtlederTest {
             "123",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
-            EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
+            EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.AKTØRID, AktørId.dummy().value()),
-            DokumentTypeId.I000001
+            DokumentType.I000001
         );
     }
 
@@ -94,9 +94,9 @@ class JournalføringHendelseTaskUtlederTest {
             "123",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
-            EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
+            EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.FNR, "000000"),
-            DokumentTypeId.I000038
+            DokumentType.I000038
         );
     }
 
@@ -105,9 +105,9 @@ class JournalføringHendelseTaskUtlederTest {
             "123",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
-            EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
+            EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.AKTØRID, "000000"),
-            DokumentTypeId.I000067
+            DokumentType.I000067
         );
     }
 
@@ -116,9 +116,9 @@ class JournalføringHendelseTaskUtlederTest {
             "123",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
-            EnkelJournalpost.DokumentType.INNGÅENDE_DOKUMENT,
+            EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.FNR, "000000"),
-            DokumentTypeId.I000114
+            DokumentType.I000114
         );
     }
 }
