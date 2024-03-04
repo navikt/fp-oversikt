@@ -122,7 +122,7 @@ public class BehandlingHendelseHåndterer {
         var task = ProsessTaskData.forProsessTask(HentManglendeVedleggTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
-        task.setGruppe(saksnummer + "-V");
+        task.setGruppe(saksnummer.value() + "-V");
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
     }
