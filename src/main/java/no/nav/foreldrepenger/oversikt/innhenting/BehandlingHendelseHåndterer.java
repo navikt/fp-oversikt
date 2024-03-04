@@ -77,7 +77,7 @@ public class BehandlingHendelseHåndterer {
         var task = ProsessTaskData.forProsessTask(HentInntektsmeldingerTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
-        task.setGruppe(saksnummer + "-I");
+        task.setGruppe(saksnummer.value() + "-I");
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
     }
@@ -110,7 +110,7 @@ public class BehandlingHendelseHåndterer {
         var task = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
-        task.setGruppe(saksnummer + "-T");
+        task.setGruppe(saksnummer.value() + "-T");
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         if (hendelse == Hendelse.VENTETILSTAND) { //Venter her for at fptilbake skal rekke å sende ut varslingsbrev
             task.setNesteKjøringEtter(LocalDateTime.now().plusSeconds(60));
