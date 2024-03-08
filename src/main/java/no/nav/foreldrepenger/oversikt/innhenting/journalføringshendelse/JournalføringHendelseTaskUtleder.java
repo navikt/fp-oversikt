@@ -9,6 +9,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,9 +64,14 @@ public class JournalføringHendelseTaskUtleder {
         var m = ProsessTaskData.forProsessTask(HentManglendeVedleggTask.class);
         m.setSaksnummer(saksnummer);
         m.setCallIdFraEksisterende();
-        m.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+        m.setSekvens(genererNesteSekvens());
         m.setGruppe(saksnummer + "-V");
         return m;
+    }
+
+    private static String genererNesteSekvens() {
+        //Prøver å hindre samme sekvens innad i samme taskgruppe
+        return String.valueOf(Instant.now().toEpochMilli() + ThreadLocalRandom.current().nextLong(100L));
     }
 
     private ProsessTaskData lagHentInntektsmeldingTask(String saksnummer, String journalpostId) {
@@ -75,7 +81,7 @@ public class JournalføringHendelseTaskUtleder {
         i.setCallIdFraEksisterende();
         i.medNesteKjøringEtter(LocalDateTime.now().plus(HentInntektsmeldingerTask.TASK_DELAY));
         i.setGruppe(saksnummer + "-I");
-        i.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+        i.setSekvens(genererNesteSekvens());
         return i;
     }
 
