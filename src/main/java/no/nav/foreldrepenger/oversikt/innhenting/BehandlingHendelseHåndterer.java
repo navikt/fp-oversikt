@@ -12,10 +12,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import no.nav.foreldrepenger.konfig.Environment;
+import no.nav.foreldrepenger.konfig.KonfigVerdi;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentInntektsmeldingerTask;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentManglendeVedleggTask;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask;
+import no.nav.vedtak.felles.integrasjon.kafka.KafkaMessageHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.vedtak.hendelser.behandling.Hendelse;
@@ -26,25 +29,34 @@ import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 @ApplicationScoped
 @ActivateRequestContext
 @Transactional
-public class BehandlingHendelseHåndterer {
+public class BehandlingHendelseHåndterer implements KafkaMessageHandler.KafkaStringMessageHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(BehandlingHendelseHåndterer.class);
 
     private static final Set<Hendelse> IGNORE = Set.of(Hendelse.ENHET, Hendelse.MIGRERING);
 
+    private static final Environment ENV = Environment.current();
+
+    private static final String PROD_GROUP_ID = "fpoversikt-behandling"; // Hold konstant pga offset commit !!
+    private static final long HANDLE_MESSAGE_INTERVAL_MILLIS = 20;
+
     private ProsessTaskTjeneste taskTjeneste;
+    private String topicName;
 
     @Inject
-    public BehandlingHendelseHåndterer(ProsessTaskTjeneste taskTjeneste) {
+    public BehandlingHendelseHåndterer(ProsessTaskTjeneste taskTjeneste,
+                                       @KonfigVerdi(value = "kafka.behandlinghendelse.topic", defaultVerdi = "teamforeldrepenger.behandling-hendelse-v1") String topicName) {
         this.taskTjeneste = taskTjeneste;
+        this.topicName = topicName;
     }
 
     public BehandlingHendelseHåndterer() {
 
     }
 
-    void handleMessage(String topic, String key, String payload) {
-        LOG.debug("Lest fra : topic={}", topic);
+    @Override
+    public void handleRecord(String key, String payload) {
+        LOG.debug("Lest fra : topic={}", topicName);
         try {
             var hendelse = map(payload);
             var hendelseType = hendelse.getHendelse();
@@ -65,6 +77,16 @@ public class BehandlingHendelseHåndterer {
             }
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
+        }
+        sleep();
+    }
+
+    private static void sleep() {
+        try {
+            Thread.sleep(HANDLE_MESSAGE_INTERVAL_MILLIS);
+        } catch (InterruptedException e) {
+            LOG.warn("Interrupt!", e);
+            Thread.currentThread().interrupt();
         }
     }
 
@@ -131,5 +153,16 @@ public class BehandlingHendelseHåndterer {
         return DefaultJsonMapper.fromJson(payload, BehandlingHendelseV1.class);
     }
 
+    @Override
+    public String topic() {
+        return topicName;
+    }
 
+    @Override
+    public String groupId() {
+        if (!ENV.isProd()) {
+            return PROD_GROUP_ID + (ENV.isDev() ? "-dev" : "-vtp");
+        }
+        return PROD_GROUP_ID;
+    }
 }

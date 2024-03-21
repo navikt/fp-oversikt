@@ -10,6 +10,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
+import no.nav.foreldrepenger.konfig.Environment;
+import no.nav.foreldrepenger.konfig.KonfigVerdi;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerRepository;
@@ -19,6 +21,7 @@ import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentInn
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentManglendeVedleggTask;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask;
 import no.nav.foreldrepenger.oversikt.innhenting.tilbakekreving.FptilbakeTjeneste;
+import no.nav.vedtak.felles.integrasjon.kafka.KafkaMessageHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
@@ -28,9 +31,13 @@ import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 @ApplicationScoped
 @ActivateRequestContext
 @Transactional
-public class BehandlingMigreringHåndterer {
+public class BehandlingMigreringHåndterer implements KafkaMessageHandler.KafkaStringMessageHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(BehandlingMigreringHåndterer.class);
+
+    private static final Environment ENV = Environment.current();
+
+    private static final String PROD_GROUP_ID = "fpoversikt-migrering"; // Hold konstant pga offset commit !!
 
     private ProsessTaskTjeneste taskTjeneste;
     private FpsakTjeneste fpSakKlient;
@@ -39,15 +46,18 @@ public class BehandlingMigreringHåndterer {
     private InntektsmeldingerRepository inntektsmeldingerRepository;
     private TilbakekrevingRepository tilbakekrevingRepository;
     private ManglendeVedleggRepository manglendeVedleggRepository;
+    private String topicName;
 
     @Inject
-    public BehandlingMigreringHåndterer(ProsessTaskTjeneste taskTjeneste,
+    public BehandlingMigreringHåndterer(@KonfigVerdi(value = "kafka.migerering.topic", defaultVerdi = "teamforeldrepenger.fpoversikt-migrering-v1") String topicName,
+                                        ProsessTaskTjeneste taskTjeneste,
                                         FpsakTjeneste fpSakKlient,
                                         FptilbakeTjeneste fptilbakeTjeneste,
                                         SakRepository sakRepository,
                                         InntektsmeldingerRepository inntektsmeldingerRepository,
                                         TilbakekrevingRepository tilbakekrevingRepository,
                                         ManglendeVedleggRepository manglendeVedleggRepository) {
+        this.topicName = topicName;
         this.taskTjeneste = taskTjeneste;
         this.fpSakKlient = fpSakKlient;
         this.fptilbakeTjeneste = fptilbakeTjeneste;
@@ -61,8 +71,9 @@ public class BehandlingMigreringHåndterer {
 
     }
 
-    void handleMessage(String topic, String key, String payload) {
-        LOG.info("Lest fra : topic={}", topic);
+    @Override
+    public void handleRecord(String key, String payload) {
+        LOG.info("Lest fra : topic={}", topicName);
         try {
             var hendelse = map(payload);
             hentSak(hendelse);
@@ -162,5 +173,18 @@ public class BehandlingMigreringHåndterer {
 
     private static BehandlingHendelseV1 map(String payload) {
         return DefaultJsonMapper.fromJson(payload, BehandlingHendelseV1.class);
+    }
+
+    @Override
+    public String topic() {
+        return topicName;
+    }
+
+    @Override
+    public String groupId() {
+        if (!ENV.isProd()) {
+            return PROD_GROUP_ID + (ENV.isDev() ? "-dev" : "-vtp");
+        }
+        return PROD_GROUP_ID;
     }
 }
