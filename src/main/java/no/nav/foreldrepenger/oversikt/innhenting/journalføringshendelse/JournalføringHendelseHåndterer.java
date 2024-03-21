@@ -61,8 +61,9 @@ public class JournalføringHendelseHåndterer implements KafkaMessageHandler<Str
     }
 
     private static boolean hendelseSkalHåndteres(JournalfoeringHendelseRecord value) {
-        return TEMA_FOR.equals(value.getTemaNytt()) && (MOTTAKSKANAL_ALTINN.equals(value.getMottaksKanal())
-            || MOTTAKSKANAL_SELVBETJENING.equals(value.getMottaksKanal()) && HENDELSE_ENDELIG_JOURNALFØRT.equals(value.getHendelsesType()));
+        return TEMA_FOR.equals(value.getTemaNytt())
+            && (MOTTAKSKANAL_ALTINN.equals(value.getMottaksKanal()) || MOTTAKSKANAL_SELVBETJENING.equals(value.getMottaksKanal()))
+            && HENDELSE_ENDELIG_JOURNALFØRT.equals(value.getHendelsesType());
     }
 
     /*
