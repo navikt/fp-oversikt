@@ -16,11 +16,9 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.konfig.KonfigVerdi;
 import no.nav.vedtak.felles.integrasjon.kafka.KafkaProperties;
-import no.nav.vedtak.log.metrics.Controllable;
-import no.nav.vedtak.log.metrics.LiveAndReadinessAware;
 
 @ApplicationScoped
-public class BehandlingMigreringConsumer implements LiveAndReadinessAware, Controllable {
+public class BehandlingMigreringConsumer {
 
     private static final Logger LOG = LoggerFactory.getLogger(BehandlingMigreringConsumer.class);
     private static final Environment ENV = Environment.current();
@@ -47,26 +45,22 @@ public class BehandlingMigreringConsumer implements LiveAndReadinessAware, Contr
         this.stream = new KafkaStreams(builder.build(), KafkaProperties.forStreamsStringValue(getApplicationId()));
     }
 
-    @Override
     public void start() {
         addShutdownHooks();
         stream.start();
         LOG.info("Starter konsumering av topic={}, tilstand={}", getTopicName(), stream.state());
     }
 
-    @Override
     public void stop() {
         LOG.info("Starter shutdown av topic={}, tilstand={} med 15 sekunder timeout", getTopicName(), stream.state());
         stream.close(Duration.ofSeconds(15));
         LOG.info("Shutdown av topic={}, tilstand={} med 15 sekunder timeout", getTopicName(), stream.state());
     }
 
-    @Override
     public boolean isAlive() {
         return (stream != null && stream.state().isRunningOrRebalancing());
     }
 
-    @Override
     public boolean isReady() {
         return isAlive();
     }

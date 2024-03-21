@@ -16,14 +16,12 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.konfig.KonfigVerdi;
 import no.nav.joarkjournalfoeringhendelser.JournalfoeringHendelseRecord;
 import no.nav.vedtak.felles.integrasjon.kafka.KafkaProperties;
-import no.nav.vedtak.log.metrics.Controllable;
-import no.nav.vedtak.log.metrics.LiveAndReadinessAware;
 
 /*
  * Dokumentasjon https://confluence.adeo.no/display/BOA/Joarkhendelser
  */
 @ApplicationScoped
-public class JournalHendelseConsumer implements LiveAndReadinessAware, Controllable {
+public class JournalHendelseConsumer {
 
     private static final Logger LOG = LoggerFactory.getLogger(JournalHendelseConsumer.class);
 
@@ -79,7 +77,6 @@ public class JournalHendelseConsumer implements LiveAndReadinessAware, Controlla
         });
     }
 
-    @Override
     public void start() {
         addShutdownHooks();
 
@@ -91,17 +88,14 @@ public class JournalHendelseConsumer implements LiveAndReadinessAware, Controlla
         return topic.topic();
     }
 
-    @Override
     public boolean isAlive() {
         return (stream != null) && stream.state().isRunningOrRebalancing();
     }
 
-    @Override
     public boolean isReady() {
         return isAlive();
     }
 
-    @Override
     public void stop() {
         LOG.info("Starter shutdown av topic={}, tilstand={} med 15 sekunder timeout", getTopicName(), stream.state());
         stream.close(Duration.ofSeconds(15));
