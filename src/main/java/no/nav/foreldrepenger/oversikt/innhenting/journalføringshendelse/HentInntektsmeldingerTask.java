@@ -27,6 +27,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 @ProsessTask(value = TASK_TYPE, maxFailedRuns = HentInntektsmeldingerTask.MAX_FAILED_RUNS, thenDelay = 60 * 15)
 public class HentInntektsmeldingerTask implements ProsessTaskHandler {
 
+
     public static final String TASK_TYPE = "hent.inntektsmeldinger";
     public static final Duration TASK_DELAY = Duration.ofSeconds(30);
     public static final String JOURNALPOST_ID = HentDataFraJoarkForHåndteringTask.JOURNALPOST_ID;
