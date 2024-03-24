@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import java.util.List;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,7 +23,7 @@ public class JournalHendelseConsumer implements LiveAndReadinessAware, Controlla
 
     @Inject
     public JournalHendelseConsumer(JournalføringHendelseHåndterer journalføringHendelseHåndterer) {
-        this.kcm = new KafkaConsumerManager<>(List.of(journalføringHendelseHåndterer));
+        this.kcm = new KafkaConsumerManager<>(journalføringHendelseHåndterer);
     }
 
     @Override

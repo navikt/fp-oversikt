@@ -12,7 +12,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.context.control.ActivateRequestContext;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.konfig.KonfigVerdi;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentInntektsmeldingerTask;
@@ -35,9 +34,7 @@ public class BehandlingHendelseHåndterer implements KafkaMessageHandler.KafkaSt
 
     private static final Set<Hendelse> IGNORE = Set.of(Hendelse.ENHET, Hendelse.MIGRERING);
 
-    private static final Environment ENV = Environment.current();
-
-    private static final String PROD_GROUP_ID = "fpoversikt-behandling"; // Hold konstant pga offset commit !!
+    private static final String GROUP_ID = "fpoversikt-behandling"; // Hold konstant pga offset commit !!
     private static final long HANDLE_MESSAGE_INTERVAL_MILLIS = 20;
 
     private ProsessTaskTjeneste taskTjeneste;
@@ -160,9 +157,6 @@ public class BehandlingHendelseHåndterer implements KafkaMessageHandler.KafkaSt
 
     @Override
     public String groupId() {
-        if (!ENV.isProd()) {
-            return PROD_GROUP_ID + (ENV.isDev() ? "-dev" : "-vtp");
-        }
-        return PROD_GROUP_ID;
+        return GROUP_ID;
     }
 }
