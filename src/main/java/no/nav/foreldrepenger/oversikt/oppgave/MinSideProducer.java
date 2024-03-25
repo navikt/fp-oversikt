@@ -1,11 +1,6 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import no.nav.foreldrepenger.konfig.Environment;
-import no.nav.foreldrepenger.konfig.KonfigVerdi;
-import no.nav.vedtak.exception.IntegrasjonException;
-import no.nav.vedtak.felles.integrasjon.kafka.KafkaProperties;
+import java.util.UUID;
 
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
@@ -13,7 +8,12 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.UUID;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.foreldrepenger.konfig.Environment;
+import no.nav.foreldrepenger.konfig.KonfigVerdi;
+import no.nav.vedtak.exception.IntegrasjonException;
+import no.nav.vedtak.felles.integrasjon.kafka.KafkaProperties;
 
 @ApplicationScoped
 public class MinSideProducer {
@@ -39,7 +39,7 @@ public class MinSideProducer {
     }
 
     private void send(String topic, UUID key, String msg) {
-        if (ENV.isLocal() || ENV.isVTP()) {
+        if (ENV.isLocal()) {
             LOG.info("Dummy MinSideVarsel-producer sender {}", msg);
             return;
         }

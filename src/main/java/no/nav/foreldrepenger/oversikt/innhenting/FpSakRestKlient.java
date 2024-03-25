@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.UriBuilder;
 import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.Inntektsmelding;
+import no.nav.vedtak.felles.integrasjon.rest.FpApplication;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
@@ -15,7 +16,7 @@ import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 
 @ApplicationScoped
-@RestClientConfig(tokenConfig = TokenFlow.AZUREAD_CC, endpointProperty = "fpsak.base.url", endpointDefault = "https://fpsak-api.prod-fss-pub.nais.io/fpsak", scopesProperty = "fpsak.scopes", scopesDefault = "api://prod-fss.teamforeldrepenger.fpsak/.default")
+@RestClientConfig(tokenConfig = TokenFlow.AZUREAD_CC, application = FpApplication.FPSAK)
 class FpSakRestKlient implements FpsakTjeneste {
 
     private static final String FPSAK_API = "/api";
