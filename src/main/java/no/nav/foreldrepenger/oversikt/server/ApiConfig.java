@@ -1,5 +1,12 @@
 package no.nav.foreldrepenger.oversikt.server;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import org.glassfish.jersey.server.ServerProperties;
+
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.integration.GenericOpenApiContextBuilder;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
@@ -17,15 +24,11 @@ import no.nav.foreldrepenger.oversikt.oppgave.OppgaveRest;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
 import no.nav.vedtak.exception.TekniskException;
-import org.glassfish.jersey.server.ServerProperties;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-@ApplicationPath("/api")
+@ApplicationPath(ApiConfig.API_URI)
 public class ApiConfig extends Application {
+
+    public static final String API_URI ="/api";
 
     private static final Environment ENV = Environment.current();
 
@@ -55,7 +58,7 @@ public class ApiConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         // eksponert grensesnitt bak sikkerhet
-        return Set.of(InntektsmeldingRest.class, OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class, OpenApiResource.class, GeneralRestExceptionMapper.class);
+        return Set.of(InntektsmeldingRest.class, OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class, AuthenticationFilter.class, OpenApiResource.class, GeneralRestExceptionMapper.class);
     }
 
     @Override
