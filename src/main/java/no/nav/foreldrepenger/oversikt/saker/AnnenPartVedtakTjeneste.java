@@ -89,7 +89,7 @@ public class AnnenPartVedtakTjeneste {
 
         if (annenPartsSaker.size() > 1) {
             var saksnummer = annenPartsSaker.stream().map(ForeldrepengerSak::saksnummer).collect(Collectors.toSet());
-            LOG.warn("Fant flere enn 1 sak ved oppslag av annen parts vedtaksperioder."
+            LOG.info("Fant flere enn 1 sak ved oppslag av annen parts vedtaksperioder."
                 + " Velger sak med siste søknad. Saksnummer {}.", saksnummer);
         }
         return annenPartsSaker.stream()
