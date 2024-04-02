@@ -21,7 +21,7 @@
 
         <io.confluent.version>7.6.0</io.confluent.version>
 
-        <felles.version>7.0.9</felles.version>
+        <felles.version>7.0.10</felles.version>
         <prosesstask.version>5.0.5</prosesstask.version>
         <fp-kontrakter.version>9.1.8</fp-kontrakter.version>
         <fpsoknad-felles.version>3.0.7</fpsoknad-felles.version>
@@ -68,8 +68,12 @@
 
     <dependencies>
         <dependency>
-            <groupId>no.nav.foreldrepenger.felles.sikkerhet</groupId>
-            <artifactId>felles-sikkerhet</artifactId>
+            <groupId>no.nav.foreldrepenger.felles</groupId>
+            <artifactId>felles-oidc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles</groupId>
+            <artifactId>felles-auth-filter</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
@@ -125,23 +129,11 @@
         <!-- Server -->
         <dependency>
             <groupId>org.eclipse.jetty.ee10</groupId>
-            <artifactId>jetty-ee10-annotations</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.ee10</groupId>
             <artifactId>jetty-ee10-webapp</artifactId>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty.ee10</groupId>
             <artifactId>jetty-ee10-cdi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-security</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.ee10</groupId>
-            <artifactId>jetty-ee10-jaspi</artifactId>
         </dependency>
 
         <!-- Prometheus -->
