@@ -59,23 +59,24 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             .map(FpVedtak::tilDto)
             .orElse(null);
 
-        var annenPart = annenPartAktørId == null ? null : new Person(personOppslagSystem.fødselsnummer(annenPartAktørId), null);
+        var annenPart = Optional.ofNullable(annenPartAktørId).flatMap(a -> mapPerson(personOppslagSystem, a));
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
 
         var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
-        var barna = safeStream(fødteBarn).map(b -> {
-            var fnr = personOppslagSystem.fødselsnummer(b);
-            return new Person(fnr, null);
-        }).collect(Collectors.toSet());
+        var barna = safeStream(fødteBarn).flatMap(b -> mapPerson(personOppslagSystem, b).stream()).collect(Collectors.toSet());
         var gjelderAdopsjon = familieHendelse() != null && familieHendelse().gjelderAdopsjon();
         var morUføretrygd = rettigheter != null && rettigheter.morUføretrygd();
         var harAnnenForelderTilsvarendeRettEØS = rettigheter != null && rettigheter.annenForelderTilsvarendeRettEØS();
         var rettighetType = utledRettighetType(rettigheter, sisteSøknad.map(FpSøknad::perioder).orElse(Set.of()), gjeldendeVedtak.map(
             FpVedtak::perioder).orElse(List.of()));
         return new FpSak(saksnummer.tilDto(), avsluttet, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
-            morUføretrygd, harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart, fh, fpVedtak, åpenBehandling,
+            morUføretrygd, harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart.orElse(null), fh, fpVedtak, åpenBehandling,
             barna, dekningsgrad == null ? null : dekningsgrad.tilDto(), oppdatertTidspunkt());
+    }
+
+    private Optional<Person> mapPerson(PersonOppslagSystem personOppslagSystem, AktørId aktørId) {
+        return personOppslagSystem.fødselsnummerSjekkBeskyttelse(aktørId).map(fnr -> new Person(fnr, null));
     }
 
     @Override
