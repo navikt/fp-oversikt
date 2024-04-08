@@ -6,7 +6,7 @@
     <parent>
         <groupId>no.nav.foreldrepenger.felles</groupId>
         <artifactId>fp-bom</artifactId>
-        <version>3.1.2</version>
+        <version>3.1.4</version>
     </parent>
 
     <groupId>no.nav.foreldrepenger</groupId>
@@ -21,12 +21,12 @@
 
         <io.confluent.version>7.6.0</io.confluent.version>
 
-        <felles.version>7.0.10</felles.version>
-        <prosesstask.version>5.0.5</prosesstask.version>
+        <felles.version>7.1.1</felles.version>
+        <prosesstask.version>5.0.7</prosesstask.version>
         <fp-kontrakter.version>9.1.8</fp-kontrakter.version>
         <fpsoknad-felles.version>3.0.7</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.1</fp-tidsserie.version>
-        <mittnav-varsler.version>1.0.2</mittnav-varsler.version>
+        <mittnav-varsler.version>1.0.3-test-3</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>1.1.0</teamdokumenthandtering-avro-schemas.version>
     </properties>
 
@@ -35,7 +35,7 @@
             <dependency>
                 <groupId>no.nav.foreldrepenger.felles</groupId>
                 <artifactId>fp-bom</artifactId>
-                <version>3.1.2</version>
+                <version>3.1.4</version>
                 <scope>import</scope>
                 <type>pom</type>
             </dependency>
