@@ -19,7 +19,7 @@
         <sonar.projectName>fp-oversikt</sonar.projectName>
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
-        <io.confluent.version>7.6.0</io.confluent.version>
+        <io.confluent.version>7.6.1</io.confluent.version>
 
         <felles.version>7.0.10</felles.version>
         <prosesstask.version>5.0.5</prosesstask.version>
