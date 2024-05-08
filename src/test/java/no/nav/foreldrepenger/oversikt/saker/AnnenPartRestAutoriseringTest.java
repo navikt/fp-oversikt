@@ -24,9 +24,9 @@ class AnnenPartRestAutoriseringTest {
         var tilgangKontrollTjeneste = new TilgangKontrollTjeneste(null, innloggetBruker);
         var annenPartRest = new AnnenPartRest(null, tilgangKontrollTjeneste, innloggetBruker, annenbrukerBeskyttetAdresse());
 
-        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("1"), null, null);
+        var request = new AnnenPartRest.AnnenPartRequest(new Fødselsnummer("1"), null, null);
 
-        assertThat(annenPartRest.hent(request)).isNull();
+        assertThat(annenPartRest.hentVedtak(request)).isNull();
     }
 
     @Test
@@ -35,9 +35,9 @@ class AnnenPartRestAutoriseringTest {
         var tilgangKontrollTjeneste = new TilgangKontrollTjeneste(null, null);
         var annenPartRest = new AnnenPartRest(null, tilgangKontrollTjeneste, null, annenpartUbeskyttetAdresse());
 
-        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("1"), null, null);
+        var request = new AnnenPartRest.AnnenPartRequest(new Fødselsnummer("1"), null, null);
 
-        assertThatThrownBy(() -> annenPartRest.hent(request)).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> annenPartRest.hentVedtak(request)).isExactlyInstanceOf(ManglerTilgangException.class);
     }
 
     @Test
@@ -47,9 +47,9 @@ class AnnenPartRestAutoriseringTest {
         var tilgangKontrollTjeneste = new TilgangKontrollTjeneste(null, innloggetBruker);
         var annenPartRest = new AnnenPartRest(null, tilgangKontrollTjeneste, innloggetBruker, DummyPersonOppslagSystemTest.annenbrukerBeskyttetAdresse(new BrukerIkkeFunnetIPdlException()));
 
-        var request = new AnnenPartRest.AnnenPartVedtakRequest(new Fødselsnummer("1"), null, null);
+        var request = new AnnenPartRest.AnnenPartRequest(new Fødselsnummer("1"), null, null);
 
-        assertThat(annenPartRest.hent(request)).isNull();
+        assertThat(annenPartRest.hentVedtak(request)).isNull();
     }
 
 

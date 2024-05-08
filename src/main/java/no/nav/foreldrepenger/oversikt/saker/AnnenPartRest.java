@@ -16,7 +16,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.innsyn.AnnenPartVedtak;
+import no.nav.foreldrepenger.common.innsyn.AnnenPartSak;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 @Path("/annenPart")
@@ -26,15 +26,15 @@ public class AnnenPartRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(AnnenPartRest.class);
 
-    private AnnenPartVedtakTjeneste annenPartVedtakTjeneste;
+    private AnnenPartSakTjeneste annenPartSakTjeneste;
     private TilgangKontrollTjeneste tilgangkontroll;
     private InnloggetBruker innloggetBruker;
     private PersonOppslagSystem personOppslagSystem;
 
     @Inject
-    public AnnenPartRest(AnnenPartVedtakTjeneste annenPartVedtakTjeneste, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker,
+    public AnnenPartRest(AnnenPartSakTjeneste annenPartSakTjeneste, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker,
                          PersonOppslagSystem personOppslagSystem) {
-        this.annenPartVedtakTjeneste = annenPartVedtakTjeneste;
+        this.annenPartSakTjeneste = annenPartSakTjeneste;
         this.tilgangkontroll = tilgangkontroll;
         this.innloggetBruker = innloggetBruker;
         this.personOppslagSystem = personOppslagSystem;
@@ -43,9 +43,35 @@ public class AnnenPartRest {
     AnnenPartRest() {
     }
 
+    @Path("/v2")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public AnnenPartVedtak hent(@Valid @NotNull AnnenPartVedtakRequest request) {
+    public AnnenPartSak hent(@Valid @NotNull AnnenPartRest.AnnenPartRequest request) {
+        tilgangkontroll.sjekkAtKallErFraBorger();
+        try {
+            var adresseBeskyttelse = personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer());
+            if (adresseBeskyttelse.harBeskyttetAdresse()) {
+                return null;
+            }
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            LOG.info("Klarer ikke å finne adressebeskyttelse for annen part, person ikke funnet i pdl. Returnerer ingen sak for annen part", e);
+            return null;
+        }
+
+        var søkerAktørId = innloggetBruker.aktørId();
+        var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
+        var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
+        var familieHendelse = request.familiehendelse();
+        var annenPartSak = annenPartSakTjeneste.hentFor(søkerAktørId, annenPartAktørId, barnAktørId, familieHendelse);
+        if (annenPartSak.isPresent()) {
+            LOG.info("Returnerer annen parts sak. Antall perioder {} dekningsgrad {}", annenPartSak.get().perioder().size(), annenPartSak.get().dekningsgrad());
+        }
+        return annenPartSak.orElse(null);
+    }
+
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public AnnenPartSak hentVedtak(@Valid @NotNull AnnenPartRest.AnnenPartRequest request) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         try {
             var adresseBeskyttelse = personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer());
@@ -62,13 +88,13 @@ public class AnnenPartRest {
         var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
         var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
-        var vedtak = annenPartVedtakTjeneste.hentFor(søkerAktørId, annenPartAktørId, barnAktørId, familieHendelse);
+        var vedtak = annenPartSakTjeneste.hentVedtak(søkerAktørId, annenPartAktørId, barnAktørId, familieHendelse);
         if (vedtak.isPresent()) {
             LOG.info("Returnerer annen parts vedtak. Antall perioder {} dekningsgrad {}", vedtak.get().perioder().size(), vedtak.get().dekningsgrad());
         }
         return vedtak.orElse(null);
     }
 
-    public record AnnenPartVedtakRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer, LocalDate familiehendelse) {
+    public record AnnenPartRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer, LocalDate familiehendelse) {
     }
 }
