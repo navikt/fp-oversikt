@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -14,33 +12,33 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.innsyn.AnnenPartVedtak;
+import no.nav.foreldrepenger.common.innsyn.AnnenPartSak;
 import no.nav.foreldrepenger.common.innsyn.Dekningsgrad;
 import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
-import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
 
 @ApplicationScoped
-public class AnnenPartVedtakTjeneste {
+public class AnnenPartSakTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AnnenPartVedtakTjeneste.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AnnenPartSakTjeneste.class);
 
     private Saker saker;
 
     @Inject
-    public AnnenPartVedtakTjeneste(Saker saker) {
+    public AnnenPartSakTjeneste(Saker saker) {
         this.saker = saker;
     }
 
-    AnnenPartVedtakTjeneste() {
+    AnnenPartSakTjeneste() {
         //CDI
     }
 
-    Optional<AnnenPartVedtak> hentFor(AktørId søker,
+    Optional<AnnenPartSak> hentFor(AktørId søker,
                                       AktørId annenPart,
                                       AktørId barn,
                                       LocalDate familiehendelse) {
@@ -55,7 +53,37 @@ public class AnnenPartVedtakTjeneste {
 
         var gjeldendeSakForAnnenPartOpt = gjeldendeSak(fpSaker, søker, barn, familiehendelse);
         if (gjeldendeSakForAnnenPartOpt.isEmpty()) {
-            LOG.info("Finner ingen sak som ikke er avsluttet der annen part har oppgitt søker");
+            LOG.info("Finner ingen sak der annen part har oppgitt søker");
+            return Optional.empty();
+        }
+        var gjeldendeSak = gjeldendeSakForAnnenPartOpt.get();
+        LOG.info("Fant gjeldende sak for annen part med saksnummer {}", gjeldendeSak.saksnummer().value());
+        var termindato = gjeldendeSak.familieHendelse().termindato();
+        var antallBarn = gjeldendeSak.familieHendelse().antallBarn();
+        var dekningsgrad = switch (gjeldendeSak.dekningsgrad()) {
+            case ÅTTI -> Dekningsgrad.ÅTTI;
+            case HUNDRE -> Dekningsgrad.HUNDRE;
+        };
+        var uttakperioder = finnUttaksperioder(gjeldendeSak);
+        return Optional.of(new AnnenPartSak(fjernArbeidsgivere(uttakperioder), termindato, dekningsgrad, antallBarn));
+    }
+
+    Optional<AnnenPartSak> hentVedtak(AktørId søker,
+                                      AktørId annenPart,
+                                      AktørId barn,
+                                      LocalDate familiehendelse) {
+        var fpSaker = saker.hentSaker(annenPart).stream()
+            .filter(ForeldrepengerSak.class::isInstance)
+            .map(s -> (ForeldrepengerSak) s)
+            .collect(Collectors.toSet());
+        if (fpSaker.isEmpty()) {
+            LOG.info("Annen part har ingen saker om foreldrepenger");
+            return Optional.empty();
+        }
+
+        var gjeldendeSakForAnnenPartOpt = gjeldendeSak(fpSaker, søker, barn, familiehendelse);
+        if (gjeldendeSakForAnnenPartOpt.isEmpty()) {
+            LOG.info("Finner ingen sak der annen part har oppgitt søker");
             return Optional.empty();
         }
         var gjeldendeSak = gjeldendeSakForAnnenPartOpt.get();
@@ -71,12 +99,21 @@ public class AnnenPartVedtakTjeneste {
             case ÅTTI -> Dekningsgrad.ÅTTI;
             case HUNDRE -> Dekningsgrad.HUNDRE;
         };
-        return Optional.of(new AnnenPartVedtak(filterSensitive(gjeldendeVedtak.get()), termindato, dekningsgrad, antallBarn));
+        var vedtaksperioder = gjeldendeVedtak.get().perioder().stream().map(Uttaksperiode::tilDto).toList();
+        return Optional.of(new AnnenPartSak(fjernArbeidsgivere(vedtaksperioder), termindato, dekningsgrad, antallBarn));
     }
 
-    private static List<UttakPeriode> filterSensitive(FpVedtak gjeldendeVedtak) {
+    private static List<UttakPeriode> finnUttaksperioder(ForeldrepengerSak gjeldendeSak) {
+        //Fra vedtak, ellers søknad
+        return gjeldendeSak.gjeldendeVedtak().map(gjeldendeVedtak -> gjeldendeVedtak.perioder().stream().map(Uttaksperiode::tilDto).toList()).orElseGet(() -> {
+            LOG.info("Annen parts gjeldende sak har ingen gjeldende vedtak. Saksnummer {}", gjeldendeSak.saksnummer());
+            return gjeldendeSak.sisteSøknad().map(s -> s.perioder().stream().map(FpSøknadsperiode::tilDto).toList()).orElse(List.of());
+        });
+    }
+
+    private static List<UttakPeriode> fjernArbeidsgivere(List<UttakPeriode> uttakperioder) {
         //SKal ikke kunne se annen parts arbeidsgivere
-        return safeStream(gjeldendeVedtak.perioder()).map(Uttaksperiode::tilDto).map(p -> {
+        return uttakperioder.stream().map(p -> {
             var gradering = p.gradering() == null ? null : new Gradering(p.gradering().arbeidstidprosent(), null);
             return new UttakPeriode(p.fom(), p.tom(),
                 p.kontoType(), p.resultat(), p.utsettelseÅrsak(), p.oppholdÅrsak(), p.overføringÅrsak(), gradering,
