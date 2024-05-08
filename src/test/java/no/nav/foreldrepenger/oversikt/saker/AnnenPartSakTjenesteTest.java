@@ -27,7 +27,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 
-class AnnenPartVedtakTjenesteTest {
+class AnnenPartSakTjenesteTest {
 
     @Test
     void henter_annen_parts_vedtak_på_barns_aktørId() {
