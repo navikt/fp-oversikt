@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
@@ -99,13 +101,13 @@ public class AnnenPartSakTjeneste {
             case ÅTTI -> Dekningsgrad.ÅTTI;
             case HUNDRE -> Dekningsgrad.HUNDRE;
         };
-        var vedtaksperioder = gjeldendeVedtak.get().perioder().stream().map(Uttaksperiode::tilDto).toList();
+        var vedtaksperioder = safeStream(gjeldendeVedtak.get().perioder()).map(Uttaksperiode::tilDto).toList();
         return Optional.of(new AnnenPartSak(fjernArbeidsgivere(vedtaksperioder), termindato, dekningsgrad, antallBarn));
     }
 
     private static List<UttakPeriode> finnUttaksperioder(ForeldrepengerSak gjeldendeSak) {
         //Fra vedtak, ellers søknad
-        return gjeldendeSak.gjeldendeVedtak().map(gjeldendeVedtak -> gjeldendeVedtak.perioder().stream().map(Uttaksperiode::tilDto).toList()).orElseGet(() -> {
+        return gjeldendeSak.gjeldendeVedtak().map(gjeldendeVedtak -> safeStream(gjeldendeVedtak.perioder()).map(Uttaksperiode::tilDto).toList()).orElseGet(() -> {
             LOG.info("Annen parts gjeldende sak har ingen gjeldende vedtak. Saksnummer {}", gjeldendeSak.saksnummer());
             return gjeldendeSak.sisteSøknad().map(s -> s.perioder().stream().map(FpSøknadsperiode::tilDto).toList()).orElse(List.of());
         });
