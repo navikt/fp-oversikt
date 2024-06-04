@@ -18,7 +18,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(TASK_TYPE)
+@ProsessTask(value = TASK_TYPE, prioritet = 2)
 public class MinSideBeskjedVedMottattSøknadTask implements ProsessTaskHandler {
     private static final Logger LOG = LoggerFactory.getLogger(MinSideBeskjedVedMottattSøknadTask.class);
 

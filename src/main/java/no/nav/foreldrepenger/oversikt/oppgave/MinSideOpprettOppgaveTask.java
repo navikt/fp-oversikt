@@ -9,7 +9,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
 @ApplicationScoped
-@ProsessTask(value = "dittnav.opprett")
+@ProsessTask(value = "dittnav.opprett", prioritet = 2)
 class MinSideOpprettOppgaveTask implements ProsessTaskHandler {
 
     static final String OPPGAVE_ID = "oppgaveId";

@@ -15,7 +15,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 
 @ApplicationScoped
-@ProsessTask("hendelse.hentFraJoark")
+@ProsessTask(value = "hendelse.hentFraJoark", prioritet = 2)
 public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
 
     private static final Logger LOG = LoggerFactory.getLogger(HentDataFraJoarkForHåndteringTask.class);
