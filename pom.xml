@@ -21,9 +21,9 @@
 
         <io.confluent.version>7.6.1</io.confluent.version>
 
-        <felles.version>7.2.0</felles.version>
+        <felles.version>7.2.1</felles.version>
         <prosesstask.version>5.0.9</prosesstask.version>
-        <fp-kontrakter.version>9.1.12</fp-kontrakter.version>
+        <fp-kontrakter.version>9.1.15</fp-kontrakter.version>
         <fpsoknad-felles.version>3.1.1</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.1</fp-tidsserie.version>
         <mittnav-varsler.version>1.0.4</mittnav-varsler.version>
