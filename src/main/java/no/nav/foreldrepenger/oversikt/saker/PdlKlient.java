@@ -6,8 +6,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
-import no.nav.pdl.Foedsel;
-import no.nav.pdl.FoedselResponseProjection;
+import no.nav.pdl.Foedselsdato;
+import no.nav.pdl.FoedselsdatoResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
 import no.nav.pdl.PersonResponseProjection;
 import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
@@ -30,11 +30,11 @@ class PdlKlient extends AbstractPersonKlient {
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr);
         var projection = new PersonResponseProjection()
-            .foedsel(new FoedselResponseProjection().foedselsdato());
+            .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato());
         var person = hentPerson(request, projection);
-        return person.getFoedsel().stream()
+        return person.getFoedselsdato().stream()
             .findFirst()
-            .map(Foedsel::getFoedselsdato)
+            .map(Foedselsdato::getFoedselsdato)
             .map(LocalDate::parse)
             .orElseThrow();
     }
