@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import java.time.LocalDate;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,12 +36,5 @@ public class OppslagInnloggetBruker implements InnloggetBruker {
     @Override
     public Fødselsnummer fødselsnummer() {
         return new Fødselsnummer(KontekstHolder.getKontekst().getUid());
-    }
-
-    @Override
-    public boolean erMyndig() {
-        var fnr = KontekstHolder.getKontekst().getUid();
-        var fødselsdato = pdlKlient.fødselsdato(fnr);
-        return fødselsdato.plusYears(18).isBefore(LocalDate.now());
     }
 }

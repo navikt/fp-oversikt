@@ -23,7 +23,7 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 
 
 public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
@@ -51,7 +51,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
+    public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(TilgangKontroll tilgangKontroll) {
         var sisteSøknad = sisteSøknad();
         var gjeldendeVedtak = gjeldendeVedtak();
         var dekningsgrad = dekningsgrad();
@@ -59,12 +59,12 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             .map(FpVedtak::tilDto)
             .orElse(null);
 
-        var annenPart = Optional.ofNullable(annenPartAktørId).flatMap(a -> mapPerson(personOppslagSystem, a));
+        var annenPart = Optional.ofNullable(annenPartAktørId).flatMap(a -> mapPerson(tilgangKontroll, a));
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
 
         var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
-        var barna = safeStream(fødteBarn).flatMap(b -> mapPerson(personOppslagSystem, b).stream()).collect(Collectors.toSet());
+        var barna = safeStream(fødteBarn).flatMap(b -> mapPerson(tilgangKontroll, b).stream()).collect(Collectors.toSet());
         var gjelderAdopsjon = familieHendelse() != null && familieHendelse().gjelderAdopsjon();
         var morUføretrygd = rettigheter != null && rettigheter.morUføretrygd();
         var harAnnenForelderTilsvarendeRettEØS = rettigheter != null && rettigheter.annenForelderTilsvarendeRettEØS();
@@ -75,8 +75,11 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             barna, dekningsgrad == null ? null : dekningsgrad.tilDto(), oppdatertTidspunkt());
     }
 
-    private Optional<Person> mapPerson(PersonOppslagSystem personOppslagSystem, AktørId aktørId) {
-        return personOppslagSystem.fødselsnummerSjekkBeskyttelse(aktørId).map(fnr -> new Person(fnr, null));
+    private Optional<Person> mapPerson(TilgangKontroll tilgangKontroll, AktørId aktørId) {
+        if (tilgangKontroll.erUkjentPerson(aktørId.value()) || tilgangKontroll.harAdresseBeskyttelse(aktørId.value())) {
+            return Optional.empty();
+        }
+        return Optional.of(new Person(tilgangKontroll.fødselsnummer(aktørId), null));
     }
 
     @Override

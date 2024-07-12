@@ -10,7 +10,7 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 
 @Path("/saker")
 @ApplicationScoped
@@ -19,10 +19,10 @@ public class SakerRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SakerRest.class);
     private Saker saker;
-    private TilgangKontrollTjeneste tilgangkontroll;
+    private TilgangKontroll tilgangkontroll;
 
     @Inject
-    public SakerRest(Saker saker, TilgangKontrollTjeneste tilgangkontroll) {
+    public SakerRest(Saker saker, TilgangKontroll tilgangkontroll) {
         this.saker = saker;
         this.tilgangkontroll = tilgangkontroll;
     }

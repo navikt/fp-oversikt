@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.oversikt.domene.svp;
 import static java.time.LocalDate.now;
 import static no.nav.foreldrepenger.oversikt.domene.svp.Aktivitet.Type;
 import static no.nav.foreldrepenger.oversikt.domene.svp.OppholdPeriode.Årsak.FERIE;
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDateTime;
@@ -20,6 +19,7 @@ import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
+import no.nav.foreldrepenger.oversikt.stub.TilgangKontrollStub;
 
 class DtoMapperTest {
 
@@ -44,7 +44,7 @@ class DtoMapperTest {
             Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(tilrettelegging))), Set.of(vedtak),
             LocalDateTime.now());
 
-        var dto = sakSVP0.tilSakDto(annenpartUbeskyttetAdresse());
+        var dto = sakSVP0.tilSakDto(TilgangKontrollStub.borger(true));
         assertThat(dto.sakAvsluttet()).isFalse();
         assertThat(dto.familiehendelse().antallBarn()).isEqualTo(antallBarn);
         assertThat(dto.familiehendelse().fødselsdato()).isNull();

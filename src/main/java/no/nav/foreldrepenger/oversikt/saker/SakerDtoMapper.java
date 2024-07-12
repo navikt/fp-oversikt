@@ -7,15 +7,16 @@ import no.nav.foreldrepenger.common.innsyn.EsSak;
 import no.nav.foreldrepenger.common.innsyn.FpSak;
 import no.nav.foreldrepenger.common.innsyn.svp.SvpSak;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 
 final class SakerDtoMapper {
 
     private SakerDtoMapper() {
     }
 
-    static no.nav.foreldrepenger.common.innsyn.Saker tilDto(List<Sak> saker, PersonOppslagSystem personOppslagSystem) {
+    static no.nav.foreldrepenger.common.innsyn.Saker tilDto(List<Sak> saker, TilgangKontroll tilgangKontroll) {
         var sakerDtoer = saker.stream()
-            .map(s -> s.tilSakDto(personOppslagSystem))
+            .map(s -> s.tilSakDto(tilgangKontroll))
             .collect(Collectors.toSet());
 
         var foreldrepenger = sakerDtoer.stream()

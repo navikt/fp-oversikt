@@ -17,7 +17,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.AnnenPartSak;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 
 @Path("/annenPart")
 @ApplicationScoped
@@ -27,12 +27,12 @@ public class AnnenPartRest {
     private static final Logger LOG = LoggerFactory.getLogger(AnnenPartRest.class);
 
     private AnnenPartSakTjeneste annenPartSakTjeneste;
-    private TilgangKontrollTjeneste tilgangkontroll;
+    private TilgangKontroll tilgangkontroll;
     private InnloggetBruker innloggetBruker;
     private PersonOppslagSystem personOppslagSystem;
 
     @Inject
-    public AnnenPartRest(AnnenPartSakTjeneste annenPartSakTjeneste, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker,
+    public AnnenPartRest(AnnenPartSakTjeneste annenPartSakTjeneste, TilgangKontroll tilgangkontroll, InnloggetBruker innloggetBruker,
                          PersonOppslagSystem personOppslagSystem) {
         this.annenPartSakTjeneste = annenPartSakTjeneste;
         this.tilgangkontroll = tilgangkontroll;
@@ -48,13 +48,8 @@ public class AnnenPartRest {
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartSak hent(@Valid @NotNull AnnenPartRest.AnnenPartRequest request) {
         tilgangkontroll.sjekkAtKallErFraBorger();
-        try {
-            var adresseBeskyttelse = personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer());
-            if (adresseBeskyttelse.harBeskyttetAdresse()) {
-                return null;
-            }
-        } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.info("Klarer ikke å finne adressebeskyttelse for annen part, person ikke funnet i pdl. Returnerer ingen sak for annen part", e);
+        var annenpartsFødselsnummer = request.annenPartFødselsnummer();
+        if (tilgangkontroll.erUkjentPerson(annenpartsFødselsnummer.value()) || tilgangkontroll.harAdresseBeskyttelse(annenpartsFødselsnummer.value())) {
             return null;
         }
 
@@ -73,19 +68,14 @@ public class AnnenPartRest {
     @Produces(MediaType.APPLICATION_JSON)
     public AnnenPartSak hentVedtak(@Valid @NotNull AnnenPartRest.AnnenPartRequest request) {
         tilgangkontroll.sjekkAtKallErFraBorger();
-        try {
-            var adresseBeskyttelse = personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer());
-            if (adresseBeskyttelse.harBeskyttetAdresse()) {
-                return null;
-            }
-        } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.info("Klarer ikke å finne adressebeskyttelse for annen part, person ikke funnet i pdl. Returnerer ingen vedtak for annen part", e);
+        var annenpartsFødselsnummer = request.annenPartFødselsnummer();
+        if (tilgangkontroll.erUkjentPerson(annenpartsFødselsnummer.value()) || tilgangkontroll.harAdresseBeskyttelse(annenpartsFødselsnummer.value())) {
             return null;
         }
 
         LOG.debug("Kall mot annenPart endepunkt");
         var søkerAktørId = innloggetBruker.aktørId();
-        var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
+        var annenPartAktørId = personOppslagSystem.aktørId(annenpartsFødselsnummer);
         var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
         var vedtak = annenPartSakTjeneste.hentVedtak(søkerAktørId, annenPartAktørId, barnAktørId, familieHendelse);
