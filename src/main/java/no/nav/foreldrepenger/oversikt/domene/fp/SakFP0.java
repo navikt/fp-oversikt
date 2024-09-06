@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.domene.fp;
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.Konto.FORELDREPENGER;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -129,7 +130,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                 .map(FpSøknadsperiode::tilDto)
                 .sorted(Comparator.comparing(UttakPeriode::fom))
                 .toList();
-            return new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()), perioder);
+            return new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()), compress(perioder));
         }).orElse(null);
     }
 
