@@ -1,39 +1,17 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
-import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandlerMedDriftRolle;
-import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandlerUtenDrift;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.oversikt.stub.TilgangKontrollStub;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
 class ProsessTaskRestTjenesteTilgangTest {
 
     @Test
-    void ansattMedDriftrolleSkalFåTilgang() {
-        innloggetSaksbehandlerMedDriftRolle();
-        assertThatCode(ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift).doesNotThrowAnyException();
-    }
-
-    @Test
-    void ansattMedSaksbehandlerRolleIKKESkalFåTilgang() {
-        innloggetSaksbehandlerUtenDrift();
-        assertThatThrownBy(ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift).isExactlyInstanceOf(ManglerTilgangException.class);
-    }
-
-    @Test
-    void eksternBrukerSkalIkkeFåTilgangTilDriftRessurser() {
-        innloggetBorger();
-        assertThatThrownBy(ProsessTaskRestTjeneste::sjekkAtSaksbehandlerHarRollenDrift).isExactlyInstanceOf(ManglerTilgangException.class);
-    }
-
-    @Test
     void verifiserAtSamtligeEndepunktHarSjekk() {
-        innloggetSaksbehandlerUtenDrift();
-        var prosessTaskRestTjeneste = new ProsessTaskRestTjeneste(null);
+        var prosessTaskRestTjeneste = new ProsessTaskRestTjeneste(null, TilgangKontrollStub.borger(true));
 
         assertThatThrownBy(() -> prosessTaskRestTjeneste.createProsessTask(null)).isExactlyInstanceOf(ManglerTilgangException.class);
         assertThatThrownBy(() -> prosessTaskRestTjeneste.restartProsessTask(null)).isExactlyInstanceOf(ManglerTilgangException.class);

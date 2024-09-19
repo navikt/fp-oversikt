@@ -10,19 +10,20 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 
 @ApplicationScoped
 public class Saker {
 
     private SakRepository sakRepository;
     private InnloggetBruker innloggetBruker;
-    private PersonOppslagSystem fødselsnummerOppslag;
+    private TilgangKontroll tilgangKontroll;
 
     @Inject
-    public Saker(SakRepository sakRepository, InnloggetBruker innloggetBruker, PersonOppslagSystem fødselsnummerOppslag) {
+    public Saker(SakRepository sakRepository, InnloggetBruker innloggetBruker, TilgangKontroll tilgangKontroll) {
         this.sakRepository = sakRepository;
         this.innloggetBruker = innloggetBruker;
-        this.fødselsnummerOppslag = fødselsnummerOppslag;
+        this.tilgangKontroll = tilgangKontroll;
     }
 
     Saker() {
@@ -31,7 +32,7 @@ public class Saker {
 
     public no.nav.foreldrepenger.common.innsyn.Saker hent() {
         var saker = hentSaker(innloggetBruker.aktørId());
-        return tilDto(saker, fødselsnummerOppslag);
+        return tilDto(saker, tilgangKontroll);
     }
 
     List<Sak> hentSaker(AktørId aktørId) {

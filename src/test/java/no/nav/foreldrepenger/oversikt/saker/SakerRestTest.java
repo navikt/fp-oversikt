@@ -1,15 +1,12 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import static java.time.LocalDate.now;
-import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettHentSakTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Type;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Årsak;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -17,7 +14,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
@@ -48,21 +44,15 @@ import no.nav.foreldrepenger.oversikt.innhenting.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.innhenting.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.stub.FpsakTjenesteStub;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
+import no.nav.foreldrepenger.oversikt.stub.TilgangKontrollStub;
 
 class SakerRestTest {
-
-    @BeforeEach
-    public void initializeKontekst() {
-        innloggetBorger();
-    }
 
     @Test
     void hent_fp_sak_roundtrip_test() {
         var innloggetBruker = myndigInnloggetBruker();
-        var annenpart = annenpartUbeskyttetAdresse();
         var repository = new RepositoryStub();
-        var tjeneste = new SakerRest(new Saker(repository, innloggetBruker, annenpart), mock(TilgangKontrollTjeneste.class));
+        var tjeneste = new SakerRest(new Saker(repository, innloggetBruker, TilgangKontrollStub.borger(true)), TilgangKontrollStub.borger(true));
 
         var arbeidstidsprosent = new Prosent(BigDecimal.valueOf(33.33));
         var aktivitet = new FpSak.UttakAktivitet(FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString());
@@ -132,7 +122,7 @@ class SakerRestTest {
     void hent_svp_sak_roundtrip_test() {
         var innloggetBruker = myndigInnloggetBruker();
         var repository = new RepositoryStub();
-        var tjeneste = new SakerRest(new Saker(repository, innloggetBruker, annenpartUbeskyttetAdresse()), mock(TilgangKontrollTjeneste.class));
+        var tjeneste = new SakerRest(new Saker(repository, innloggetBruker, TilgangKontrollStub.borger(true)), TilgangKontrollStub.borger(true));
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
         var aktivitet = new SvpSak.Aktivitet(SvpSak.Aktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null);
@@ -169,7 +159,7 @@ class SakerRestTest {
     void hent_es_sak_roundtrip_test() {
         var innloggetBruker = myndigInnloggetBruker();
         var repository = new RepositoryStub();
-        var tjeneste = new SakerRest(new Saker(repository, innloggetBruker, annenpartUbeskyttetAdresse()), mock(TilgangKontrollTjeneste.class));
+        var tjeneste = new SakerRest(new Saker(repository, innloggetBruker, TilgangKontrollStub.borger(true)), TilgangKontrollStub.borger(true));
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
         var sakFraFpsak = new EsSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, true, ventTidligSøknadAp(),

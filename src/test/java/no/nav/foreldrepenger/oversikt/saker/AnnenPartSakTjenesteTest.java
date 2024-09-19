@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import static java.time.LocalDateTime.now;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -26,6 +25,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.Konto;
 import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
+import no.nav.foreldrepenger.oversikt.stub.TilgangKontrollStub;
 
 class AnnenPartSakTjenesteTest {
 
@@ -42,7 +42,7 @@ class AnnenPartSakTjenesteTest {
             termindato.minusWeeks(1));
         repository.lagre(annenPartsSak);
         repository.lagre(annenPartsSakPåAnnetBarn);
-        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), TilgangKontrollStub.borger(true)));
         var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, aktørIdBarn, null).orElseThrow();
 
         assertThat(annenPartSak.termindato()).isEqualTo(termindato);
@@ -60,7 +60,7 @@ class AnnenPartSakTjenesteTest {
             termindato.minusYears(1));
         repository.lagre(annenPartsSak);
         repository.lagre(annenPartsSakPåAnnetBarn);
-        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), TilgangKontrollStub.borger(true)));
         var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, fødselsdato).orElseThrow();
 
         assertThat(annenPartSak.termindato()).isEqualTo(termindato);
@@ -78,7 +78,7 @@ class AnnenPartSakTjenesteTest {
             new FamilieHendelse(fødselsdato, null, 1, omsorgsovertakelse), Set.of(), Set.of(new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(), dekningsgrad)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
         repository.lagre(annenPartsSak);
-        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), TilgangKontrollStub.borger(true)));
         var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, omsorgsovertakelse);
 
         assertThat(annenPartSak).isPresent();
@@ -93,7 +93,7 @@ class AnnenPartSakTjenesteTest {
         var fødselsdato = LocalDate.now();
         var annenPartsSak = sakMedVedtak(aktørIdAnnenPart, tredjePart, null, fødselsdato, now(), fødselsdato);
         repository.lagre(annenPartsSak);
-        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), TilgangKontrollStub.borger(true)));
         var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, fødselsdato);
 
         assertThat(annenPartSak).isEmpty();
@@ -107,7 +107,7 @@ class AnnenPartSakTjenesteTest {
         var fødselsdato = LocalDate.now();
         var annenPartsSak = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, null, fødselsdato, now(), fødselsdato);
         repository.lagre(annenPartsSak);
-        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), TilgangKontrollStub.borger(true)));
         var annenPartSak = tjeneste.hentFor(aktørIdSøker, null, null, fødselsdato);
 
         assertThat(annenPartSak).isEmpty();
@@ -121,7 +121,7 @@ class AnnenPartSakTjenesteTest {
         var fødselsdato = LocalDate.now();
         var annenPartsSak = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, AktørId.dummy(), fødselsdato, now(), fødselsdato, true);
         repository.lagre(annenPartsSak);
-        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), TilgangKontrollStub.borger(true)));
         var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, fødselsdato);
 
         assertThat(annenPartSak).isEmpty();
@@ -137,7 +137,7 @@ class AnnenPartSakTjenesteTest {
         var søknadsperiode = new FpSøknadsperiode(termindato, termindato.plusWeeks(10), Konto.MØDREKVOTE, null, null, null, null, null, false, null);
         var annenPartsSak = sakUtenVedtak(aktørIdAnnenPart, aktørIdSøker, termindato, Dekningsgrad.ÅTTI, antallBarn, Set.of(søknadsperiode));
         repository.lagre(annenPartsSak);
-        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), TilgangKontrollStub.borger(true)));
         var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, null).orElseThrow();
 
         assertThat(annenPartSak.termindato()).isEqualTo(termindato);

@@ -9,6 +9,4 @@ public interface InnloggetBruker {
 
     Fødselsnummer fødselsnummer();
 
-    boolean erMyndig();
-
 }

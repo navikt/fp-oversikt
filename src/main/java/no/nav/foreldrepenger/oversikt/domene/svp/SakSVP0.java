@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.YtelseType;
-import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 
 public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                       @JsonProperty("aktørId") AktørId aktørId,
@@ -62,7 +62,7 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.svp.SvpSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
+    public no.nav.foreldrepenger.common.innsyn.svp.SvpSak tilSakDto(TilgangKontroll tilgangKontroll) {
         return DtoMapper.mapFra(this);
     }
 
