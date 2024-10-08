@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
@@ -15,11 +16,9 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
                        @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad) {
 
     public no.nav.foreldrepenger.common.innsyn.FpVedtak tilDto() {
-        var uttaksperioder = safeStream(perioder)
-            .map(Uttaksperiode::tilDto)
-            .sorted(Comparator.comparing(UttakPeriode::fom))
-            .toList();
-        return new no.nav.foreldrepenger.common.innsyn.FpVedtak(uttaksperioder);
+        var sortert = safeStream(perioder).map(Uttaksperiode::tilDto).sorted(Comparator.comparing(UttakPeriode::fom)).toList();
+        var compressed = compress(sortert);
+        return new no.nav.foreldrepenger.common.innsyn.FpVedtak(compressed);
     }
 
     public boolean innvilget() {
