@@ -4,10 +4,8 @@ import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.time.LocalDate;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.common.innsyn.Aktivitet;
 import no.nav.foreldrepenger.common.innsyn.Arbeidstidprosent;
@@ -15,17 +13,11 @@ import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.SamtidigUttak;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
 
 public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utsettelseÅrsak, OppholdÅrsak oppholdÅrsak,
                             OverføringÅrsak overføringÅrsak, Prosent samtidigUttak, Boolean flerbarnsdager,
                             MorsAktivitet morsAktivitet, Resultat resultat) {
-
-    private static final Environment ENV = Environment.current();
 
     public UttakPeriode tilDto() {
         var trekkerDager = safeStream(resultat().aktiviteter()).anyMatch(a -> a.trekkdager().merEnn0());
@@ -44,23 +36,6 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
         var res = new UttakPeriodeResultat(resultat().innvilget(), resultat().trekkerMinsterett(), trekkerDager, resultat().årsak().tilDto());
         return new UttakPeriode(fom, tom, konto.map(Konto::tilDto).orElse(null), res, utsettelse, opphold, overføring, gradering,
             ma, sa, flerbarnsdager() != null && flerbarnsdager());
-    }
-
-    public static List<UttakPeriode> compress(List<UttakPeriode> uttaksperioder) {
-        if (ENV.isProd()) {
-            return uttaksperioder;
-        }
-
-        var segments = uttaksperioder.stream().map(p -> new LocalDateSegment<>(p.fom(), p.tom(), p)).collect(Collectors.toSet());
-        var timeline = new LocalDateTimeline<>(segments).compress(LocalDateInterval::abutsWorkdays, UttakPeriode::likBortsattFraTidsperiode,
-            (datoInterval, datoSegment, datoSegment2) -> {
-                var segmentValue = datoSegment.getValue();
-                return new LocalDateSegment<>(datoInterval,
-                    new UttakPeriode(datoInterval.getFomDato(), datoInterval.getTomDato(), segmentValue.kontoType(), segmentValue.resultat(),
-                        segmentValue.utsettelseÅrsak(), segmentValue.oppholdÅrsak(), segmentValue.overføringÅrsak(), segmentValue.gradering(),
-                        segmentValue.morsAktivitet(), segmentValue.samtidigUttak(), segmentValue.flerbarnsdager()));
-            });
-        return timeline.stream().map(LocalDateSegment::getValue).toList();
     }
 
     private Optional<Gradering> utledGradering() {
