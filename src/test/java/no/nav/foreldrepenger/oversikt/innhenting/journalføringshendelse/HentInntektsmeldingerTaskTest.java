@@ -17,7 +17,7 @@ class HentInntektsmeldingerTaskTest {
 
     @Test
     void map() {
-        var fraFpsak = new Inntektsmelding(new BigDecimal(100), new BigDecimal(100), Arbeidsgiver.dummy(), "1",
+        var fraFpsak = new Inntektsmelding(new BigDecimal(100), new BigDecimal(100), Arbeidsgiver.dummy(), "1", "Sjef sjefsen", "11223344",
             LocalDateTime.now().minusWeeks(1), LocalDateTime.now().minusWeeks(1), LocalDate.now(), List.of(), List.of());
         var resultat = HentInntektsmeldingerTask.map(fraFpsak);
 

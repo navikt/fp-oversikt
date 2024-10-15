@@ -102,12 +102,19 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
     }
 
     static InntektsmeldingV2 mapV2(Inntektsmelding inntektsmelding) {
-        var aktiveNaturalytelser = inntektsmelding.aktiveNaturalytelser().stream().map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type())).toList();
-        var refusjonsperioder = inntektsmelding.refusjonsperioder().stream().map(r -> new InntektsmeldingV2.Refusjon(r.fomDato(), r.refusjonsbeløpMnd())).toList();
+        var aktiveNaturalytelser = inntektsmelding.aktiveNaturalytelser()
+            .stream()
+            .map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type()))
+            .toList();
+        var refusjonsperioder = inntektsmelding.refusjonsperioder()
+            .stream()
+            .map(r -> new InntektsmeldingV2.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
+            .toList();
 
-        return new InntektsmeldingV2(inntektsmelding.inntektPrMnd(), inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiver(), inntektsmelding.journalpostId(), inntektsmelding.innsendingstidspunkt(),
-            inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), aktiveNaturalytelser, refusjonsperioder
-        );
+        return new InntektsmeldingV2(inntektsmelding.inntektPrMnd(), inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiver(),
+            inntektsmelding.journalpostId(), inntektsmelding.kontaktpersonNavn(), inntektsmelding.kontaktpersonNummer(),
+            inntektsmelding.innsendingstidspunkt(), inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), aktiveNaturalytelser,
+            refusjonsperioder);
     }
 
     private static boolean imKnyttetTilJournalpost(List<Inntektsmelding> inntektsmeldinger, String journalpostId) {
