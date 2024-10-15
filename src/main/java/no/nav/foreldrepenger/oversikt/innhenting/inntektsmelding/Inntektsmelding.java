@@ -1,10 +1,31 @@
 package no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
-import no.nav.foreldrepenger.oversikt.domene.Beløp;
 
-public record Inntektsmelding(String journalpostId, Arbeidsgiver arbeidsgiver, LocalDateTime innsendingstidspunkt, Beløp inntekt,
-                              LocalDateTime mottattTidspunkt) {
+public record Inntektsmelding(BigDecimal inntektPrMnd,
+                              BigDecimal refusjonPrMnd,
+                          Arbeidsgiver arbeidsgiver,
+                          String journalpostId,
+                          LocalDateTime innsendingstidspunkt,
+                          LocalDateTime mottattTidspunkt,
+                          LocalDate startDatoPermisjon,
+                          List<NaturalYtelse> aktiveNaturalytelser,
+                          List<Refusjon> refusjonsperioder
+) {
+    public record NaturalYtelse(
+        LocalDate fomDato,
+        LocalDate tomDato,
+        BigDecimal beloepPerMnd,
+        String type
+    ) {}
+
+    public record Refusjon(
+        BigDecimal refusjonsbeløpMnd,
+        LocalDate fomDato
+    ) {}
 }

@@ -8,6 +8,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.foreldrepenger.oversikt.domene.Beløp;
+import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV2;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,7 +70,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
         }
 
         Set<no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmelding> mapped = inntektsmeldinger.stream()
-            .map(HentInntektsmeldingerTask::map)
+            .map(HentInntektsmeldingerTask::mapV2)
             .collect(Collectors.toSet());
 
         if (inntektsmeldinger.isEmpty()) {
@@ -95,7 +98,16 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
 
     static InntektsmeldingV1 map(Inntektsmelding inntektsmelding) {
         return new InntektsmeldingV1(inntektsmelding.journalpostId(), inntektsmelding.arbeidsgiver(), inntektsmelding.innsendingstidspunkt(),
-            inntektsmelding.inntekt(), inntektsmelding.mottattTidspunkt());
+            new Beløp(inntektsmelding.inntektPrMnd()), inntektsmelding.mottattTidspunkt());
+    }
+
+    static InntektsmeldingV2 mapV2(Inntektsmelding inntektsmelding) {
+        var aktiveNaturalytelser = inntektsmelding.aktiveNaturalytelser().stream().map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type())).toList();
+        var refusjonsperioder = inntektsmelding.refusjonsperioder().stream().map(r -> new InntektsmeldingV2.Refusjon(r.fomDato(), r.refusjonsbeløpMnd())).toList();
+
+        return new InntektsmeldingV2(inntektsmelding.inntektPrMnd(), inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiver(), inntektsmelding.journalpostId(), inntektsmelding.innsendingstidspunkt(),
+            inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), aktiveNaturalytelser, refusjonsperioder
+        );
     }
 
     private static boolean imKnyttetTilJournalpost(List<Inntektsmelding> inntektsmeldinger, String journalpostId) {
