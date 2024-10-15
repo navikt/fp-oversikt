@@ -7,14 +7,12 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record InntektsmeldingDto(
     int versjon,
     BigDecimal inntektPrMnd,
                               BigDecimal refusjonPrMnd,
-                              Arbeidsgiver arbeidsgiver,
+                              String arbeidsgiverNavn,
                               String journalpostId,
     String kontaktpersonNavn,
     String kontaktpersonNummer,

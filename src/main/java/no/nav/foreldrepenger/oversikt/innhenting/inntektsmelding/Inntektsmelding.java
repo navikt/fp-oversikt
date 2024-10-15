@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 
 public record Inntektsmelding(BigDecimal inntektPrMnd,
                               BigDecimal refusjonPrMnd,
-                          Arbeidsgiver arbeidsgiver,
+                          String arbeidsgiverNavn,
                           String journalpostId,
                               String kontaktpersonNavn,
                               String kontaktpersonNummer,

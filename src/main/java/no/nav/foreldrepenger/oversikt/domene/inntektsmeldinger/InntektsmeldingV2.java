@@ -14,7 +14,7 @@ import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 public record InntektsmeldingV2(
     @JsonProperty("inntektPrMnd") BigDecimal inntektPrMnd,
     @JsonProperty("refusjonPrMnd") BigDecimal refusjonPrMnd,
-    @JsonProperty("arbeidsgiver") Arbeidsgiver arbeidsgiver,
+    @JsonProperty("arbeidsgiverNavn") String arbeidsgiverNavn,
     @JsonProperty("journalpostId") String journalpostId,
     @JsonProperty("kontaktpersonNavn") String kontaktpersonNavn,
     @JsonProperty("kontaktpersonNummer") String kontaktpersonNummer,

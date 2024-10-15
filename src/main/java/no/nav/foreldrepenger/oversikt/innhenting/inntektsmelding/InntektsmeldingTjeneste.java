@@ -41,14 +41,14 @@ public class InntektsmeldingTjeneste {
                 .map(r -> new InntektsmeldingDto.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
                 .toList();
             return new InntektsmeldingDto(2, inntektsmeldingV2.inntektPrMnd(),
-                inntektsmeldingV2.refusjonPrMnd(), inntektsmeldingV2.arbeidsgiver(), inntektsmeldingV2.journalpostId(),
+                inntektsmeldingV2.refusjonPrMnd(), inntektsmeldingV2.arbeidsgiverNavn(), inntektsmeldingV2.journalpostId(),
                 inntektsmeldingV2.kontaktpersonNavn(), inntektsmeldingV2.kontaktpersonNummer(),
                 inntektsmeldingV2.innsendingstidspunkt(), inntektsmeldingV2.mottattTidspunkt(),
                 inntektsmeldingV2.startDatoPermisjon(), naturalytelser, refusjon);
         }
-        if (inntektsmelding instanceof InntektsmeldingV1) {
+        if (inntektsmelding instanceof InntektsmeldingV1 inntektsmeldingV1) {
             var mottatTidspunkt =
-                inntektsmelding.mottattTidspunkt() == null ? inntektsmelding.innsendingstidspunkt() : inntektsmelding.mottattTidspunkt();
+                inntektsmeldingV1.mottattTidspunkt() == null ? inntektsmeldingV1.innsendingstidspunkt() : inntektsmeldingV1.mottattTidspunkt();
             // TODO: finn ut hvilke tidspunkt som faktisk trengs
             return new InntektsmeldingDto(1, null, null, null, null, null, null, null, mottatTidspunkt, null, Collections.emptyList(),
                 Collections.emptyList());

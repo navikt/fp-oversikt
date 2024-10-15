@@ -13,8 +13,4 @@ import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
     @JsonSubTypes.Type(value = InntektsmeldingV2.class, name = "2")
 })
 public interface Inntektsmelding {
-    String journalpostId();
-    Arbeidsgiver arbeidsgiver();
-    LocalDateTime innsendingstidspunkt();
-    LocalDateTime mottattTidspunkt();
 }
