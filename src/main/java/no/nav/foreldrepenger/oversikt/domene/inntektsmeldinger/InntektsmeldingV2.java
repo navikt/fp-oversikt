@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record InntektsmeldingV2(
     @JsonProperty("erAktiv") boolean erAktiv,
+    @JsonProperty("stillingsprosent") BigDecimal stillingsprosent,
     @JsonProperty("inntektPrMnd") BigDecimal inntektPrMnd,
     @JsonProperty("refusjonPrMnd") BigDecimal refusjonPrMnd,
     @JsonProperty("arbeidsgiverNavn") String arbeidsgiverNavn,

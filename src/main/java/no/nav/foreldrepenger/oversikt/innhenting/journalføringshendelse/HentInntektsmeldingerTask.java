@@ -112,7 +112,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
             .map(r -> new InntektsmeldingV2.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
             .toList();
 
-        return new InntektsmeldingV2(inntektsmelding.erAktiv(), inntektsmelding.inntektPrMnd(), inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiverNavn(),
+        return new InntektsmeldingV2(inntektsmelding.erAktiv(), inntektsmelding.stillingsprosent(), inntektsmelding.inntektPrMnd(), inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiverNavn(),
             inntektsmelding.journalpostId(), inntektsmelding.kontaktpersonNavn(), inntektsmelding.kontaktpersonNummer(),
             inntektsmelding.innsendingstidspunkt(), inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), bortfalteNaturalytelser,
             refusjonsperioder);

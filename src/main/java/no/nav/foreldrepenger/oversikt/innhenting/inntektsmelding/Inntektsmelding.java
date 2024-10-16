@@ -7,6 +7,7 @@ import java.util.List;
 
 public record Inntektsmelding(
     boolean erAktiv,
+    BigDecimal stillingsprosent,
     BigDecimal inntektPrMnd,
                               BigDecimal refusjonPrMnd,
                           String arbeidsgiverNavn,

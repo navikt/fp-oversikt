@@ -40,17 +40,16 @@ public class InntektsmeldingTjeneste {
                 .stream()
                 .map(r -> new InntektsmeldingDto.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
                 .toList();
-            return new InntektsmeldingDto(2, inntektsmeldingV2.erAktiv(), inntektsmeldingV2.inntektPrMnd(),
-                inntektsmeldingV2.refusjonPrMnd(), inntektsmeldingV2.arbeidsgiverNavn(), inntektsmeldingV2.journalpostId(),
-                inntektsmeldingV2.kontaktpersonNavn(), inntektsmeldingV2.kontaktpersonNummer(),
-                inntektsmeldingV2.innsendingstidspunkt(), inntektsmeldingV2.mottattTidspunkt(),
+            return new InntektsmeldingDto(2, inntektsmeldingV2.erAktiv(), inntektsmeldingV2.stillingsprosent(), inntektsmeldingV2.inntektPrMnd(), inntektsmeldingV2.refusjonPrMnd(),
+                inntektsmeldingV2.arbeidsgiverNavn(), inntektsmeldingV2.journalpostId(), inntektsmeldingV2.kontaktpersonNavn(),
+                inntektsmeldingV2.kontaktpersonNummer(), inntektsmeldingV2.innsendingstidspunkt(), inntektsmeldingV2.mottattTidspunkt(),
                 inntektsmeldingV2.startDatoPermisjon(), naturalytelser, refusjon);
         }
         if (inntektsmelding instanceof InntektsmeldingV1 inntektsmeldingV1) {
             var mottatTidspunkt =
                 inntektsmeldingV1.mottattTidspunkt() == null ? inntektsmeldingV1.innsendingstidspunkt() : inntektsmeldingV1.mottattTidspunkt();
             // TODO: finn ut hvilke tidspunkt som faktisk trengs
-            return new InntektsmeldingDto(1, false, null, null, null, null, null, null, null, mottatTidspunkt, null, Collections.emptyList(),
+            return new InntektsmeldingDto(1, false, null, null, null, null, null, null, null, null, mottatTidspunkt, null, Collections.emptyList(),
                 Collections.emptyList());
         }
 

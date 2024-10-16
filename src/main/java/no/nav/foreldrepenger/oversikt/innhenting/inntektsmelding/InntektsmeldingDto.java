@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public record InntektsmeldingDto(
     int versjon,
     boolean erAktiv,
+    BigDecimal stillingsprosent,
     BigDecimal inntektPrMnd,
                               BigDecimal refusjonPrMnd,
                               String arbeidsgiverNavn,
