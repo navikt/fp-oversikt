@@ -8,10 +8,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
-
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record InntektsmeldingV2(
+    @JsonProperty("erAktiv") boolean erAktiv,
     @JsonProperty("inntektPrMnd") BigDecimal inntektPrMnd,
     @JsonProperty("refusjonPrMnd") BigDecimal refusjonPrMnd,
     @JsonProperty("arbeidsgiverNavn") String arbeidsgiverNavn,
@@ -21,7 +20,7 @@ public record InntektsmeldingV2(
     @JsonProperty("innsendingstidspunkt") LocalDateTime innsendingstidspunkt,
     @JsonProperty("mottattTidspunkt") LocalDateTime mottattTidspunkt,
     @JsonProperty("startDatoPermisjon") LocalDate startDatoPermisjon,
-    @JsonProperty("aktiveNaturalytelser") List<NaturalYtelse> aktiveNaturalytelser,
+    @JsonProperty("bortfalteNaturalytelser") List<NaturalYtelse> bortfalteNaturalytelser,
     @JsonProperty("refusjonsperioder") List<Refusjon> refusjonsperioder
 ) implements Inntektsmelding {
     public record NaturalYtelse(

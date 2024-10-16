@@ -32,7 +32,7 @@ public class InntektsmeldingTjeneste {
 
     private static InntektsmeldingDto tilInntektsmeldingDto(Inntektsmelding inntektsmelding) {
         if (inntektsmelding instanceof InntektsmeldingV2 inntektsmeldingV2) {
-            var naturalytelser = inntektsmeldingV2.aktiveNaturalytelser()
+            var naturalytelser = inntektsmeldingV2.bortfalteNaturalytelser()
                 .stream()
                 .map(n -> new InntektsmeldingDto.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type()))
                 .toList();
@@ -40,7 +40,7 @@ public class InntektsmeldingTjeneste {
                 .stream()
                 .map(r -> new InntektsmeldingDto.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
                 .toList();
-            return new InntektsmeldingDto(2, inntektsmeldingV2.inntektPrMnd(),
+            return new InntektsmeldingDto(2, inntektsmeldingV2.erAktiv(), inntektsmeldingV2.inntektPrMnd(),
                 inntektsmeldingV2.refusjonPrMnd(), inntektsmeldingV2.arbeidsgiverNavn(), inntektsmeldingV2.journalpostId(),
                 inntektsmeldingV2.kontaktpersonNavn(), inntektsmeldingV2.kontaktpersonNummer(),
                 inntektsmeldingV2.innsendingstidspunkt(), inntektsmeldingV2.mottattTidspunkt(),
@@ -50,7 +50,7 @@ public class InntektsmeldingTjeneste {
             var mottatTidspunkt =
                 inntektsmeldingV1.mottattTidspunkt() == null ? inntektsmeldingV1.innsendingstidspunkt() : inntektsmeldingV1.mottattTidspunkt();
             // TODO: finn ut hvilke tidspunkt som faktisk trengs
-            return new InntektsmeldingDto(1, null, null, null, null, null, null, null, mottatTidspunkt, null, Collections.emptyList(),
+            return new InntektsmeldingDto(1, false, null, null, null, null, null, null, null, mottatTidspunkt, null, Collections.emptyList(),
                 Collections.emptyList());
         }
 

@@ -10,6 +10,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record InntektsmeldingDto(
     int versjon,
+    boolean erAktiv,
     BigDecimal inntektPrMnd,
                               BigDecimal refusjonPrMnd,
                               String arbeidsgiverNavn,
@@ -19,7 +20,7 @@ public record InntektsmeldingDto(
                               LocalDateTime innsendingstidspunkt,
                               LocalDateTime mottattTidspunkt,
                               LocalDate startDatoPermisjon,
-                              List<NaturalYtelse> aktiveNaturalytelser,
+                              List<NaturalYtelse> bortfalteNaturalytelser,
                               List<Refusjon> refusjonsperioder
 ) {
     public record NaturalYtelse(

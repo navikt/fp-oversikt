@@ -5,9 +5,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
-
-public record Inntektsmelding(BigDecimal inntektPrMnd,
+public record Inntektsmelding(
+    boolean erAktiv,
+    BigDecimal inntektPrMnd,
                               BigDecimal refusjonPrMnd,
                           String arbeidsgiverNavn,
                           String journalpostId,
@@ -16,7 +16,7 @@ public record Inntektsmelding(BigDecimal inntektPrMnd,
                           LocalDateTime innsendingstidspunkt,
                           LocalDateTime mottattTidspunkt,
                           LocalDate startDatoPermisjon,
-                          List<NaturalYtelse> aktiveNaturalytelser,
+                          List<NaturalYtelse> bortfalteNaturalytelser,
                           List<Refusjon> refusjonsperioder
 ) {
     public record NaturalYtelse(

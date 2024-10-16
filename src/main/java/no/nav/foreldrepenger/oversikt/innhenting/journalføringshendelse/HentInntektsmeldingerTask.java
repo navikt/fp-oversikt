@@ -103,7 +103,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
     }
 
     static InntektsmeldingV2 mapV2(Inntektsmelding inntektsmelding) {
-        var aktiveNaturalytelser = inntektsmelding.aktiveNaturalytelser()
+        var bortfalteNaturalytelser = inntektsmelding.bortfalteNaturalytelser()
             .stream()
             .map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type()))
             .toList();
@@ -112,9 +112,9 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
             .map(r -> new InntektsmeldingV2.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
             .toList();
 
-        return new InntektsmeldingV2(inntektsmelding.inntektPrMnd(), inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiverNavn(),
+        return new InntektsmeldingV2(inntektsmelding.erAktiv(), inntektsmelding.inntektPrMnd(), inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiverNavn(),
             inntektsmelding.journalpostId(), inntektsmelding.kontaktpersonNavn(), inntektsmelding.kontaktpersonNummer(),
-            inntektsmelding.innsendingstidspunkt(), inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), aktiveNaturalytelser,
+            inntektsmelding.innsendingstidspunkt(), inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), bortfalteNaturalytelser,
             refusjonsperioder);
     }
 
