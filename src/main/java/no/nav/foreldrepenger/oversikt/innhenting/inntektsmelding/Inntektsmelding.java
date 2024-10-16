@@ -14,7 +14,6 @@ public record Inntektsmelding(
                           String journalpostId,
                               String kontaktpersonNavn,
                               String kontaktpersonNummer,
-                          LocalDateTime innsendingstidspunkt,
                           LocalDateTime mottattTidspunkt,
                           LocalDate startDatoPermisjon,
                           List<NaturalYtelse> bortfalteNaturalytelser,

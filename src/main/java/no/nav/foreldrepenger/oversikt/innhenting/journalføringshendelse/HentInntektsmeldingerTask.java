@@ -97,11 +97,6 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
         }
     }
 
-    static InntektsmeldingV1 map(Inntektsmelding inntektsmelding) {
-        return new InntektsmeldingV1(inntektsmelding.journalpostId(), new Arbeidsgiver(inntektsmelding.arbeidsgiverNavn()), inntektsmelding.innsendingstidspunkt(),
-            new Beløp(inntektsmelding.inntektPrMnd()), inntektsmelding.mottattTidspunkt());
-    }
-
     static InntektsmeldingV2 mapV2(Inntektsmelding inntektsmelding) {
         var bortfalteNaturalytelser = inntektsmelding.bortfalteNaturalytelser()
             .stream()
@@ -114,7 +109,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
 
         return new InntektsmeldingV2(inntektsmelding.erAktiv(), inntektsmelding.stillingsprosent(), inntektsmelding.inntektPrMnd(), inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiverNavn(),
             inntektsmelding.journalpostId(), inntektsmelding.kontaktpersonNavn(), inntektsmelding.kontaktpersonNummer(),
-            inntektsmelding.innsendingstidspunkt(), inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), bortfalteNaturalytelser,
+            inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), bortfalteNaturalytelser,
             refusjonsperioder);
     }
 
