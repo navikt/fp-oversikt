@@ -8,8 +8,6 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
-import no.nav.foreldrepenger.oversikt.domene.Beløp;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV2;
 
 import org.slf4j.Logger;
@@ -18,10 +16,9 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV1;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerRepository;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.Inntektsmelding;
+import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 import no.nav.vedtak.exception.IntegrasjonException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -84,7 +81,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
     private static void feilHvisInntektsmeldingIkkeMottatt(Saksnummer saksnummer,
                                                            String journalpostId,
                                                            int failedRuns,
-                                                           List<Inntektsmelding> inntektsmeldinger) {
+                                                           List<FpSakInntektsmeldingDto> inntektsmeldinger) {
         if (!imKnyttetTilJournalpost(inntektsmeldinger, journalpostId)) {
             if (failedRuns >= MAX_FAILED_RUNS - 1) {
                 //IM kan være journalført på sak, men ikke oppdatert i fpsak. Feks IM på henlagt/opphørt sak
@@ -97,7 +94,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
         }
     }
 
-    static InntektsmeldingV2 mapV2(Inntektsmelding inntektsmelding) {
+    static InntektsmeldingV2 mapV2(FpSakInntektsmeldingDto inntektsmelding) {
         var bortfalteNaturalytelser = inntektsmelding.bortfalteNaturalytelser()
             .stream()
             .map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type()))
@@ -113,7 +110,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
             refusjonsperioder);
     }
 
-    private static boolean imKnyttetTilJournalpost(List<Inntektsmelding> inntektsmeldinger, String journalpostId) {
+    private static boolean imKnyttetTilJournalpost(List<FpSakInntektsmeldingDto> inntektsmeldinger, String journalpostId) {
         return inntektsmeldinger.stream().anyMatch(i -> Objects.equals(i.journalpostId(), journalpostId));
     }
 }

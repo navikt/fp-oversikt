@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record Inntektsmelding(
+public record FpSakInntektsmeldingDto(
     boolean erAktiv,
     BigDecimal stillingsprosent,
     BigDecimal inntektPrMnd,

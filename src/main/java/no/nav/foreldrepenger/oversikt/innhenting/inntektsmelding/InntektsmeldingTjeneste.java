@@ -26,21 +26,21 @@ public class InntektsmeldingTjeneste {
         // CDI
     }
 
-    List<InntektsmeldingDto> inntektsmeldinger(Saksnummer saksnummer) {
+    List<FpOversiktInntektsmeldingDto> inntektsmeldinger(Saksnummer saksnummer) {
         return inntektsmeldingerRepository.hentFor(Set.of(saksnummer)).stream().map(InntektsmeldingTjeneste::tilInntektsmeldingDto).toList();
     }
 
-    private static InntektsmeldingDto tilInntektsmeldingDto(Inntektsmelding inntektsmelding) {
+    private static FpOversiktInntektsmeldingDto tilInntektsmeldingDto(Inntektsmelding inntektsmelding) {
         if (inntektsmelding instanceof InntektsmeldingV2 inntektsmeldingV2) {
             var naturalytelser = inntektsmeldingV2.bortfalteNaturalytelser()
                 .stream()
-                .map(n -> new InntektsmeldingDto.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type()))
+                .map(n -> new FpOversiktInntektsmeldingDto.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type()))
                 .toList();
             var refusjon = inntektsmeldingV2.refusjonsperioder()
                 .stream()
-                .map(r -> new InntektsmeldingDto.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
+                .map(r -> new FpOversiktInntektsmeldingDto.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
                 .toList();
-            return new InntektsmeldingDto(2, inntektsmeldingV2.erAktiv(), inntektsmeldingV2.stillingsprosent(), inntektsmeldingV2.inntektPrMnd(), inntektsmeldingV2.refusjonPrMnd(),
+            return new FpOversiktInntektsmeldingDto(2, inntektsmeldingV2.erAktiv(), inntektsmeldingV2.stillingsprosent(), inntektsmeldingV2.inntektPrMnd(), inntektsmeldingV2.refusjonPrMnd(),
                 inntektsmeldingV2.arbeidsgiverNavn(), inntektsmeldingV2.journalpostId(), inntektsmeldingV2.kontaktpersonNavn(),
                 inntektsmeldingV2.kontaktpersonNummer(), inntektsmeldingV2.mottattTidspunkt(),
                 inntektsmeldingV2.startDatoPermisjon(), naturalytelser, refusjon);
@@ -49,7 +49,7 @@ public class InntektsmeldingTjeneste {
             var mottatTidspunkt =
                 inntektsmeldingV1.mottattTidspunkt() == null ? inntektsmeldingV1.innsendingstidspunkt() : inntektsmeldingV1.mottattTidspunkt();
             // TODO: finn ut hvilke tidspunkt som faktisk trengs
-            return new InntektsmeldingDto(1, false, null, null, null, null, null, null, null,  mottatTidspunkt, null, Collections.emptyList(),
+            return new FpOversiktInntektsmeldingDto(1, false, null, null, null, null, null, null, null,  mottatTidspunkt, null, Collections.emptyList(),
                 Collections.emptyList());
         }
 

@@ -8,7 +8,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public record InntektsmeldingDto(
+public record FpOversiktInntektsmeldingDto(
     int versjon,
     boolean erAktiv,
     BigDecimal stillingsprosent,
