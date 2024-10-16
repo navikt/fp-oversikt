@@ -48,7 +48,6 @@ public class InntektsmeldingTjeneste {
         if (inntektsmelding instanceof InntektsmeldingV1 inntektsmeldingV1) {
             var mottatTidspunkt =
                 inntektsmeldingV1.mottattTidspunkt() == null ? inntektsmeldingV1.innsendingstidspunkt() : inntektsmeldingV1.mottattTidspunkt();
-            // TODO: finn ut hvilke tidspunkt som faktisk trengs
             return new FpOversiktInntektsmeldingDto(1, false, null, null, null, null, null, null, null,  mottatTidspunkt, null, Collections.emptyList(),
                 Collections.emptyList());
         }
