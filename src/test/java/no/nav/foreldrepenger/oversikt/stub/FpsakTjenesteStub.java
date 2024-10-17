@@ -8,13 +8,13 @@ import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.Sak;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.Inntektsmelding;
+import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 
 public class FpsakTjenesteStub implements FpsakTjeneste {
 
     private final Map<Saksnummer, Sak> saker = new ConcurrentHashMap<>();
     private final Map<Saksnummer, List<DokumentType>> manglendeVedlegg = new ConcurrentHashMap<>();
-    private final Map<Saksnummer, List<Inntektsmelding>> inntektsmeldinger = new ConcurrentHashMap<>();
+    private final Map<Saksnummer, List<FpSakInntektsmeldingDto>> inntektsmeldinger = new ConcurrentHashMap<>();
 
     public FpsakTjenesteStub leggTilSak(Sak sak) {
         saker.put(new Saksnummer(sak.saksnummer()), sak);
@@ -26,7 +26,7 @@ public class FpsakTjenesteStub implements FpsakTjeneste {
         return this;
     }
 
-    public FpsakTjenesteStub leggTilIMs(Saksnummer saksnummer, List<Inntektsmelding> ims) {
+    public FpsakTjenesteStub leggTilIMs(Saksnummer saksnummer, List<FpSakInntektsmeldingDto> ims) {
         inntektsmeldinger.put(saksnummer, List.copyOf(ims));
         return this;
     }
@@ -42,7 +42,7 @@ public class FpsakTjenesteStub implements FpsakTjeneste {
     }
 
     @Override
-    public List<Inntektsmelding> hentInntektsmeldinger(Saksnummer saksnummer) {
+    public List<FpSakInntektsmeldingDto> hentInntektsmeldinger(Saksnummer saksnummer) {
         return inntektsmeldinger.get(saksnummer);
     }
 }

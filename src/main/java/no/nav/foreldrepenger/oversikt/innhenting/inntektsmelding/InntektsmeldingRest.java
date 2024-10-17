@@ -37,7 +37,7 @@ public class InntektsmeldingRest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<InntektsmeldingDto> alleInntektsmeldinger(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
+    public List<FpOversiktInntektsmeldingDto> alleInntektsmeldinger(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         tilgangkontroll.sakKobletTilAktørGuard(saksnummer);

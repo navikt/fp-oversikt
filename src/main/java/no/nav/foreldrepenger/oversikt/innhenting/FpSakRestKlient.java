@@ -7,7 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.UriBuilder;
 import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.Inntektsmelding;
+import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 import no.nav.vedtak.felles.integrasjon.rest.FpApplication;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
@@ -45,10 +45,10 @@ class FpSakRestKlient implements FpsakTjeneste {
     }
 
     @Override
-    public List<Inntektsmelding> hentInntektsmeldinger(Saksnummer saksnummer) {
+    public List<FpSakInntektsmeldingDto> hentInntektsmeldinger(Saksnummer saksnummer) {
         var uri = uri("/fpoversikt/inntektsmeldinger", saksnummer);
         var request = RestRequest.newGET(uri, restConfig);
-        return restClient.sendReturnList(request, Inntektsmelding.class);
+        return restClient.sendReturnList(request, FpSakInntektsmeldingDto.class);
     }
 
     private URI uri(String path, Saksnummer saksnummer) {
