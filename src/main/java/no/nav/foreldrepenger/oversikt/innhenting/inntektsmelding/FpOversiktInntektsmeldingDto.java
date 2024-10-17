@@ -13,25 +13,17 @@ public record FpOversiktInntektsmeldingDto(
     boolean erAktiv,
     BigDecimal stillingsprosent,
     BigDecimal inntektPrMnd,
-                              BigDecimal refusjonPrMnd,
-                              String arbeidsgiverNavn,
-                              String journalpostId,
-    String kontaktpersonNavn,
-    String kontaktpersonTelefonNummer,
-                              LocalDateTime mottattTidspunkt,
-                              LocalDate startDatoPermisjon,
-                              List<NaturalYtelse> bortfalteNaturalytelser,
-                              List<Refusjon> refusjonsperioder
+    BigDecimal refusjonPrMnd,
+    String arbeidsgiverNavn,
+    String journalpostId,
+    LocalDateTime mottattTidspunkt,
+    LocalDate startDatoPermisjon,
+    List<NaturalYtelse> bortfalteNaturalytelser,
+    List<Refusjon> refusjonsperioder
 ) {
-    public record NaturalYtelse(
-        LocalDate fomDato,
-        LocalDate tomDato,
-        BigDecimal beløpPerMnd,
-        String type
-    ) {}
+    public record NaturalYtelse(LocalDate fomDato, LocalDate tomDato, BigDecimal beløpPerMnd, String type) {
+    }
 
-    public record Refusjon(
-        LocalDate fomDato,
-        BigDecimal refusjonsbeløpMnd
-    ) {}
+    public record Refusjon(LocalDate fomDato, BigDecimal refusjonsbeløpMnd) {
+    }
 }

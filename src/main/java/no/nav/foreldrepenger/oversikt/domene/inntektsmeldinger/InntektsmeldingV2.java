@@ -16,8 +16,6 @@ public record InntektsmeldingV2(
     @JsonProperty("refusjonPrMnd") BigDecimal refusjonPrMnd,
     @JsonProperty("arbeidsgiverNavn") String arbeidsgiverNavn,
     @JsonProperty("journalpostId") String journalpostId,
-    @JsonProperty("kontaktpersonNavn") String kontaktpersonNavn,
-    @JsonProperty("kontaktpersonTelefonNummer") String kontaktpersonTelefonNummer,
     @JsonProperty("mottattTidspunkt") LocalDateTime mottattTidspunkt,
     @JsonProperty("startDatoPermisjon") LocalDate startDatoPermisjon,
     @JsonProperty("bortfalteNaturalytelser") List<NaturalYtelse> bortfalteNaturalytelser,
