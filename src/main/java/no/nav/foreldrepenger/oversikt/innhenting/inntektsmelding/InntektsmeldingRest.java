@@ -1,5 +1,10 @@
 package no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding;
 
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -11,10 +16,6 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
 
 @Path("/inntektsmeldinger")
 @ApplicationScoped
@@ -39,6 +40,7 @@ public class InntektsmeldingRest {
     public List<FpOversiktInntektsmeldingDto> alleInntektsmeldinger(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
+        tilgangkontroll.sakKobletTilAktørGuard(saksnummer);
         var inntektsmeldinger = inntektsmeldingTjeneste.inntektsmeldinger(saksnummer);
         LOG.info("Hentet {} inntektsmeldinger på sak {}", inntektsmeldinger.size(), saksnummer.value());
         return inntektsmeldinger;
