@@ -17,7 +17,7 @@ public record InntektsmeldingV2(
     @JsonProperty("arbeidsgiverNavn") String arbeidsgiverNavn,
     @JsonProperty("journalpostId") String journalpostId,
     @JsonProperty("kontaktpersonNavn") String kontaktpersonNavn,
-    @JsonProperty("kontaktpersonNummer") String kontaktpersonNummer,
+    @JsonProperty("kontaktpersonTelefonNummer") String kontaktpersonTelefonNummer,
     @JsonProperty("mottattTidspunkt") LocalDateTime mottattTidspunkt,
     @JsonProperty("startDatoPermisjon") LocalDate startDatoPermisjon,
     @JsonProperty("bortfalteNaturalytelser") List<NaturalYtelse> bortfalteNaturalytelser,
@@ -26,7 +26,7 @@ public record InntektsmeldingV2(
     public record NaturalYtelse(
         @JsonProperty("fomDato") LocalDate fomDato,
         @JsonProperty("tomDato") LocalDate tomDato,
-        @JsonProperty("beloepPerMnd") BigDecimal beloepPerMnd,
+        @JsonProperty("beløpPerMnd") BigDecimal beløpPerMnd,
         @JsonProperty("type") String type
     ) {}
 

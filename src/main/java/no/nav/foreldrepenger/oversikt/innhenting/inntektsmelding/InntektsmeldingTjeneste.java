@@ -34,7 +34,7 @@ public class InntektsmeldingTjeneste {
         if (inntektsmelding instanceof InntektsmeldingV2 inntektsmeldingV2) {
             var naturalytelser = inntektsmeldingV2.bortfalteNaturalytelser()
                 .stream()
-                .map(n -> new FpOversiktInntektsmeldingDto.NaturalYtelse(n.fomDato(), n.tomDato(), n.beloepPerMnd(), n.type()))
+                .map(n -> new FpOversiktInntektsmeldingDto.NaturalYtelse(n.fomDato(), n.tomDato(), n.beløpPerMnd(), n.type()))
                 .toList();
             var refusjon = inntektsmeldingV2.refusjonsperioder()
                 .stream()
@@ -42,7 +42,7 @@ public class InntektsmeldingTjeneste {
                 .toList();
             return new FpOversiktInntektsmeldingDto(2, inntektsmeldingV2.erAktiv(), inntektsmeldingV2.stillingsprosent(), inntektsmeldingV2.inntektPrMnd(), inntektsmeldingV2.refusjonPrMnd(),
                 inntektsmeldingV2.arbeidsgiverNavn(), inntektsmeldingV2.journalpostId(), inntektsmeldingV2.kontaktpersonNavn(),
-                inntektsmeldingV2.kontaktpersonNummer(), inntektsmeldingV2.mottattTidspunkt(),
+                inntektsmeldingV2.kontaktpersonTelefonNummer(), inntektsmeldingV2.mottattTidspunkt(),
                 inntektsmeldingV2.startDatoPermisjon(), naturalytelser, refusjon);
         }
         if (inntektsmelding instanceof InntektsmeldingV1 inntektsmeldingV1) {

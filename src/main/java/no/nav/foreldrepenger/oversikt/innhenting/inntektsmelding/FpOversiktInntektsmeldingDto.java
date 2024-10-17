@@ -17,7 +17,7 @@ public record FpOversiktInntektsmeldingDto(
                               String arbeidsgiverNavn,
                               String journalpostId,
     String kontaktpersonNavn,
-    String kontaktpersonNummer,
+    String kontaktpersonTelefonNummer,
                               LocalDateTime mottattTidspunkt,
                               LocalDate startDatoPermisjon,
                               List<NaturalYtelse> bortfalteNaturalytelser,
@@ -26,7 +26,7 @@ public record FpOversiktInntektsmeldingDto(
     public record NaturalYtelse(
         LocalDate fomDato,
         LocalDate tomDato,
-        BigDecimal beloepPerMnd,
+        BigDecimal beløpPerMnd,
         String type
     ) {}
 
