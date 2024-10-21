@@ -8,6 +8,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.foreldrepenger.common.innsyn.inntektsmelding.FpSakInntektsmeldingDto;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV2;
 
 import org.slf4j.Logger;
@@ -18,7 +19,6 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerRepository;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 import no.nav.vedtak.exception.IntegrasjonException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -97,7 +97,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
     static InntektsmeldingV2 mapV2(FpSakInntektsmeldingDto inntektsmelding) {
         var bortfalteNaturalytelser = inntektsmelding.bortfalteNaturalytelser()
             .stream()
-            .map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beløpPerMnd(), n.type()))
+            .map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beløpPerMnd(), n.toString()))
             .toList();
         var refusjonsperioder = inntektsmelding.refusjonsperioder()
             .stream()

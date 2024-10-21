@@ -2,6 +2,8 @@ package no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding;
 
 import java.util.List;
 
+import no.nav.foreldrepenger.common.innsyn.inntektsmelding.FpOversiktInntektsmeldingDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
