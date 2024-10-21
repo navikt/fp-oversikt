@@ -15,7 +15,6 @@ import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.SamtidigUttak;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -24,8 +23,6 @@ import no.nav.fpsak.tidsserie.LocalDateTimeline;
 public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utsettelseÅrsak, OppholdÅrsak oppholdÅrsak,
                             OverføringÅrsak overføringÅrsak, Prosent samtidigUttak, Boolean flerbarnsdager,
                             MorsAktivitet morsAktivitet, Resultat resultat) {
-
-    private static final Environment ENV = Environment.current();
 
     public UttakPeriode tilDto() {
         var trekkerDager = safeStream(resultat().aktiviteter()).anyMatch(a -> a.trekkdager().merEnn0());
@@ -47,10 +44,6 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
     }
 
     public static List<UttakPeriode> compress(List<UttakPeriode> uttaksperioder) {
-        if (ENV.isProd()) {
-            return uttaksperioder;
-        }
-
         var segments = uttaksperioder.stream().map(p -> new LocalDateSegment<>(p.fom(), p.tom(), p)).collect(Collectors.toSet());
         var timeline = new LocalDateTimeline<>(segments).compress(LocalDateInterval::abutsWorkdays, UttakPeriode::likBortsattFraTidsperiode,
             (datoInterval, datoSegment, datoSegment2) -> {
