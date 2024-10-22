@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
@@ -13,6 +12,7 @@ import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask;
+import no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.TaskType;
 
@@ -22,7 +22,7 @@ class JournalføringHendelseTaskUtlederTest {
 
     @BeforeEach
     void setUp() {
-        journalføringHendelseTaskUtleder = new JournalføringHendelseTaskUtleder(annenpartUbeskyttetAdresse());
+        journalføringHendelseTaskUtleder = new JournalføringHendelseTaskUtleder(new DummyPersonOppslagSystemTest());
     }
 
     @Test

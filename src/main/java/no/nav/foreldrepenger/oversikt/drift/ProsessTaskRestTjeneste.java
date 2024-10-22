@@ -24,8 +24,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.rest.app.ProsessTaskApplikasjonTjeneste;
 import no.nav.vedtak.felles.prosesstask.rest.dto.FeiletProsessTaskDataDto;
@@ -38,11 +37,6 @@ import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskRetryAllResultatDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskSetFerdigInputDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.SokeFilterDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.StatusFilterDto;
-import no.nav.vedtak.sikkerhet.kontekst.Groups;
-import no.nav.vedtak.sikkerhet.kontekst.IdentType;
-import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
-import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
-import no.nav.vedtak.sikkerhet.kontekst.RequestKontekst;
 
 @OpenAPIDefinition(tags = @Tag(name = "prosesstask", description = "Håndtering av asynkrone oppgaver i form av prosesstask"))
 @Path("/prosesstask")
@@ -54,14 +48,16 @@ public class ProsessTaskRestTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(ProsessTaskRestTjeneste.class);
 
     private ProsessTaskApplikasjonTjeneste prosessTaskApplikasjonTjeneste;
+    private TilgangKontroll tilgangKontroll;
 
     ProsessTaskRestTjeneste() {
         // REST CDI
     }
 
     @Inject
-    public ProsessTaskRestTjeneste(ProsessTaskApplikasjonTjeneste prosessTaskApplikasjonTjeneste) {
+    public ProsessTaskRestTjeneste(ProsessTaskApplikasjonTjeneste prosessTaskApplikasjonTjeneste, TilgangKontroll tilgangKontroll) {
         this.prosessTaskApplikasjonTjeneste = prosessTaskApplikasjonTjeneste;
+        this.tilgangKontroll = tilgangKontroll;
     }
 
     @POST
@@ -72,7 +68,7 @@ public class ProsessTaskRestTjeneste {
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
     public ProsessTaskDataDto createProsessTask(@Parameter(description = "Informasjon for restart en eksisterende prosesstask") @Valid ProsessTaskOpprettInputDto inputDto) {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         // kjøres manuelt for å avhjelpe feilsituasjon, da er det veldig greit at det blir logget!
         LOG.info("Oppretter prossess task av type {}", inputDto.getTaskType());
         return prosessTaskApplikasjonTjeneste.opprettTask(inputDto);
@@ -88,7 +84,7 @@ public class ProsessTaskRestTjeneste {
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
     public ProsessTaskRestartResultatDto restartProsessTask(@Parameter(description = "Informasjon for restart en eksisterende prosesstask") @Valid ProsessTaskRestartInputDto restartInputDto) {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         // kjøres manuelt for å avhjelpe feilsituasjon, da er det veldig greit at det blir logget!
         LOG.info("Restarter prossess task {}", restartInputDto.getProsessTaskId());
         return prosessTaskApplikasjonTjeneste.flaggProsessTaskForRestart(restartInputDto);
@@ -102,7 +98,7 @@ public class ProsessTaskRestTjeneste {
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
     public ProsessTaskRetryAllResultatDto retryAllProsessTask() {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         // kjøres manuelt for å avhjelpe feilsituasjon, da er det veldig greit at det blir logget!
         LOG.info("Restarter alle prossess task i status FEILET");
         return prosessTaskApplikasjonTjeneste.flaggAlleFeileteProsessTasksForRestart();
@@ -115,7 +111,7 @@ public class ProsessTaskRestTjeneste {
         @ApiResponse(responseCode = "200", description = "Liste over prosesstasker, eller tom liste når angitt/default søkefilter ikke finner noen prosesstasker", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProsessTaskDataDto.class)))
     })
     public List<ProsessTaskDataDto> finnProsessTasks(@Parameter(description = "Liste av statuser som skal hentes.") @Valid StatusFilterDto statusFilterDto) {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         return prosessTaskApplikasjonTjeneste.finnAlle(statusFilterDto);
     }
 
@@ -126,7 +122,7 @@ public class ProsessTaskRestTjeneste {
         @ApiResponse(responseCode = "200", description = "Liste over prosesstasker, eller tom liste når angitt/default søkefilter ikke finner noen prosesstasker", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProsessTaskDataDto.class)))
     })
     public List<ProsessTaskDataDto> searchProsessTasks(@Parameter(description = "Søkefilter for å begrense resultatet av returnerte prosesstask.") @Valid SokeFilterDto sokeFilterDto) {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         return prosessTaskApplikasjonTjeneste.søk(sokeFilterDto);
     }
 
@@ -139,7 +135,7 @@ public class ProsessTaskRestTjeneste {
         @ApiResponse(responseCode = "400", description = "Feil input")
     })
     public Response finnFeiletProsessTask(@NotNull @Parameter(description = "Prosesstask-id for feilet prosesstask") @Valid ProsessTaskIdDto prosessTaskIdDto) {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         var resultat = prosessTaskApplikasjonTjeneste.finnFeiletProsessTask(prosessTaskIdDto.getProsessTaskId());
         if (resultat.isPresent()) {
             return Response.ok(resultat.get()).build();
@@ -155,31 +151,9 @@ public class ProsessTaskRestTjeneste {
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
     public Response setFeiletProsessTaskFerdig(@NotNull @Parameter(description = "Prosesstask-id for feilet prosesstask") @Valid ProsessTaskSetFerdigInputDto prosessTaskIdDto) {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         prosessTaskApplikasjonTjeneste.setProsessTaskFerdig(prosessTaskIdDto.getProsessTaskId(), ProsessTaskStatus.valueOf(prosessTaskIdDto.getNaaVaaerendeStatus()));
         return Response.ok().build();
-    }
-
-    static void sjekkAtSaksbehandlerHarRollenDrift() {
-        var kontekst = KontekstHolder.getKontekst();
-        if (erSaksbehandler(kontekst) && saksbehandlerHarRollenDrift(kontekst)) {
-            return;
-        }
-        throw new ManglerTilgangException(FeilKode.IKKE_TILGANG_MANGLER_DRIFT_ROLLE);
-    }
-
-    private static boolean erSaksbehandler(Kontekst kontekst) {
-        if (kontekst == null) {
-            return false;
-        }
-        return IdentType.InternBruker.equals(kontekst.getIdentType());
-    }
-
-    private static boolean saksbehandlerHarRollenDrift(Kontekst kontekst) {
-        if (kontekst == null) {
-            return false;
-        }
-        return kontekst instanceof RequestKontekst requestKontekst && requestKontekst.harGruppe(Groups.DRIFT);
     }
 
 }

@@ -1,8 +1,6 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
 
-import static no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste.sjekkAtSaksbehandlerHarRollenDrift;
-
 import java.time.Instant;
 import java.util.List;
 
@@ -28,6 +26,7 @@ import jakarta.ws.rs.core.Response;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.HentSakTask;
 import no.nav.foreldrepenger.oversikt.oppgave.OpprettOppgaverTask;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 
@@ -41,14 +40,16 @@ public class ManuellOppdateringAvSakDriftTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(ManuellOppdateringAvSakDriftTjeneste.class);
 
     private ProsessTaskTjeneste taskTjeneste;
+    private TilgangKontroll tilgangKontroll;
 
     ManuellOppdateringAvSakDriftTjeneste() {
         // REST CDI
     }
 
     @Inject
-    public ManuellOppdateringAvSakDriftTjeneste(ProsessTaskTjeneste taskTjeneste) {
+    public ManuellOppdateringAvSakDriftTjeneste(ProsessTaskTjeneste taskTjeneste, TilgangKontroll tilgangKontroll) {
         this.taskTjeneste = taskTjeneste;
+        this.tilgangKontroll = tilgangKontroll;
     }
 
     @POST
@@ -59,7 +60,7 @@ public class ManuellOppdateringAvSakDriftTjeneste {
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
     public Response opprettHentSakTaskForSaksnummre(@Parameter(description = "Liste med saksnummre som skal oppdateres") @Valid @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         for (var saksnummer : saksnummre) {
             LOG.info("Lager task for å oppdatere følgende sak {}", saksnummer.value());
             lagreHentSakTask(saksnummer);
@@ -74,7 +75,7 @@ public class ManuellOppdateringAvSakDriftTjeneste {
         @ApiResponse(responseCode = "200", description = "Task for å oppdatere oppgaver er opprettet per sak")
     })
     public Response oppdaterOppgaver(@Parameter(description = "Liste med saksnummre som skal oppdateres") @Valid @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
-        sjekkAtSaksbehandlerHarRollenDrift();
+        tilgangKontroll.sjekkAtSaksbehandlerHarRollenDrift();
         for (var saksnummer : saksnummre) {
             LOG.info("Lager task for å oppdatere oppgaver {}", saksnummer.value());
             lagreOpprettOppgaveTask(saksnummer);

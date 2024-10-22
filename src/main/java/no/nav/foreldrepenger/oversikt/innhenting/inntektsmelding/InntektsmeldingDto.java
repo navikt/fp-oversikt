@@ -2,5 +2,5 @@ package no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding;
 
 import java.time.LocalDateTime;
 
-record InntektsmeldingDto(LocalDateTime opprettet) {
+public record InntektsmeldingDto(LocalDateTime opprettet) {
 }

@@ -7,7 +7,6 @@ import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapperTest.fpSak;
 import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapperTest.fpSakUtenSøknad;
 import static no.nav.foreldrepenger.oversikt.saker.SakerDtoMapperTest.svpSak;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -36,8 +35,12 @@ import no.nav.foreldrepenger.oversikt.domene.svp.Tilrettelegging;
 import no.nav.foreldrepenger.oversikt.domene.svp.TilretteleggingPeriode;
 import no.nav.foreldrepenger.oversikt.domene.svp.TilretteleggingType;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
+import no.nav.foreldrepenger.oversikt.stub.TilgangKontrollStub;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 
 class SakerTest {
+
+    private static final TilgangKontroll TILGANG_KONTROLL_DUMMY = TilgangKontrollStub.borger(true);
 
     @Test
     void skal_ikke_returne_saker_uten_søknad() {
@@ -49,7 +52,7 @@ class SakerTest {
         repository.lagre(svpSak(aktørId));
         repository.lagre(esSak(aktørId));
         var innloggetBruker = myndigInnloggetBruker(aktørId);
-        var saker = new Saker(repository, innloggetBruker, annenpartUbeskyttetAdresse());
+        var saker = new Saker(repository, innloggetBruker, TILGANG_KONTROLL_DUMMY);
 
         var sakerDto = saker.hent();
 
@@ -74,7 +77,7 @@ class SakerTest {
         repository.lagre(henlagtSvpSak);
         repository.lagre(henlagtEsSak);
 
-        var saker = new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse());
+        var saker = new Saker(repository, myndigInnloggetBruker(), TILGANG_KONTROLL_DUMMY);
         var sakerDto = saker.hentSaker(aktørId);
 
         assertThat(sakerDto).isEmpty();
@@ -97,7 +100,7 @@ class SakerTest {
         repository.lagre(new SakES0(Saksnummer.dummy(), aktørId, false, null, Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, now())),
             Set.of(), now()));
         var innloggetBruker = myndigInnloggetBruker(aktørId);
-        var saker = new Saker(repository, innloggetBruker, annenpartUbeskyttetAdresse());
+        var saker = new Saker(repository, innloggetBruker, TILGANG_KONTROLL_DUMMY);
 
         var sakerDto = saker.hent();
 

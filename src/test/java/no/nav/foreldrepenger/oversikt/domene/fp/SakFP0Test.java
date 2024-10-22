@@ -11,7 +11,6 @@ import static no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager.ZERO;
 import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.Resultat.Type.AVSLÅTT;
 import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.Resultat.Type.INNVILGET;
 import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.Resultat.Årsak.ANNET;
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -34,8 +33,12 @@ import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.UttaksperiodeAktivitet;
+import no.nav.foreldrepenger.oversikt.stub.TilgangKontrollStub;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontroll;
 
 class SakFP0Test {
+
+    public static final TilgangKontroll TILGANG_KONTROLL = TilgangKontrollStub.borger(true);
 
     @Test
     void verifiser_at_gjeldende_vedtak_er_det_med_senest_vedtakstidspunkt() {
@@ -47,8 +50,7 @@ class SakFP0Test {
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, vedtakene, AktørId.dummy(), fh(), of(),
             of(), MEDMOR, of(), rettigheter(), false, LocalDateTime.now());
 
-        var annenpartOppslag = annenpartUbeskyttetAdresse();
-        var fpSakDto = sakFP0.tilSakDto(annenpartOppslag);
+        var fpSakDto = sakFP0.tilSakDto(TILGANG_KONTROLL);
 
         assertThat(fpSakDto.gjeldendeVedtak()).isNotNull();
         assertThat(fpSakDto.gjeldendeVedtak().perioder()).hasSameSizeAs(uttaksperioderGjeldendeVedtak);
@@ -116,7 +118,7 @@ class SakFP0Test {
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(vedtak), null, fh(), of(), of(), MOR,
             of(), rettigheter(), false, LocalDateTime.now());
 
-        var fpSakDto = sakFP0.tilSakDto(annenpartUbeskyttetAdresse());
+        var fpSakDto = sakFP0.tilSakDto(TILGANG_KONTROLL);
 
         assertThat(fpSakDto.kanSøkeOmEndring()).isTrue();
     }
@@ -138,7 +140,7 @@ class SakFP0Test {
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(vedtak), null, fh(), of(), of(), MOR,
             of(), rettigheter(), false, LocalDateTime.now());
 
-        var fpSakDto = sakFP0.tilSakDto(annenpartUbeskyttetAdresse());
+        var fpSakDto = sakFP0.tilSakDto(TILGANG_KONTROLL);
 
         assertThat(fpSakDto.kanSøkeOmEndring()).isFalse();
     }
@@ -148,7 +150,7 @@ class SakFP0Test {
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(), null, fh(), of(), of(), FAR, of(),
             rettigheter(), false, LocalDateTime.now());
 
-        var fpSakDto = sakFP0.tilSakDto(annenpartUbeskyttetAdresse());
+        var fpSakDto = sakFP0.tilSakDto(TILGANG_KONTROLL);
 
         assertThat(fpSakDto.kanSøkeOmEndring()).isFalse();
     }
@@ -159,7 +161,7 @@ class SakFP0Test {
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(), null, familieHendelse, of(), of(),
             MOR, of(), rettigheter(), false, LocalDateTime.now());
 
-        var fpSakDto = sakFP0.tilSakDto(annenpartUbeskyttetAdresse());
+        var fpSakDto = sakFP0.tilSakDto(TILGANG_KONTROLL);
 
         assertThat(fpSakDto.familiehendelse().antallBarn()).isEqualTo(familieHendelse.antallBarn());
         assertThat(fpSakDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
@@ -178,8 +180,8 @@ class SakFP0Test {
             of(new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), of(), Dekningsgrad.HUNDRE)), MOR, of(), rettigheter(), false, LocalDateTime.now());
 
 
-        var fpSakDto1 = åpenBehandling.tilSakDto(annenpartUbeskyttetAdresse());
-        var fpSakDto2 = ikkeÅpenBehandling.tilSakDto(annenpartUbeskyttetAdresse());
+        var fpSakDto1 = åpenBehandling.tilSakDto(TILGANG_KONTROLL);
+        var fpSakDto2 = ikkeÅpenBehandling.tilSakDto(TILGANG_KONTROLL);
 
         assertThat(fpSakDto1.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
         assertThat(fpSakDto2.åpenBehandling()).isNull();
@@ -194,9 +196,9 @@ class SakFP0Test {
         var medmor = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(), null, fh(), of(), of(), MEDMOR, of(),
             rettigheter(), false, LocalDateTime.now());
 
-        assertThat(mor.tilSakDto(annenpartUbeskyttetAdresse()).sakTilhørerMor()).isTrue();
-        assertThat(far.tilSakDto(annenpartUbeskyttetAdresse()).sakTilhørerMor()).isFalse();
-        assertThat(medmor.tilSakDto(annenpartUbeskyttetAdresse()).sakTilhørerMor()).isFalse();
+        assertThat(mor.tilSakDto(TILGANG_KONTROLL).sakTilhørerMor()).isTrue();
+        assertThat(far.tilSakDto(TILGANG_KONTROLL).sakTilhørerMor()).isFalse();
+        assertThat(medmor.tilSakDto(TILGANG_KONTROLL).sakTilhørerMor()).isFalse();
     }
 
     @Test
@@ -206,7 +208,7 @@ class SakFP0Test {
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(), null, fh(), of(), of(), MOR,
             of(barn1AktørId, barn2AktørId), rettigheter(), false, LocalDateTime.now());
 
-        var dto = sak.tilSakDto(annenpartUbeskyttetAdresse());
+        var dto = sak.tilSakDto(TILGANG_KONTROLL);
         assertThat(dto.barn())
             .containsExactlyInAnyOrder(
                 new Person(new Fødselsnummer(barn1AktørId.value()), null),
@@ -221,7 +223,7 @@ class SakFP0Test {
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(false, false, false), false, LocalDateTime.now());
 
-        var dto = sak.tilSakDto(annenpartUbeskyttetAdresse());
+        var dto = sak.tilSakDto(TILGANG_KONTROLL);
         assertThat(dto.rettighetType()).isEqualTo(RettighetType.BEGGE_RETT);
         assertThat(dto.morUføretrygd()).isFalse();
         assertThat(dto.harAnnenForelderTilsvarendeRettEØS()).isFalse();
@@ -235,7 +237,7 @@ class SakFP0Test {
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(true, false, false), false, LocalDateTime.now());
 
-        var dto = sak.tilSakDto(annenpartUbeskyttetAdresse());
+        var dto = sak.tilSakDto(TILGANG_KONTROLL);
         assertThat(dto.rettighetType()).isEqualTo(RettighetType.ALENEOMSORG);
         assertThat(dto.morUføretrygd()).isFalse();
         assertThat(dto.harAnnenForelderTilsvarendeRettEØS()).isFalse();
@@ -249,7 +251,7 @@ class SakFP0Test {
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(false, true, true), false, LocalDateTime.now());
 
-        var dto = sak.tilSakDto(annenpartUbeskyttetAdresse());
+        var dto = sak.tilSakDto(TILGANG_KONTROLL);
         assertThat(dto.rettighetType()).isEqualTo(RettighetType.BARE_SØKER_RETT);
         assertThat(dto.morUføretrygd()).isTrue();
         assertThat(dto.harAnnenForelderTilsvarendeRettEØS()).isTrue();
@@ -260,7 +262,7 @@ class SakFP0Test {
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(), null, fh(), of(), of(), FAR, of(),
             rettigheter(), true, LocalDateTime.now());
 
-        var dto = sak.tilSakDto(annenpartUbeskyttetAdresse());
+        var dto = sak.tilSakDto(TILGANG_KONTROLL);
         assertThat(dto.ønskerJustertUttakVedFødsel()).isTrue();
     }
 
