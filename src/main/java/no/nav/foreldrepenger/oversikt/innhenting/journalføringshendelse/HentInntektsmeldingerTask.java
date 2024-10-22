@@ -8,8 +8,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.FpSakInntektsmeldingDto;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV2;
+
+import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
