@@ -8,16 +8,18 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV2;
+
+import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV1;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerRepository;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.Inntektsmelding;
 import no.nav.vedtak.exception.IntegrasjonException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
@@ -67,7 +69,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
         }
 
         Set<no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmelding> mapped = inntektsmeldinger.stream()
-            .map(HentInntektsmeldingerTask::map)
+            .map(HentInntektsmeldingerTask::mapV2)
             .collect(Collectors.toSet());
 
         if (inntektsmeldinger.isEmpty()) {
@@ -80,7 +82,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
     private static void feilHvisInntektsmeldingIkkeMottatt(Saksnummer saksnummer,
                                                            String journalpostId,
                                                            int failedRuns,
-                                                           List<Inntektsmelding> inntektsmeldinger) {
+                                                           List<FpSakInntektsmeldingDto> inntektsmeldinger) {
         if (!imKnyttetTilJournalpost(inntektsmeldinger, journalpostId)) {
             if (failedRuns >= MAX_FAILED_RUNS - 1) {
                 //IM kan være journalført på sak, men ikke oppdatert i fpsak. Feks IM på henlagt/opphørt sak
@@ -93,12 +95,22 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
         }
     }
 
-    static InntektsmeldingV1 map(Inntektsmelding inntektsmelding) {
-        return new InntektsmeldingV1(inntektsmelding.journalpostId(), inntektsmelding.arbeidsgiver(), inntektsmelding.innsendingstidspunkt(),
-            inntektsmelding.inntekt(), inntektsmelding.mottattTidspunkt());
+    static InntektsmeldingV2 mapV2(FpSakInntektsmeldingDto inntektsmelding) {
+        var bortfalteNaturalytelser = inntektsmelding.bortfalteNaturalytelser()
+            .stream()
+            .map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beløpPerMnd(), n.toString()))
+            .toList();
+        var refusjonsperioder = inntektsmelding.refusjonsperioder()
+            .stream()
+            .map(r -> new InntektsmeldingV2.Refusjon(r.fomDato(), r.refusjonsbeløpMnd()))
+            .toList();
+
+        return new InntektsmeldingV2(inntektsmelding.erAktiv(), inntektsmelding.stillingsprosent(), inntektsmelding.inntektPrMnd(),
+            inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiverNavn(), inntektsmelding.arbeidsgiverIdent(), inntektsmelding.journalpostId(),
+            inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), bortfalteNaturalytelser, refusjonsperioder);
     }
 
-    private static boolean imKnyttetTilJournalpost(List<Inntektsmelding> inntektsmeldinger, String journalpostId) {
+    private static boolean imKnyttetTilJournalpost(List<FpSakInntektsmeldingDto> inntektsmeldinger, String journalpostId) {
         return inntektsmeldinger.stream().anyMatch(i -> Objects.equals(i.journalpostId(), journalpostId));
     }
 }

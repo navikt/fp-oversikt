@@ -2,6 +2,8 @@ package no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding;
 
 import java.util.List;
 
+import no.nav.foreldrepenger.common.innsyn.inntektsmelding.FpOversiktInntektsmeldingDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +39,7 @@ public class InntektsmeldingRest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<InntektsmeldingDto> alleInntektsmeldinger(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
+    public List<FpOversiktInntektsmeldingDto> alleInntektsmeldinger(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         tilgangkontroll.sakKobletTilAktørGuard(saksnummer);
