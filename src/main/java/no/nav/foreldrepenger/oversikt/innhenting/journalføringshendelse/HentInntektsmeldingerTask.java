@@ -105,8 +105,8 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
             .toList();
 
         return new InntektsmeldingV2(inntektsmelding.erAktiv(), inntektsmelding.stillingsprosent(), inntektsmelding.inntektPrMnd(),
-            inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiverNavn(), inntektsmelding.journalpostId(), inntektsmelding.mottattTidspunkt(),
-            inntektsmelding.startDatoPermisjon(), bortfalteNaturalytelser, refusjonsperioder);
+            inntektsmelding.refusjonPrMnd(), inntektsmelding.arbeidsgiverNavn(), inntektsmelding.arbeidsgiverIdent(), inntektsmelding.journalpostId(),
+            inntektsmelding.mottattTidspunkt(), inntektsmelding.startDatoPermisjon(), bortfalteNaturalytelser, refusjonsperioder);
     }
 
     private static boolean imKnyttetTilJournalpost(List<FpSakInntektsmeldingDto> inntektsmeldinger, String journalpostId) {
