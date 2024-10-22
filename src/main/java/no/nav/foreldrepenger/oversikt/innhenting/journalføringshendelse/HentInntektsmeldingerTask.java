@@ -62,7 +62,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
                                     String journalpostId,
                                     int failedRuns) {
         var inntektsmeldinger = fpsakTjeneste.hentInntektsmeldinger(saksnummer);
-        LOG.info("Hentet inntektsmeldinger for sak {} {}", saksnummer.value(), inntektsmeldinger);
+        LOG.info("Hentet inntektsmeldinger for sak {} {}", saksnummer.value(), inntektsmeldinger.size());
 
         if (journalpostId != null) {
             feilHvisInntektsmeldingIkkeMottatt(saksnummer, journalpostId, failedRuns, inntektsmeldinger);
