@@ -45,7 +45,7 @@ public class InntektsmeldingTjeneste {
                 .toList();
             return new FpOversiktInntektsmeldingDto(2, inntektsmeldingV2.erAktiv(), inntektsmeldingV2.stillingsprosent(),
                 inntektsmeldingV2.inntektPrMnd(), inntektsmeldingV2.refusjonPrMnd(), inntektsmeldingV2.arbeidsgiverNavn(),
-                null, inntektsmeldingV2.journalpostId(), inntektsmeldingV2.mottattTidspunkt(), inntektsmeldingV2.startDatoPermisjon(), naturalytelser,
+                inntektsmeldingV2.arbeidsgiverIdent(), inntektsmeldingV2.journalpostId(), inntektsmeldingV2.mottattTidspunkt(), inntektsmeldingV2.startDatoPermisjon(), naturalytelser,
                 refusjon);
         }
         if (inntektsmelding instanceof InntektsmeldingV1 inntektsmeldingV1) {
