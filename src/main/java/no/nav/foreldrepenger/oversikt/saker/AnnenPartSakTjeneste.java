@@ -22,8 +22,6 @@ import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
-import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
-import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
 
 @ApplicationScoped
 public class AnnenPartSakTjeneste {
@@ -102,19 +100,20 @@ public class AnnenPartSakTjeneste {
             case ÅTTI -> Dekningsgrad.ÅTTI;
             case HUNDRE -> Dekningsgrad.HUNDRE;
         };
-        var vedtaksperioder = safeStream(gjeldendeVedtak.get().perioder()).map(Uttaksperiode::tilDto).toList();
+        var vedtaksperioder = safeStream(gjeldendeVedtak.get().perioder()).map(p -> p.tilDto(gjeldendeSak.brukerRolle().tilDto())).toList();
         return Optional.of(new AnnenPartSak(compress(fjernArbeidsgivere(vedtaksperioder)), termindato, dekningsgrad, antallBarn));
     }
 
     private static List<UttakPeriode> finnUttaksperioder(ForeldrepengerSak gjeldendeSak) {
         //Fra vedtak, ellers søknad
+        var brukerRolle = gjeldendeSak.brukerRolle().tilDto();
         return gjeldendeSak.gjeldendeVedtak().map(gjeldendeVedtak -> {
-            var perioder = safeStream(gjeldendeVedtak.perioder()).map(Uttaksperiode::tilDto).toList();
+            var perioder = safeStream(gjeldendeVedtak.perioder()).map(p -> p.tilDto(brukerRolle)).toList();
             return compress(perioder);
         }).orElseGet(() -> {
             LOG.info("Annen parts gjeldende sak har ingen gjeldende vedtak. Saksnummer {}", gjeldendeSak.saksnummer());
             return gjeldendeSak.sisteSøknad().map(s -> {
-                var perioder = s.perioder().stream().map(FpSøknadsperiode::tilDto).toList();
+                var perioder = s.perioder().stream().map(fpSøknadsperiode -> fpSøknadsperiode.tilDto(brukerRolle)).toList();
                 return compress(perioder);
             }).orElse(List.of());
         });
@@ -126,7 +125,7 @@ public class AnnenPartSakTjeneste {
             var gradering = p.gradering() == null ? null : new Gradering(p.gradering().arbeidstidprosent(), null);
             return new UttakPeriode(p.fom(), p.tom(),
                 p.kontoType(), p.resultat(), p.utsettelseÅrsak(), p.oppholdÅrsak(), p.overføringÅrsak(), gradering,
-                p.morsAktivitet(), p.samtidigUttak(), p.flerbarnsdager());
+                p.morsAktivitet(), p.samtidigUttak(), p.flerbarnsdager(), p.forelder());
         }).toList();
     }
 

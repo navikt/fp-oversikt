@@ -52,13 +52,12 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.FpSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
+    public FpSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
         var sisteSøknad = sisteSøknad();
         var gjeldendeVedtak = gjeldendeVedtak();
         var dekningsgrad = dekningsgrad();
-        var fpVedtak = gjeldendeVedtak
-            .map(FpVedtak::tilDto)
-            .orElse(null);
+        var forelder = brukerRolle.tilDto();
+        var fpVedtak = gjeldendeVedtak.map(fpVedtak1 -> fpVedtak1.tilDto(forelder)).orElse(null);
 
         var annenPart = Optional.ofNullable(annenPartAktørId).flatMap(a -> mapPerson(personOppslagSystem, a));
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::innvilget);
@@ -69,11 +68,11 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var gjelderAdopsjon = familieHendelse() != null && familieHendelse().gjelderAdopsjon();
         var morUføretrygd = rettigheter != null && rettigheter.morUføretrygd();
         var harAnnenForelderTilsvarendeRettEØS = rettigheter != null && rettigheter.annenForelderTilsvarendeRettEØS();
-        var rettighetType = utledRettighetType(rettigheter, sisteSøknad.map(FpSøknad::perioder).orElse(Set.of()), gjeldendeVedtak.map(
-            FpVedtak::perioder).orElse(List.of()));
-        return new FpSak(saksnummer.tilDto(), avsluttet, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon,
-            morUføretrygd, harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart.orElse(null), fh, fpVedtak, åpenBehandling,
-            barna, dekningsgrad == null ? null : dekningsgrad.tilDto(), oppdatertTidspunkt());
+        var rettighetType = utledRettighetType(rettigheter, sisteSøknad.map(FpSøknad::perioder).orElse(Set.of()),
+            gjeldendeVedtak.map(FpVedtak::perioder).orElse(List.of()));
+        return new FpSak(saksnummer.tilDto(), avsluttet, kanSøkeOmEndring, MOR.equals(brukerRolle()), gjelderAdopsjon, morUføretrygd,
+            harAnnenForelderTilsvarendeRettEØS, ønskerJustertUttakVedFødsel, rettighetType, annenPart.orElse(null), fh, fpVedtak, åpenBehandling,
+            barna, dekningsgrad == null ? null : dekningsgrad.tilDto(), oppdatertTidspunkt(), forelder);
     }
 
     private Optional<Person> mapPerson(PersonOppslagSystem personOppslagSystem, AktørId aktørId) {
@@ -82,8 +81,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
 
     @Override
     public Dekningsgrad dekningsgrad() {
-        return gjeldendeVedtak().map(FpVedtak::dekningsgrad)
-            .orElseGet(() -> sisteSøknad().map(FpSøknad::dekningsgrad).orElse(null));
+        return gjeldendeVedtak().map(FpVedtak::dekningsgrad).orElseGet(() -> sisteSøknad().map(FpSøknad::dekningsgrad).orElse(null));
     }
 
     @Override
@@ -127,7 +125,10 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             // bare returnere perioder i førstegangsbehandlinger
             List<UttakPeriode> perioder = kanSøkeOmEndring ? List.of() : s.perioder()
                 .stream()
-                .map(FpSøknadsperiode::tilDto)
+                .map(fpSøknadsperiode -> {
+                    var forelder = brukerRolle.tilDto();
+                    return fpSøknadsperiode.tilDto(forelder);
+                })
                 .sorted(Comparator.comparing(UttakPeriode::fom))
                 .toList();
             return new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()), compress(perioder));
@@ -135,8 +136,6 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     private Optional<FpSøknad> søknadUnderBehandling() {
-        return safeStream(søknader())
-            .max(Comparator.comparing(FpSøknad::mottattTidspunkt))
-            .filter(sisteSøknad -> !sisteSøknad.status().behandlet());
+        return safeStream(søknader()).max(Comparator.comparing(FpSøknad::mottattTidspunkt)).filter(sisteSøknad -> !sisteSøknad.status().behandlet());
     }
 }
