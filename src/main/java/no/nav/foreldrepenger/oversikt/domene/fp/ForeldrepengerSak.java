@@ -24,6 +24,8 @@ public interface ForeldrepengerSak extends Sak {
 
     boolean oppgittAleneomsorg();
 
+    BrukerRolle brukerRolle();
+
     default boolean gjelderBarn(AktørId barnAktørid) {
         return fødteBarn() != null && fødteBarn().contains(barnAktørid);
     }
