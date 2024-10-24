@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static java.time.LocalDate.now;
 import static java.util.Set.of;
+import static no.nav.foreldrepenger.common.innsyn.BrukerRolle.*;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.FAR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MEDMOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
@@ -78,7 +79,7 @@ class SakFP0Test {
     void sjekk_at_mapping_av_uttaksperiode_til_dto_fungere() {
         var uttaksperiode = uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO));
 
-        var uttaksperiodeDto = uttaksperiode.tilDto();
+        var uttaksperiodeDto = uttaksperiode.tilDto(FAR_MEDMOR);
 
         assertThat(uttaksperiodeDto.fom()).isEqualTo(uttaksperiode.fom());
         assertThat(uttaksperiodeDto.tom()).isEqualTo(uttaksperiode.tom());
@@ -92,7 +93,7 @@ class SakFP0Test {
             uttaksperiode(LocalDate.of(2024, 10, 10).plusMonths(1), LocalDate.of(2024, 10, 10).plusMonths(2), innvilget(ZERO)));
         var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
 
-        var vedtakDto = vedtak.tilDto();
+        var vedtakDto = vedtak.tilDto(no.nav.foreldrepenger.common.innsyn.BrukerRolle.MOR);
 
         assertThat(vedtakDto.perioder()).hasSameSizeAs(vedtak.perioder());
     }
@@ -102,7 +103,7 @@ class SakFP0Test {
     void sjekk_at_mapping_av_vedtak_til_dto_ikke_kaster_exception_når_uttak_er_null() {
         var vedtak = new FpVedtak(LocalDateTime.now(), null, Dekningsgrad.HUNDRE);
 
-        var vedtakDto = vedtak.tilDto();
+        var vedtakDto = vedtak.tilDto(FAR_MEDMOR);
 
         assertThat(vedtakDto.perioder()).isEmpty();
     }

@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static no.nav.foreldrepenger.common.innsyn.Arbeidsgiver.ArbeidsgiverType;
+import static no.nav.foreldrepenger.common.innsyn.BrukerRolle.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -18,7 +19,7 @@ class FpSøknadsperiodeTest {
     void mapper_til_dto() {
         var periode = periode();
 
-        var dto = periode.tilDto();
+        var dto = periode.tilDto(MOR);
         assertThat(dto.fom()).isEqualTo(periode.fom());
         assertThat(dto.fom()).isEqualTo(periode.fom());
         assertThat(dto.gradering().arbeidstidprosent().value()).isEqualTo(periode.gradering().prosent().decimalValue());
@@ -33,13 +34,14 @@ class FpSøknadsperiodeTest {
         assertThat(dto.oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER);
         assertThat(dto.utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UtsettelseÅrsak.SØKER_SYKDOM);
         assertThat(dto.overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.SYKDOM_ANNEN_FORELDER);
+        assertThat(dto.forelder()).isEqualTo(MOR);
     }
 
     @Test
     void samtidig_uttak_skal_sett_gradering_til_null() {
         var periode = periode(new Prosent(10), new Prosent(20));
 
-        var dto = periode.tilDto();
+        var dto = periode.tilDto(MOR);
 
         assertThat(dto.gradering()).isNull();
         assertThat(dto.samtidigUttak().value()).isEqualTo(periode.samtidigUttak().decimalValue());
@@ -49,7 +51,7 @@ class FpSøknadsperiodeTest {
     void null_prosent_samtidig_uttak_er_ikke_samtidig_uttak() {
         var periode = periode(Prosent.ZERO, null);
 
-        var dto = periode.tilDto();
+        var dto = periode.tilDto(FAR_MEDMOR);
 
         assertThat(dto.samtidigUttak()).isNull();
     }
