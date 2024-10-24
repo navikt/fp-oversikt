@@ -23,11 +23,11 @@
 
         <felles.version>7.3.1</felles.version>
         <prosesstask.version>5.0.16</prosesstask.version>
-        <fp-kontrakter.version>9.1.20</fp-kontrakter.version>
+        <fp-kontrakter.version>9.1.21</fp-kontrakter.version>
         <fpsoknad-felles.version>3.1.10</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.1</fp-tidsserie.version>
         <mittnav-varsler.version>1.1.0</mittnav-varsler.version>
-        <teamdokumenthandtering-avro-schemas.version>1.1.0</teamdokumenthandtering-avro-schemas.version>
+        <teamdokumenthandtering-avro-schemas.version>1.1.6</teamdokumenthandtering-avro-schemas.version>
     </properties>
 
     <dependencyManagement>
