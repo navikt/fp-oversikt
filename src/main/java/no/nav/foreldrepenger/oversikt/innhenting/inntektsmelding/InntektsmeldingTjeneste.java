@@ -37,7 +37,7 @@ public class InntektsmeldingTjeneste {
         if (inntektsmelding instanceof InntektsmeldingV2 inntektsmeldingV2) {
             var naturalytelser = inntektsmeldingV2.bortfalteNaturalytelser()
                 .stream()
-                .map(n -> new BortfaltNaturalytelse(n.fomDato(), n.tomDato(), n.beløpPerMnd(), no.nav.foreldrepenger.common.innsyn.inntektsmelding.NaturalytelseType.valueOf(n.type())))
+                .map(n -> new BortfaltNaturalytelse(n.fomDato(), n.tomDato(), n.beløpPerMnd(), n.type()))
                 .toList();
             var refusjon = inntektsmeldingV2.refusjonsperioder()
                 .stream()

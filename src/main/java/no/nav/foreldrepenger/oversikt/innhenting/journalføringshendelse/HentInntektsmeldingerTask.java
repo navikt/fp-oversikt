@@ -98,7 +98,7 @@ public class HentInntektsmeldingerTask implements ProsessTaskHandler {
     public static InntektsmeldingV2 mapV2(FpSakInntektsmeldingDto inntektsmelding) {
         var bortfalteNaturalytelser = inntektsmelding.bortfalteNaturalytelser()
             .stream()
-            .map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beløpPerMnd(), n.type().name()))
+            .map(n -> new InntektsmeldingV2.NaturalYtelse(n.fomDato(), n.tomDato(), n.beløpPerMnd(), n.type()))
             .toList();
         var refusjonsperioder = inntektsmelding.refusjonsperioder()
             .stream()

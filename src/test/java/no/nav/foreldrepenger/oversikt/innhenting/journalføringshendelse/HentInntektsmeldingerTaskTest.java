@@ -31,10 +31,10 @@ class HentInntektsmeldingerTaskTest {
         assertThat(resultat.inntektPrMnd()).isEqualTo(fraFpsak.inntektPrMnd());
         assertThat(resultat.arbeidsgiverNavn()).isEqualTo(fraFpsak.arbeidsgiverNavn());
         assertThat(resultat.mottattTidspunkt()).isEqualTo(fraFpsak.mottattTidspunkt());
-        assertThat(resultat.bortfalteNaturalytelser().get(0).type()).isEqualTo("BIL");
+        assertThat(resultat.bortfalteNaturalytelser().get(0).type()).isEqualTo(NaturalytelseType.BIL);
         assertThat(resultat.bortfalteNaturalytelser().get(0).beløpPerMnd()).isEqualTo(bortfalteNaturalytelse1.beløpPerMnd());
         assertThat(resultat.bortfalteNaturalytelser().get(0).fomDato()).isEqualTo(bortfalteNaturalytelse1.fomDato());
         assertThat(resultat.bortfalteNaturalytelser().get(0).tomDato()).isEqualTo(bortfalteNaturalytelse1.tomDato());
-        assertThat(resultat.bortfalteNaturalytelser().get(1).type()).isEqualTo("KOST_DØGN");
+        assertThat(resultat.bortfalteNaturalytelser().get(1).type()).isEqualTo(NaturalytelseType.KOST_DØGN);
     }
 }

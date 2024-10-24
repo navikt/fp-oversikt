@@ -8,6 +8,8 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.foreldrepenger.common.innsyn.inntektsmelding.NaturalytelseType;
+
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record InntektsmeldingV2(
     @JsonProperty("erAktiv") boolean erAktiv,
@@ -26,7 +28,7 @@ public record InntektsmeldingV2(
         @JsonProperty("fomDato") LocalDate fomDato,
         @JsonProperty("tomDato") LocalDate tomDato,
         @JsonProperty("beløpPerMnd") BigDecimal beløpPerMnd,
-        @JsonProperty("type") String type
+        @JsonProperty("type") NaturalytelseType type
     ) {}
 
     public record Refusjon(
