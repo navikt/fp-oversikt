@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
+import static no.nav.foreldrepenger.common.innsyn.BrukerRolle.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -19,7 +20,7 @@ class UttaksperiodeTest {
     void mapper_til_dto() {
         var periode = periode(null, new Prosent(10), Uttaksperiode.Resultat.Type.INNVILGET_GRADERING);
 
-        var dto = periode.tilDto();
+        var dto = periode.tilDto(FAR_MEDMOR);
         assertThat(dto.fom()).isEqualTo(periode.fom());
         assertThat(dto.fom()).isEqualTo(periode.fom());
         var uttaksperiodeAktivitet = periode.resultat().aktiviteter().stream().findFirst().orElseThrow();
@@ -37,13 +38,14 @@ class UttaksperiodeTest {
         assertThat(dto.resultat().trekkerDager()).isTrue();
         assertThat(dto.resultat().trekkerMinsterett()).isTrue();
         assertThat(dto.resultat().årsak()).isEqualTo(UttakPeriodeResultat.Årsak.ANNET);
+        assertThat(dto.forelder()).isEqualTo(FAR_MEDMOR);
     }
 
     @Test
     void samtidig_uttak_skal_sett_gradering_til_null() {
         var periode = periode(new Prosent(10), new Prosent(20), Uttaksperiode.Resultat.Type.INNVILGET);
 
-        var dto = periode.tilDto();
+        var dto = periode.tilDto(FAR_MEDMOR);
 
         assertThat(dto.gradering()).isNull();
         assertThat(dto.samtidigUttak().value()).isEqualTo(periode.samtidigUttak().decimalValue());
@@ -53,7 +55,7 @@ class UttaksperiodeTest {
     void null_prosent_samtidig_uttak_er_ikke_samtidig_uttak() {
         var periode = periode(Prosent.ZERO, Prosent.ZERO, Uttaksperiode.Resultat.Type.INNVILGET);
 
-        var dto = periode.tilDto();
+        var dto = periode.tilDto(FAR_MEDMOR);
 
         assertThat(dto.samtidigUttak()).isNull();
     }
