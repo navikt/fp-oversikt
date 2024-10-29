@@ -22,7 +22,7 @@
         <io.confluent.version>7.7.1</io.confluent.version>
 
         <felles.version>7.3.1</felles.version>
-        <prosesstask.version>5.0.16</prosesstask.version>
+        <prosesstask.version>5.0.17</prosesstask.version>
         <fp-kontrakter.version>9.1.21</fp-kontrakter.version>
         <fpsoknad-felles.version>3.2.1</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.1</fp-tidsserie.version>
