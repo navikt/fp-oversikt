@@ -14,6 +14,7 @@ public record OppholdPeriode(@JsonProperty("fom") LocalDate fom,
     }
     public enum OppholdKilde {
         SAKSBEHANDLER,
-        INNTEKTSMELDING
+        INNTEKTSMELDING,
+        SØKNAD
     }
 }

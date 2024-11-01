@@ -199,6 +199,7 @@ public class HentSakTask implements ProsessTaskHandler {
             switch (oppholdPeriode.kilde()) {
             case SAKSBEHANDLER -> OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
             case INNTEKTSMELDING -> OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
+            case SØKNAD -> OppholdPeriode.OppholdKilde.SØKNAD;
             });
     }
 
