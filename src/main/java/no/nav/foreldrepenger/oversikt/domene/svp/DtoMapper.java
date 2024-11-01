@@ -130,6 +130,7 @@ final class DtoMapper {
             switch (opphold.kilde()) {
             case SAKSBEHANDLER -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
             case INNTEKTSMELDING -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
+            case SØKNAD -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.SØKNAD;
             });
     }
 
