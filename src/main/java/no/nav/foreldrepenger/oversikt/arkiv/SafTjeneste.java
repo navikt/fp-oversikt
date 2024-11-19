@@ -60,7 +60,7 @@ public class SafTjeneste {
             .journalposttype()
             .eksternReferanseId()
             .bruker(new BrukerResponseProjection().type().id())
-            .sak(new SakResponseProjection().fagsakId())
+            .sak(new SakResponseProjection().fagsakId().fagsaksystem())
             .tilleggsopplysninger(new TilleggsopplysningResponseProjection().nokkel().verdi())
             .dokumenter(new DokumentInfoResponseProjection().tittel());
     }
@@ -69,6 +69,7 @@ public class SafTjeneste {
         var innsendingstype = tilType(journalpost.getJournalposttype());
         return new EnkelJournalpost(
             journalpost.getJournalpostId(),
+            journalpost.getSak().getFagsaksystem(),
             journalpost.getEksternReferanseId(),
             journalpost.getSak().getFagsakId(),
             innsendingstype,

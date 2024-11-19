@@ -81,6 +81,7 @@ class JournalføringHendelseTaskUtlederTest {
     private static EnkelJournalpost søknad() {
         return new EnkelJournalpost(
             "123",
+            "FS36",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
             EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
@@ -92,6 +93,7 @@ class JournalføringHendelseTaskUtlederTest {
     private static EnkelJournalpost ettersending() {
         return new EnkelJournalpost(
             "123",
+            "FS36",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
             EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
@@ -103,6 +105,7 @@ class JournalføringHendelseTaskUtlederTest {
     private static EnkelJournalpost inntektsmelding() {
         return new EnkelJournalpost(
             "123",
+            "FS36",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
             EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
@@ -114,6 +117,7 @@ class JournalføringHendelseTaskUtlederTest {
     private static EnkelJournalpost uttalelseTilbakebetaling() {
         return new EnkelJournalpost(
             "123",
+            "FS36",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
             EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
