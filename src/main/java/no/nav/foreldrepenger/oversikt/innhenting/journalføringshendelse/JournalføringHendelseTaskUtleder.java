@@ -42,7 +42,7 @@ public class JournalføringHendelseTaskUtleder {
     List<ProsessTaskData> utledProsesstask(EnkelJournalpost journalpost) {
         var saksnummer = journalpost.saksnummer();
         var dokumenttype = journalpost.hovedtype();
-        if (dokumenttype == null) {
+        if (dokumenttype == null || journalpost.erInfotrygdSak()) {
             return List.of();
         }
 
