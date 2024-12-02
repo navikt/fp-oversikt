@@ -37,7 +37,7 @@ public class OppgaveTjeneste {
 
         var eksisterendeOppgaver = hentAktiveOppgaver(saksnummer);
         LOG.info("Hentet eksisterende oppgaver for {} {}", saksnummer.value(), eksisterendeOppgaver);
-        avsluttOppgaver(oppgaver, eksisterendeOppgaver);
+        avsluttOppgaver(saksnummer, oppgaver, eksisterendeOppgaver);
         opprettOppgaver(saksnummer, oppgaver, eksisterendeOppgaver);
     }
 
@@ -50,18 +50,18 @@ public class OppgaveTjeneste {
         for (var o : oppgaverSomSkalOpprettes) {
             LOG.info("Oppretter oppgave {}", o);
             oppgaveRepository.opprett(o);
-            opprettOpprettDittNavOppgaveTask(o.id());
+            opprettOpprettDittNavOppgaveTask(o.id(), saksnummer);
         }
     }
 
-    private void avsluttOppgaver(Set<OppgaveType> oppgaver, Set<Oppgave> eksisterendeOppgaver) {
+    private void avsluttOppgaver(Saksnummer saksnummer, Set<OppgaveType> oppgaver, Set<Oppgave> eksisterendeOppgaver) {
         var oppgaverSomSkalAvsluttes = eksisterendeOppgaver.stream()
             .filter(oppgave -> !oppgaver.contains(oppgave.type()))
             .collect(Collectors.toSet());
         for (var o : oppgaverSomSkalAvsluttes) {
             LOG.info("Avslutter oppgave {}", o);
             oppgaveRepository.lagreStatus(o.id(), new Oppgave.Status(o.status().opprettetTidspunkt(), LocalDateTime.now()));
-            opprettAvsluttDittNavOppgaveTask(o.id());
+            opprettAvsluttDittNavOppgaveTask(o.id(), saksnummer);
         }
     }
 
@@ -69,18 +69,20 @@ public class OppgaveTjeneste {
         return oppgaveRepository.hentFor(saksnummer).stream().filter(Oppgave::aktiv).collect(Collectors.toSet());
     }
 
-    private void opprettOpprettDittNavOppgaveTask(UUID id) {
+    private void opprettOpprettDittNavOppgaveTask(UUID id, Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(MinSideOpprettOppgaveTask.class);
         task.setCallIdFraEksisterende();
+        task.setSaksnummer(saksnummer.value());
         task.setProperty(MinSideOpprettOppgaveTask.OPPGAVE_ID, id.toString());
         task.setGruppe(id.toString());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         prosessTaskTjeneste.lagre(task);
     }
 
-    private void opprettAvsluttDittNavOppgaveTask(UUID id) {
+    private void opprettAvsluttDittNavOppgaveTask(UUID id, Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(MinSideAvsluttOppgaveTask.class);
         task.setCallIdFraEksisterende();
+        task.setSaksnummer(saksnummer.value());
         task.setProperty(MinSideAvsluttOppgaveTask.OPPGAVE_ID, id.toString());
         task.setGruppe(id.toString());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
