@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
 import static no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask.TASK_TYPE;
-import static no.nav.vedtak.felles.prosesstask.api.CommonTaskProperties.SAKSNUMMER;
 
 import java.util.UUID;
 
@@ -42,7 +41,7 @@ public class MinSideBeskjedVedMottattSøknadTask implements ProsessTaskHandler {
     @Override
     public void doTask(ProsessTaskData data) {
         var aktørId = new AktørId(data.getPropertyValue(AKTØRID));
-        var saksnummer = new Saksnummer(data.getPropertyValue(SAKSNUMMER));
+        var saksnummer = new Saksnummer(data.getSaksnummer());
         var erEndringssøknad = Boolean.parseBoolean(data.getPropertyValue(ER_ENDRINGSSØKNAD));
         var ytelseType = YtelseType.valueOf(data.getPropertyValue(YTELSE_TYPE));
         // eventuell ny innsending med samme eventId (kanalreferanse fra journalpost) regnes som duplikat og ignoreres av MinSideVarsel
