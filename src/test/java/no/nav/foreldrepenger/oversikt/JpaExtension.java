@@ -3,11 +3,13 @@ package no.nav.foreldrepenger.oversikt;
 import static no.nav.foreldrepenger.oversikt.server.JettyServer.flywayConfig;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
 
 import org.eclipse.jetty.plus.jndi.EnvEntry;
+import org.flywaydb.core.api.FlywayException;
 import org.junit.jupiter.api.extension.TestInstantiationException;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -31,8 +33,13 @@ public class JpaExtension extends EntityManagerAwareExtension {
         TEST_DATABASE.start();
 
         var dataSource = datasSource(TEST_DATABASE.getJdbcUrl(), TEST_DATABASE.getUsername(), TEST_DATABASE.getPassword());
-        var flyway = flywayConfig(dataSource).cleanDisabled(false).cleanOnValidationError(true).load();
-        flyway.migrate();
+        var flyway = flywayConfig(dataSource).cleanDisabled(false).load();
+        try {
+            flyway.migrate();
+        } catch (FlywayException e) {
+            flyway.clean();
+            flyway.migrate();
+        }
     }
 
     private synchronized static DataSource datasSource(String jdbcUrl, String username, String password) {
@@ -54,9 +61,7 @@ public class JpaExtension extends EntityManagerAwareExtension {
         config.setPassword(password);
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(6);
-        config.setIdleTimeout(10001);
-        config.setMaxLifetime(30001);
-        config.setInitializationFailTimeout(30000);
+        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(2)); // feiler fast hvis db ikke kjører lokalt.
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
         config.setAutoCommit(false);

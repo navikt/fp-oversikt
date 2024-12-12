@@ -63,7 +63,6 @@ public class JournalføringHendelseTaskUtleder {
     private ProsessTaskData lagHentManglendeVedleggTask(String saksnummer) {
         var m = ProsessTaskData.forProsessTask(HentManglendeVedleggTask.class);
         m.setSaksnummer(saksnummer);
-        m.setCallIdFraEksisterende();
         m.setSekvens(genererNesteSekvens());
         m.setGruppe(saksnummer + "-V");
         return m;
@@ -78,7 +77,6 @@ public class JournalføringHendelseTaskUtleder {
         var i = ProsessTaskData.forProsessTask(HentInntektsmeldingerTask.class);
         i.setSaksnummer(saksnummer);
         i.setProperty(HentInntektsmeldingerTask.JOURNALPOST_ID, journalpostId);
-        i.setCallIdFraEksisterende();
         i.medNesteKjøringEtter(LocalDateTime.now().plus(HentInntektsmeldingerTask.TASK_DELAY));
         i.setGruppe(saksnummer + "-I");
         i.setSekvens(genererNesteSekvens());
@@ -88,7 +86,6 @@ public class JournalføringHendelseTaskUtleder {
     private ProsessTaskData lagHentTilbakekrevingTask(String saksnummer) {
         var t = ProsessTaskData.forProsessTask(HentTilbakekrevingTask.class);
         t.setSaksnummer(saksnummer);
-        t.setCallIdFraEksisterende();
         t.setProperty(HentTilbakekrevingTask.FORVENTER_BESVART_VARSEL, "true");
         return t;
     }
@@ -96,7 +93,6 @@ public class JournalføringHendelseTaskUtleder {
     private ProsessTaskData lagSendBrukernotifikasjonBeskjedTask(String saksnummer, DokumentType dokumentType, EnkelJournalpost journalpost) {
         var b = ProsessTaskData.forProsessTask(MinSideBeskjedVedMottattSøknadTask.class);
         b.setSaksnummer(saksnummer);
-        b.setCallIdFraEksisterende();
         b.setProperty(YTELSE_TYPE, gjelderYtelse(dokumentType).name());
         b.setProperty(ER_ENDRINGSSØKNAD, Boolean.toString(dokumentType.erEndringssøknad()));
         b.setProperty(AKTØRID, tilAktørid(journalpost.bruker()).value());

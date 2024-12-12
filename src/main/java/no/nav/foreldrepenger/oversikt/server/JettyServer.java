@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -132,11 +133,9 @@ public class JettyServer {
         config.setJdbcUrl(dbUrl());
         config.setUsername(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_USERNAME", "fpoversikt"));
         config.setPassword(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PASSWORD", "fpoversikt"));
+        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(1));
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(6);
-        config.setIdleTimeout(10001);
-        config.setMaxLifetime(30001);
-        config.setInitializationFailTimeout(30000);
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
         config.setAutoCommit(false);

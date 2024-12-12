@@ -14,8 +14,8 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
-import no.nav.vedtak.log.metrics.LivenessAware;
-import no.nav.vedtak.log.metrics.ReadinessAware;
+import no.nav.vedtak.server.LivenessAware;
+import no.nav.vedtak.server.ReadinessAware;
 
 @Path("/health")
 @ApplicationScoped

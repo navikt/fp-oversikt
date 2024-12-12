@@ -3,6 +3,12 @@ package no.nav.foreldrepenger.oversikt.drift;
 import java.net.HttpURLConnection;
 import java.util.List;
 
+import jakarta.ws.rs.BeanParam;
+
+import jakarta.ws.rs.PathParam;
+import no.nav.vedtak.felles.prosesstask.rest.dto.IkkeFerdigProsessTaskStatusEnum;
+import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskStatusDto;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +44,7 @@ import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskRetryAllResultatDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskSetFerdigInputDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.SokeFilterDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.StatusFilterDto;
-import no.nav.vedtak.sikkerhet.kontekst.Groups;
+import no.nav.vedtak.sikkerhet.kontekst.AnsattGruppe;
 import no.nav.vedtak.sikkerhet.kontekst.IdentType;
 import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
@@ -79,7 +85,7 @@ public class ProsessTaskRestTjeneste {
     }
 
     @POST
-    @Path("/launch")
+    @Path("/launch/{prosessTaskId}/{prosessTaskStatus}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Restarter en eksisterende prosesstask.", summary = "En allerede FERDIG prosesstask kan ikke restartes. En prosesstask har normalt et gitt antall forsøk den kan kjøres automatisk. "
         +
@@ -87,7 +93,7 @@ public class ProsessTaskRestTjeneste {
         @ApiResponse(responseCode = "200", description = "Prosesstaskens oppdatert informasjon", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProsessTaskRestartResultatDto.class))),
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
-    public ProsessTaskRestartResultatDto restartProsessTask(@Parameter(description = "Informasjon for restart en eksisterende prosesstask") @Valid ProsessTaskRestartInputDto restartInputDto) {
+    public ProsessTaskRestartResultatDto restartProsessTask(@Parameter(description = "Informasjon for restart en eksisterende prosesstask") @Valid @BeanParam ProsessTaskRestartInputDto restartInputDto) {
         sjekkAtSaksbehandlerHarRollenDrift();
         // kjøres manuelt for å avhjelpe feilsituasjon, da er det veldig greit at det blir logget!
         LOG.info("Restarter prossess task {}", restartInputDto.getProsessTaskId());
@@ -109,13 +115,15 @@ public class ProsessTaskRestTjeneste {
     }
 
     @POST
-    @Path("/list")
+    @Path("/list/{prosessTaskStatus}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Lister prosesstasker med angitt status.", tags = "prosesstask", responses = {
         @ApiResponse(responseCode = "200", description = "Liste over prosesstasker, eller tom liste når angitt/default søkefilter ikke finner noen prosesstasker", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProsessTaskDataDto.class)))
     })
-    public List<ProsessTaskDataDto> finnProsessTasks(@Parameter(description = "Liste av statuser som skal hentes.") @Valid StatusFilterDto statusFilterDto) {
+    public List<ProsessTaskDataDto> finnProsessTasks(@Parameter(description = "Task status som skal hentes.") @Valid @PathParam("prosessTaskStatus") IkkeFerdigProsessTaskStatusEnum finnTaskStatus) {
         sjekkAtSaksbehandlerHarRollenDrift();
+        var statusFilterDto = new StatusFilterDto();
+        statusFilterDto.setProsessTaskStatuser(List.of(new ProsessTaskStatusDto(finnTaskStatus.name())));
         return prosessTaskApplikasjonTjeneste.finnAlle(statusFilterDto);
     }
 
@@ -131,14 +139,14 @@ public class ProsessTaskRestTjeneste {
     }
 
     @POST
-    @Path("/feil")
+    @Path("/feil/{prosessTaskId}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Henter informasjon om feilet prosesstask med angitt prosesstask-id", tags = "prosesstask", responses = {
         @ApiResponse(responseCode = "200", description = "Angitt prosesstask-id finnes", content = @Content(mediaType = "application/json", schema = @Schema(implementation = FeiletProsessTaskDataDto.class))),
         @ApiResponse(responseCode = "404", description = "Tom respons når angitt prosesstask-id ikke finnes"),
         @ApiResponse(responseCode = "400", description = "Feil input")
     })
-    public Response finnFeiletProsessTask(@NotNull @Parameter(description = "Prosesstask-id for feilet prosesstask") @Valid ProsessTaskIdDto prosessTaskIdDto) {
+    public Response finnFeiletProsessTask(@NotNull @Parameter(description = "Prosesstask-id for feilet prosesstask") @Valid @BeanParam ProsessTaskIdDto prosessTaskIdDto) {
         sjekkAtSaksbehandlerHarRollenDrift();
         var resultat = prosessTaskApplikasjonTjeneste.finnFeiletProsessTask(prosessTaskIdDto.getProsessTaskId());
         if (resultat.isPresent()) {
@@ -148,16 +156,26 @@ public class ProsessTaskRestTjeneste {
     }
 
     @POST
-    @Path("/setferdig")
+    @Path("/setferdig/{prosessTaskId}/{prosessTaskStatus}")
     @Consumes(MediaType.APPLICATION_JSON)
     @Operation(description = "Setter feilet prosesstask med angitt prosesstask-id til FERDIG (kjøres ikke)", tags = "prosesstask", responses = {
         @ApiResponse(responseCode = "200", description = "Angitt prosesstask-id satt til status FERDIG"),
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
-    public Response setFeiletProsessTaskFerdig(@NotNull @Parameter(description = "Prosesstask-id for feilet prosesstask") @Valid ProsessTaskSetFerdigInputDto prosessTaskIdDto) {
+    public Response setFeiletProsessTaskFerdig(@Parameter(description = "Prosesstask-id for feilet prosesstask") @NotNull @Valid @BeanParam ProsessTaskSetFerdigInputDto prosessTaskIdDto) {
         sjekkAtSaksbehandlerHarRollenDrift();
-        prosessTaskApplikasjonTjeneste.setProsessTaskFerdig(prosessTaskIdDto.getProsessTaskId(), ProsessTaskStatus.valueOf(prosessTaskIdDto.getNaaVaaerendeStatus()));
+        prosessTaskApplikasjonTjeneste.setProsessTaskFerdig(prosessTaskIdDto.getProsessTaskId(), mapIkkeFerdigTaskStatus(prosessTaskIdDto.getNaaVaaerendeStatus()));
         return Response.ok().build();
+    }
+
+    private ProsessTaskStatus mapIkkeFerdigTaskStatus(IkkeFerdigProsessTaskStatusEnum naavarendeTaskStatus) {
+        return switch (naavarendeTaskStatus) {
+            case FEILET -> ProsessTaskStatus.FEILET;
+            case VENTER_SVAR -> ProsessTaskStatus.VENTER_SVAR;
+            case KLAR -> ProsessTaskStatus.KLAR;
+            case SUSPENDERT -> ProsessTaskStatus.SUSPENDERT;
+            case VETO -> ProsessTaskStatus.VETO;
+        };
     }
 
     static void sjekkAtSaksbehandlerHarRollenDrift() {
@@ -179,7 +197,7 @@ public class ProsessTaskRestTjeneste {
         if (kontekst == null) {
             return false;
         }
-        return kontekst instanceof RequestKontekst requestKontekst && requestKontekst.harGruppe(Groups.DRIFT);
+        return kontekst instanceof RequestKontekst requestKontekst && requestKontekst.harGruppe(AnsattGruppe.DRIFT);
     }
 
 }

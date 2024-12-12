@@ -3,7 +3,7 @@ package no.nav.foreldrepenger.oversikt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import no.nav.vedtak.sikkerhet.kontekst.Groups;
+import no.nav.vedtak.sikkerhet.kontekst.AnsattGruppe;
 import no.nav.vedtak.sikkerhet.kontekst.IdentType;
 import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
@@ -29,7 +29,7 @@ public class KontekstTestHelper {
         var kontekst = mock(RequestKontekst.class);
         when(kontekst.harKontekst()).thenReturn(true);
         when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
-        when(kontekst.harGruppe(Groups.DRIFT)).thenReturn(true);
+        when(kontekst.harGruppe(AnsattGruppe.DRIFT)).thenReturn(true);
         KontekstHolder.setKontekst(kontekst);
     }
 }
