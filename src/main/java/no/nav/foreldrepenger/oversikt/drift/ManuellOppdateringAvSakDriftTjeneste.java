@@ -90,7 +90,6 @@ public class ManuellOppdateringAvSakDriftTjeneste {
     private static ProsessTaskData opprettOpprettOppgaveTask(Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(OpprettOppgaverTask.class);
         task.setSaksnummer(saksnummer.value());
-        task.setCallIdFraEksisterende();
         task.setGruppe(saksnummer.value() + "-oppgave");
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;
@@ -104,7 +103,6 @@ public class ManuellOppdateringAvSakDriftTjeneste {
     private static ProsessTaskData opprettTask(Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentSakTask.class);
         task.setSaksnummer(saksnummer.value());
-        task.setCallIdFraEksisterende();
         task.setGruppe(saksnummer.value());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
         return task;

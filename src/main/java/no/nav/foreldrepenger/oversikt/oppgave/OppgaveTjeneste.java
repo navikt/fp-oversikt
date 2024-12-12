@@ -71,7 +71,6 @@ public class OppgaveTjeneste {
 
     private void opprettOpprettDittNavOppgaveTask(UUID id, Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(MinSideOpprettOppgaveTask.class);
-        task.setCallIdFraEksisterende();
         task.setSaksnummer(saksnummer.value());
         task.setProperty(MinSideOpprettOppgaveTask.OPPGAVE_ID, id.toString());
         task.setGruppe(id.toString());
@@ -81,7 +80,6 @@ public class OppgaveTjeneste {
 
     private void opprettAvsluttDittNavOppgaveTask(UUID id, Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(MinSideAvsluttOppgaveTask.class);
-        task.setCallIdFraEksisterende();
         task.setSaksnummer(saksnummer.value());
         task.setProperty(MinSideAvsluttOppgaveTask.OPPGAVE_ID, id.toString());
         task.setGruppe(id.toString());
@@ -91,7 +89,6 @@ public class OppgaveTjeneste {
 
     public void opprettOppdaterOppgaveTask(Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(OpprettOppgaverTask.class);
-        task.setCallIdFraEksisterende();
         task.setSaksnummer(saksnummer.value());
         task.setGruppe(saksnummer.value() + "-oppgave");
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));

@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt;
 import static no.nav.foreldrepenger.oversikt.server.JettyServer.flywayConfig;
 
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 import javax.naming.NamingException;
 import javax.sql.DataSource;
@@ -60,9 +61,7 @@ public class JpaExtension extends EntityManagerAwareExtension {
         config.setPassword(password);
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(6);
-        config.setIdleTimeout(10001);
-        config.setMaxLifetime(30001);
-        config.setInitializationFailTimeout(30000);
+        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(2)); // feiler fast hvis db ikke kjører lokalt.
         config.setConnectionTestQuery("select 1");
         config.setDriverClassName("org.postgresql.Driver");
         config.setAutoCommit(false);
