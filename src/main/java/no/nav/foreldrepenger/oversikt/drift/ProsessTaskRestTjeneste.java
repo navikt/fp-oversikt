@@ -3,12 +3,6 @@ package no.nav.foreldrepenger.oversikt.drift;
 import java.net.HttpURLConnection;
 import java.util.List;
 
-import jakarta.ws.rs.BeanParam;
-
-import jakarta.ws.rs.PathParam;
-import no.nav.vedtak.felles.prosesstask.rest.dto.IkkeFerdigProsessTaskStatusEnum;
-import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskStatusDto;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,9 +18,11 @@ import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.BeanParam;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -35,6 +31,7 @@ import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskStatus;
 import no.nav.vedtak.felles.prosesstask.rest.app.ProsessTaskApplikasjonTjeneste;
 import no.nav.vedtak.felles.prosesstask.rest.dto.FeiletProsessTaskDataDto;
+import no.nav.vedtak.felles.prosesstask.rest.dto.IkkeFerdigProsessTaskStatusEnum;
 import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskDataDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskIdDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskOpprettInputDto;
@@ -43,7 +40,6 @@ import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskRestartResultatDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskRetryAllResultatDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.ProsessTaskSetFerdigInputDto;
 import no.nav.vedtak.felles.prosesstask.rest.dto.SokeFilterDto;
-import no.nav.vedtak.felles.prosesstask.rest.dto.StatusFilterDto;
 import no.nav.vedtak.sikkerhet.kontekst.AnsattGruppe;
 import no.nav.vedtak.sikkerhet.kontekst.IdentType;
 import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
@@ -97,7 +93,7 @@ public class ProsessTaskRestTjeneste {
         sjekkAtSaksbehandlerHarRollenDrift();
         // kjøres manuelt for å avhjelpe feilsituasjon, da er det veldig greit at det blir logget!
         LOG.info("Restarter prossess task {}", restartInputDto.getProsessTaskId());
-        return prosessTaskApplikasjonTjeneste.flaggProsessTaskForRestart(restartInputDto);
+        return prosessTaskApplikasjonTjeneste.flaggProsessTaskForRestart(restartInputDto.getProsessTaskId(), ProsessTaskStatus.valueOf(restartInputDto.getNaaVaaerendeStatus().name()));
     }
 
     @POST
@@ -122,9 +118,8 @@ public class ProsessTaskRestTjeneste {
     })
     public List<ProsessTaskDataDto> finnProsessTasks(@Parameter(description = "Task status som skal hentes.") @Valid @PathParam("prosessTaskStatus") IkkeFerdigProsessTaskStatusEnum finnTaskStatus) {
         sjekkAtSaksbehandlerHarRollenDrift();
-        var statusFilterDto = new StatusFilterDto();
-        statusFilterDto.setProsessTaskStatuser(List.of(new ProsessTaskStatusDto(finnTaskStatus.name())));
-        return prosessTaskApplikasjonTjeneste.finnAlle(statusFilterDto);
+        var statusFilter = List.of(ProsessTaskStatus.valueOf(finnTaskStatus.name()));
+        return prosessTaskApplikasjonTjeneste.finnAlle(statusFilter);
     }
 
     @POST
