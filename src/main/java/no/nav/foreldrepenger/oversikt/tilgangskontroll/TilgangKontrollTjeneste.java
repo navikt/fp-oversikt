@@ -1,5 +1,8 @@
 package no.nav.foreldrepenger.oversikt.tilgangskontroll;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
@@ -11,6 +14,8 @@ import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
 @ApplicationScoped
 public class TilgangKontrollTjeneste {
+
+    private static final Logger LOG = LoggerFactory.getLogger(TilgangKontrollTjeneste.class);
 
     private SakRepository sakRepository;
     private InnloggetBruker innloggetBruker;
@@ -34,6 +39,8 @@ public class TilgangKontrollTjeneste {
     public void sakKobletTilAktørGuard(Saksnummer saksnummer) {
         var aktørId = innloggetBruker.aktørId();
         if (!sakRepository.erSakKobletTilAktør(saksnummer, aktørId)) {
+            var alleSaksnummer = sakRepository.hentFor(aktørId).stream().map(s -> s.saksnummer().value()).toList();
+            LOG.info("Saksnummer {} ikke koblet til bruker. Brukers saksnummer {}", saksnummer.value(), alleSaksnummer);
             throw new ManglerTilgangException(FeilKode.IKKE_TILGANG);
         }
     }
