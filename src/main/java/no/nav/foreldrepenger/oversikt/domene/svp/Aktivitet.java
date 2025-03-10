@@ -9,7 +9,7 @@ public record Aktivitet(@JsonProperty("type") Type type,
                         @JsonProperty("arbeidsforholdId") String arbeidsforholdId,
                         @JsonProperty("arbeidsgiverNavn") String arbeidsgiverNavn) {
     public no.nav.foreldrepenger.common.innsyn.Aktivitet tilDto() {
-        return new no.nav.foreldrepenger.common.innsyn.Aktivitet(type.tilDto(), arbeidsgiver == null ? null : arbeidsgiver.tilDto());
+        return new no.nav.foreldrepenger.common.innsyn.Aktivitet(type.tilDto(), arbeidsgiver == null ? null : arbeidsgiver.tilDto(), arbeidsgiverNavn);
     }
 
     public enum Type {
