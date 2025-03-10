@@ -27,7 +27,7 @@ class DtoMapperTest {
     void mapper_til_dto() {
         var termindato = now().plusWeeks(4);
         var antallBarn = 1;
-        var aktivitet = new Aktivitet(Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null);
+        var aktivitet = new Aktivitet(Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null, "Arbeidsgivernavn");
         var arbeidstidprosent = new Prosent(50);
         var oppholdPeriode = new OppholdPeriode(now(), now(), FERIE, OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
         var tlPeriode = new TilretteleggingPeriode(now(), TilretteleggingType.DELVIS, arbeidstidprosent);

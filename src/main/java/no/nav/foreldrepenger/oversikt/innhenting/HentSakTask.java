@@ -222,7 +222,7 @@ public class HentSakTask implements ProsessTaskHandler {
             case FRILANS -> Aktivitet.Type.FRILANS;
         };
         var arbeidsgiver = tilArbeidsgiver(aktivitet.arbeidsgiver());
-        return new Aktivitet(type, arbeidsgiver, aktivitet.arbeidsforholdId());
+        return new Aktivitet(type, arbeidsgiver, aktivitet.arbeidsforholdId(), aktivitet.arbeidsgiverNavn());
     }
 
     private static FpSøknad tilFpSøknad(FpSak.Søknad søknad) {

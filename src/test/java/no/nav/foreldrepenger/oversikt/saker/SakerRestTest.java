@@ -135,7 +135,7 @@ class SakerRestTest {
         var tjeneste = new SakerRest(new Saker(repository, innloggetBruker, annenpartUbeskyttetAdresse()), mock(TilgangKontrollTjeneste.class));
 
         var familieHendelse = new Sak.FamilieHendelse(now(), now().minusMonths(1), 1, null);
-        var aktivitet = new SvpSak.Aktivitet(SvpSak.Aktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null);
+        var aktivitet = new SvpSak.Aktivitet(SvpSak.Aktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null, "ArbeidsgiverNavn");
         var oppholdsperioder = Set.of(new SvpSak.OppholdPeriode(now(), now(), SvpSak.OppholdPeriode.Årsak.FERIE, SvpSak.OppholdPeriode.OppholdKilde.SAKSBEHANDLER));
         var tilrettelegging = new SvpSak.Søknad.Tilrettelegging(aktivitet, now(), "risiko", "tiltak",
             Set.of(new SvpSak.Søknad.Tilrettelegging.Periode(now(), SvpSak.TilretteleggingType.DELVIS, new Prosent(50))), oppholdsperioder);
