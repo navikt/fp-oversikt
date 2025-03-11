@@ -91,7 +91,7 @@ class SakerTest {
         repository.lagre(new SakFP0(Saksnummer.dummy(), aktørId, false, Set.of(), null, null, Set.of(), Set.of(søknadFP),
             BrukerRolle.MOR, Set.of(), null, false, now()));
         var svpSøknad = new SvpSøknad(SøknadStatus.MOTTATT, now(), Set.of(
-            new Tilrettelegging(new Aktivitet(Aktivitet.Type.FRILANS, null, null), LocalDate.now(), null, null,
+            new Tilrettelegging(new Aktivitet(Aktivitet.Type.FRILANS, null, null, null), LocalDate.now(), null, null,
                 Set.of(new TilretteleggingPeriode(LocalDate.now(), TilretteleggingType.INGEN, Prosent.ZERO)), Set.of())));
         repository.lagre(new SakSVP0(Saksnummer.dummy(), aktørId, false, null, Set.of(), Set.of(svpSøknad), Set.of(), now()));
         repository.lagre(new SakES0(Saksnummer.dummy(), aktørId, false, null, Set.of(), Set.of(new EsSøknad(SøknadStatus.MOTTATT, now())),

@@ -63,7 +63,7 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
         }
         var gradertAktivitet = finnGradertAktivitet(resultat());
         return gradertAktivitet.map(a -> new Gradering(new Arbeidstidprosent(a.arbeidstidsprosent().decimalValue()),
-            new Aktivitet(a.aktivitet().type().tilDto(), a.aktivitet().arbeidsgiver() == null ? null : a.aktivitet().arbeidsgiver().tilDto())));
+            new Aktivitet(a.aktivitet().type().tilDto(), a.aktivitet().arbeidsgiver() == null ? null : a.aktivitet().arbeidsgiver().tilDto(), null)));
     }
 
     private Optional<Konto> utledKontoType(Resultat resultat) {
