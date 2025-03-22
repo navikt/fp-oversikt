@@ -20,9 +20,8 @@ import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
  * Swagger https://aareg-services-q2.dev.intern.nav.no/swagger-ui/index.html?urls.primaryName=aareg.api.v1#/arbeidstaker/finnArbeidsforholdPrArbeidstaker
  * Swagger V2 https://aareg-services-q2.dev.intern.nav.no/swagger-ui/index.html?urls.primaryName=aareg.api.v2#/arbeidstaker/finnArbeidsforholdPrArbeidstaker
  */
-
 @Dependent
-@RestClientConfig(tokenConfig = TokenFlow.ADAPTIVE, endpointProperty = "aareg.rs.url",
+@RestClientConfig(tokenConfig = TokenFlow.AZUREAD_CC, endpointProperty = "aareg.rs.url",
     endpointDefault = "http://aareg-services-nais.arbeidsforhold/api/v1/arbeidstaker",
     scopesProperty = "aareg.scopes", scopesDefault = "api://prod-fss.arbeidsforhold.aareg-services-nais/.default")
 public class AaregRestKlient {

@@ -1,16 +1,16 @@
 package no.nav.foreldrepenger.oversikt.aareg;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 
 
 @ApplicationScoped
@@ -53,11 +53,11 @@ public class ArbeidsforholdTjeneste {
 
     private ArbeidsforholdIdentifikator utledArbeidsgiverRS(ArbeidsforholdRS arbeidsforhold) {
         if (ArbeidsforholdRS.OpplysningspliktigType.Person.equals(arbeidsforhold.arbeidsgiver().type())) {
-            final var uuid = UUID.nameUUIDFromBytes(arbeidsforhold.type().getBytes(StandardCharsets.UTF_8));
-            return new ArbeidsforholdIdentifikator(arbeidsforhold.arbeidsgiver().aktoerId(), arbeidsforhold.type(), uuid.toString());
+            final var uuid = UUID.nameUUIDFromBytes(arbeidsforhold.type().getOffisiellKode().getBytes(StandardCharsets.UTF_8));
+            return new ArbeidsforholdIdentifikator(arbeidsforhold.arbeidsgiver().aktoerId(), uuid.toString(), arbeidsforhold.type());
         } else if (ArbeidsforholdRS.OpplysningspliktigType.Organisasjon.equals(arbeidsforhold.arbeidsgiver().type())) {
             return new ArbeidsforholdIdentifikator(arbeidsforhold.arbeidsgiver().organisasjonsnummer(),
-                arbeidsforhold.type(), arbeidsforhold.arbeidsforholdId());
+                arbeidsforhold.arbeidsforholdId(), arbeidsforhold.type());
         } else {
             throw new IllegalArgumentException("Mangler arbeidsgivertype");
         }

@@ -13,32 +13,27 @@ public record ArbeidsforholdRS(String arbeidsforholdId,
                                AnsettelsesperiodeRS ansettelsesperiode,
                                List<ArbeidsavtaleRS> arbeidsavtaler,
                                List<PermisjonPermitteringRS> permisjonPermitteringer,
-                               String type) { // (kodeverk: Arbeidsforholdtyper)
+                               ArbeidType type) {
 
 
-    public record ArbeidsavtaleRS(BigDecimal stillingsprosent,
-                                         PeriodeRS gyldighetsperiode) {
-    }
+    public record ArbeidsavtaleRS(BigDecimal stillingsprosent, PeriodeRS gyldighetsperiode) { }
 
     public record OpplysningspliktigArbeidsgiverRS(OpplysningspliktigType type,
-                                                          String organisasjonsnummer,
-                                                          String aktoerId,
-                                                          String offentligIdent) {
+                                                   String organisasjonsnummer,
+                                                   String aktoerId,
+                                                   String offentligIdent) {
     }
 
-    public record PermisjonPermitteringRS(PeriodeRS periode, BigDecimal prosent, String type) {
-    }
+    public record PermisjonPermitteringRS(PeriodeRS periode, BigDecimal prosent, PermType type) { }
 
     public enum OpplysningspliktigType {
         Organisasjon,
         Person
     }
 
-    public record AnsettelsesperiodeRS(PeriodeRS periode) {
-    }
+    public record AnsettelsesperiodeRS(PeriodeRS periode) { }
 
-    public record PeriodeRS(LocalDate fom, LocalDate tom) {
-    }
+    public record PeriodeRS(LocalDate fom, LocalDate tom) { }
 
     public List<PermisjonPermitteringRS> getPermisjonPermitteringer() {
         return permisjonPermitteringer != null ? permisjonPermitteringer : List.of();

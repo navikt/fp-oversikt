@@ -4,5 +4,5 @@ import java.math.BigDecimal;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 
-public record Permisjon(LocalDateInterval permisjonPeriode, BigDecimal permisjonsprosent, String permisjonsÅrsak) {
+public record Permisjon(LocalDateInterval permisjonPeriode, BigDecimal permisjonsprosent, PermType permisjonstype) {
 }
