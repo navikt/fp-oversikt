@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.oversikt.aareg;
 
-import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -54,7 +53,7 @@ public class ArbeidsforholdMapper {
             .toList();
     }
 
-    private record PermisjonTidslinjeObjekt(BigDecimal permisjonsprosent, PermType permisjonstype) {}
+    private record PermisjonTidslinjeObjekt(Stillingsprosent permisjonsprosent, PermType permisjonstype) {}
 
     private static List<Permisjon> tilPermisjonDto(LocalDateSegment<List<PermisjonTidslinjeObjekt>> s) {
         return s.getValue().stream()

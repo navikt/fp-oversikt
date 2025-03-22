@@ -1,8 +1,6 @@
 package no.nav.foreldrepenger.oversikt.aareg;
 
-import java.math.BigDecimal;
-
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 
-public record Permisjon(LocalDateInterval permisjonPeriode, BigDecimal permisjonsprosent, PermType permisjonstype) {
+public record Permisjon(LocalDateInterval permisjonPeriode, Stillingsprosent permisjonsprosent, PermType permisjonstype) {
 }
