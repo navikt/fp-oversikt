@@ -4,18 +4,19 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonValue;
+
 /**
  * Stillingsprosent slik det er oppgitt i arbeidsavtalen
  */
-public record Stillingsprosent(BigDecimal verdi) implements Comparable<Stillingsprosent> {
+public record Stillingsprosent(@JsonValue BigDecimal prosent) implements Comparable<Stillingsprosent> {
 
     private static final RoundingMode AVRUNDINGSMODUS = RoundingMode.HALF_EVEN;
 
     private static final BigDecimal ARBEID_MAX_VERDI = BigDecimal.valueOf(109.99d); // Bør være 100 men legger på litt slack (10,75 vs 107,5)
 
     public Stillingsprosent {
-        Objects.requireNonNull(verdi, "Stillingsprosent kan ikke være null");
-        if (BigDecimal.ZERO.compareTo(verdi) > 0) {
+        if (BigDecimal.ZERO.compareTo(prosent) > 0) {
             throw new IllegalArgumentException("Prosent må være >= 0");
         }
     }
@@ -24,8 +25,12 @@ public record Stillingsprosent(BigDecimal verdi) implements Comparable<Stillings
         return new Stillingsprosent(normaliserData(verdi));
     }
 
+    public static Stillingsprosent nullProsent() {
+        return new Stillingsprosent(null);
+    }
+
     public BigDecimal skalertVerdi() {
-        return verdi.setScale(2, AVRUNDINGSMODUS);
+        return prosent != null ? prosent.setScale(2, AVRUNDINGSMODUS) : null;
     }
 
     private static BigDecimal normaliserData(BigDecimal verdi) {
@@ -56,7 +61,7 @@ public record Stillingsprosent(BigDecimal verdi) implements Comparable<Stillings
 
     @Override
     public int compareTo(Stillingsprosent o) {
-        return this.verdi.compareTo(o.verdi);
+        return this.prosent.compareTo(o.prosent);
     }
 
 }

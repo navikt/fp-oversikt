@@ -40,4 +40,9 @@ public record DummyPersonOppslagSystemTest(AdresseBeskyttelse adresseBeskyttelse
         return adresseBeskyttelse;
     }
 
+    @Override
+    public String navn(String ident) {
+        return "Navn";
+    }
+
 }

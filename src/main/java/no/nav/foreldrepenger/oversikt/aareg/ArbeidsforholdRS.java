@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record ArbeidsforholdRS(String arbeidsforholdId,
@@ -27,8 +28,8 @@ public record ArbeidsforholdRS(String arbeidsforholdId,
     public record PermisjonPermitteringRS(PeriodeRS periode, BigDecimal prosent, PermType type) { }
 
     public enum OpplysningspliktigType {
-        Organisasjon,
-        Person
+        @JsonProperty("Organisasjon") ORGANISASJON,
+        @JsonProperty("Person") PERSON
     }
 
     public record AnsettelsesperiodeRS(PeriodeRS periode) { }

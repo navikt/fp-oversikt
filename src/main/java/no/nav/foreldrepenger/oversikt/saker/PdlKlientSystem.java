@@ -1,5 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -10,6 +12,8 @@ import no.nav.pdl.Adressebeskyttelse;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.AdressebeskyttelseResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
+import no.nav.pdl.Navn;
+import no.nav.pdl.NavnResponseProjection;
 import no.nav.pdl.PersonResponseProjection;
 import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
@@ -53,6 +57,23 @@ class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSyste
         return new AdresseBeskyttelse(gradering);
     }
 
+    @Override
+    public String navn(String ident) {
+        var request = new HentPersonQueryRequest();
+        request.setIdent(ident);
+        var projection = new PersonResponseProjection()
+            .navn(new NavnResponseProjection().fornavn().mellomnavn().etternavn());
+        var person = hentPerson(request, projection, true);
+
+        if (person == null) {
+            return "Ukjent person";
+        }
+        return person.getNavn().stream()
+            .map(PdlKlientSystem::mapNavn)
+            .filter(Objects::nonNull)
+            .findFirst().orElse("Ukjent navn");
+    }
+
     private static AdresseBeskyttelse.Gradering tilGradering(AdressebeskyttelseGradering adressebeskyttelseGradering) {
         if (adressebeskyttelseGradering == null) {
             return AdresseBeskyttelse.Gradering.UGRADERT;
@@ -61,6 +82,17 @@ class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSyste
             case STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, FORTROLIG -> AdresseBeskyttelse.Gradering.GRADERT;
             case UGRADERT -> AdresseBeskyttelse.Gradering.UGRADERT;
         };
+    }
+
+    private static String mapNavn(Navn navn) {
+        if (navn.getFornavn() == null) {
+            return null;
+        }
+        return navn.getFornavn() + leftPad(navn.getMellomnavn()) + leftPad(navn.getEtternavn());
+    }
+
+    private static String leftPad(String navn) {
+        return Optional.ofNullable(navn).map(n -> " " + navn).orElse("");
     }
 
 }

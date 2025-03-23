@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.aareg;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.ws.rs.core.UriBuilder;
@@ -35,15 +36,20 @@ public class AaregRestKlient {
     }
 
     public List<ArbeidsforholdRS> finnArbeidsforholdForArbeidstaker(String ident, LocalDate qfom, LocalDate qtom, boolean historikk) {
+        return finnArbeidsforholdForArbeidstaker(ident, qfom, qtom, Optional.empty(), historikk);
+    }
+
+    public List<ArbeidsforholdRS> finnArbeidsforholdForArbeidstaker(String ident, LocalDate qfom, LocalDate qtom,
+                                                                    Optional<ArbeidType> arbeidType, boolean historikk) {
         try {
             var query = UriBuilder.fromUri(restConfig.endpoint()).path("arbeidsforhold")
                 .queryParam("ansettelsesperiodeFom", String.valueOf(qfom))
-                .queryParam("ansettelsesperiodeTom", String.valueOf(qtom))
                 .queryParam("regelverk", "A_ORDNINGEN")
                 .queryParam("historikk", String.valueOf(historikk))
-                .queryParam("sporingsinformasjon", "false")
-                .build();
-            var request = RestRequest.newGET(query, restConfig)
+                .queryParam("sporingsinformasjon", "false");
+            Optional.ofNullable(qtom).map(String::valueOf).ifPresent(tom -> query.queryParam("ansettelsesperiodeTom", tom));
+            arbeidType.map(ArbeidType::getOffisiellKode).ifPresent(at -> query.queryParam("arbeidsforholdtype", at));
+            var request = RestRequest.newGET(query.build(), restConfig)
                 .header(NavHeaders.HEADER_NAV_PERSONIDENT, ident);
             var result = sender.send(request, ArbeidsforholdRS[].class);
             return Arrays.asList(result);

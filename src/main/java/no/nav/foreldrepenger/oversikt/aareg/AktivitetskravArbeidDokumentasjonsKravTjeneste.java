@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,10 +62,9 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
 
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante, mapper om og grupperer på arbeidsgiver
         var ident = personOppslagSystem.fødselsnummer(request.morAktørId());
-        var morsAktivitet = arbeidsforholdTjeneste.finnArbeidsforholdForIdentIPerioden(ident, requestTidslinje.getMinLocalDate(), requestTidslinje.getMaxLocalDate())
-            .entrySet().stream()
-            .map(ArbeidsforholdMapper::mapTilArbeidsforholdMedPermisjoner)
-            .filter(a -> RELEVANT_ARBEID.contains(a.arbeidsforholdIdentifikator().type()))
+        var morsAktivitet = arbeidsforholdTjeneste.finnAlleArbeidsforholdForIdentIPerioden(ident, requestTidslinje.getMinLocalDate(), requestTidslinje.getMaxLocalDate())
+            .stream()
+            .filter(a -> RELEVANT_ARBEID.contains(a.arbeidsforholdIdentifikator().arbeidType()))
             .collect(Collectors.groupingBy(this::aktivitetskravNøkkel));
 
         // Ikke funnet noe arbeid, dokumentasjon er nødvendig
@@ -76,11 +76,13 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
     }
 
     private boolean finnesBehovForDokumentasjon(LocalDateTimeline<BigDecimal> requestTidslinje,
-                                                Map<String, List<GruppertArbeidsforholdPrArbeidsforholdId>> morsAktivitet) {
+                                                Map<String, List<Arbeidsforhold>> morsAktivitet) {
         Map<String, LocalDateTimeline<BigDecimal>> tidslinjerPrOrgnummer = new LinkedHashMap<>();
 
         var requestSpanTidslinje = new LocalDateTimeline<>(requestTidslinje.getMinLocalDate(), requestTidslinje.getMaxLocalDate(), BigDecimal.ZERO);
 
+        // Koden nedenfor kunne vært enda mer forenklet men vi venter på litt mer erfaring med data fra Aa-register
+        // Vi skal potensielt se bort fra enkelte typer permisjon eller permisjon for tilfelle med stillingsprosent 0%
         for (var entry : morsAktivitet.entrySet()) {
             var orgnr = entry.getKey();
             var arbeidsforhold = entry.getValue();
@@ -101,7 +103,6 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
         // Summerer opp alle stillingsprosent for hver periode og beskjærer (nok en gang) mot request.
         var summertStillingsprosent = tidslinjerPrOrgnummer.values().stream()
             .flatMap(LocalDateTimeline::stream)
-            .map(s -> new LocalDateSegment<>(s.getLocalDateInterval(), s.getValue()))
             .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())))
             .intersection(requestTidslinje);
 
@@ -109,11 +110,10 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
         return summertStillingsprosent.stream().anyMatch(s -> s.getValue().compareTo(KRAV_FOR_DOKUMENTASJON) < 0);
     }
 
-    private static LocalDateTimeline<BigDecimal> permisjonTidslinje(List<GruppertArbeidsforholdPrArbeidsforholdId> arbeidsforholdInfo) {
-        //sørger for at hull blir 0% og at de permisjonene som overlapper  per arbeidsforhold summeres
+    private static LocalDateTimeline<BigDecimal> permisjonTidslinje(List<Arbeidsforhold> arbeidsforholdInfo) {
         return arbeidsforholdInfo.stream()
             .flatMap(a -> a.permisjoner().stream())
-            .map(p -> new LocalDateSegment<>(p.permisjonPeriode(), p.permisjonsprosent().skalertVerdi()))
+            .map(s -> new LocalDateSegment<>(s.getLocalDateInterval(), summerPermisjoner(s.getValue())))
             .collect(Collectors.collectingAndThen(Collectors.toList(), liste -> new LocalDateTimeline<>(liste, bigDesimalSum())));
     }
 
@@ -121,15 +121,19 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
         return StandardCombinators::sum;
     }
 
-
-    private String aktivitetskravNøkkel(GruppertArbeidsforholdPrArbeidsforholdId arbeidsforholdInfo) {
-        return arbeidsforholdInfo.arbeidsforholdIdentifikator().arbeidsgiver();
+    private static BigDecimal summerPermisjoner(List<Permisjon> permisjoner) {
+        return permisjoner.stream().map(Permisjon::permisjonsprosent).map(Stillingsprosent::prosent).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private LocalDateTimeline<BigDecimal> stillingsprosentTidslinje(List<GruppertArbeidsforholdPrArbeidsforholdId> arbeidsforholdInfo) {
+    private String aktivitetskravNøkkel(Arbeidsforhold arbeidsforhold) {
+        return arbeidsforhold.arbeidsforholdIdentifikator().arbeidsgiver();
+    }
+
+    private LocalDateTimeline<BigDecimal> stillingsprosentTidslinje(List<Arbeidsforhold> arbeidsforholdInfo) {
         return arbeidsforholdInfo.stream()
             .flatMap(a -> a.arbeidsavtaler().stream())
-            .map(aktivitetAvtale -> new LocalDateSegment<>(aktivitetAvtale.arbeidsavtalePeriode(), aktivitetAvtale.stillingsprosent().skalertVerdi()))
+            .filter(s -> s.getValue().prosent() != null)
+            .map(a -> new LocalDateSegment<>(a.getLocalDateInterval(), a.getValue().prosent()))
             .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
     }
 

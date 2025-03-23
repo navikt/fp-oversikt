@@ -25,4 +25,6 @@ public interface PersonOppslagSystem {
     }
 
     AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException;
+
+    String navn(String ident);
 }

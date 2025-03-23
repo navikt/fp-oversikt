@@ -38,13 +38,20 @@ public class VirksomhetTjeneste {
         if (Objects.equals(KUNSTIG_ORG, orgNummer)) {
             return KUNSTIG_NAVN;
         }
-        var virksomhetNavn = Optional.ofNullable(CACHE.get(orgNummer)).orElseGet(() -> hentOrganisasjonRest(orgNummer));
+        var virksomhetNavn = Optional.ofNullable(CACHE.get(orgNummer))
+            .or(() -> Optional.ofNullable(hentOrganisasjonRest(orgNummer)))
+            .orElse("Ukjent virksomhet");
         CACHE.put(orgNummer, virksomhetNavn);
         return virksomhetNavn;
     }
 
     private String hentOrganisasjonRest(String orgNummer) {
-        return eregRestKlient.hentOrganisasjonNavn(orgNummer);
+        try {
+            return eregRestKlient.hentOrganisasjonNavn(orgNummer);
+        } catch (Exception e) {
+            return null;
+        }
+
     }
 
 }
