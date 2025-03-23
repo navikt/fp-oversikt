@@ -8,12 +8,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -28,24 +24,20 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
  */
 @ApplicationScoped
 public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
-    private static final Logger LOG = LoggerFactory.getLogger(AktivitetskravArbeidDokumentasjonsKravTjeneste.class);
 
     private static final Set<ArbeidType> RELEVANT_ARBEID = Set.of(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, ArbeidType.MARITIMT_ARBEIDSFORHOLD);
 
     private static final BigDecimal KRAV_FOR_DOKUMENTASJON = BigDecimal.valueOf(75);
 
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
-    private PersonOppslagSystem personOppslagSystem;
 
     public AktivitetskravArbeidDokumentasjonsKravTjeneste() {
         //CDI
     }
 
     @Inject
-    public AktivitetskravArbeidDokumentasjonsKravTjeneste(ArbeidsforholdTjeneste arbeidsforholdTjeneste,
-                                                          PersonOppslagSystem personOppslagSystem) {
+    public AktivitetskravArbeidDokumentasjonsKravTjeneste(ArbeidsforholdTjeneste arbeidsforholdTjeneste) {
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
-        this.personOppslagSystem = personOppslagSystem;
     }
 
     public boolean krevesDokumentasjonForAktivitetskravArbeid(PerioderMedAktivitetskravArbeid request) {
@@ -61,7 +53,7 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
         }
 
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante, mapper om og grupperer på arbeidsgiver
-        var ident = personOppslagSystem.fødselsnummer(request.morAktørId());
+        var ident = request.morFødselsnummer();
         var morsAktivitet = arbeidsforholdTjeneste.finnAlleArbeidsforholdForIdentIPerioden(ident, requestTidslinje.getMinLocalDate(), requestTidslinje.getMaxLocalDate())
             .stream()
             .filter(a -> RELEVANT_ARBEID.contains(a.arbeidsforholdIdentifikator().arbeidType()))

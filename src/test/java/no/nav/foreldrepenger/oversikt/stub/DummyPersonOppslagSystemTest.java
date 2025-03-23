@@ -45,4 +45,9 @@ public record DummyPersonOppslagSystemTest(AdresseBeskyttelse adresseBeskyttelse
         return "Navn";
     }
 
+    @Override
+    public boolean barnHarDisseForeldrene(Fødselsnummer barn, Fødselsnummer mor, Fødselsnummer annenForelder) {
+        return false;
+    }
+
 }

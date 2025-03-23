@@ -11,6 +11,8 @@ import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.pdl.Adressebeskyttelse;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.AdressebeskyttelseResponseProjection;
+import no.nav.pdl.ForelderBarnRelasjonResponseProjection;
+import no.nav.pdl.ForelderBarnRelasjonRolle;
 import no.nav.pdl.HentPersonQueryRequest;
 import no.nav.pdl.Navn;
 import no.nav.pdl.NavnResponseProjection;
@@ -72,6 +74,28 @@ class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSyste
             .map(PdlKlientSystem::mapNavn)
             .filter(Objects::nonNull)
             .findFirst().orElse("Ukjent navn");
+    }
+
+    @Override
+    public boolean barnHarDisseForeldrene(Fødselsnummer barn, Fødselsnummer mor, Fødselsnummer annenForelder) {
+        var request = new HentPersonQueryRequest();
+        request.setIdent(barn.value());
+        var projection = new PersonResponseProjection()
+            .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsIdent().relatertPersonsIdent());
+        var person = hentPerson(request, projection, true);
+
+        if (person == null) {
+            return false;
+        }
+        var forventetMor = person.getForelderBarnRelasjon().stream()
+            .filter(f -> ForelderBarnRelasjonRolle.MOR.equals(f.getRelatertPersonsRolle()))
+            .filter(f -> Objects.equals(f.getRelatertPersonsIdent(), mor.value()))
+            .findFirst();
+        var forventetAnnenForelder = person.getForelderBarnRelasjon().stream()
+            .filter(f -> ForelderBarnRelasjonRolle.FAR.equals(f.getRelatertPersonsRolle()) || ForelderBarnRelasjonRolle.MEDMOR.equals(f.getRelatertPersonsRolle()))
+            .filter(f -> Objects.equals(f.getRelatertPersonsIdent(), annenForelder.value()))
+            .findFirst();
+        return forventetMor.isPresent() && forventetAnnenForelder.isPresent();
     }
 
     private static AdresseBeskyttelse.Gradering tilGradering(AdressebeskyttelseGradering adressebeskyttelseGradering) {

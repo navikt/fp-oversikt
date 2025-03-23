@@ -27,4 +27,6 @@ public interface PersonOppslagSystem {
     AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException;
 
     String navn(String ident);
+
+    boolean barnHarDisseForeldrene(Fødselsnummer barn, Fødselsnummer mor, Fødselsnummer annenForelder);
 }

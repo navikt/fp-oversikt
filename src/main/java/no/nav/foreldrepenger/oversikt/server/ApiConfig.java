@@ -17,6 +17,7 @@ import io.swagger.v3.oas.models.servers.Server;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 import no.nav.foreldrepenger.konfig.Environment;
+import no.nav.foreldrepenger.oversikt.arbeid.ArbeidRest;
 import no.nav.foreldrepenger.oversikt.drift.ManuellOppdateringAvSakDriftTjeneste;
 import no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingRest;
@@ -57,8 +58,10 @@ public class ApiConfig extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        // eksponert grensesnitt bak sikkerhet
-        return Set.of(InntektsmeldingRest.class, OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class, AuthenticationFilter.class, OpenApiResource.class, GeneralRestExceptionMapper.class);
+        // eksponert grensesnitt bak sikkerhet. Nå er vi på max Set.of før varargs-versjonen.
+        return Set.of(InntektsmeldingRest.class, OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ArbeidRest.class,
+            ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class,
+            AuthenticationFilter.class, OpenApiResource.class, GeneralRestExceptionMapper.class);
     }
 
     @Override

@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -43,17 +42,12 @@ class MineArbeidsforholdTjenesteTest {
     @Mock
     private VirksomhetTjeneste virksomhetTjeneste;
 
-    @BeforeEach
-    void setUp() {
-        when(personOppslagSystem.fødselsnummer(AKTOER_ID)).thenReturn(FNR);
-    }
-
     private List<EksternArbeidsforhold> kallTjeneste(List<ArbeidsforholdRS> registerResponse) {
         when(restKlient.finnArbeidsforholdForArbeidstaker(any(), any(), any(), anyBoolean())).thenReturn(registerResponse);
         lenient().when(virksomhetTjeneste.hentOrganisasjonNavn(any())).thenReturn("Virksomhet");
         lenient().when(personOppslagSystem.navn(any())).thenReturn("Fornavn Etternavn");
         var tjeneste = new MineArbeidsforholdTjeneste(new ArbeidsforholdTjeneste(restKlient), personOppslagSystem, virksomhetTjeneste);
-        return tjeneste.brukersArbeidsforhold(AKTOER_ID);
+        return tjeneste.brukersArbeidsforhold(FNR);
     }
 
     @Test
@@ -157,7 +151,7 @@ class MineArbeidsforholdTjenesteTest {
         when(virksomhetTjeneste.hentOrganisasjonNavn(any())).thenReturn("Virksomhet");
         var tjeneste = new MineArbeidsforholdTjeneste(new ArbeidsforholdTjeneste(restKlient), personOppslagSystem, virksomhetTjeneste);
 
-        var resultat = tjeneste.brukersFrilansoppdragSisteSeksMåneder(AKTOER_ID);
+        var resultat = tjeneste.brukersFrilansoppdragSisteSeksMåneder(FNR);
         assertThat(resultat).hasSize(2)
             .satisfies(d -> assertThat(d.stream().allMatch(a -> a.stillingsprosent() == null)).isTrue());
     }

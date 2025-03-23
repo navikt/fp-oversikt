@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.ereg.VirksomhetTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -41,19 +41,17 @@ public class MineArbeidsforholdTjeneste {
         this.virksomhetTjeneste = virksomhetTjeneste;
     }
 
-    public List<EksternArbeidsforhold> brukersArbeidsforhold(AktørId brukerAktørId) {
+    public List<EksternArbeidsforhold> brukersArbeidsforhold(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
-        var ident = personOppslagSystem.fødselsnummer(brukerAktørId);
-        return arbeidsforholdTjeneste.finnAktiveArbeidsforholdForIdent(ident).stream()
+        return arbeidsforholdTjeneste.finnAktiveArbeidsforholdForIdent(brukerFødselsnummer).stream()
             .map(this::tilEksternArbeidsforhold)
             .sorted(Comparator.comparing(EksternArbeidsforhold::arbeidsgiverNavn))
             .toList();
     }
 
-    public List<EksternArbeidsforhold> brukersFrilansoppdragSisteSeksMåneder(AktørId brukerAktørId) {
+    public List<EksternArbeidsforhold> brukersFrilansoppdragSisteSeksMåneder(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
-        var ident = personOppslagSystem.fødselsnummer(brukerAktørId);
-        return arbeidsforholdTjeneste.finnFrilansForIdentIPerioden(ident, LocalDate.now().minusMonths(6)).stream()
+        return arbeidsforholdTjeneste.finnFrilansForIdentIPerioden(brukerFødselsnummer, LocalDate.now().minusMonths(6)).stream()
             .map(this::tilEksternArbeidsforhold)
             .sorted(Comparator.comparing(EksternArbeidsforhold::arbeidsgiverNavn))
             .toList();

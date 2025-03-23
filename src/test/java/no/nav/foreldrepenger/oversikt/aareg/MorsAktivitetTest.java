@@ -9,7 +9,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -17,7 +16,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,17 +33,10 @@ class MorsAktivitetTest {
 
     @Mock
     private AaregRestKlient restKlient;
-    @Mock
-    private PersonOppslagSystem personOppslagSystem;
-
-    @BeforeEach
-    void setUp() {
-        when(personOppslagSystem.fødselsnummer(AKTOER_ID)).thenReturn(FNR);
-    }
 
     private boolean kallTjeneste(PerioderMedAktivitetskravArbeid søknad, List<ArbeidsforholdRS> registerResponse) {
         when(restKlient.finnArbeidsforholdForArbeidstaker(any(), any(), any(), anyBoolean())).thenReturn(registerResponse);
-        var tjeneste = new AktivitetskravArbeidDokumentasjonsKravTjeneste(new ArbeidsforholdTjeneste(restKlient), personOppslagSystem);
+        var tjeneste = new AktivitetskravArbeidDokumentasjonsKravTjeneste(new ArbeidsforholdTjeneste(restKlient));
         return tjeneste.krevesDokumentasjonForAktivitetskravArbeid(søknad);
     }
 
@@ -59,7 +50,7 @@ class MorsAktivitetTest {
             List.of(),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(AKTOER_ID, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
         var resultat = kallTjeneste(søknad, List.of(response));
         assertThat(resultat).isFalse();
     }
@@ -74,7 +65,7 @@ class MorsAktivitetTest {
             List.of(),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(AKTOER_ID, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
         var resultat = kallTjeneste(søknad, List.of(response));
         assertThat(resultat).isTrue();
     }
@@ -90,7 +81,7 @@ class MorsAktivitetTest {
             List.of(new ArbeidsforholdRS.PermisjonPermitteringRS(perm, FEMTI_PROSENT, PermType.ANNEN_PERMISJON_IKKE_LOVFESTET)),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(AKTOER_ID, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
         var resultat = kallTjeneste(søknad, List.of(response));
         assertThat(resultat).isTrue();
     }
@@ -111,7 +102,7 @@ class MorsAktivitetTest {
             List.of(),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(AKTOER_ID, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
         var resultat = kallTjeneste(søknad, List.of(response1, response2));
         assertThat(resultat).isFalse();
     }
@@ -133,7 +124,7 @@ class MorsAktivitetTest {
             List.of(new ArbeidsforholdRS.PermisjonPermitteringRS(perm, HUNDRE_PROSENT, PermType.PERMISJON_MED_FORELDREPENGER)),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(AKTOER_ID, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
         var resultat = kallTjeneste(søknad, List.of(response1, response2));
         assertThat(resultat).isTrue();
     }
@@ -151,7 +142,7 @@ class MorsAktivitetTest {
             List.of(),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(AKTOER_ID, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusMonths(1))));
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusMonths(1))));
         var resultat = kallTjeneste(søknad, List.of(response));
         assertThat(resultat).isTrue();
     }
@@ -169,7 +160,7 @@ class MorsAktivitetTest {
             List.of(),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(AKTOER_ID, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusMonths(1))));
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusMonths(1))));
         var resultat = kallTjeneste(søknad, List.of(response));
         assertThat(resultat).isFalse();
     }
@@ -186,7 +177,7 @@ class MorsAktivitetTest {
             List.of(new ArbeidsforholdRS.PermisjonPermitteringRS(perm, HUNDRE_PROSENT, PermType.ANNEN_PERMISJON_IKKE_LOVFESTET)),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(AKTOER_ID, List.of(
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(
             new LocalDateInterval(LocalDate.now().minusMonths(1), LocalDate.now().minusMonths(1).plusWeeks(1)),
             new LocalDateInterval(LocalDate.now().plusMonths(1), LocalDate.now().plusMonths(1).plusWeeks(1))
         ));
