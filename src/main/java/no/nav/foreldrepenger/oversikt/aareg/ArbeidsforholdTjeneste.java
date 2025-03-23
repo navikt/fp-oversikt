@@ -61,12 +61,14 @@ public class ArbeidsforholdTjeneste {
 
         var arbeidsavtaler = arbeidsforhold.arbeidsavtaler()
             .stream()
+            .filter(a -> a.stillingsprosent() != null) // De blir uansett forkastet senere
             .map(this::byggArbeidsavtaleRS)
             .filter(av -> overlapperMedIntervall(av, intervall))
             .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new))
             .intersection(ansettelsesPeriode);
 
         var permisjoner = arbeidsforhold.getPermisjonPermitteringer().stream()
+            .filter(p -> p.prosent() != null) // De blir uansett forkastet senere
             .map(this::byggPermisjonRS)
             .collect(Collectors.collectingAndThen(Collectors.toList(),
                 datoSegmenter -> new LocalDateTimeline<>(datoSegmenter, StandardCombinators::concatLists)))
@@ -94,9 +96,7 @@ public class ArbeidsforholdTjeneste {
     }
 
     private LocalDateSegment<Stillingsprosent> byggArbeidsavtaleRS(ArbeidsforholdRS.ArbeidsavtaleRS arbeidsavtale) {
-        var stillingsprosent = arbeidsavtale.stillingsprosent() != null
-            ? Stillingsprosent.arbeid(safeProsent(arbeidsavtale.stillingsprosent()))
-            : Stillingsprosent.nullProsent();
+        var stillingsprosent = Stillingsprosent.arbeid(safeProsent(arbeidsavtale.stillingsprosent()));
         var arbeidsavtaleFom = safeFom(arbeidsavtale.gyldighetsperiode().fom());
         var arbeidsavtaleTom = safeTom(arbeidsavtale.gyldighetsperiode().tom());
         var periode = new LocalDateInterval(arbeidsavtaleFom, arbeidsavtaleTom);
@@ -104,9 +104,7 @@ public class ArbeidsforholdTjeneste {
     }
 
     private LocalDateSegment<List<Permisjon>> byggPermisjonRS(ArbeidsforholdRS.PermisjonPermitteringRS permisjonPermitteringRS) {
-        var permisjonprosent = permisjonPermitteringRS.prosent() != null
-            ? Stillingsprosent.arbeid(permisjonPermitteringRS.prosent())
-            : Stillingsprosent.nullProsent();
+        var permisjonprosent = Stillingsprosent.arbeid(safeProsent(permisjonPermitteringRS.prosent()));
         var permisjonFom = safeFom(permisjonPermitteringRS.periode().fom());
         var permisjonTom = safeTom(permisjonPermitteringRS.periode().tom());
         var periode = new LocalDateInterval(permisjonFom, permisjonTom);

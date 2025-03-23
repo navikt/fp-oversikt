@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -114,7 +113,7 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
     }
 
     private static BigDecimal summerPermisjoner(List<Permisjon> permisjoner) {
-        return permisjoner.stream().map(Permisjon::permisjonsprosent).map(Stillingsprosent::prosent).filter(Objects::nonNull).reduce(BigDecimal.ZERO, BigDecimal::add);
+        return permisjoner.stream().map(Permisjon::permisjonsprosent).map(Stillingsprosent::prosent).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
     private String aktivitetskravNøkkel(Arbeidsforhold arbeidsforhold) {
@@ -124,7 +123,6 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
     private LocalDateTimeline<BigDecimal> stillingsprosentTidslinje(List<Arbeidsforhold> arbeidsforholdInfo) {
         return arbeidsforholdInfo.stream()
             .flatMap(a -> a.arbeidsavtaler().stream())
-            .filter(s -> s.getValue().prosent() != null)
             .map(a -> new LocalDateSegment<>(a.getLocalDateInterval(), a.getValue().prosent()))
             .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
     }

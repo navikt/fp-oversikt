@@ -16,6 +16,7 @@ public record Stillingsprosent(@JsonValue BigDecimal prosent) implements Compara
     private static final BigDecimal ARBEID_MAX_VERDI = BigDecimal.valueOf(109.99d); // Bør være 100 men legger på litt slack (10,75 vs 107,5)
 
     public Stillingsprosent {
+        Objects.requireNonNull(prosent, "Stillingsprosent må ha en verdi");
         if (BigDecimal.ZERO.compareTo(prosent) > 0) {
             throw new IllegalArgumentException("Prosent må være >= 0");
         }
@@ -25,12 +26,8 @@ public record Stillingsprosent(@JsonValue BigDecimal prosent) implements Compara
         return new Stillingsprosent(normaliserData(verdi));
     }
 
-    public static Stillingsprosent nullProsent() {
-        return new Stillingsprosent(null);
-    }
-
     public BigDecimal skalertVerdi() {
-        return prosent != null ? prosent.setScale(2, AVRUNDINGSMODUS) : null;
+        return prosent.setScale(2, AVRUNDINGSMODUS);
     }
 
     private static BigDecimal normaliserData(BigDecimal verdi) {
@@ -51,7 +48,7 @@ public record Stillingsprosent(@JsonValue BigDecimal prosent) implements Compara
         if (obj == this) {
             return true;
         }
-        return obj instanceof Stillingsprosent other && skalertVerdi().compareTo(other.skalertVerdi()) == 0;
+        return obj instanceof Stillingsprosent other && this.compareTo(other) == 0;
     }
 
     @Override
@@ -61,7 +58,7 @@ public record Stillingsprosent(@JsonValue BigDecimal prosent) implements Compara
 
     @Override
     public int compareTo(Stillingsprosent o) {
-        return this.prosent.compareTo(o.prosent);
+        return this.prosent().compareTo(o.prosent());
     }
 
 }

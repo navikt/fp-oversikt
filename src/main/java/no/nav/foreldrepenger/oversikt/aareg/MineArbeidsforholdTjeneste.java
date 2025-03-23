@@ -80,7 +80,6 @@ public class MineArbeidsforholdTjeneste {
         return arbeidsforhold.arbeidsavtaler().stream()
             .filter(s -> erGjeldende(s.getLocalDateInterval()))
             .map(LocalDateSegment::getValue)
-            .filter(s -> s.prosent() != null)
             .findFirst().orElse(null);
     }
 
