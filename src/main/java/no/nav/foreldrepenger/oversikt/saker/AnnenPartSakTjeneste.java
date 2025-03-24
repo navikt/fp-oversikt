@@ -39,11 +39,12 @@ public class AnnenPartSakTjeneste {
         //CDI
     }
 
-    Optional<AnnenPartSak> hentFor(AktørId søker,
-                                      AktørId annenPart,
-                                      AktørId barn,
-                                      LocalDate familiehendelse) {
-        var fpSaker = saker.hentSaker(annenPart).stream()
+    public Optional<ForeldrepengerSak> annenPartGjeldendeSakOppgittSøker(AktørId søker,
+                                                                         AktørId annenPart,
+                                                                         AktørId barn,
+                                                                         LocalDate familiehendelse) {
+        var fpSaker = saker.hentSaker(annenPart)
+            .stream()
             .filter(ForeldrepengerSak.class::isInstance)
             .map(s -> (ForeldrepengerSak) s)
             .collect(Collectors.toSet());
@@ -52,7 +53,15 @@ public class AnnenPartSakTjeneste {
             return Optional.empty();
         }
 
-        var gjeldendeSakForAnnenPartOpt = gjeldendeSak(fpSaker, søker, barn, familiehendelse);
+        return gjeldendeSak(fpSaker, søker, barn, familiehendelse);
+    }
+
+    Optional<AnnenPartSak> hentFor(AktørId søker,
+                                      AktørId annenPart,
+                                      AktørId barn,
+                                      LocalDate familiehendelse) {
+
+        var gjeldendeSakForAnnenPartOpt = annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
         if (gjeldendeSakForAnnenPartOpt.isEmpty()) {
             LOG.info("Finner ingen sak der annen part har oppgitt søker");
             return Optional.empty();
@@ -73,16 +82,8 @@ public class AnnenPartSakTjeneste {
                                       AktørId annenPart,
                                       AktørId barn,
                                       LocalDate familiehendelse) {
-        var fpSaker = saker.hentSaker(annenPart).stream()
-            .filter(ForeldrepengerSak.class::isInstance)
-            .map(s -> (ForeldrepengerSak) s)
-            .collect(Collectors.toSet());
-        if (fpSaker.isEmpty()) {
-            LOG.info("Annen part har ingen saker om foreldrepenger");
-            return Optional.empty();
-        }
+        var gjeldendeSakForAnnenPartOpt = annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
 
-        var gjeldendeSakForAnnenPartOpt = gjeldendeSak(fpSaker, søker, barn, familiehendelse);
         if (gjeldendeSakForAnnenPartOpt.isEmpty()) {
             LOG.info("Finner ingen sak der annen part har oppgitt søker");
             return Optional.empty();

@@ -40,4 +40,14 @@ public record DummyPersonOppslagSystemTest(AdresseBeskyttelse adresseBeskyttelse
         return adresseBeskyttelse;
     }
 
+    @Override
+    public String navn(String ident) {
+        return "Navn";
+    }
+
+    @Override
+    public boolean barnHarDisseForeldrene(Fødselsnummer barn, Fødselsnummer mor, Fødselsnummer annenForelder) {
+        return false;
+    }
+
 }
