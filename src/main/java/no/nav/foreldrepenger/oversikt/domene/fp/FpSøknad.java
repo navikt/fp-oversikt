@@ -7,7 +7,8 @@ import java.util.Set;
 
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 
-public record FpSøknad(SøknadStatus status, LocalDateTime mottattTidspunkt, Set<FpSøknadsperiode> perioder, Dekningsgrad dekningsgrad) {
+public record FpSøknad(SøknadStatus status, LocalDateTime mottattTidspunkt, Set<FpSøknadsperiode> perioder, Dekningsgrad dekningsgrad,
+                       boolean morArbeidUtenDok) {
 
     @Override
     public Set<FpSøknadsperiode> perioder() {

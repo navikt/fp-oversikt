@@ -79,7 +79,7 @@ class SakerRestTest {
         var søknadsperiode = new FpSak.Søknad.Periode(now().minusMonths(1), now().plusMonths(1), Konto.FORELDREPENGER, UtsettelseÅrsak.SØKER_SYKDOM,
             OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER, OverføringÅrsak.SYKDOM_ANNEN_FORELDER, new FpSak.Gradering(arbeidstidsprosent, new FpSak.UttakAktivitet(
             FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null)), new Prosent(40), true, MorsAktivitet.ARBEID);
-        var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode), FpSak.Dekningsgrad.ÅTTI);
+        var søknad = new FpSak.Søknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode), FpSak.Dekningsgrad.ÅTTI, false);
         var sakFraFpsak = new FpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse, true, Set.of(vedtak), aktørIdAnnenPart.value(),
             ventTidligSøknadAp(), Set.of(søknad), MOR, Set.of(aktørIdBarn.value()), new FpSak.Rettigheter(false, true, true), true);
         sendBehandlingHendelse(sakFraFpsak, repository);
@@ -87,23 +87,23 @@ class SakerRestTest {
         var sakerFraDBtilDto = tjeneste.hent().foreldrepenger().stream().toList();
 
         assertThat(sakerFraDBtilDto).hasSize(1);
-        var sakFraDbOmgjortTilDto = sakerFraDBtilDto.get(0);
+        var sakFraDbOmgjortTilDto = sakerFraDBtilDto.getFirst();
         assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
         assertThat(sakFraDbOmgjortTilDto.sakAvsluttet()).isTrue();
         assertThat(sakFraDbOmgjortTilDto.dekningsgrad()).isEqualTo(Dekningsgrad.HUNDRE);
         var vedtaksperioder = sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder();
         assertThat(vedtaksperioder).hasSameSizeAs(vedtak.uttaksperioder());
-        assertThat(vedtaksperioder.get(0).fom()).isEqualTo(vedtak.uttaksperioder().get(0).fom());
-        assertThat(vedtaksperioder.get(0).tom()).isEqualTo(vedtak.uttaksperioder().get(0).tom());
-        assertThat(vedtaksperioder.get(0).resultat().innvilget()).isTrue();
-        assertThat(vedtaksperioder.get(0).resultat().trekkerDager()).isTrue();
-        assertThat(vedtaksperioder.get(0).kontoType()).isEqualTo(KontoType.FORELDREPENGER);
-        assertThat(vedtaksperioder.get(0).gradering().arbeidstidprosent().value()).isEqualTo(arbeidstidsprosent.decimalValue());
-        assertThat(vedtaksperioder.get(0).utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UtsettelseÅrsak.FRI);
-        assertThat(vedtaksperioder.get(0).oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER);
-        assertThat(vedtaksperioder.get(0).overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER);
-        assertThat(vedtaksperioder.get(0).samtidigUttak()).isNull();
-        assertThat(vedtaksperioder.get(0).morsAktivitet()).isEqualTo(no.nav.foreldrepenger.common.innsyn.MorsAktivitet.INNLAGT);
+        assertThat(vedtaksperioder.getFirst().fom()).isEqualTo(vedtak.uttaksperioder().getFirst().fom());
+        assertThat(vedtaksperioder.getFirst().tom()).isEqualTo(vedtak.uttaksperioder().getFirst().tom());
+        assertThat(vedtaksperioder.getFirst().resultat().innvilget()).isTrue();
+        assertThat(vedtaksperioder.getFirst().resultat().trekkerDager()).isTrue();
+        assertThat(vedtaksperioder.getFirst().kontoType()).isEqualTo(KontoType.FORELDREPENGER);
+        assertThat(vedtaksperioder.getFirst().gradering().arbeidstidprosent().value()).isEqualTo(arbeidstidsprosent.decimalValue());
+        assertThat(vedtaksperioder.getFirst().utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UtsettelseÅrsak.FRI);
+        assertThat(vedtaksperioder.getFirst().oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER);
+        assertThat(vedtaksperioder.getFirst().overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER);
+        assertThat(vedtaksperioder.getFirst().samtidigUttak()).isNull();
+        assertThat(vedtaksperioder.getFirst().morsAktivitet()).isEqualTo(no.nav.foreldrepenger.common.innsyn.MorsAktivitet.INNLAGT);
         assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());
         assertThat(sakFraDbOmgjortTilDto.barn()).containsExactly(new Person(new Fødselsnummer(aktørIdBarn.value()), null));
         assertThat(sakFraDbOmgjortTilDto.kanSøkeOmEndring()).isTrue();
@@ -150,14 +150,14 @@ class SakerRestTest {
         var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();
 
         assertThat(sakerFraDBtilDto).hasSize(1);
-        var sakFraDbOmgjortTilDto = sakerFraDBtilDto.get(0);
+        var sakFraDbOmgjortTilDto = sakerFraDBtilDto.getFirst();
         assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
         assertThat(sakFraDbOmgjortTilDto.sakAvsluttet()).isTrue();
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().antallBarn()).isEqualTo(familieHendelse.antallBarn());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
-        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().arbeidsforhold().stream().toList().get(0).oppholdsperioder().stream().toList().get(0).oppholdKilde()).isEqualTo(
+        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().arbeidsforhold().stream().toList().getFirst().oppholdsperioder().stream().toList().getFirst().oppholdKilde()).isEqualTo(
             OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
 
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
@@ -179,7 +179,7 @@ class SakerRestTest {
         var sakerFraDBtilDto = tjeneste.hent().engangsstønad().stream().toList();
 
         assertThat(sakerFraDBtilDto).hasSize(1);
-        var sakFraDbOmgjortTilDto = sakerFraDBtilDto.get(0);
+        var sakFraDbOmgjortTilDto = sakerFraDBtilDto.getFirst();
         assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
         assertThat(sakFraDbOmgjortTilDto.sakAvsluttet()).isTrue();
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().antallBarn()).isEqualTo(familieHendelse.antallBarn());

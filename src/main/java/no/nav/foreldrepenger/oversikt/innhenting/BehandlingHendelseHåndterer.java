@@ -17,11 +17,13 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentInntektsmeldingerTask;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentManglendeVedleggTask;
 import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentTilbakekrevingTask;
+import no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedMorsArbeidTask;
 import no.nav.vedtak.felles.integrasjon.kafka.KafkaMessageHandler;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskTjeneste;
 import no.nav.vedtak.hendelser.behandling.Hendelse;
 import no.nav.vedtak.hendelser.behandling.Kildesystem;
+import no.nav.vedtak.hendelser.behandling.Ytelse;
 import no.nav.vedtak.hendelser.behandling.v1.BehandlingHendelseV1;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 
@@ -60,7 +62,14 @@ public class BehandlingHendelseHåndterer implements KafkaMessageHandler.KafkaSt
             if (!IGNORE.contains(hendelseType)) {
                 var hendelseUuid = hendelse.getHendelseUuid();
                 var saksnummer = new Saksnummer(hendelse.getSaksnummer());
-                lagreHentSakTask(hendelseUuid, saksnummer);
+                if (hendelseType == Hendelse.LAGRET_SØKNAD) {
+                    //Trenger ikke sak innhenting på denne hendelsen. Sak hentes ved andre hendelser
+                    if (hendelse.getYtelse() == Ytelse.FORELDREPENGER) {
+                        lagreSendBeskjedMorsArbeidTask(hendelseUuid, saksnummer);
+                    }
+                } else {
+                    lagreHentSakTask(hendelseUuid, saksnummer);
+                }
                 if (hendelseType == Hendelse.AVSLUTTET) {
                     // Henter inntektsmeldinger her pga sære caser der IM ikke behandles i fpsak rett etter journalføring.
                     // Feks ved IM på henlagte saker der det opprettes vurder dokument oppgave
@@ -112,6 +121,19 @@ public class BehandlingHendelseHåndterer implements KafkaMessageHandler.KafkaSt
         task.setSaksnummer(saksnummer.value());
         task.setGruppe(saksnummer.value());
         task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
+        return task;
+    }
+
+    private void lagreSendBeskjedMorsArbeidTask(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = opprettSendBeskjedMorsArbeidTask(hendelseUuid, saksnummer);
+        taskTjeneste.lagre(task);
+    }
+
+    public static ProsessTaskData opprettSendBeskjedMorsArbeidTask(UUID hendelseUuid, Saksnummer saksnummer) {
+        var task = ProsessTaskData.forProsessTask(MinSideBeskjedMorsArbeidTask.class);
+        task.setCallId(hendelseUuid.toString());
+        task.setSaksnummer(saksnummer.value());
+        task.setNesteKjøringEtter(LocalDateTime.now().plus(MinSideBeskjedMorsArbeidTask.DELAY_MIN));
         return task;
     }
 

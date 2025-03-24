@@ -63,7 +63,7 @@ class SakerTest {
         var aktørId = AktørId.dummy();
         var henlagtFpSak = new SakFP0(Saksnummer.dummy(), aktørId,
             true, Set.of(), AktørId.dummy(), fh(), Set.of(), Set.of(new FpSøknad(SøknadStatus.BEHANDLET, now(),
-            Set.of(), Dekningsgrad.HUNDRE)), BrukerRolle.MOR,
+            Set.of(), Dekningsgrad.HUNDRE, false)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
         var henlagtSvpSak = new SakSVP0(Saksnummer.dummy(), aktørId, true, new FamilieHendelse(null, LocalDate.now(),
             0, null), Set.of(), Set.of(new SvpSøknad(SøknadStatus.BEHANDLET, now(), Set.of())), Set.of(), now());
@@ -87,7 +87,7 @@ class SakerTest {
         var aktørId = AktørId.dummy();
         var søknadFP = new FpSøknad(SøknadStatus.BEHANDLET, now(),
             Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now(), Konto.MØDREKVOTE, null, null, null, null, null, false, null)),
-            Dekningsgrad.ÅTTI);
+            Dekningsgrad.ÅTTI, false);
         repository.lagre(new SakFP0(Saksnummer.dummy(), aktørId, false, Set.of(), null, null, Set.of(), Set.of(søknadFP),
             BrukerRolle.MOR, Set.of(), null, false, now()));
         var svpSøknad = new SvpSøknad(SøknadStatus.MOTTATT, now(), Set.of(

@@ -173,10 +173,12 @@ class SakFP0Test {
         var familieHendelse = fh();
         var åpenBehandling = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(), null, familieHendelse,
             Set.of(new Aksjonspunkt(Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD, null, LocalDateTime.now())),
-            of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), of(), Dekningsgrad.HUNDRE)), MOR, of(), rettigheter(), false, LocalDateTime.now());
+            of(new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), of(), Dekningsgrad.HUNDRE, false)), MOR, of(), rettigheter(), false,
+            LocalDateTime.now());
         var ikkeÅpenBehandling = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(), null, familieHendelse,
             of(new Aksjonspunkt(Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD, null, LocalDateTime.now())),
-            of(new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), of(), Dekningsgrad.HUNDRE)), MOR, of(), rettigheter(), false, LocalDateTime.now());
+            of(new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), of(), Dekningsgrad.HUNDRE, false)), MOR, of(), rettigheter(), false,
+            LocalDateTime.now());
 
 
         var fpSakDto1 = åpenBehandling.tilSakDto(annenpartUbeskyttetAdresse());

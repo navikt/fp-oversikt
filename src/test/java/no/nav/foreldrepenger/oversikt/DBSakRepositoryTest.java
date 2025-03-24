@@ -52,7 +52,7 @@ class DBSakRepositoryTest {
         var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE);
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now(), Konto.FELLESPERIODE,
             UtsettelseÅrsak.SØKER_SYKDOM, null, null, new Gradering(new Prosent(3), new UttakAktivitet(UttakAktivitet.Type.FRILANS,
-            Arbeidsgiver.dummy(), null)), new Prosent(44), true, MorsAktivitet.ARBEID)), Dekningsgrad.HUNDRE);
+            Arbeidsgiver.dummy(), null)), new Prosent(44), true, MorsAktivitet.ARBEID)), Dekningsgrad.HUNDRE, true);
         var originalt = new SakFP0(Saksnummer.dummy(), aktørId, false, of(vedtak), AktørId.dummy(), fh(), aksjonspunkt(),
             of(søknad), MOR, of(AktørId.dummy()), beggeRett(), false, LocalDateTime.now());
         repository.lagre(originalt);
@@ -97,7 +97,7 @@ class DBSakRepositoryTest {
             barn, beggeRett(), false, LocalDateTime.now());
         repository.lagre(originalt);
         var oppdatertSak = new SakFP0(saksnummer, aktørId, false, null, annenPartAktørId, fh(), aksjonspunkt(),
-            of(new FpSøknad(SøknadStatus.MOTTATT, now(), null, Dekningsgrad.HUNDRE)), FAR, barn, beggeRett(), false, LocalDateTime.now());
+            of(new FpSøknad(SøknadStatus.MOTTATT, now(), null, Dekningsgrad.HUNDRE, true)), FAR, barn, beggeRett(), false, LocalDateTime.now());
         repository.lagre(oppdatertSak);
 
         var saker = repository.hentFor(aktørId);
