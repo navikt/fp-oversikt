@@ -4,6 +4,8 @@ package no.nav.foreldrepenger.oversikt.arbeid;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +26,6 @@ import no.nav.foreldrepenger.oversikt.aareg.EksternArbeidsforhold;
 import no.nav.foreldrepenger.oversikt.aareg.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.aareg.PerioderMedAktivitetskravArbeid;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
-import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
@@ -59,7 +60,7 @@ public class ArbeidRest {
     ArbeidRest() {
     }
 
-    @Path("/mittArbeid")
+    @Path("/mineArbeidsforhold")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<EksternArbeidsforhold> hentMittArbeid() {
@@ -79,7 +80,7 @@ public class ArbeidRest {
         return mineArbeidsforholdTjeneste.brukersFrilansoppdragSisteSeksMåneder(innloggetBruker.fødselsnummer());
     }
 
-    @Path("/morDokuentasjon")
+    @Path("/morDokumentasjon")
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public boolean trengerDokumentereMorsArbeid(@Valid @NotNull ArbeidRest.MorArbeidRequest request) {

@@ -91,14 +91,19 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
             tidslinjerPrOrgnummer.put(orgnr, grunnlagTidslinje);
         }
 
-        // Summerer opp alle stillingsprosent for hver periode og beskjærer (nok en gang) mot request.
-        var summertStillingsprosent = tidslinjerPrOrgnummer.values().stream()
-            .flatMap(LocalDateTimeline::stream)
-            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())))
-            .intersection(requestTidslinje);
+        var summertStillingsprosent = summerStillingsprosentTidslinje(requestTidslinje, tidslinjerPrOrgnummer);
 
         // Krever dokumentasjon dersom en av request-periodene har arbeid under 75%.
         return summertStillingsprosent.stream().anyMatch(s -> s.getValue().compareTo(KRAV_FOR_DOKUMENTASJON) < 0);
+    }
+
+    private static LocalDateTimeline<BigDecimal> summerStillingsprosentTidslinje(LocalDateTimeline<BigDecimal> requestTidslinje,
+                                                                      Map<String, LocalDateTimeline<BigDecimal>> tidslinjerPrOrgnummer) {
+        // Summerer opp alle stillingsprosent for hver periode og beskjærer (nok en gang) mot request.
+        return tidslinjerPrOrgnummer.values().stream()
+            .flatMap(LocalDateTimeline::stream)
+            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())))
+            .intersection(requestTidslinje);
     }
 
     private static LocalDateTimeline<BigDecimal> permisjonTidslinje(List<Arbeidsforhold> arbeidsforholdInfo) {
