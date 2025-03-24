@@ -81,7 +81,7 @@ class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSyste
         var request = new HentPersonQueryRequest();
         request.setIdent(barn.value());
         var projection = new PersonResponseProjection()
-            .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsIdent().relatertPersonsIdent());
+            .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsIdent().relatertPersonsRolle());
         var person = hentPerson(request, projection, true);
 
         if (person == null) {
