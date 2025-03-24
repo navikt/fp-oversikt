@@ -84,6 +84,7 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
             }
             // Lager tidslinje med stillingsprosent fra Aa-register, fyller på med 0% for perioder uten arbeid og beskjærer mot request.
             var stillingsprosentTidslinje = stillingsprosentTidslinje(arbeidsforhold);
+            // her skal man eventelt sammenstille med permisjon for å kunne eliminere enkelte tilfelle - se fpsak for relevant crossJoin(perm)
             var grunnlagTidslinje = stillingsprosentTidslinje.crossJoin(requestSpanTidslinje, StandardCombinators::coalesceLeftHandSide)
                 .intersection(requestTidslinje);
             tidslinjerPrArbeidsforhold.add(grunnlagTidslinje);
