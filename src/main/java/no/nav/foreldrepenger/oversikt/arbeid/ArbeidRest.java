@@ -4,8 +4,6 @@ package no.nav.foreldrepenger.oversikt.arbeid;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +24,7 @@ import no.nav.foreldrepenger.oversikt.aareg.EksternArbeidsforhold;
 import no.nav.foreldrepenger.oversikt.aareg.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.aareg.PerioderMedAktivitetskravArbeid;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
@@ -113,15 +112,15 @@ public class ArbeidRest {
             }
         }
         var intervaller = request.perioder().stream()
-            .map(p -> new LocalDateInterval(p.fom(), p.tom() != null ? p.tom() : LocalDate.MAX))
+            .map(p -> new LocalDateInterval(p.fom(), p.tom()))
             .toList();
         var aktivitetskravrequest = new PerioderMedAktivitetskravArbeid(request.annenPartFødselsnummer(), intervaller);
         return aktivitetskravArbeidDokumentasjonsKravTjeneste.krevesDokumentasjonForAktivitetskravArbeid(aktivitetskravrequest);
     }
 
     public record MorArbeidRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer,
-                                   LocalDate familiehendelse, @Valid @Size(min = 1) List<PeriodeRequest> perioder) {
+                                   LocalDate familiehendelse, @Valid @Size(min = 1) List<@Valid PeriodeRequest> perioder) {
     }
 
-    public record PeriodeRequest(@Valid @NotNull LocalDate fom, @Valid LocalDate tom) {}
+    public record PeriodeRequest(@Valid @NotNull LocalDate fom, @Valid @NotNull LocalDate tom) {}
 }

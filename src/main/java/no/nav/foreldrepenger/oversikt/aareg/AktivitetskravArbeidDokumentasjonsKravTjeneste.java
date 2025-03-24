@@ -1,9 +1,8 @@
 package no.nav.foreldrepenger.oversikt.aareg;
 
 import java.math.BigDecimal;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -56,7 +55,7 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
         var morsAktivitet = arbeidsforholdTjeneste.finnAlleArbeidsforholdForIdentIPerioden(ident, requestTidslinje.getMinLocalDate(), requestTidslinje.getMaxLocalDate())
             .stream()
             .filter(a -> RELEVANT_ARBEID.contains(a.arbeidsforholdIdentifikator().arbeidType()))
-            .collect(Collectors.groupingBy(this::aktivitetskravNøkkel));
+            .toList();
 
         // Ikke funnet noe arbeid, dokumentasjon er nødvendig
         if (morsAktivitet.isEmpty()) {
@@ -67,16 +66,15 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
     }
 
     private boolean finnesBehovForDokumentasjon(LocalDateTimeline<BigDecimal> requestTidslinje,
-                                                Map<String, List<Arbeidsforhold>> morsAktivitet) {
-        Map<String, LocalDateTimeline<BigDecimal>> tidslinjerPrOrgnummer = new LinkedHashMap<>();
+                                                List<Arbeidsforhold> morsAktivitet) {
+        List<LocalDateTimeline<BigDecimal>> tidslinjerPrArbeidsforhold = new ArrayList<>();
 
         var requestSpanTidslinje = new LocalDateTimeline<>(requestTidslinje.getMinLocalDate(), requestTidslinje.getMaxLocalDate(), BigDecimal.ZERO);
 
         // Koden nedenfor kunne vært enda mer forenklet men vi venter på litt mer erfaring med data fra Aa-register
         // Vi skal potensielt se bort fra enkelte typer permisjon eller permisjon for tilfelle med stillingsprosent 0%
-        for (var entry : morsAktivitet.entrySet()) {
-            var orgnr = entry.getKey();
-            var arbeidsforhold = entry.getValue();
+        // Da er det mest naturlig å behandle hvert arbeidforhold for seg.
+        for (var arbeidsforhold : morsAktivitet) {
             // Sjekker om det finnes permisjoner i noen av de søkte periodene. Denne vil ha behov for tuning etterhvert (fx stilling 0% med permisjon).
             var permisjonProsentTidslinje = permisjonTidslinje(arbeidsforhold);
             var harPermisjonForRequestPerioder = permisjonProsentTidslinje.intersection(requestTidslinje).stream()
@@ -88,27 +86,26 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
             var stillingsprosentTidslinje = stillingsprosentTidslinje(arbeidsforhold);
             var grunnlagTidslinje = stillingsprosentTidslinje.crossJoin(requestSpanTidslinje, StandardCombinators::coalesceLeftHandSide)
                 .intersection(requestTidslinje);
-            tidslinjerPrOrgnummer.put(orgnr, grunnlagTidslinje);
+            tidslinjerPrArbeidsforhold.add(grunnlagTidslinje);
         }
 
-        var summertStillingsprosent = summerStillingsprosentTidslinje(requestTidslinje, tidslinjerPrOrgnummer);
+        var summertStillingsprosent = summerStillingsprosentTidslinje(requestTidslinje, tidslinjerPrArbeidsforhold);
 
         // Krever dokumentasjon dersom en av request-periodene har arbeid under 75%.
         return summertStillingsprosent.stream().anyMatch(s -> s.getValue().compareTo(KRAV_FOR_DOKUMENTASJON) < 0);
     }
 
     private static LocalDateTimeline<BigDecimal> summerStillingsprosentTidslinje(LocalDateTimeline<BigDecimal> requestTidslinje,
-                                                                      Map<String, LocalDateTimeline<BigDecimal>> tidslinjerPrOrgnummer) {
+                                                                      List<LocalDateTimeline<BigDecimal>> tidslinjerPrArbeidsforhold) {
         // Summerer opp alle stillingsprosent for hver periode og beskjærer (nok en gang) mot request.
-        return tidslinjerPrOrgnummer.values().stream()
+        return tidslinjerPrArbeidsforhold.stream()
             .flatMap(LocalDateTimeline::stream)
             .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())))
             .intersection(requestTidslinje);
     }
 
-    private static LocalDateTimeline<BigDecimal> permisjonTidslinje(List<Arbeidsforhold> arbeidsforholdInfo) {
-        return arbeidsforholdInfo.stream()
-            .flatMap(a -> a.permisjoner().stream())
+    private static LocalDateTimeline<BigDecimal> permisjonTidslinje(Arbeidsforhold arbeidsforhold) {
+        return arbeidsforhold.permisjoner().stream()
             .map(s -> new LocalDateSegment<>(s.getLocalDateInterval(), summerPermisjoner(s.getValue())))
             .collect(Collectors.collectingAndThen(Collectors.toList(), liste -> new LocalDateTimeline<>(liste, bigDesimalSum())));
     }
@@ -121,13 +118,8 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
         return permisjoner.stream().map(Permisjon::permisjonsprosent).map(Stillingsprosent::prosent).reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private String aktivitetskravNøkkel(Arbeidsforhold arbeidsforhold) {
-        return arbeidsforhold.arbeidsforholdIdentifikator().arbeidsgiver();
-    }
-
-    private LocalDateTimeline<BigDecimal> stillingsprosentTidslinje(List<Arbeidsforhold> arbeidsforholdInfo) {
-        return arbeidsforholdInfo.stream()
-            .flatMap(a -> a.arbeidsavtaler().stream())
+    private LocalDateTimeline<BigDecimal> stillingsprosentTidslinje(Arbeidsforhold arbeidsforhold) {
+        return arbeidsforhold.arbeidsavtaler().stream()
             .map(a -> new LocalDateSegment<>(a.getLocalDateInterval(), a.getValue().prosent()))
             .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
     }
