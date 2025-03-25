@@ -227,7 +227,8 @@ public class HentSakTask implements ProsessTaskHandler {
 
     private static FpSøknad tilFpSøknad(FpSak.Søknad søknad) {
         var perioder = søknad.perioder().stream().map(HentSakTask::tilSøknadsperiode).collect(Collectors.toSet());
-        return new FpSøknad(map(søknad.status()), søknad.mottattTidspunkt(), perioder, tilDekningsgrad(søknad.dekningsgrad()));
+        return new FpSøknad(map(søknad.status()), søknad.mottattTidspunkt(), perioder, tilDekningsgrad(søknad.dekningsgrad()),
+            søknad.morArbeidUtenDok());
     }
 
     private static SøknadStatus map(no.nav.foreldrepenger.oversikt.innhenting.SøknadStatus status) {

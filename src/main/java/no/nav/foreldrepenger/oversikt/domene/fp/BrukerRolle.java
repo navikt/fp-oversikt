@@ -10,4 +10,8 @@ public enum BrukerRolle {
             case UKJENT -> null;
         };
     }
+
+    public boolean erFarEllerMedmor() {
+        return this == FAR || this == MEDMOR;
+    }
 }

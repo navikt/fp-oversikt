@@ -133,7 +133,7 @@ class SakerDtoMapperTest {
         var vedtak = new FpVedtak(LocalDateTime.now(), List.of(), dekningsgrad);
         return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(vedtak), AktørId.dummy(), fh(), Set.of(),
             Set.of(new FpSøknad(SøknadStatus.MOTTATT, now(), Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now(), Konto.MØDREKVOTE,
-                null, null, null, null, null, false, null)), dekningsgrad)), BrukerRolle.MOR,
+                null, null, null, null, null, false, null)), dekningsgrad, false)), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
     }
 
