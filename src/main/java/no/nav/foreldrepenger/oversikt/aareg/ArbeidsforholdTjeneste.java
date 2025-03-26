@@ -42,7 +42,7 @@ public class ArbeidsforholdTjeneste {
         var innhentingsIntervall = new LocalDateInterval(spørFra, spørTil);
         return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, spørTil, false).stream()
             .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
-            .filter(a -> a.ansettelsesPeriode().overlaps(innhentingsIntervall))
+            .filter(a -> innhentingsIntervall.overlaps(a.ansettelsesPeriode()))
             .toList();
     }
 
@@ -73,14 +73,14 @@ public class ArbeidsforholdTjeneste {
             .stream()
             .filter(a -> a.stillingsprosent() != null) // De blir uansett forkastet senere
             .map(this::byggArbeidsavtaleRS)
-            .filter(av -> overlapperArbeidMedIntervall(av, innhentingsIntervall))
+            .filter(av -> innhentingsIntervall.overlaps(av.getLocalDateInterval()))
             .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new))
             .intersection(ansettelsesPeriode);
 
         var permisjoner = arbeidsforhold.getPermisjonPermitteringer().stream()
             .filter(p -> p.prosent() != null) // De blir uansett forkastet senere
             .map(this::byggPermisjonRS)
-            .filter(perm -> overlapperPermisjonMedIntervall(perm, innhentingsIntervall))
+            .filter(perm -> innhentingsIntervall.overlaps(perm.getLocalDateInterval()))
             .collect(Collectors.collectingAndThen(Collectors.toList(),
                 datoSegmenter -> new LocalDateTimeline<>(datoSegmenter, StandardCombinators::concatLists)))
             .intersection(ansettelsesPeriode);
@@ -120,14 +120,6 @@ public class ArbeidsforholdTjeneste {
         var permisjonTom = safeTom(permisjonPermitteringRS.periode().tom());
         var periode = new LocalDateInterval(permisjonFom, permisjonTom);
         return new LocalDateSegment<>(periode, List.of(new Permisjon(permisjonprosent, permisjonPermitteringRS.type())));
-    }
-
-    private boolean overlapperArbeidMedIntervall(LocalDateSegment<Stillingsprosent> arbeid, LocalDateInterval innhentingsIntervall) {
-        return innhentingsIntervall.overlaps(arbeid.getLocalDateInterval());
-    }
-
-    private boolean overlapperPermisjonMedIntervall(LocalDateSegment<List<Permisjon>> perm, LocalDateInterval innhentingsIntervall) {
-        return innhentingsIntervall.overlaps(perm.getLocalDateInterval());
     }
 
     private LocalDate safeFom(LocalDate fom) {
