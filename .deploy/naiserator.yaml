@@ -86,6 +86,7 @@ spec:
     outbound:
       external:
         - host: pdl-api.{{environment}}-fss-pub.nais.io
+        - host: aareg-services.{{environment}}-fss-pub.nais.io
         - host: fpsak-api.{{environment}}-fss-pub.nais.io
         - host: fptilbake.{{environment}}-fss-pub.nais.io
         - host: saf.{{environment}}-fss-pub.nais.io
