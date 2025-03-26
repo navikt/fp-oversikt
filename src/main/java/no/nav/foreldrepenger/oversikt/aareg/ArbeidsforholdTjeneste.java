@@ -39,28 +39,33 @@ public class ArbeidsforholdTjeneste {
     public List<Arbeidsforhold> finnAktiveArbeidsforholdForIdent(Fødselsnummer ident) {
         var spørFra = LocalDate.now().minus(TID_TILBAKE_ARBEID);
         var spørTil = LocalDate.now().plus(TID_FRAMOVER);
+        var innhentingsIntervall = new LocalDateInterval(spørFra, spørTil);
         return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, spørTil, false).stream()
-            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, spørFra, spørTil))
+            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
+            .filter(a -> a.ansettelsesPeriode().overlaps(innhentingsIntervall))
             .toList();
     }
 
     public List<Arbeidsforhold> finnFrilansForIdent(Fødselsnummer ident) {
         var spørFra = LocalDate.now().minus(TID_TILBAKE_FRILANS);
         var spørTil = LocalDate.now().plus(TID_FRAMOVER);
+        var innhentingsIntervall = new LocalDateInterval(spørFra, spørTil);
         return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, spørTil,
                 Optional.of(ArbeidType.FRILANSER_OPPDRAGSTAKER_MED_MER), true).stream()
-            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, spørFra, spørTil))
+            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
+            .filter(a -> a.ansettelsesPeriode().overlaps(innhentingsIntervall))
             .toList();
     }
 
     public List<Arbeidsforhold> finnAlleArbeidsforholdForIdentIPerioden(Fødselsnummer ident, LocalDate fom, LocalDate tom) {
+        var innhentingsIntervall = new LocalDateInterval(safeFom(fom), safeTom(tom));
         return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), fom, tom, true).stream()
-            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, fom, tom))
+            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
+            .filter(a -> a.ansettelsesPeriode().overlaps(innhentingsIntervall))
             .toList();
     }
 
-    private Arbeidsforhold mapArbeidsforholdRSTilDto(ArbeidsforholdRS arbeidsforhold, LocalDate fom, LocalDate tom) {
-        var innhentingsIntervall = new LocalDateInterval(safeFom(fom), safeTom(tom));
+    private Arbeidsforhold mapArbeidsforholdRSTilDto(ArbeidsforholdRS arbeidsforhold, LocalDateInterval innhentingsIntervall) {
 
         var ansettelsesPeriode = byggAnsettelsesPeriodeRS(arbeidsforhold);
 
