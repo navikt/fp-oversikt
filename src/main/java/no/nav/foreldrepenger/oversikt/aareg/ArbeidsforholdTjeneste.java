@@ -21,7 +21,9 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 @ApplicationScoped
 public class ArbeidsforholdTjeneste {
 
-    private static final Period TID_TILBAKE = Period.ofYears(3);
+    private static final Period TID_TILBAKE_ARBEID = Period.ofYears(3);
+    private static final Period TID_TILBAKE_FRILANS = Period.ofMonths(6);
+    private static final Period TID_FRAMOVER = Period.ofMonths(3);
 
     private AaregRestKlient aaregRestKlient;
 
@@ -35,27 +37,35 @@ public class ArbeidsforholdTjeneste {
     }
 
     public List<Arbeidsforhold> finnAktiveArbeidsforholdForIdent(Fødselsnummer ident) {
-        var spørFra = LocalDate.now().minus(TID_TILBAKE);
-        return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, null, false).stream()
-            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, spørFra, null))
+        var spørFra = LocalDate.now().minus(TID_TILBAKE_ARBEID);
+        var spørTil = LocalDate.now().plus(TID_FRAMOVER);
+        var innhentingsIntervall = new LocalDateInterval(spørFra, spørTil);
+        return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, spørTil, false).stream()
+            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
+            .filter(a -> innhentingsIntervall.overlaps(a.ansettelsesPeriode()))
             .toList();
     }
 
-    public List<Arbeidsforhold> finnFrilansForIdentIPerioden(Fødselsnummer ident, LocalDate fom) {
-        return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), fom, null,
+    public List<Arbeidsforhold> finnFrilansForIdent(Fødselsnummer ident) {
+        var spørFra = LocalDate.now().minus(TID_TILBAKE_FRILANS);
+        var spørTil = LocalDate.now().plus(TID_FRAMOVER);
+        var innhentingsIntervall = new LocalDateInterval(spørFra, spørTil);
+        return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, spørTil,
                 Optional.of(ArbeidType.FRILANSER_OPPDRAGSTAKER_MED_MER), true).stream()
-            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, fom, null))
+            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
+            .filter(a -> a.ansettelsesPeriode().overlaps(innhentingsIntervall))
             .toList();
     }
 
     public List<Arbeidsforhold> finnAlleArbeidsforholdForIdentIPerioden(Fødselsnummer ident, LocalDate fom, LocalDate tom) {
+        var innhentingsIntervall = new LocalDateInterval(safeFom(fom), safeTom(tom));
         return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), fom, tom, true).stream()
-            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, fom, tom))
+            .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
+            .filter(a -> a.ansettelsesPeriode().overlaps(innhentingsIntervall))
             .toList();
     }
 
-    private Arbeidsforhold mapArbeidsforholdRSTilDto(ArbeidsforholdRS arbeidsforhold, LocalDate fom, LocalDate tom) {
-        var intervall = new LocalDateInterval(safeFom(fom), safeTom(tom));
+    private Arbeidsforhold mapArbeidsforholdRSTilDto(ArbeidsforholdRS arbeidsforhold, LocalDateInterval innhentingsIntervall) {
 
         var ansettelsesPeriode = byggAnsettelsesPeriodeRS(arbeidsforhold);
 
@@ -63,13 +73,14 @@ public class ArbeidsforholdTjeneste {
             .stream()
             .filter(a -> a.stillingsprosent() != null) // De blir uansett forkastet senere
             .map(this::byggArbeidsavtaleRS)
-            .filter(av -> overlapperMedIntervall(av, intervall))
+            .filter(av -> innhentingsIntervall.overlaps(av.getLocalDateInterval()))
             .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new))
             .intersection(ansettelsesPeriode);
 
         var permisjoner = arbeidsforhold.getPermisjonPermitteringer().stream()
             .filter(p -> p.prosent() != null) // De blir uansett forkastet senere
             .map(this::byggPermisjonRS)
+            .filter(perm -> innhentingsIntervall.overlaps(perm.getLocalDateInterval()))
             .collect(Collectors.collectingAndThen(Collectors.toList(),
                 datoSegmenter -> new LocalDateTimeline<>(datoSegmenter, StandardCombinators::concatLists)))
             .intersection(ansettelsesPeriode);
@@ -109,10 +120,6 @@ public class ArbeidsforholdTjeneste {
         var permisjonTom = safeTom(permisjonPermitteringRS.periode().tom());
         var periode = new LocalDateInterval(permisjonFom, permisjonTom);
         return new LocalDateSegment<>(periode, List.of(new Permisjon(permisjonprosent, permisjonPermitteringRS.type())));
-    }
-
-    private boolean overlapperMedIntervall(LocalDateSegment<Stillingsprosent> av, LocalDateInterval intervall) {
-        return intervall.overlaps(av.getLocalDateInterval());
     }
 
     private LocalDate safeFom(LocalDate fom) {

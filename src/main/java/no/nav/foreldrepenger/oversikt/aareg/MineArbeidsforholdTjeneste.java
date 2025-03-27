@@ -51,7 +51,7 @@ public class MineArbeidsforholdTjeneste {
 
     public List<EksternArbeidsforhold> brukersFrilansoppdragSisteSeksMåneder(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
-        return arbeidsforholdTjeneste.finnFrilansForIdentIPerioden(brukerFødselsnummer, LocalDate.now().minusMonths(6)).stream()
+        return arbeidsforholdTjeneste.finnFrilansForIdent(brukerFødselsnummer).stream()
             .map(this::tilEksternArbeidsforhold)
             .sorted(Comparator.comparing(EksternArbeidsforhold::arbeidsgiverNavn))
             .toList();
