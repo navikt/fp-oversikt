@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.saker;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.Dependent;
@@ -20,6 +21,7 @@ import no.nav.pdl.PersonResponseProjection;
 import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
+import no.nav.vedtak.util.LRUCache;
 
 @RestClientConfig(
     tokenConfig = TokenFlow.AZUREAD_CC,
@@ -30,18 +32,37 @@ import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 @Dependent
 class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSystem {
 
+    private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
+    private static final LRUCache<String, Fødselsnummer> AKTØR_FNR = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
+    private static final LRUCache<String, AktørId> FNR_AKTØR = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
+    private static final LRUCache<String, AdresseBeskyttelse> FNR_ADRESSE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
+
     @Override
     public Fødselsnummer fødselsnummer(AktørId aktørId) {
-        return new Fødselsnummer(hentPersonIdentForAktørId(aktørId.value()).orElseThrow());
+        return Optional.ofNullable(AKTØR_FNR.get(aktørId.value()))
+            .orElseGet(() -> {
+                var fnr = new Fødselsnummer(hentPersonIdentForAktørId(aktørId.value()).orElseThrow());
+                AKTØR_FNR.put(aktørId.value(), fnr);
+                FNR_AKTØR.put(fnr.value(), aktørId);
+                return fnr;
+            });
     }
 
     @Override
     public AktørId aktørId(Fødselsnummer fnr) {
-        return new AktørId(hentAktørIdForPersonIdent(fnr.value()).orElseThrow());
+        return Optional.ofNullable(FNR_AKTØR.get(fnr.value()))
+            .orElseGet(() -> {
+                var aktørId = new AktørId(hentAktørIdForPersonIdent(fnr.value()).orElseThrow());
+                FNR_AKTØR.put(fnr.value(), aktørId);
+                return aktørId;
+            });
     }
 
     @Override
     public AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException {
+        if (FNR_ADRESSE.get(fnr.value()) != null) {
+            return FNR_ADRESSE.get(fnr.value());
+        }
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr.value());
         var projection = new PersonResponseProjection()
@@ -56,7 +77,9 @@ class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSyste
                 .map(Adressebeskyttelse::getGradering)
                 .map(PdlKlientSystem::tilGradering)
                 .collect(Collectors.toSet());
-        return new AdresseBeskyttelse(gradering);
+        var beskyttelse = new AdresseBeskyttelse(gradering);
+        FNR_ADRESSE.put(fnr.value(), beskyttelse);
+        return beskyttelse;
     }
 
     @Override
