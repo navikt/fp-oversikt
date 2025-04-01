@@ -10,6 +10,12 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.EksternArbeidsforhold;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.MineArbeidsforholdTjeneste;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -17,7 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.ereg.VirksomhetTjeneste;
+import no.nav.foreldrepenger.oversikt.integrasjoner.ereg.VirksomhetTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 @ExtendWith(MockitoExtension.class)

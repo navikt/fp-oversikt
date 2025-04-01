@@ -63,7 +63,7 @@ public class AnnenPartSakTjeneste {
 
         var gjeldendeSakForAnnenPartOpt = annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
         if (gjeldendeSakForAnnenPartOpt.isEmpty()) {
-            LOG.info("Finner ingen sak der annen part har oppgitt søker");
+            LOG.info("Finner ingen sak der annen part har oppgitt person");
             return Optional.empty();
         }
         var gjeldendeSak = gjeldendeSakForAnnenPartOpt.get();
@@ -85,7 +85,7 @@ public class AnnenPartSakTjeneste {
         var gjeldendeSakForAnnenPartOpt = annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
 
         if (gjeldendeSakForAnnenPartOpt.isEmpty()) {
-            LOG.info("Finner ingen sak der annen part har oppgitt søker");
+            LOG.info("Finner ingen sak der annen part har oppgitt person");
             return Optional.empty();
         }
         var gjeldendeSak = gjeldendeSakForAnnenPartOpt.get();

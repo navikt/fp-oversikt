@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.ereg;
+package no.nav.foreldrepenger.oversikt.integrasjoner.ereg;
 
 import java.util.Objects;
 import java.util.Optional;

@@ -1,12 +1,5 @@
 package no.nav.foreldrepenger.oversikt.server;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
-
-import org.glassfish.jersey.server.ServerProperties;
-
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import io.swagger.v3.oas.integration.GenericOpenApiContextBuilder;
 import io.swagger.v3.oas.integration.OpenApiConfigurationException;
@@ -22,9 +15,16 @@ import no.nav.foreldrepenger.oversikt.drift.ManuellOppdateringAvSakDriftTjeneste
 import no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingRest;
 import no.nav.foreldrepenger.oversikt.oppgave.OppgaveRest;
+import no.nav.foreldrepenger.oversikt.oppslag.OppslagRestTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
 import no.nav.vedtak.exception.TekniskException;
+import org.glassfish.jersey.server.ServerProperties;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 
 @ApplicationPath(ApiConfig.API_URI)
 public class ApiConfig extends Application {
@@ -59,7 +59,7 @@ public class ApiConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         // eksponert grensesnitt bak sikkerhet. Nå er vi på max Set.of før varargs-versjonen.
-        return Set.of(InntektsmeldingRest.class, OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ArbeidRest.class,
+        return Set.of(OppslagRestTjeneste.class, InntektsmeldingRest.class, OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ArbeidRest.class,
             ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class,
             AuthenticationFilter.class, OpenApiResource.class, GeneralRestExceptionMapper.class);
     }

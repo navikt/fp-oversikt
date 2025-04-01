@@ -1,15 +1,15 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import java.time.LocalDate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
 
 @ApplicationScoped
 public class OppslagInnloggetBruker implements InnloggetBruker {
