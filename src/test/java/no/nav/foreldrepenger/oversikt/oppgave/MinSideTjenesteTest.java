@@ -1,22 +1,21 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.domene.YtelseType;
-import no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest;
-
-import no.nav.tms.varsel.builder.BuilderEnvironment;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 import java.net.MalformedURLException;
 import java.util.Map;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.YtelseType;
+import no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest;
+import no.nav.tms.varsel.builder.BuilderEnvironment;
 
 
 class MinSideTjenesteTest {
@@ -28,7 +27,7 @@ class MinSideTjenesteTest {
     void setup() throws MalformedURLException {
         var pdl = new DummyPersonOppslagSystemTest(null, null);
         producer = mock(MinSideProducer.class);
-        tjeneste = new MinSideTjeneste(pdl, null, producer, "https://www.nav.no/foreldrepenger/oversikt");
+        tjeneste = new MinSideTjeneste(pdl, null, producer, "https://www.nav.no/foreldrepenger/oversikt", "https://www.nav.no/foreldrepenger");
         BuilderEnvironment.extend(Map.of(
             "NAIS_CLUSTER_NAME", "test",
             "NAIS_NAMESPACE", "test",

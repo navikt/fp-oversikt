@@ -1,12 +1,12 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
 import static java.time.ZoneOffset.UTC;
+import static no.nav.tms.varsel.builder.OpprettVarselBuilder.eksternVarsling;
 
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.time.LocalDateTime;
-import java.time.ZonedDateTime;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -35,6 +35,7 @@ class MinSideTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(MinSideTjeneste.class);
     private MinSideProducer producer;
     private URL innsynLenke;
+    private URL morsArbeidLenke;
     private PersonOppslagSystem personOppslagSystem;
     private SakRepository sakRepository;
 
@@ -42,11 +43,14 @@ class MinSideTjeneste {
     public MinSideTjeneste(PersonOppslagSystem personOppslagSystem,
                            SakRepository sakRepository,
                            MinSideProducer producer,
-                           @KonfigVerdi(value = "foreldrepenger.innsynlenke") String innsynLenke) throws MalformedURLException {
+                           @KonfigVerdi(value = "foreldrepenger.innsynlenke") String innsynLenke,
+                           @KonfigVerdi(value = "foreldrepenger.morsarbeidlenke") String morsArbeidLenke
+                           ) throws MalformedURLException {
         this.personOppslagSystem = personOppslagSystem;
         this.sakRepository = sakRepository;
         this.producer = producer;
         this.innsynLenke = URI.create(innsynLenke).toURL();
+        this.morsArbeidLenke = URI.create(morsArbeidLenke).toURL();
     }
 
     MinSideTjeneste() {
@@ -96,7 +100,7 @@ class MinSideTjeneste {
     private String beskjedJson(AktørId aktørId, UUID varselId, String beskjed) {
         var builder = builder(Varseltype.Beskjed, aktørId, varselId, innsynLenke.toString());
         builder.withTekst("nb", beskjed, true);
-        builder.withAktivFremTil(beskjedVarighet());
+        builder.withAktivFremTil(LocalDateTime.now(UTC).plusDays(90).atZone(UTC));
         return builder.build();
     }
 
@@ -110,10 +114,6 @@ class MinSideTjeneste {
         return InaktiverVarselBuilder.newInstance()
             .withVarselId(varselId.toString())
             .build();
-    }
-
-    private static ZonedDateTime beskjedVarighet() {
-        return LocalDateTime.now(UTC).plusDays(90).atZone(UTC);
     }
 
     private OpprettVarselBuilder builder(Varseltype type, AktørId aktørId, UUID varselId) {
@@ -136,13 +136,13 @@ class MinSideTjeneste {
             return; //TODO TFP-5383
         }
 
-        var varselstekst = "Far/Medmor har søkt foreldrepenger. Nav henter automatisk inn dine arbeidsforhold til bruk i saksbehandling."
-            + " Denne beskjeden er kun til opplysning, du trenger ikke å foreta deg noe."; //TODO TFP-5383
+        var varselstekst = "Nav har brukt opplysninger om arbeidsforholdet ditt"; //TODO TFP-5383
 
         var builder = builder(Varseltype.Beskjed, morsAktørId, eventId)
+            .withLink(morsArbeidLenke.toString())
             .withTekst("nb", varselstekst, true)
-          //  .withEksternVarsling(OpprettVarselBuilder.EksternVarslingBuilder) TODO TFP-5383
-            .withAktivFremTil(beskjedVarighet());
+            .withEksternVarsling(eksternVarsling())
+            .withAktivFremTil(LocalDateTime.now(UTC).plusDays(14).atZone(UTC));
         producer.send(eventId, builder.build());
     }
 }
