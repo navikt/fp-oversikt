@@ -117,12 +117,16 @@ class PdlOppslagTjenesteTest {
     }
 
     @Test
-    void dødfødte_barn_skal_også_returers() {
+    void dødfødte_barn_skal_også_returneres_så_lenge_det_er_dødfødt_for_mindre_enn_40_uker_siden() {
         var barnUgradert = lagBarn(LocalDate.now().minusMonths(10), AdressebeskyttelseGradering.UGRADERT);
         var søker = new Person();
         søker.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
-        var dødfødtDato = LocalDate.now().minusWeeks(2);
-        søker.setDoedfoedtBarn(List.of(new DoedfoedtBarn(tilStreng(dødfødtDato), null, null)));
+        var dødfødtDatoMindreEnn40UkerSiden = LocalDate.now().minusWeeks(2);
+        var dødfødtDatoMerEnn40UkerSiden = LocalDate.now().minusYears(4);
+        søker.setDoedfoedtBarn(List.of(
+                new DoedfoedtBarn(tilStreng(dødfødtDatoMindreEnn40UkerSiden), null, null),
+                new DoedfoedtBarn(tilStreng(dødfødtDatoMerEnn40UkerSiden), null, null)) // Skal ikke returneres
+        );
 
         when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(
                 new HentPersonBolkResult(BARN_1_IDENT, barnUgradert, null)
@@ -134,8 +138,8 @@ class PdlOppslagTjenesteTest {
         assertThat(result.get(0).ident()).isEqualTo(BARN_1_IDENT);
         assertThat(result.get(0).person().getFoedselsdato().getFirst().getFoedselsdato()).isEqualTo(barnUgradert.getFoedselsdato().getFirst().getFoedselsdato());
         assertThat(result.get(1).ident()).isNull();
-        assertThat(result.get(1).person().getFoedselsdato().getFirst().getFoedselsdato()).isEqualTo(tilStreng(dødfødtDato));
-        assertThat(result.get(1).person().getDoedsfall().getFirst().getDoedsdato()).isEqualTo(tilStreng(dødfødtDato));
+        assertThat(result.get(1).person().getFoedselsdato().getFirst().getFoedselsdato()).isEqualTo(tilStreng(dødfødtDatoMindreEnn40UkerSiden));
+        assertThat(result.get(1).person().getDoedsfall().getFirst().getDoedsdato()).isEqualTo(tilStreng(dødfødtDatoMindreEnn40UkerSiden));
     }
 
     @Test

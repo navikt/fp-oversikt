@@ -91,7 +91,9 @@ public class PdlOppslagTjeneste {
                 .toList();
         var dødfødteBarn = safeStream(søker.person().getDoedfoedtBarn())
                 .filter(d -> d.getDato() != null)
-                .map(df -> new PersonMedIdent(null, dødfødtBarn(df)))
+                .map(PdlOppslagTjeneste::dødfødtBarn)
+                .filter(PdlOppslagTjeneste::barnErYngreEnn40Mnd)
+                .map(person -> new PersonMedIdent(null, person))
                 .toList();
         return Stream.concat(relaterteBarn.stream(), dødfødteBarn.stream())
                 .toList();
