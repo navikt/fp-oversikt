@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.aareg;
+package no.nav.foreldrepenger.oversikt.integrasjoner.aareg;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

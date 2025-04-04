@@ -1,20 +1,22 @@
-package no.nav.foreldrepenger.oversikt.aareg;
+package no.nav.foreldrepenger.oversikt.oppslag;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.arbeid.Arbeidsforhold;
+import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdIdentifikator;
+import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
+import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
+import no.nav.foreldrepenger.oversikt.integrasjoner.ereg.VirksomhetTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.ereg.VirksomhetTjeneste;
-import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
 
 
 /**
@@ -22,8 +24,6 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
  */
 @ApplicationScoped
 public class MineArbeidsforholdTjeneste {
-    private static final Logger LOG = LoggerFactory.getLogger(MineArbeidsforholdTjeneste.class);
-
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
     private PersonOppslagSystem personOppslagSystem;
     private VirksomhetTjeneste virksomhetTjeneste;
@@ -41,29 +41,31 @@ public class MineArbeidsforholdTjeneste {
         this.virksomhetTjeneste = virksomhetTjeneste;
     }
 
-    public List<EksternArbeidsforhold> brukersArbeidsforhold(Fødselsnummer brukerFødselsnummer) {
+    public List<EksternArbeidsforholdDto> brukersArbeidsforhold(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
         return arbeidsforholdTjeneste.finnAktiveArbeidsforholdForIdent(brukerFødselsnummer).stream()
             .map(this::tilEksternArbeidsforhold)
-            .sorted(Comparator.comparing(EksternArbeidsforhold::arbeidsgiverNavn))
+            .sorted(Comparator.comparing(EksternArbeidsforholdDto::arbeidsgiverNavn))
             .toList();
     }
 
-    public List<EksternArbeidsforhold> brukersFrilansoppdragSisteSeksMåneder(Fødselsnummer brukerFødselsnummer) {
+    public List<EksternArbeidsforholdDto> brukersFrilansoppdragSisteSeksMåneder(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
         return arbeidsforholdTjeneste.finnFrilansForIdent(brukerFødselsnummer).stream()
             .map(this::tilEksternArbeidsforhold)
-            .sorted(Comparator.comparing(EksternArbeidsforhold::arbeidsgiverNavn))
+            .sorted(Comparator.comparing(EksternArbeidsforholdDto::arbeidsgiverNavn))
             .toList();
     }
 
-    private EksternArbeidsforhold tilEksternArbeidsforhold(Arbeidsforhold a) {
-        return new EksternArbeidsforhold(a.arbeidsforholdIdentifikator().arbeidsgiver(),
-            tilArbeidsgiverTypeFrontend(a.arbeidsforholdIdentifikator()),
-            a.ansettelsesPeriode().getFomDato(),
-            Optional.of(a.ansettelsesPeriode().getTomDato()).filter(d -> d.isBefore(LocalDate.MAX)),
-            gjeldendeStillingsprosent(a),
-            arbeidsgiverNavn(a.arbeidsforholdIdentifikator()));
+    private EksternArbeidsforholdDto tilEksternArbeidsforhold(Arbeidsforhold a) {
+        return new EksternArbeidsforholdDto(
+                a.arbeidsforholdIdentifikator().arbeidsgiver(),
+                tilArbeidsgiverTypeFrontend(a.arbeidsforholdIdentifikator()),
+                arbeidsgiverNavn(a.arbeidsforholdIdentifikator()),
+                gjeldendeStillingsprosent(a),
+                a.ansettelsesPeriode().getFomDato(),
+                Optional.of(a.ansettelsesPeriode().getTomDato()).filter(d -> d.isBefore(LocalDate.MAX))
+        );
     }
 
     private String arbeidsgiverNavn(ArbeidsforholdIdentifikator a) {

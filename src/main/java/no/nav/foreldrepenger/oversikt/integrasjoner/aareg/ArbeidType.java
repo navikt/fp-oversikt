@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.aareg;
+package no.nav.foreldrepenger.oversikt.integrasjoner.aareg;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 import com.fasterxml.jackson.annotation.JsonValue;

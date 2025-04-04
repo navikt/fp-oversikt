@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.ereg;
+package no.nav.foreldrepenger.oversikt.integrasjoner.ereg;
 
 import jakarta.enterprise.context.Dependent;
 import no.nav.vedtak.felles.integrasjon.organisasjon.AbstractOrganisasjonKlient;

@@ -1,9 +1,9 @@
-package no.nav.foreldrepenger.oversikt.aareg;
-
-import java.util.List;
+package no.nav.foreldrepenger.oversikt.arbeid;
 
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+
+import java.util.List;
 
 
 public record Arbeidsforhold(ArbeidsforholdIdentifikator arbeidsforholdIdentifikator,
