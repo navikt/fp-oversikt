@@ -12,8 +12,6 @@ import no.nav.foreldrepenger.oversikt.integrasjoner.ereg.VirksomhetTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.Comparator;
@@ -26,8 +24,6 @@ import java.util.Optional;
  */
 @ApplicationScoped
 public class MineArbeidsforholdTjeneste {
-    private static final Logger LOG = LoggerFactory.getLogger(MineArbeidsforholdTjeneste.class);
-
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
     private PersonOppslagSystem personOppslagSystem;
     private VirksomhetTjeneste virksomhetTjeneste;

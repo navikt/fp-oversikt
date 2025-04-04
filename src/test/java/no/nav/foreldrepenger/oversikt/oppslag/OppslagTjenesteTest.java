@@ -345,7 +345,7 @@ class OppslagTjenesteTest {
         assertThat(arbeidsforholdDto1.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver 1");
         assertThat(arbeidsforholdDto1.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(100));
         assertThat(arbeidsforholdDto1.from()).isEqualTo(LocalDate.now().minusYears(5));
-        assertThat(arbeidsforholdDto1.to().get()).isEqualTo(LocalDate.now());
+        assertThat(arbeidsforholdDto1.to()).contains(LocalDate.now());
 
         var arbeidsforholdDto2 = søkerinfo.arbeidsforhold().get(1);
         assertThat(arbeidsforholdDto2.arbeidsgiverId()).isEqualTo("12312312312");
