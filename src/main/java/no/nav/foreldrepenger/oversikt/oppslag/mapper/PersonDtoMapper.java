@@ -39,13 +39,13 @@ public class PersonDtoMapper {
                                          Målform målform,
                                          KontonummerDto kontonummer) {
         var søkerPerson = søker.person();
-        var fødselsdato = fødselsdatoFraPerson(søkerPerson);
+        var fødselsdato = fødselsdatoFor(søkerPerson);
         return new PersonDto(
                 new no.nav.foreldrepenger.common.domain.AktørId(aktøridSøker.value()),
                 new Fødselsnummer(søker.ident()),
                 fødselsdato,
-                tilNavn(søkerPerson),
-                tilKjønn(søkerPerson),
+                navnFor(søkerPerson),
+                kjønnFor(søkerPerson),
                 målform,
                 tilBankkonto(kontonummer),
                 tilSivilstand(søkerPerson),
@@ -60,12 +60,23 @@ public class PersonDtoMapper {
     }
 
     private static PersonDto.BarnDto tilBarn(PdlOppslagTjeneste.PersonMedIdent barnet, Map<String, PdlOppslagTjeneste.PersonMedIdent> annenpart) {
+        if (barnet.ident() == null) { // Dødfødt barn
+            return new PersonDto.BarnDto(
+                    null,
+                    fødselsdatoFor(barnet.person()),
+                    dødsdatoFor(barnet.person()),
+                    null,
+                    null,
+                    null
+            );
+        }
+
         return new PersonDto.BarnDto(
                 new Fødselsnummer(barnet.ident()),
-                fødselsdatoFraPerson(barnet.person()),
-                dødsdatoFraPerson(barnet.person()),
-                tilNavn(barnet.person()),
-                tilKjønn(barnet.person()),
+                fødselsdatoFor(barnet.person()),
+                dødsdatoFor(barnet.person()),
+                navnFor(barnet.person()),
+                kjønnFor(barnet.person()),
                 annenpart.containsKey(barnet.ident()) ? tilAnnenpart(annenpart.get(barnet.ident())) : null
         );
     }
@@ -74,8 +85,8 @@ public class PersonDtoMapper {
         var person = personMedIdent.person();
         return new PersonDto.AnnenForelderDto(
                 new Fødselsnummer(personMedIdent.ident()),
-                tilNavn(person),
-                fødselsdatoFraPerson(person)
+                navnFor(person),
+                fødselsdatoFor(person)
         );
     }
 
@@ -119,7 +130,7 @@ public class PersonDtoMapper {
         return utenlandskKontoInfo.banknavn();
     }
 
-    private static Kjønn tilKjønn(Person person) {
+    private static Kjønn kjønnFor(Person person) {
         return safeStream(person.getKjoenn())
                 .map(PersonDtoMapper::tilKjønn)
                 .findFirst()
@@ -136,8 +147,8 @@ public class PersonDtoMapper {
     }
 
 
-    private static no.nav.foreldrepenger.common.domain.Navn tilNavn(Person person) {
-        return person.getNavn().stream()
+    private static no.nav.foreldrepenger.common.domain.Navn navnFor(Person person) {
+        return safeStream(person.getNavn())
                 .filter(Objects::nonNull)
                 .map(PersonDtoMapper::navn)
                 .findFirst()
@@ -151,7 +162,7 @@ public class PersonDtoMapper {
                 navn.getEtternavn()
         );
     }
-    private static LocalDate fødselsdatoFraPerson(Person søkerPerson) {
+    private static LocalDate fødselsdatoFor(Person søkerPerson) {
         return safeStream(søkerPerson.getFoedselsdato())
                 .map(Foedselsdato::getFoedselsdato)
                 .filter(Objects::nonNull)
@@ -160,7 +171,7 @@ public class PersonDtoMapper {
                 .orElse(null);
     }
 
-    private static LocalDate dødsdatoFraPerson(Person person) {
+    private static LocalDate dødsdatoFor(Person person) {
         return safeStream(person.getDoedsfall())
                 .map(Doedsfall::getDoedsdato)
                 .filter(Objects::nonNull)
