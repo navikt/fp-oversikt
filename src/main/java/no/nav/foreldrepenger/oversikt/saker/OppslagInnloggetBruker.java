@@ -29,10 +29,9 @@ public class OppslagInnloggetBruker implements InnloggetBruker {
 
     @Override
     public AktørId aktørId() {
-        var fnr = KontekstHolder.getKontekst().getUid();
-        var aktørId = pdlKlient.hentAktørIdForPersonIdent(fnr).orElseThrow();
         LOG.debug("Mapper fnr til aktørId");
-        return new AktørId(aktørId);
+        var fnr = KontekstHolder.getKontekst().getUid();
+        return pdlKlient.aktørId(fnr);
     }
 
     @Override

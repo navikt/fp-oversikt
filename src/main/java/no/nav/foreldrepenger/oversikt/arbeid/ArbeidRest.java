@@ -13,10 +13,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AktivitetskravArbeidDokumentasjonsKravTjeneste;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.EksternArbeidsforhold;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.MineArbeidsforholdTjeneste;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.PerioderMedAktivitetskravArbeid;
+import no.nav.foreldrepenger.oversikt.oppslag.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
@@ -61,7 +58,7 @@ public class ArbeidRest {
     @Path("/mineArbeidsforhold")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<EksternArbeidsforhold> hentMittArbeid() {
+    public List<EksternArbeidsforholdDto> hentMittArbeid() {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
 
@@ -71,7 +68,7 @@ public class ArbeidRest {
     @Path("/mineFrilansoppdrag")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<EksternArbeidsforhold> hentMineFrilansoppdrag() {
+    public List<EksternArbeidsforholdDto> hentMineFrilansoppdrag() {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
 

@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.integrasjoner.pdl;
 
 import jakarta.enterprise.context.Dependent;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.pdl.Foedselsdato;
 import no.nav.pdl.FoedselsdatoResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
@@ -13,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 @RestClientConfig(
@@ -28,6 +30,7 @@ public class PdlKlient extends AbstractPersonKlient {
 
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     private static final LRUCache<String, LocalDate> FNR_FØDT = new LRUCache<>(1000, CACHE_ELEMENT_LIVE_TIME_MS);
+    private static final LRUCache<String, AktørId> FNR_AKTØR = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
 
     public LocalDate fødselsdato(String fnr) {
         LOG.debug("Henter fødselsdato");
@@ -46,5 +49,14 @@ public class PdlKlient extends AbstractPersonKlient {
             .orElseThrow();
         FNR_FØDT.put(fnr, fødselsdato);
         return fødselsdato;
+    }
+
+    public AktørId aktørId(String fnr) {
+        return Optional.ofNullable(FNR_AKTØR.get(fnr))
+                .orElseGet(() -> {
+                    var aktørId = new AktørId(hentAktørIdForPersonIdent(fnr).orElseThrow());
+                    FNR_AKTØR.put(fnr, aktørId);
+                    return aktørId;
+                });
     }
 }

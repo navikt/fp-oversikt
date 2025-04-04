@@ -96,7 +96,7 @@ public class PdlOppslagTjeneste {
                 .toList();
     }
 
-    private Person dødfødtBarn(DoedfoedtBarn df) {
+    private static Person dødfødtBarn(DoedfoedtBarn df) {
         var dødfødtBarn = new Person();
         dødfødtBarn.setFoedselsdato(List.of(new Foedselsdato(df.getDato(), null, null, null)));
         dødfødtBarn.setDoedsfall(List.of(new Doedsfall(df.getDato(), null, null)));

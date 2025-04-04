@@ -4,15 +4,13 @@ package no.nav.foreldrepenger.oversikt.oppslag;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.domain.felles.Kjønn;
 import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
+import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
+import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.EksternArbeidsforhold;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.MineArbeidsforholdTjeneste;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.Stillingsprosent;
 import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.ForelderBarnRelasjonRolle;
 import no.nav.pdl.KjoennType;
@@ -31,8 +29,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static no.nav.foreldrepenger.oversikt.oppslag.OppslagRestTjeneste.PERSONINFO_CACHE;
-import static no.nav.foreldrepenger.oversikt.oppslag.OppslagRestTjeneste.PERSON_ARBEIDSFORHOLD_CACHE;
+import static no.nav.foreldrepenger.oversikt.oppslag.OppslagTjeneste.PERSONINFO_CACHE;
+import static no.nav.foreldrepenger.oversikt.oppslag.OppslagTjeneste.PERSON_ARBEIDSFORHOLD_CACHE;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.adressebeskyttelse;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.forelderBarnRelasjon;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.fødselsdato;
@@ -44,7 +42,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class OppslagRestTjenesteTest {
+class OppslagTjenesteTest {
 
     private static final String SØKER_IDENT = "12345678901";
     private static final String BARN_1_IDENT = "111111";
@@ -64,13 +62,10 @@ class OppslagRestTjenesteTest {
     private KontaktInformasjonKlient kontaktInformasjonKlient;
 
     @Mock
-    private TilgangKontrollTjeneste tilgangkontroll;
-
-    @Mock
     private InnloggetBruker innloggetBruker;
 
     @InjectMocks
-    private OppslagRestTjeneste oppslagRestTjeneste;
+    private OppslagTjeneste oppslagTjeneste;
 
     @BeforeEach
     void setUp() {
@@ -90,13 +85,11 @@ class OppslagRestTjenesteTest {
         søkerPdl.setSivilstand(siviltilstand(Sivilstandstype.UGIFT));
         søkerPdl.setForelderBarnRelasjon(List.of());
 
-        var enkeltArbeidsforhold = new EksternArbeidsforhold(
+        var enkeltArbeidsforhold = new EksternArbeidsforholdDto(
                 "123456789",
                 "fnr",
-                LocalDate.now().minusYears(5),
-                Optional.empty(),
-                Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
-                "Navn på arbeidsgiver"
+                "Navn på arbeidsgiver", Stillingsprosent.arbeid(BigDecimal.valueOf(100)), LocalDate.now().minusYears(5),
+                Optional.empty()
         );
 
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
@@ -107,7 +100,7 @@ class OppslagRestTjenesteTest {
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of(enkeltArbeidsforhold));
 
         // Act
-        var søkerinfo = oppslagRestTjeneste.søkerinfo();
+        var søkerinfo = oppslagTjeneste.personinfoMedArbeidsforholdFor();
 
         // Assert
         assertThat(søkerinfo).isNotNull();
@@ -126,8 +119,8 @@ class OppslagRestTjenesteTest {
         assertThat(arbeidsforholdDto.arbeidsgiverId()).isEqualTo("123456789");
         assertThat(arbeidsforholdDto.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver");
         assertThat(arbeidsforholdDto.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(100));
-        assertThat(arbeidsforholdDto.fom()).isEqualTo(LocalDate.now().minusYears(5));
-        assertThat(arbeidsforholdDto.tom()).isNull();
+        assertThat(arbeidsforholdDto.from()).isEqualTo(LocalDate.now().minusYears(5));
+        assertThat(arbeidsforholdDto.to()).isEmpty();
     }
 
     @Test
@@ -165,7 +158,7 @@ class OppslagRestTjenesteTest {
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
 
         // Act
-        var søkerinfo = oppslagRestTjeneste.søkerinfo();
+        var søkerinfo = oppslagTjeneste.personinfoMedArbeidsforholdFor();
 
         // Asserts
 
@@ -239,7 +232,7 @@ class OppslagRestTjenesteTest {
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
 
         // Act
-        var søkerinfo = oppslagRestTjeneste.søkerinfo();
+        var søkerinfo = oppslagTjeneste.personinfoMedArbeidsforholdFor();
 
         // Assert
         var søkerDto = søkerinfo.person();
@@ -293,7 +286,7 @@ class OppslagRestTjenesteTest {
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
 
         // Act
-        var søkerinfo = oppslagRestTjeneste.søkerinfo();
+        var søkerinfo = oppslagTjeneste.personinfoMedArbeidsforholdFor();
 
         // Assert
         assertThat(søkerinfo.person().bankkonto().kontonummer()).isNull();
@@ -310,29 +303,23 @@ class OppslagRestTjenesteTest {
         søkerPdl.setSivilstand(siviltilstand(Sivilstandstype.UGIFT));
         søkerPdl.setForelderBarnRelasjon(List.of());
 
-        var enkeltArbeidsforhold1 = new EksternArbeidsforhold(
+        var enkeltArbeidsforhold1 = new EksternArbeidsforholdDto(
                 "2",
                 "org",
-                LocalDate.now().minusYears(5),
-                Optional.of(LocalDate.now()),
-                Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
-                "Navn på arbeidsgiver 1"
+                "Navn på arbeidsgiver 1", Stillingsprosent.arbeid(BigDecimal.valueOf(100)), LocalDate.now().minusYears(5),
+                Optional.of(LocalDate.now())
         );
-        var enkeltArbeidsforhold2 = new EksternArbeidsforhold(
+        var enkeltArbeidsforhold2 = new EksternArbeidsforholdDto(
                 "12312312312",
                 "org",
-                LocalDate.now().minusYears(5),
-                Optional.empty(),
-                Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
-                "Navn på arbeidsgiver 2"
+                "Navn på arbeidsgiver 2", Stillingsprosent.arbeid(BigDecimal.valueOf(100)), LocalDate.now().minusYears(5),
+                Optional.empty()
         );
-        var enkeltArbeidsforhold3 = new EksternArbeidsforhold(
+        var enkeltArbeidsforhold3 = new EksternArbeidsforholdDto(
                 "1",
                 "fnr",
-                LocalDate.now(),
-                Optional.empty(),
-                Stillingsprosent.arbeid(BigDecimal.valueOf(55)),
-                "Navn på arbeidsgiver 3"
+                "Navn på arbeidsgiver 3", Stillingsprosent.arbeid(BigDecimal.valueOf(55)), LocalDate.now(),
+                Optional.empty()
         );
         var eksterneArbeidsforhold = List.of(
                 enkeltArbeidsforhold1,
@@ -348,7 +335,7 @@ class OppslagRestTjenesteTest {
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(eksterneArbeidsforhold);
 
         // Act
-        var søkerinfo = oppslagRestTjeneste.søkerinfo();
+        var søkerinfo = oppslagTjeneste.personinfoMedArbeidsforholdFor();
 
         // Assert
         assertThat(søkerinfo.arbeidsforhold()).hasSameSizeAs(eksterneArbeidsforhold);
@@ -357,21 +344,21 @@ class OppslagRestTjenesteTest {
         assertThat(arbeidsforholdDto1.arbeidsgiverId()).isEqualTo("2");
         assertThat(arbeidsforholdDto1.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver 1");
         assertThat(arbeidsforholdDto1.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(100));
-        assertThat(arbeidsforholdDto1.fom()).isEqualTo(LocalDate.now().minusYears(5));
-        assertThat(arbeidsforholdDto1.tom()).isEqualTo(LocalDate.now());
+        assertThat(arbeidsforholdDto1.from()).isEqualTo(LocalDate.now().minusYears(5));
+        assertThat(arbeidsforholdDto1.to().get()).isEqualTo(LocalDate.now());
 
         var arbeidsforholdDto2 = søkerinfo.arbeidsforhold().get(1);
         assertThat(arbeidsforholdDto2.arbeidsgiverId()).isEqualTo("12312312312");
         assertThat(arbeidsforholdDto2.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver 2");
         assertThat(arbeidsforholdDto2.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(100));
-        assertThat(arbeidsforholdDto2.fom()).isEqualTo(LocalDate.now().minusYears(5));
-        assertThat(arbeidsforholdDto2.tom()).isNull();
+        assertThat(arbeidsforholdDto2.from()).isEqualTo(LocalDate.now().minusYears(5));
+        assertThat(arbeidsforholdDto2.to()).isEmpty();
 
         var arbeidsforholdDto3 = søkerinfo.arbeidsforhold().get(2);
         assertThat(arbeidsforholdDto3.arbeidsgiverId()).isEqualTo("1");
         assertThat(arbeidsforholdDto3.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver 3");
         assertThat(arbeidsforholdDto3.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(55));
-        assertThat(arbeidsforholdDto3.fom()).isEqualTo(LocalDate.now());
-        assertThat(arbeidsforholdDto3.tom()).isNull();
+        assertThat(arbeidsforholdDto3.from()).isEqualTo(LocalDate.now());
+        assertThat(arbeidsforholdDto2.to()).isEmpty();
     }
 }

@@ -10,11 +10,11 @@ import java.time.LocalDate;
 import java.util.List;
 
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AktivitetskravArbeidDokumentasjonsKravTjeneste;
+import no.nav.foreldrepenger.oversikt.arbeid.AktivitetskravArbeidDokumentasjonsKravTjeneste;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdTjeneste;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.PerioderMedAktivitetskravArbeid;
+import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.oversikt.arbeid.PerioderMedAktivitetskravArbeid;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.PermType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

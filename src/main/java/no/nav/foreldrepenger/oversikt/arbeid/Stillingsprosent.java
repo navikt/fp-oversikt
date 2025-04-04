@@ -1,10 +1,10 @@
-package no.nav.foreldrepenger.oversikt.integrasjoner.aareg;
+package no.nav.foreldrepenger.oversikt.arbeid;
+
+import com.fasterxml.jackson.annotation.JsonValue;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
-
-import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * Stillingsprosent slik det er oppgitt i arbeidsavtalen
