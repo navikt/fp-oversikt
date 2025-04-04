@@ -26,7 +26,6 @@ import no.nav.pdl.PersonResponseProjection;
 import no.nav.pdl.SivilstandResponseProjection;
 
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -84,6 +83,8 @@ public class PdlOppslagTjeneste {
                         .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsIdent().relatertPersonsRolle().minRolleForPerson())
                 );
         var relaterteBarn =  pdlKlientSystem.hentPersonBolk(requestBarn, projeksjonBolk).stream()
+                // Feiler nå hardt hvis person er null (finnes ikke, ugyldig ident)
+                // identen kommer fra opprinnelig fra PDL så her antar vi noe er veldig feil hivs dette intreffer
                 .filter(b -> barnErYngreEnn40Mnd(b.getPerson()))
                 .filter(b -> !harAdressebeskyttelse(b.getPerson()))
                 .map(p -> new PersonMedIdent(p.getIdent(), p.getPerson()))
@@ -108,25 +109,33 @@ public class PdlOppslagTjeneste {
             return Map.of();
         }
 
-        var barnAnnenpartMap = new HashMap<String, PersonMedIdent>();
-        for (var barnet : barn) {
-            var annenpartsIdent = annenForelderRegisterertPåBarnet(søker, barnet);
-            if (annenpartsIdent.isPresent()) {
-                var request = new HentPersonQueryRequest();
-                request.setIdent(annenpartsIdent.get());
-                var projeksjonAnnenpart = new PersonResponseProjection()
+        var annenpartTilBarnMapping = barn.stream()
+                .map(barnet -> Map.entry(annenForelderRegisterertPåBarnet(søker, barnet), barnet.ident()))
+                .filter(entry -> entry.getKey().isPresent())
+                .collect(Collectors.toMap(entry -> entry.getKey().get(), Map.Entry::getValue));
+
+        var annenpartIDenter = annenpartTilBarnMapping.keySet().stream().distinct().toList();
+        if (annenpartIDenter.isEmpty()) {
+            return Map.of();
+        }
+
+        var request = new HentPersonBolkQueryRequest();
+        request.setIdenter(annenpartIDenter);
+        var projeksjonAnnenpart = new HentPersonBolkResultResponseProjection()
+                .ident()
+                .person(new PersonResponseProjection()
                         .navn(new NavnResponseProjection().fornavn().mellomnavn().etternavn())
                         .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
                         .doedsfall(new DoedsfallResponseProjection().doedsdato())
-                        .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering());
-                var value = pdlKlientSystem.hentPerson(request, projeksjonAnnenpart);
-                Optional.ofNullable(value)
-                        .filter(a -> !harAdressebeskyttelse(a))
-                        .filter(a -> !harDødsdato(a))
-                        .ifPresent(annenpart -> barnAnnenpartMap.put(barnet.ident(), new PersonMedIdent(annenpartsIdent.get(), annenpart)));
-            }
-        }
-        return barnAnnenpartMap;
+                        .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering()));
+
+        return pdlKlientSystem.hentPersonBolk(request, projeksjonAnnenpart).stream()
+                // Feiler nå hardt hvis person er null (finnes ikke, ugyldig ident)
+                // identen kommer fra opprinnelig fra PDL så her antar vi noe er veldig feil hivs dette intreffer
+                .filter(result -> !harAdressebeskyttelse(result.getPerson()))
+                .filter(result -> !harDødsdato(result.getPerson()))
+                .map(result -> new PersonMedIdent(result.getIdent(), result.getPerson()))
+                .collect(Collectors.toMap(person -> annenpartTilBarnMapping.get(person.ident()), person -> person));
     }
 
     private static boolean harDødsdato(Person person) {

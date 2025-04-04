@@ -149,7 +149,8 @@ class PdlOppslagTjenesteTest {
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         );
-        when(pdlKlientSystem.hentPerson(any(), any())).thenReturn(annenpart);
+        when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(ANNENPART_IDENT, annenpart, null)));
+
 
         var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn)), new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
 
@@ -171,7 +172,7 @@ class PdlOppslagTjenesteTest {
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         ));
-        when(pdlKlientSystem.hentPerson(any(), any())).thenReturn(annenpart);
+        when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(ANNENPART_IDENT, annenpart, null)));
 
         var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(
                 new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn)),
@@ -206,9 +207,10 @@ class PdlOppslagTjenesteTest {
                 forelderBarnRelasjon(ANNENPART_2_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         ));
 
-        when(pdlKlientSystem.hentPerson(any(), any()))
-                .thenReturn(annenpartGradert)
-                .thenReturn(annenpartUgradert);
+        when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(
+                        new HentPersonBolkResult(ANNENPART_IDENT, annenpartGradert, null),
+                        new HentPersonBolkResult(ANNENPART_2_IDENT, annenpartUgradert, null)
+                ));
 
         var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(
                 new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barnGradertAnnenforelder),
@@ -231,7 +233,7 @@ class PdlOppslagTjenesteTest {
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         ));
-        when(pdlKlientSystem.hentPerson(any(), any())).thenReturn(annenpart);
+        when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(ANNENPART_IDENT, annenpart, null)));
 
         var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(
                 List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn)),
