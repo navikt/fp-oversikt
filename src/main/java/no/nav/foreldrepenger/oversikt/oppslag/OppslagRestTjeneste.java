@@ -29,7 +29,6 @@ import static no.nav.foreldrepenger.oversikt.oppslag.mapper.ArbeidsforholdDtoMap
 @ApplicationScoped
 @Transactional
 public class OppslagRestTjeneste {
-
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     public static final LRUCache<String, PersonDto> PERSONINFO_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
     public static final LRUCache<String, List<EksternArbeidsforhold>> PERSON_ARBEIDSFORHOLD_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
