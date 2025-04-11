@@ -26,7 +26,7 @@ import java.util.List;
 @RestClientConfig(
         tokenConfig = TokenFlow.ADAPTIVE,
         endpointProperty = "krr.rs.uri",
-        endpointDefault = "https://digdir-krr-proxy.team-rocket/rest/v1/personer",
+        endpointDefault = "http://digdir-krr-proxy.team-rocket/rest/v1/personer",
         scopesProperty = "krr.rs.scopes", scopesDefault = "api://prod-gcp.team-rocket.digdir-krr-proxy/.default")
 public class KrrSpråkKlient {
     private static final Logger LOG = LoggerFactory.getLogger(KrrSpråkKlient.class);
@@ -69,6 +69,9 @@ public class KrrSpråkKlient {
             return person.spraak();
         } catch (UriBuilderException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Utviklerfeil syntax-exception for KrrSpråkKlient.finnSpråkkodeForBruker");
+        } catch (Exception e) {
+            LOG.info("KrrSpråkKlient: kall til digdir krr feilet, returnerer default", e);
+            return Målform.NB;
         }
     }
 

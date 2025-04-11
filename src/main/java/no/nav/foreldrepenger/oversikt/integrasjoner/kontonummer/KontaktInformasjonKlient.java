@@ -23,7 +23,7 @@ import java.time.Duration;
 @RestClientConfig(
         tokenConfig = TokenFlow.ADAPTIVE,
         endpointProperty = "sokos.kontoregister.person.url",
-        endpointDefault = "https://sokos-kontoregister-person.okonomi/api/borger/v1/hent-aktiv-konto",
+        endpointDefault = "http://sokos-kontoregister-person.okonomi/api/borger/v1/hent-aktiv-konto",
         scopesProperty = "sokos.kontoregister.person.rs.scopes",
         scopesDefault = "api://prod-gcp.okonomi.sokos-kontoregister-person/.default"
 )

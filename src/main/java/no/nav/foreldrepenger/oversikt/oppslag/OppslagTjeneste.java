@@ -11,6 +11,8 @@ import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonMedArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.oppslag.mapper.PersonDtoMapper;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.vedtak.util.LRUCache;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
 public class OppslagTjeneste {
+    private static final Logger LOG = LoggerFactory.getLogger(OppslagTjeneste.class);
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     public static final LRUCache<String, PersonDto> PERSONINFO_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
     public static final LRUCache<String, List<EksternArbeidsforholdDto>> PERSON_ARBEIDSFORHOLD_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
@@ -46,12 +49,14 @@ public class OppslagTjeneste {
     }
 
     public PersonDto personinfoFor() {
+        LOG.info("Henter personinfo for søker");
         var søkersFnr = innloggetBruker.fødselsnummer();
         return Optional.ofNullable(PERSONINFO_CACHE.get(søkersFnr.value()))
                 .orElseGet(() -> hentPersoninfoPåNytt(søkersFnr));
     }
 
     public PersonMedArbeidsforholdDto personinfoMedArbeidsforholdFor() {
+        LOG.info("Henter personinfo med arbeidsforhold for søker");
         return new PersonMedArbeidsforholdDto(personinfoFor(), hentEksternArbeidsforhold());
     }
 
