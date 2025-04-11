@@ -185,6 +185,43 @@ class PdlOppslagTjenesteTest {
         assertThat(result).isEmpty();
     }
 
+    @Test
+    void tvillinger_har_samme_annnepart_og_skal_bare_slå_opp_en_gang() {
+        var søker = new Person();
+        søker.setForelderBarnRelasjon(List.of(
+                forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
+                forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)
+        ));
+        var annenpart = new Person();
+        annenpart.setForelderBarnRelasjon(List.of(
+                forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MEDMOR),
+                forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MEDMOR)
+        ));
+
+        var barn1 = lagBarn();
+        barn1.setForelderBarnRelasjon(List.of(
+                forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
+                forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
+        ));
+        var barn2 = lagBarn();
+        barn2.setForelderBarnRelasjon(List.of(
+                forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
+                forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
+        ));
+
+        when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(
+                new HentPersonBolkResult(ANNENPART_IDENT, annenpart, null)
+        ));
+
+        var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(
+                        new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn1),
+                        new PdlOppslagTjeneste.PersonMedIdent(BARN_2_IDENT, barn2)),
+                new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
+
+        assertThat(result).hasSize(2)
+                .containsKey(BARN_1_IDENT)
+                .containsKey(BARN_2_IDENT);
+    }
 
     @Test
     void to_barn_med_to_forskjellige_foreldre_en_har_beskyttet_adresse_mens_andre_ikke_har_det_skal_returene_bare_sistnevnte() {

@@ -111,12 +111,12 @@ public class PdlOppslagTjeneste {
             return Map.of();
         }
 
-        var annenpartTilBarnMapping = barn.stream()
-                .map(barnet -> Map.entry(annenForelderRegisterertPåBarnet(søker, barnet), barnet.ident()))
-                .filter(entry -> entry.getKey().isPresent())
-                .collect(Collectors.toMap(entry -> entry.getKey().get(), Map.Entry::getValue));
+        var barnTilAnnenpartMapping = barn.stream()
+                .map(barnet -> Map.entry(barnet.ident(), annenForelderRegisterertPåBarnet(søker, barnet)))
+                .filter(entry -> entry.getValue().isPresent())
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
 
-        var annenpartIDenter = annenpartTilBarnMapping.keySet().stream().distinct().toList();
+        var annenpartIDenter = barnTilAnnenpartMapping.values().stream().distinct().toList();
         if (annenpartIDenter.isEmpty()) {
             return Map.of();
         }
@@ -131,13 +131,21 @@ public class PdlOppslagTjeneste {
                         .doedsfall(new DoedsfallResponseProjection().doedsdato())
                         .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering()));
 
-        return pdlKlientSystem.hentPersonBolk(request, projeksjonAnnenpart).stream()
+        var annnepartOppslag = pdlKlientSystem.hentPersonBolk(request, projeksjonAnnenpart).stream()
                 // Feiler nå hardt hvis person er null (finnes ikke, ugyldig ident)
                 // identen kommer fra opprinnelig fra PDL så her antar vi noe er veldig feil hivs dette intreffer
                 .filter(result -> !harAdressebeskyttelse(result.getPerson()))
                 .filter(result -> !harDødsdato(result.getPerson()))
                 .map(result -> new PersonMedIdent(result.getIdent(), result.getPerson()))
-                .collect(Collectors.toMap(person -> annenpartTilBarnMapping.get(person.ident()), person -> person));
+                .collect(Collectors.toMap(PersonMedIdent::ident, person -> person));
+
+        if (annnepartOppslag.isEmpty()) {
+            return Map.of();
+        }
+
+        return barnTilAnnenpartMapping.entrySet().stream()
+                .filter(entry -> annnepartOppslag.containsKey(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> annnepartOppslag.get(entry.getValue())));
     }
 
     private static boolean harDødsdato(Person person) {
