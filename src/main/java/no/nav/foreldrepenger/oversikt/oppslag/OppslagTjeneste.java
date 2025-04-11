@@ -49,15 +49,26 @@ public class OppslagTjeneste {
     }
 
     public PersonDto personinfoFor() {
-        LOG.info("Henter personinfo for søker");
-        var søkersFnr = innloggetBruker.fødselsnummer();
-        return Optional.ofNullable(PERSONINFO_CACHE.get(søkersFnr.value()))
-                .orElseGet(() -> hentPersoninfoPåNytt(søkersFnr));
+        try {
+            LOG.info("Henter personinfo for søker");
+            var søkersFnr = innloggetBruker.fødselsnummer();
+            return Optional.ofNullable(PERSONINFO_CACHE.get(søkersFnr.value()))
+                    .orElseGet(() -> hentPersoninfoPåNytt(søkersFnr));
+        } catch (Exception e) {
+            LOG.info("Feil ved henting av personinfo for søker", e);
+            return null;
+        }
+
     }
 
     public PersonMedArbeidsforholdDto personinfoMedArbeidsforholdFor() {
-        LOG.info("Henter personinfo med arbeidsforhold for søker");
-        return new PersonMedArbeidsforholdDto(personinfoFor(), hentEksternArbeidsforhold());
+        try {
+            LOG.info("Henter personinfo med arbeidsforhold for søker");
+            return new PersonMedArbeidsforholdDto(personinfoFor(), hentEksternArbeidsforhold());
+        } catch (Exception e) {
+            LOG.info("Feil ved henting av personinfo med arbeidsforhold for søker", e);
+            return null;
+        }
     }
 
     private List<EksternArbeidsforholdDto> hentEksternArbeidsforhold() {
