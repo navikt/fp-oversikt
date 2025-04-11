@@ -66,7 +66,11 @@ public class KrrSpråkKlient {
                 LOG.info("KrrSpråkKlient: bruker er inaktiv, returnerer default");
                 return Målform.NB;
             }
-            return person.spraak();
+            if (person.spraak() == null) {
+                LOG.info("KrrSpråkKlient: bruker har ikke språk, returnerer default");
+                return Målform.NB;
+            }
+            return Målform.valueOf(person.spraak().toUpperCase());
         } catch (UriBuilderException | IllegalArgumentException e) {
             throw new IllegalArgumentException("Utviklerfeil syntax-exception for KrrSpråkKlient.finnSpråkkodeForBruker");
         } catch (Exception e) {
