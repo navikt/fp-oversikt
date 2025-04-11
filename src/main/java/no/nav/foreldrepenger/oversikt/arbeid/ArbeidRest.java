@@ -1,12 +1,6 @@
 package no.nav.foreldrepenger.oversikt.arbeid;
 
 
-import java.time.LocalDate;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -19,16 +13,18 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.aareg.AktivitetskravArbeidDokumentasjonsKravTjeneste;
-import no.nav.foreldrepenger.oversikt.aareg.EksternArbeidsforhold;
-import no.nav.foreldrepenger.oversikt.aareg.MineArbeidsforholdTjeneste;
-import no.nav.foreldrepenger.oversikt.aareg.PerioderMedAktivitetskravArbeid;
+import no.nav.foreldrepenger.oversikt.oppslag.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Path("/arbeid")
 @ApplicationScoped
@@ -62,7 +58,7 @@ public class ArbeidRest {
     @Path("/mineArbeidsforhold")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<EksternArbeidsforhold> hentMittArbeid() {
+    public List<EksternArbeidsforholdDto> hentMittArbeid() {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
 
@@ -72,7 +68,7 @@ public class ArbeidRest {
     @Path("/mineFrilansoppdrag")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<EksternArbeidsforhold> hentMineFrilansoppdrag() {
+    public List<EksternArbeidsforholdDto> hentMineFrilansoppdrag() {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
 

@@ -1,24 +1,29 @@
 package no.nav.foreldrepenger.oversikt.aareg;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
+import no.nav.foreldrepenger.oversikt.integrasjoner.ereg.VirksomhetTjeneste;
+import no.nav.foreldrepenger.oversikt.oppslag.MineArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.ereg.VirksomhetTjeneste;
-import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MineArbeidsforholdTjenesteTest {
@@ -42,7 +47,7 @@ class MineArbeidsforholdTjenesteTest {
     @Mock
     private VirksomhetTjeneste virksomhetTjeneste;
 
-    private List<EksternArbeidsforhold> kallTjeneste(List<ArbeidsforholdRS> registerResponse) {
+    private List<EksternArbeidsforholdDto> kallTjeneste(List<ArbeidsforholdRS> registerResponse) {
         when(restKlient.finnArbeidsforholdForArbeidstaker(any(), any(), any(), anyBoolean())).thenReturn(registerResponse);
         lenient().when(virksomhetTjeneste.hentOrganisasjonNavn(any())).thenReturn("Virksomhet");
         lenient().when(personOppslagSystem.navn(any())).thenReturn("Fornavn Etternavn");

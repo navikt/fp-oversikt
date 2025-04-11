@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.saker;
+package no.nav.foreldrepenger.oversikt.integrasjoner.pdl;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import jakarta.enterprise.context.Dependent;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.pdl.Adressebeskyttelse;
 import no.nav.pdl.AdressebeskyttelseGradering;
@@ -30,7 +32,7 @@ import no.nav.vedtak.util.LRUCache;
     scopesProperty = "pdl.scopes",
     scopesDefault = "api://prod-fss.pdl.pdl-api/.default")
 @Dependent
-class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSystem {
+public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSystem {
 
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     private static final LRUCache<String, Fødselsnummer> AKTØR_FNR = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
@@ -121,7 +123,7 @@ class PdlKlientSystem extends AbstractPersonKlient implements PersonOppslagSyste
         return forventetMor.isPresent() && forventetAnnenForelder.isPresent();
     }
 
-    private static AdresseBeskyttelse.Gradering tilGradering(AdressebeskyttelseGradering adressebeskyttelseGradering) {
+    public static AdresseBeskyttelse.Gradering tilGradering(AdressebeskyttelseGradering adressebeskyttelseGradering) {
         if (adressebeskyttelseGradering == null) {
             return AdresseBeskyttelse.Gradering.UGRADERT;
         }
