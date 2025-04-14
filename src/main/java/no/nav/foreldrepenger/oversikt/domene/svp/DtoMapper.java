@@ -21,6 +21,7 @@ import no.nav.foreldrepenger.common.innsyn.svp.ÅpenBehandling;
 import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 
 final class DtoMapper {
 
@@ -98,14 +99,12 @@ final class DtoMapper {
 
     private static Set<no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging> fjernPerioderMedOpphold(Set<no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging> tilretteleggingDtos,
                                                                                                         Set<no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode> oppholdDtos) {
-        var oppholdSegments = oppholdDtos.stream()
+        var timelineOpphold = oppholdDtos.stream()
+            .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), Boolean.TRUE))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, StandardCombinators::alwaysTrueForMatch)));
+        var timelineTilrettelegginger = tilretteleggingDtos.stream()
             .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), p))
-            .toList();
-        var tilretteleggingSegments = tilretteleggingDtos.stream()
-            .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), p))
-            .toList();
-        var timelineTilrettelegginger = new LocalDateTimeline<>(tilretteleggingSegments);
-        var timelineOpphold = new LocalDateTimeline<>(oppholdSegments);
+            .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new));
         return timelineTilrettelegginger.disjoint(timelineOpphold, (datoInterval, tl, opphold) -> {
             var t = new no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging(datoInterval.getFomDato(), datoInterval.getTomDato(),
                 tl.getValue().type(), tl.getValue().arbeidstidprosent(), tl.getValue().resultat());
