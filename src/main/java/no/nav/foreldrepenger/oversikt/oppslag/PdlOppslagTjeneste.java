@@ -112,6 +112,7 @@ public class PdlOppslagTjeneste {
         }
 
         var barnTilAnnenpartMapping = barn.stream()
+                .filter(barnet -> barnet.ident() != null) // Eksempelvis ved dødfødsel er ikke ident satt
                 .map(barnet -> Map.entry(barnet.ident(), annenForelderRegisterertPåBarnet(søker, barnet)))
                 .filter(entry -> entry.getValue().isPresent())
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));

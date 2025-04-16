@@ -5,6 +5,7 @@ import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.DoedfoedtBarn;
 import no.nav.pdl.Doedsfall;
+import no.nav.pdl.Foedselsdato;
 import no.nav.pdl.ForelderBarnRelasjonRolle;
 import no.nav.pdl.HentPersonBolkResult;
 import no.nav.pdl.Person;
@@ -140,6 +141,21 @@ class PdlOppslagTjenesteTest {
         assertThat(result.get(1).ident()).isNull();
         assertThat(result.get(1).person().getFoedselsdato().getFirst().getFoedselsdato()).isEqualTo(tilStreng(dødfødtDatoMindreEnn40UkerSiden));
         assertThat(result.get(1).person().getDoedsfall().getFirst().getDoedsdato()).isEqualTo(tilStreng(dødfødtDatoMindreEnn40UkerSiden));
+    }
+
+    @Test
+    void annnepart_skal_ikke_slås_opp_for_dødfødte_barn_pga_manglende_ident() {
+        var søker = new Person();
+        var dødfødtBarn = new Person();
+        dødfødtBarn.setFoedselsdato(List.of(new Foedselsdato(tilStreng(LocalDate.now().minusWeeks(2)), null, null, null)));
+        dødfødtBarn.setDoedsfall(List.of(new Doedsfall(tilStreng(LocalDate.now().minusWeeks(2)), null, null)));
+
+        var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(
+                List.of(new PdlOppslagTjeneste.PersonMedIdent(null, dødfødtBarn)),
+                new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker)
+        );
+
+        assertThat(result).isEmpty();
     }
 
     @Test
