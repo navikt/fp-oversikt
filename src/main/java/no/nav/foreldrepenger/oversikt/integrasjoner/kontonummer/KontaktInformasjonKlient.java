@@ -1,17 +1,20 @@
 package no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer;
 
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
-import no.nav.vedtak.exception.ManglerTilgangException;
+import no.nav.vedtak.exception.IntegrasjonException;
 import no.nav.vedtak.felles.integrasjon.rest.NavHeaders;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
+import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.net.HttpURLConnection;
 import java.net.URI;
 import java.time.Duration;
 
@@ -48,14 +51,23 @@ public class KontaktInformasjonKlient {
             var request = RestRequest.newGET(endpoint, restConfig)
                     .otherCallId(NavHeaders.HEADER_NAV_LOWER_CALL_ID)
                     .timeout(Duration.ofSeconds(3));
-            return restClient.send(request, KontonummerDto.class);
-        } catch (ManglerTilgangException m) {
-            LOG.warn("Mangler tilgang til kontoregister", m);
-            return KontonummerDto.UKJENT;
+            var response = restClient.sendReturnUnhandled(request);
+            var statusKode = response.statusCode();
+            if (statusKode == Response.Status.NOT_FOUND.getStatusCode()) {
+                // Person har ikke kontonummer registert i kontoregisteret
+                return KontonummerDto.UKJENT;
+            }
+            if (statusKode == HttpURLConnection.HTTP_FORBIDDEN) {
+                LOG.warn("Mangler tilgang til kontoregister. Forsetter med uten kontonummer!");
+                return KontonummerDto.UKJENT;
+            }
+            if (statusKode > 300) {
+                throw new IntegrasjonException("FP-468817", "Feil ved henting av kontonummer for person. " +  response.body());
+            }
+            return DefaultJsonMapper.fromJson(response.body(), KontonummerDto.class);
         } catch (Exception e) {
-            LOG.info("Oppslag av kontonummer feilet! Forsetter uten kontonummer!", e);
+            LOG.warn("Oppslag av kontonummer feilet! Forsetter uten kontonummer!", e);
             return KontonummerDto.UKJENT;
         }
     }
-
 }
