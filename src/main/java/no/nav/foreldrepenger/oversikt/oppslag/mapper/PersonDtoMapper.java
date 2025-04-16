@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static java.util.Comparator.comparing;
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 public class PersonDtoMapper {
@@ -56,6 +57,7 @@ public class PersonDtoMapper {
     private static List<PersonDto.BarnDto> tilBarn(List<PdlOppslagTjeneste.PersonMedIdent> barn, Map<String, PdlOppslagTjeneste.PersonMedIdent> annenpart) {
         return safeStream(barn)
                 .map(barnet -> tilBarn(barnet, annenpart))
+                .sorted(comparing(PersonDto.BarnDto::fødselsdato))
                 .toList();
     }
 
