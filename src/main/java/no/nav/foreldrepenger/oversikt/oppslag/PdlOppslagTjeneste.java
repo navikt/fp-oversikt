@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.oppslag;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
@@ -28,6 +29,7 @@ import no.nav.pdl.SivilstandResponseProjection;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -106,14 +108,14 @@ public class PdlOppslagTjeneste {
         return dødfødtBarn;
     }
 
-    public Map<String, PersonMedIdent> hentAnnenpartRelatertTilBarn(List<PersonMedIdent> barn, PersonMedIdent søker) {
+    public Map<String, PersonMedIdent> hentAnnenpartRelatertTilBarn(List<PersonMedIdent> barn, Fødselsnummer søkersFnr) {
         if (barn.isEmpty()) {
             return Map.of();
         }
 
         var barnTilAnnenpartMapping = barn.stream()
                 .filter(barnet -> barnet.ident() != null) // Eksempelvis ved dødfødsel er ikke ident satt
-                .map(barnet -> Map.entry(barnet.ident(), annenForelderRegisterertPåBarnet(søker, barnet)))
+                .map(barnet -> Map.entry(barnet.ident(), annenForelderRegisterertPåBarnet(søkersFnr, barnet)))
                 .filter(entry -> entry.getValue().isPresent())
                 .collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().get()));
 
@@ -157,14 +159,16 @@ public class PdlOppslagTjeneste {
         return safeStream(person.person().getForelderBarnRelasjon())
                 .filter(r -> r.getRelatertPersonsRolle().equals(ForelderBarnRelasjonRolle.BARN))
                 .map(ForelderBarnRelasjon::getRelatertPersonsIdent)
+                .filter(Objects::nonNull)
                 .toList();
     }
 
-    private static Optional<String> annenForelderRegisterertPåBarnet(PersonMedIdent søker, PersonMedIdent barnet) {
+    private static Optional<String> annenForelderRegisterertPåBarnet(Fødselsnummer søkersFnr, PersonMedIdent barnet) {
         return safeStream(barnet.person().getForelderBarnRelasjon())
                 .filter(r -> !r.getRelatertPersonsRolle().equals(ForelderBarnRelasjonRolle.BARN))
                 .map(ForelderBarnRelasjon::getRelatertPersonsIdent)
-                .filter(relatertPersonsIdent -> !søker.ident().equals(relatertPersonsIdent)) // Sjekker at det ikke er person selv
+                .filter(Objects::nonNull)
+                .filter(relatertIdent -> !relatertIdent.equals(søkersFnr.value())) // Sjekker at det ikke er søker selv
                 .findFirst();
     }
 

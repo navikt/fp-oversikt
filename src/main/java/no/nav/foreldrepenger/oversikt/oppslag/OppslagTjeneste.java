@@ -81,7 +81,7 @@ public class OppslagTjeneste {
         var søkersAktørid = innloggetBruker.aktørId();
         var søker = pdlOppslagTjeneste.hentSøker(søkersFnr.value());
         var barn = pdlOppslagTjeneste.hentBarnTilSøker(søker);
-        var annenpart = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(barn, søker);
+        var annenpart = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(barn, søkersFnr);
         var målform = krrSpråkKlient.finnSpråkkodeForBruker(søkersFnr.value());
         var kontonummer = kontaktInformasjonKlient.hentRegistertKontonummer();
         var personinfoDto = PersonDtoMapper.tilPersonDto(søkersAktørid, søker, barn, annenpart, målform, kontonummer);

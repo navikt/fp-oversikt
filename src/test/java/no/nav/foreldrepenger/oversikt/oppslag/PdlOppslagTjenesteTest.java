@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.oppslag;
 
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
 import no.nav.pdl.AdressebeskyttelseGradering;
@@ -71,7 +72,8 @@ class PdlOppslagTjenesteTest {
         var søker = new Person();
         søker.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
-                forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)
+                forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
+                forelderBarnRelasjon(null, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)
         ));
         var barnEldreEnn40Mnd = lagBarn(LocalDate.now().minusMonths(41), AdressebeskyttelseGradering.UGRADERT,
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
@@ -118,6 +120,25 @@ class PdlOppslagTjenesteTest {
     }
 
     @Test
+    void barn_som_ikke_relatert_id_for_søkers_forelder_til_barn_relasjon_returnes_ikke() {
+        var søker = new Person();
+        søker.setForelderBarnRelasjon(List.of(
+                forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
+                forelderBarnRelasjon(null, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)
+        ));
+        var barn1 = lagBarn(LocalDate.now().minusWeeks(32), AdressebeskyttelseGradering.UGRADERT,
+                forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
+                forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN));
+
+        when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(BARN_1_IDENT, barn1, null)));
+
+        var result = pdlOppslagTjeneste.hentBarnTilSøker(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().ident()).isEqualTo(BARN_1_IDENT);
+    }
+
+    @Test
     void dødfødte_barn_skal_også_returneres_så_lenge_det_er_dødfødt_for_mindre_enn_40_uker_siden() {
         var barnUgradert = lagBarn(LocalDate.now().minusMonths(10), AdressebeskyttelseGradering.UGRADERT);
         var søker = new Person();
@@ -144,24 +165,7 @@ class PdlOppslagTjenesteTest {
     }
 
     @Test
-    void annnepart_skal_ikke_slås_opp_for_dødfødte_barn_pga_manglende_ident() {
-        var søker = new Person();
-        var dødfødtBarn = new Person();
-        dødfødtBarn.setFoedselsdato(List.of(new Foedselsdato(tilStreng(LocalDate.now().minusWeeks(2)), null, null, null)));
-        dødfødtBarn.setDoedsfall(List.of(new Doedsfall(tilStreng(LocalDate.now().minusWeeks(2)), null, null)));
-
-        var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(
-                List.of(new PdlOppslagTjeneste.PersonMedIdent(null, dødfødtBarn)),
-                new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker)
-        );
-
-        assertThat(result).isEmpty();
-    }
-
-    @Test
     void annnepart_happy_case() {
-        var søker = new Person();
-        søker.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
         var annenpart = new Person();
         annenpart.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(30)));
         annenpart.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.FAR)));
@@ -172,7 +176,7 @@ class PdlOppslagTjenesteTest {
         when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(ANNENPART_IDENT, annenpart, null)));
 
 
-        var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn)), new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
+        var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn)), new Fødselsnummer(SØKER_IDENT));
 
         assertThat(result).hasSize(1)
                 .containsKey(BARN_1_IDENT);
@@ -182,8 +186,6 @@ class PdlOppslagTjenesteTest {
 
     @Test
     void annenpart_har_beskyttet_addresse_og_skal_ikke_hentes() {
-        var søker = new Person();
-        søker.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
         var annenpart = new Person();
         annenpart.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.FAR)));
         annenpart.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG));
@@ -196,18 +198,13 @@ class PdlOppslagTjenesteTest {
 
         var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(
                 new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn)),
-                new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
+                new Fødselsnummer(SØKER_IDENT));
 
         assertThat(result).isEmpty();
     }
 
     @Test
     void tvillinger_har_samme_annnepart_og_skal_bare_slå_opp_en_gang() {
-        var søker = new Person();
-        søker.setForelderBarnRelasjon(List.of(
-                forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
-                forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)
-        ));
         var annenpart = new Person();
         annenpart.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MEDMOR),
@@ -232,7 +229,7 @@ class PdlOppslagTjenesteTest {
         var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(
                         new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn1),
                         new PdlOppslagTjeneste.PersonMedIdent(BARN_2_IDENT, barn2)),
-                new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
+                new Fødselsnummer(SØKER_IDENT));
 
         assertThat(result).hasSize(2)
                 .containsKey(BARN_1_IDENT)
@@ -241,11 +238,6 @@ class PdlOppslagTjenesteTest {
 
     @Test
     void to_barn_med_to_forskjellige_foreldre_en_har_beskyttet_adresse_mens_andre_ikke_har_det_skal_returene_bare_sistnevnte() {
-        var søker = new Person();
-        søker.setForelderBarnRelasjon(List.of(
-                forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
-                forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)
-        ));
         var annenpartGradert = new Person();
         annenpartGradert.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MEDMOR)));
         annenpartGradert.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG));
@@ -272,15 +264,13 @@ class PdlOppslagTjenesteTest {
         var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(List.of(
                 new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barnGradertAnnenforelder),
                 new PdlOppslagTjeneste.PersonMedIdent(BARN_2_IDENT, barnUgradertAnnenforelder)),
-                new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
+                new Fødselsnummer(SØKER_IDENT));
 
         assertThat(result).hasSize(1).containsKey(BARN_2_IDENT);
     }
 
     @Test
     void annenpart_er_registert_med_dato_for_død_og_skal_ikke_returneres() {
-        var søker = new Person();
-        søker.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
         var annenpart = new Person();
         annenpart.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MEDMOR)));
         annenpart.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT));
@@ -294,9 +284,38 @@ class PdlOppslagTjenesteTest {
 
         var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(
                 List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn)),
-                new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
+                new Fødselsnummer(SØKER_IDENT));
 
         assertThat(result).isEmpty();
     }
 
+    @Test
+    void annnepart_skal_ikke_slås_opp_for_dødfødte_barn_pga_manglende_ident() {
+        var dødfødtBarn = new Person();
+        dødfødtBarn.setFoedselsdato(List.of(new Foedselsdato(tilStreng(LocalDate.now().minusWeeks(2)), null, null, null)));
+        dødfødtBarn.setDoedsfall(List.of(new Doedsfall(tilStreng(LocalDate.now().minusWeeks(2)), null, null)));
+
+        var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(
+                List.of(new PdlOppslagTjeneste.PersonMedIdent(null, dødfødtBarn)),
+                new Fødselsnummer(SØKER_IDENT)
+        );
+
+        assertThat(result).isEmpty();
+    }
+
+
+    @Test
+    void barnet_kan_være_relatert_til_en_annenforelder_som_ikke_har_ident_og_skal_forsette_uten_annenforelder_i_disse_tilfellene() {
+        var barn = lagBarn();
+        barn.setForelderBarnRelasjon(List.of(
+                forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
+                forelderBarnRelasjon(null, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
+        ));
+
+        var result = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(
+                List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn)),
+                new Fødselsnummer(SØKER_IDENT));
+
+        assertThat(result).isEmpty();
+    }
 }
