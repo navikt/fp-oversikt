@@ -120,7 +120,7 @@ class PdlOppslagTjenesteTest {
     }
 
     @Test
-    void barn_som_ikke_relatert_id_for_søkers_forelder_til_barn_relasjon_returnes_ikke() {
+    void barn_som_ikke_har_relatert_id_for_søkers_forelder_til_barn_relasjon_returnes_ikke() {
         var søker = new Person();
         søker.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
@@ -162,6 +162,22 @@ class PdlOppslagTjenesteTest {
         assertThat(result.get(1).ident()).isNull();
         assertThat(result.get(1).person().getFoedselsdato().getFirst().getFoedselsdato()).isEqualTo(tilStreng(dødfødtDatoMindreEnn40UkerSiden));
         assertThat(result.get(1).person().getDoedsfall().getFirst().getDoedsdato()).isEqualTo(tilStreng(dødfødtDatoMindreEnn40UkerSiden));
+    }
+
+
+    @Test
+    void søker_skal_returner_dødfødt_barn_selv_om_ingen_barn_har_registrert_relasjon() {
+        var søker = new Person();
+        søker.setForelderBarnRelasjon(List.of());
+        var dødfødtDatoMindreEnn40UkerSiden = LocalDate.now().minusWeeks(2);
+        søker.setDoedfoedtBarn(List.of(new DoedfoedtBarn(tilStreng(dødfødtDatoMindreEnn40UkerSiden), null, null)));
+
+        var result = pdlOppslagTjeneste.hentBarnTilSøker(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søker));
+
+        assertThat(result).hasSize(1);
+        assertThat(result.getFirst().ident()).isNull();
+        assertThat(result.getFirst().person().getFoedselsdato().getFirst().getFoedselsdato()).isEqualTo(tilStreng(dødfødtDatoMindreEnn40UkerSiden));
+        assertThat(result.getFirst().person().getDoedsfall().getFirst().getDoedsdato()).isEqualTo(tilStreng(dødfødtDatoMindreEnn40UkerSiden));
     }
 
     @Test
