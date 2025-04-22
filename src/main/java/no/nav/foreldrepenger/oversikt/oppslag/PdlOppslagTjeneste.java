@@ -67,6 +67,18 @@ public class PdlOppslagTjeneste {
     }
 
     public List<PersonMedIdent> hentBarnTilSøker(PersonMedIdent søker) {
+        var relaterteBarn = relaterteBarn(søker);
+        var dødfødteBarn = safeStream(søker.person().getDoedfoedtBarn())
+                .filter(d -> d.getDato() != null)
+                .map(PdlOppslagTjeneste::dødfødtBarn)
+                .map(person -> new PersonMedIdent(null, person))
+                .toList();
+        return Stream.concat(relaterteBarn.stream(), dødfødteBarn.stream())
+                .filter(PdlOppslagTjeneste::barnErYngreEnn40Mnd)
+                .toList();
+    }
+
+    private List<PersonMedIdent> relaterteBarn(PersonMedIdent søker) {
         var barnIdenter = barnRelatertTil(søker);
         if (barnIdenter.isEmpty()) {
             return List.of();
@@ -84,20 +96,11 @@ public class PdlOppslagTjeneste {
                         .doedsfall(new DoedsfallResponseProjection().doedsdato())
                         .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsIdent().relatertPersonsRolle().minRolleForPerson())
                 );
-        var relaterteBarn =  pdlKlientSystem.hentPersonBolk(requestBarn, projeksjonBolk).stream()
+        return pdlKlientSystem.hentPersonBolk(requestBarn, projeksjonBolk).stream()
                 // Feiler nå hardt hvis person er null (finnes ikke, ugyldig ident)
                 // identen kommer fra opprinnelig fra PDL så her antar vi noe er veldig feil hivs dette intreffer
-                .filter(b -> barnErYngreEnn40Mnd(b.getPerson()))
                 .filter(b -> !harAdressebeskyttelse(b.getPerson()))
                 .map(p -> new PersonMedIdent(p.getIdent(), p.getPerson()))
-                .toList();
-        var dødfødteBarn = safeStream(søker.person().getDoedfoedtBarn())
-                .filter(d -> d.getDato() != null)
-                .map(PdlOppslagTjeneste::dødfødtBarn)
-                .filter(PdlOppslagTjeneste::barnErYngreEnn40Mnd)
-                .map(person -> new PersonMedIdent(null, person))
-                .toList();
-        return Stream.concat(relaterteBarn.stream(), dødfødteBarn.stream())
                 .toList();
     }
 
@@ -172,8 +175,8 @@ public class PdlOppslagTjeneste {
                 .findFirst();
     }
 
-    private static boolean barnErYngreEnn40Mnd(no.nav.pdl.Person barnet) {
-        return safeStream(barnet.getFoedselsdato()).findFirst()
+    private static boolean barnErYngreEnn40Mnd(PersonMedIdent barnet) {
+        return safeStream(barnet.person().getFoedselsdato()).findFirst()
                 .map(Foedselsdato::getFoedselsdato)
                 .map(LocalDate::parse)
                 .orElseThrow()
