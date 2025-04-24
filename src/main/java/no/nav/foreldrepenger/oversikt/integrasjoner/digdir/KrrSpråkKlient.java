@@ -72,7 +72,7 @@ public class KrrSpråkKlient {
             }
             return Målform.valueOf(person.spraak().toUpperCase());
         } catch (UriBuilderException | IllegalArgumentException e) {
-            throw new IllegalArgumentException("Utviklerfeil syntax-exception for KrrSpråkKlient.finnSpråkkodeForBruker");
+            throw new IllegalArgumentException("Utviklerfeil syntax-exception for KrrSpråkKlient.finnSpråkkodeForBruker", e);
         } catch (Exception e) {
             LOG.info("KrrSpråkKlient: kall til digdir krr feilet, returnerer default", e);
             return Målform.NB;
