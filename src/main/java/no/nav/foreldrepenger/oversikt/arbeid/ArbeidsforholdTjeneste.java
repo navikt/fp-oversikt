@@ -26,7 +26,7 @@ public class ArbeidsforholdTjeneste {
 
     private static final Period TID_TILBAKE_ARBEID = Period.ofYears(3);
     private static final Period TID_TILBAKE_FRILANS = Period.ofMonths(6);
-    private static final Period TID_FRAMOVER = Period.ofMonths(3);
+    private static final Period TID_FRAMOVER = Period.ofYears(3);
 
     private AaregRestKlient aaregRestKlient;
 
