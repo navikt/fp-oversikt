@@ -10,6 +10,7 @@ import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
+import no.nav.vedtak.util.LRUCache;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,6 +18,7 @@ import java.net.URI;
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 
 /*
  * https://github.com/navikt/digdir-krr
@@ -31,6 +33,9 @@ import java.util.Optional;
         scopesProperty = "krr.rs.scopes", scopesDefault = "api://prod-gcp.team-rocket.digdir-krr-proxy/.default")
 public class KrrSpråkKlient {
     private static final Logger LOG = LoggerFactory.getLogger(KrrSpråkKlient.class);
+    private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
+    private static final LRUCache<String, Kontaktinformasjoner.Kontaktinformasjon> KONTAKTINFORMASJON_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
+
     private final URI endpoint;
     private final RestClient restClient;
     private final RestConfig restConfig;
@@ -72,6 +77,15 @@ public class KrrSpråkKlient {
     }
 
     public Optional<Kontaktinformasjoner.Kontaktinformasjon> hentKontaktinformasjon(String fnr) {
+        return  Optional.ofNullable(KONTAKTINFORMASJON_CACHE.get(fnr))
+                .or(() -> {
+                    var kontaktinformasjonOpt = hentKontaktinformasjonFraKRR(fnr);
+                    kontaktinformasjonOpt.ifPresent(k -> KONTAKTINFORMASJON_CACHE.put(fnr, k));
+                    return kontaktinformasjonOpt;
+                });
+    }
+
+    private Optional<Kontaktinformasjoner.Kontaktinformasjon> hentKontaktinformasjonFraKRR(String fnr) {
         var request = RestRequest.newPOSTJson(new Personidenter(List.of(fnr)), endpoint, restConfig)
                 .otherCallId(NavHeaders.HEADER_NAV_CALL_ID)
                 .timeout(Duration.ofSeconds(3)); // Kall langt avgårde - blokkerer ofte til 3*timeout. Request inn til fpsak har timeout 20s.

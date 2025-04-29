@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 @ApplicationScoped
 public class KontaktInformasjonTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(KontaktInformasjonTjeneste.class);
+
     private KrrSpråkKlient krrSpråkKlient;
 
     public KontaktInformasjonTjeneste() {
