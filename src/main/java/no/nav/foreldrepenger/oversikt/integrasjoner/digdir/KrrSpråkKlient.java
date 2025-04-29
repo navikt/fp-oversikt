@@ -46,22 +46,12 @@ public class KrrSpråkKlient {
                 .build();
     }
 
-    public Målform finnSpråkkodeForBruker(String fnr) {
+    public Målform finnSpråkkodeMedFallbackNB(String fnr) {
         try {
-            var request = RestRequest.newPOSTJson(new Personidenter(List.of(fnr)), endpoint, restConfig)
-                    .otherCallId(NavHeaders.HEADER_NAV_CALL_ID)
-                    .timeout(Duration.ofSeconds(3)); // Kall langt avgårde - blokkerer ofte til 3*timeout. Request inn til fpsak har timeout 20s.
-            var respons = restClient.send(request, Kontaktinformasjoner.class);
-            if (respons.feil() != null && !respons.feil().isEmpty()) {
-                var feilkode = respons.feil().get(fnr);
-                if (Kontaktinformasjoner.FeilKode.person_ikke_funnet.equals(feilkode)) {
-                    LOG.info("KrrSpråkKlient: fant ikke bruker, returnerer default");
-                } else {
-                    LOG.warn("KrrSpråkKlient: Uventet feil ved kall til KRR, returnerer default.");
-                }
+            var person = hentKontaktinformasjon(fnr);
+            if (person == null) {
                 return Målform.NB;
             }
-            var person = respons.personer().get(fnr);
             if (!person.aktiv()) {
                 LOG.info("KrrSpråkKlient: bruker er inaktiv, returnerer default");
                 return Målform.NB;
@@ -77,6 +67,23 @@ public class KrrSpråkKlient {
             LOG.info("KrrSpråkKlient: kall til digdir krr feilet, returnerer default", e);
             return Målform.NB;
         }
+    }
+
+    public Kontaktinformasjoner.Kontaktinformasjon hentKontaktinformasjon(String fnr) {
+        var request = RestRequest.newPOSTJson(new Personidenter(List.of(fnr)), endpoint, restConfig)
+                .otherCallId(NavHeaders.HEADER_NAV_CALL_ID)
+                .timeout(Duration.ofSeconds(3)); // Kall langt avgårde - blokkerer ofte til 3*timeout. Request inn til fpsak har timeout 20s.
+        var respons = restClient.send(request, Kontaktinformasjoner.class);
+        if (respons.feil() != null && !respons.feil().isEmpty()) {
+            var feilkode = respons.feil().get(fnr);
+            if (Kontaktinformasjoner.FeilKode.person_ikke_funnet.equals(feilkode)) {
+                LOG.info("KrrSpråkKlient: fant ikke bruker, returnerer default");
+            } else {
+                LOG.warn("KrrSpråkKlient: Uventet feil ved kall til KRR {}, returnerer default", feilkode);
+            }
+            return null;
+        }
+        return respons.personer().get(fnr);
     }
 
     record Personidenter(List<String> personidenter) {

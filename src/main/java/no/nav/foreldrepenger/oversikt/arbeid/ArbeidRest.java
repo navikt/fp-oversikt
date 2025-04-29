@@ -39,17 +39,20 @@ public class ArbeidRest {
     private PersonOppslagSystem personOppslagSystem;
     private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
     private AktivitetskravArbeidDokumentasjonsKravTjeneste aktivitetskravArbeidDokumentasjonsKravTjeneste;
+    private KontaktInformasjonTjeneste kontaktInformasjonTjeneste;
 
     @Inject
     public ArbeidRest(AnnenPartSakTjeneste annenPartSakTjeneste, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker,
                       PersonOppslagSystem personOppslagSystem, MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste,
-                      AktivitetskravArbeidDokumentasjonsKravTjeneste aktivitetskravArbeidDokumentasjonsKravTjeneste) {
+                      AktivitetskravArbeidDokumentasjonsKravTjeneste aktivitetskravArbeidDokumentasjonsKravTjeneste,
+                      KontaktInformasjonTjeneste kontaktInformasjonTjeneste) {
         this.annenPartSakTjeneste = annenPartSakTjeneste;
         this.tilgangkontroll = tilgangkontroll;
         this.innloggetBruker = innloggetBruker;
         this.personOppslagSystem = personOppslagSystem;
         this.mineArbeidsforholdTjeneste = mineArbeidsforholdTjeneste;
         this.aktivitetskravArbeidDokumentasjonsKravTjeneste = aktivitetskravArbeidDokumentasjonsKravTjeneste;
+        this.kontaktInformasjonTjeneste = kontaktInformasjonTjeneste;
     }
 
     ArbeidRest() {
@@ -87,7 +90,11 @@ public class ArbeidRest {
                 return true;
             }
         } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.info("Klarer ikke å finne adressebeskyttelse for annen part, person ikke funnet i pdl. Returnerer ingen vedtak for annen part", e);
+            LOG.info("Klarer ikke å finne adressebeskyttelse for annen part, person ikke funnet i pdl. Søker må derfor dokumentere mors arbeid", e);
+            return true;
+        }
+        if (kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(request.annenPartFødselsnummer())) {
+            LOG.info("Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
             return true;
         }
 
