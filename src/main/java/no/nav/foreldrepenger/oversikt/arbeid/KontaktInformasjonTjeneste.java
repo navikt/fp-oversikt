@@ -28,13 +28,13 @@ public class KontaktInformasjonTjeneste {
                 return true;
             }
             var kontaktinformasjon = kontaktinformasjonOpt.get();
-            return kontaktinformasjon.aktiv() && (kontaktinformasjon.reservert() || !kontaktinformasjon.kanVarsles());
+            if (!kontaktinformasjon.aktiv()) {
+                return true;
+            }
+            return kontaktinformasjon.reservert() || !kontaktinformasjon.kanVarsles();
         } catch (Exception e) {
             LOG.warn("KrrSpråkKlient: kall til digdir krr feilet. Defaulter til at mor må dokumentere arbeid!", e);
             return true;
         }
-
-
-
     }
 }
