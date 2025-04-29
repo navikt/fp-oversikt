@@ -14,12 +14,10 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.oppslag.MineArbeidsforholdTjeneste;
-import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,26 +31,21 @@ public class ArbeidRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(ArbeidRest.class);
 
-    private AnnenPartSakTjeneste annenPartSakTjeneste;
     private TilgangKontrollTjeneste tilgangkontroll;
     private InnloggetBruker innloggetBruker;
     private PersonOppslagSystem personOppslagSystem;
     private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
-    private AktivitetskravArbeidDokumentasjonsKravTjeneste aktivitetskravArbeidDokumentasjonsKravTjeneste;
-    private KontaktInformasjonTjeneste kontaktInformasjonTjeneste;
+    private AktivitetskravMåDokumentereMorsArbeidTjeneste aktivitetskravMåDokumentereMorsArbeidTjeneste;
 
     @Inject
-    public ArbeidRest(AnnenPartSakTjeneste annenPartSakTjeneste, TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker,
+    public ArbeidRest(TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker,
                       PersonOppslagSystem personOppslagSystem, MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste,
-                      AktivitetskravArbeidDokumentasjonsKravTjeneste aktivitetskravArbeidDokumentasjonsKravTjeneste,
-                      KontaktInformasjonTjeneste kontaktInformasjonTjeneste) {
-        this.annenPartSakTjeneste = annenPartSakTjeneste;
+                      AktivitetskravMåDokumentereMorsArbeidTjeneste aktivitetskravMåDokumentereMorsArbeidTjeneste) {
         this.tilgangkontroll = tilgangkontroll;
         this.innloggetBruker = innloggetBruker;
         this.personOppslagSystem = personOppslagSystem;
         this.mineArbeidsforholdTjeneste = mineArbeidsforholdTjeneste;
-        this.aktivitetskravArbeidDokumentasjonsKravTjeneste = aktivitetskravArbeidDokumentasjonsKravTjeneste;
-        this.kontaktInformasjonTjeneste = kontaktInformasjonTjeneste;
+        this.aktivitetskravMåDokumentereMorsArbeidTjeneste = aktivitetskravMåDokumentereMorsArbeidTjeneste;
     }
 
     ArbeidRest() {
@@ -93,32 +86,7 @@ public class ArbeidRest {
             LOG.info("Klarer ikke å finne adressebeskyttelse for annen part, person ikke funnet i pdl. Søker må derfor dokumentere mors arbeid", e);
             return true;
         }
-        if (kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(request.annenPartFødselsnummer())) {
-            LOG.info("Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
-            return true;
-        }
-
-        LOG.debug("Kall mot morsArbeidDokumentasjon-endepunkt");
-        var søkerAktørId = innloggetBruker.aktørId();
-        var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
-        var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
-        var familieHendelse = request.familiehendelse();
-        var annenPartSak = annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(søkerAktørId, annenPartAktørId, barnAktørId, familieHendelse);
-
-        // Tilfelle bare far rett - der kan vi ikke vente at mor har en sak. Dersom mor har engangsstønad så har hun ikke oppgitt far/medmor
-        if (annenPartSak.isEmpty()) {
-            if (request.barnFødselsnummer() == null) {
-                return true;
-            }
-            if (!personOppslagSystem.barnHarDisseForeldrene(request.barnFødselsnummer(), request.annenPartFødselsnummer(), innloggetBruker.fødselsnummer())) {
-                return true;
-            }
-        }
-        var intervaller = request.perioder().stream()
-            .map(p -> new LocalDateInterval(p.fom(), p.tom()))
-            .toList();
-        var aktivitetskravrequest = new PerioderMedAktivitetskravArbeid(request.annenPartFødselsnummer(), intervaller);
-        return aktivitetskravArbeidDokumentasjonsKravTjeneste.krevesDokumentasjonForAktivitetskravArbeid(aktivitetskravrequest);
+        return aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(innloggetBruker.fødselsnummer(), innloggetBruker.aktørId(), request);
     }
 
     public record MorArbeidRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer,
