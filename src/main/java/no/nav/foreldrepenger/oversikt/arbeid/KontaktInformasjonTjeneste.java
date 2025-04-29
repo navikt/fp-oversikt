@@ -23,11 +23,12 @@ public class KontaktInformasjonTjeneste {
 
     public boolean harReservertSegEllerKanIkkeVarsles(Fødselsnummer fnr) {
         try {
-            var kontaktinformasjoner = krrSpråkKlient.hentKontaktinformasjon(fnr.value());
-            if (kontaktinformasjoner == null || !kontaktinformasjoner.aktiv()) {
+            var kontaktinformasjonOpt = krrSpråkKlient.hentKontaktinformasjon(fnr.value());
+            if (kontaktinformasjonOpt.isEmpty()) {
                 return true;
             }
-            return kontaktinformasjoner.reservert() || !kontaktinformasjoner.kanVarsles();
+            var kontaktinformasjon = kontaktinformasjonOpt.get();
+            return kontaktinformasjon.aktiv() && (kontaktinformasjon.reservert() || !kontaktinformasjon.kanVarsles());
         } catch (Exception e) {
             LOG.warn("KrrSpråkKlient: kall til digdir krr feilet. Defaulter til at mor må dokumentere arbeid!", e);
             return true;

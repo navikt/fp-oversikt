@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.net.URI;
 import java.time.Duration;
 import java.util.List;
+import java.util.Optional;
 
 /*
  * https://github.com/navikt/digdir-krr
@@ -48,10 +49,11 @@ public class KrrSpråkKlient {
 
     public Målform finnSpråkkodeMedFallbackNB(String fnr) {
         try {
-            var person = hentKontaktinformasjon(fnr);
-            if (person == null) {
+            var personOpt = hentKontaktinformasjon(fnr);
+            if (personOpt.isEmpty()) {
                 return Målform.NB;
             }
+            var person = personOpt.get();
             if (!person.aktiv()) {
                 LOG.info("KrrSpråkKlient: bruker er inaktiv, returnerer default");
                 return Målform.NB;
@@ -69,7 +71,7 @@ public class KrrSpråkKlient {
         }
     }
 
-    public Kontaktinformasjoner.Kontaktinformasjon hentKontaktinformasjon(String fnr) {
+    public Optional<Kontaktinformasjoner.Kontaktinformasjon> hentKontaktinformasjon(String fnr) {
         var request = RestRequest.newPOSTJson(new Personidenter(List.of(fnr)), endpoint, restConfig)
                 .otherCallId(NavHeaders.HEADER_NAV_CALL_ID)
                 .timeout(Duration.ofSeconds(3)); // Kall langt avgårde - blokkerer ofte til 3*timeout. Request inn til fpsak har timeout 20s.
@@ -81,9 +83,9 @@ public class KrrSpråkKlient {
             } else {
                 LOG.warn("KrrSpråkKlient: Uventet feil ved kall til KRR {}, returnerer default", feilkode);
             }
-            return null;
+            return Optional.empty();
         }
-        return respons.personer().get(fnr);
+        return Optional.of(respons.personer().get(fnr));
     }
 
     record Personidenter(List<String> personidenter) {
