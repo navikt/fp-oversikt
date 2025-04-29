@@ -26,7 +26,7 @@ public class ArbeidsforholdTjeneste {
 
     private static final Period TID_TILBAKE_ARBEID = Period.ofYears(3);
     private static final Period TID_TILBAKE_FRILANS = Period.ofMonths(6);
-    private static final Period TID_FRAMOVER = Period.ofYears(3);
+    // private static final Period TID_FRAMOVER = Period.ofYears(3);
 
     private AaregRestKlient aaregRestKlient;
 
@@ -41,9 +41,8 @@ public class ArbeidsforholdTjeneste {
 
     public List<Arbeidsforhold> finnAktiveArbeidsforholdForIdent(Fødselsnummer ident) {
         var spørFra = LocalDate.now().minus(TID_TILBAKE_ARBEID);
-        var spørTil = LocalDate.now().plus(TID_FRAMOVER);
-        var innhentingsIntervall = new LocalDateInterval(spørFra, spørTil);
-        return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, spørTil, false).stream()
+        var innhentingsIntervall = new LocalDateInterval(spørFra, LocalDate.MAX);
+        return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, null, false).stream()
             .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
             .filter(a -> innhentingsIntervall.overlaps(a.ansettelsesPeriode()))
             .toList();
@@ -51,9 +50,8 @@ public class ArbeidsforholdTjeneste {
 
     public List<Arbeidsforhold> finnFrilansForIdent(Fødselsnummer ident) {
         var spørFra = LocalDate.now().minus(TID_TILBAKE_FRILANS);
-        var spørTil = LocalDate.now().plus(TID_FRAMOVER);
-        var innhentingsIntervall = new LocalDateInterval(spørFra, spørTil);
-        return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, spørTil,
+        var innhentingsIntervall = new LocalDateInterval(spørFra, LocalDate.MAX);
+        return aaregRestKlient.finnArbeidsforholdForArbeidstaker(ident.value(), spørFra, null,
                 Optional.of(ArbeidType.FRILANSER_OPPDRAGSTAKER_MED_MER), true).stream()
             .map(arbeidsforhold -> mapArbeidsforholdRSTilDto(arbeidsforhold, innhentingsIntervall))
             .filter(a -> a.ansettelsesPeriode().overlaps(innhentingsIntervall))
