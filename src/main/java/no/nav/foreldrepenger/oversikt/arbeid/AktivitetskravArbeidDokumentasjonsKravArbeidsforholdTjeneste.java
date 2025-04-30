@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
  * Krever også dokumentasjon dersom det finnes permisjoner i noen av søknadsperiodene.
  */
 @ApplicationScoped
-public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
+public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
 
     private static final Set<ArbeidType> RELEVANT_ARBEID = Set.of(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, ArbeidType.MARITIMT_ARBEIDSFORHOLD);
 
@@ -31,12 +31,12 @@ public class AktivitetskravArbeidDokumentasjonsKravTjeneste {
 
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
 
-    public AktivitetskravArbeidDokumentasjonsKravTjeneste() {
+    public AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste() {
         //CDI
     }
 
     @Inject
-    public AktivitetskravArbeidDokumentasjonsKravTjeneste(ArbeidsforholdTjeneste arbeidsforholdTjeneste) {
+    public AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste(ArbeidsforholdTjeneste arbeidsforholdTjeneste) {
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
     }
 

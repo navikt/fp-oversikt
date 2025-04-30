@@ -1,29 +1,27 @@
 package no.nav.foreldrepenger.oversikt.aareg;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.when;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
-import no.nav.foreldrepenger.oversikt.arbeid.AktivitetskravArbeidDokumentasjonsKravTjeneste;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.arbeid.AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.arbeid.PerioderMedAktivitetskravArbeid;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.PermType;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MorsAktivitetTest {
@@ -35,7 +33,6 @@ class MorsAktivitetTest {
     private static final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
     private static final BigDecimal FEMTI_PROSENT = new BigDecimal(50);
     private static final BigDecimal NULL_PROSENT = BigDecimal.ZERO;
-    private static final AktørId AKTOER_ID = new AktørId("1234567890123");
     private static final Fødselsnummer FNR = new Fødselsnummer("12345678901");
 
     @Mock
@@ -43,7 +40,7 @@ class MorsAktivitetTest {
 
     private boolean kallTjeneste(PerioderMedAktivitetskravArbeid søknad, List<ArbeidsforholdRS> registerResponse) {
         when(restKlient.finnArbeidsforholdForArbeidstaker(any(), any(), any(), anyBoolean())).thenReturn(registerResponse);
-        var tjeneste = new AktivitetskravArbeidDokumentasjonsKravTjeneste(new ArbeidsforholdTjeneste(restKlient));
+        var tjeneste = new AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste(new ArbeidsforholdTjeneste(restKlient));
         return tjeneste.krevesDokumentasjonForAktivitetskravArbeid(søknad);
     }
 
