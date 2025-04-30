@@ -139,7 +139,7 @@ class AnnenPartSakTjenesteTest {
         var annenPartsSak = sakUtenVedtak(aktørIdAnnenPart, aktørIdSøker, termindato, Dekningsgrad.ÅTTI, antallBarn, Set.of(søknadsperiode));
         repository.lagre(annenPartsSak);
         var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
-        var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, null).orElseThrow();
+        var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, termindato).orElseThrow();
 
         assertThat(annenPartSak.termindato()).isEqualTo(termindato);
         assertThat(annenPartSak.antallBarn()).isEqualTo(antallBarn);
@@ -149,6 +149,29 @@ class AnnenPartSakTjenesteTest {
         assertThat(annenPartSak.perioder().getFirst().tom()).isEqualTo(søknadsperiode.tom());
         assertThat(annenPartSak.perioder().getFirst().kontoType()).isEqualTo(KontoType.MØDREKVOTE);
         assertThat(annenPartSak.perioder().getFirst().resultat()).isNull();
+    }
+
+    @Test
+    void henter_annen_parts_vedtak_på_familieHendelse_hvis_sak_ikke_har_barns_aktørId() {
+        var repository = new RepositoryStub();
+        var aktørIdAnnenPart = AktørId.dummy();
+        var aktørIdSøker = AktørId.dummy();
+        var fødselsdato = LocalDate.now();
+        var aktørIdBarn = AktørId.dummy();
+        LocalDate termindato = fødselsdato.minusMonths(1);
+        var annenPartsSak = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, null, fødselsdato, now(), termindato);
+        var annenPartsSakPåAnnetBarn = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, AktørId.dummy(), fødselsdato.minusYears(1), now().minusYears(1),
+            termindato);
+        repository.lagre(annenPartsSak);
+        repository.lagre(annenPartsSakPåAnnetBarn);
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var annenPartVedtak = tjeneste.hentVedtak(aktørIdSøker, aktørIdAnnenPart, aktørIdBarn, fødselsdato).orElseThrow();
+
+        assertThat(annenPartVedtak.termindato()).isEqualTo(termindato);
+
+        var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, aktørIdBarn, fødselsdato).orElseThrow();
+
+        assertThat(annenPartSak.termindato()).isEqualTo(termindato);
     }
 
     private static SakFP0 sakMedVedtak(AktørId aktørId,

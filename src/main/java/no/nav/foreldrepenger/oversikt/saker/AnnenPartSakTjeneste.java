@@ -1,5 +1,18 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.innsyn.AnnenPartSak;
@@ -9,18 +22,6 @@ import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
 
 @ApplicationScoped
 public class AnnenPartSakTjeneste {
@@ -150,10 +151,22 @@ public class AnnenPartSakTjeneste {
             .stream()
             .filter(sak -> !sak.oppgittAleneomsorg())
             .filter(sak -> sak.annenPartAktørId() != null && sak.annenPartAktørId().equals(søker))
-            .filter(sak -> barn == null || sak.gjelderBarn(barn))
-            //Sjekker ikke familiehendelse hvis vi har aktørId på barnet
-            .filter(sak -> barn != null || familiehendelse == null || isEquals(familiehendelse, sak.familieHendelse()))
+            .filter(sak -> matcher(barn, familiehendelse, sak))
             .toList();
+    }
+
+    private static boolean matcher(AktørId barn, LocalDate familiehendelse, ForeldrepengerSak sak) {
+        if (barn != null) {
+            if (sak.gjelderBarn(barn)) {
+                return true;
+            }
+        }
+        if (familiehendelse != null && sak.familieHendelse() != null) {
+            if (isEquals(familiehendelse, sak.familieHendelse())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean isEquals(LocalDate dato, FamilieHendelse fh) {
