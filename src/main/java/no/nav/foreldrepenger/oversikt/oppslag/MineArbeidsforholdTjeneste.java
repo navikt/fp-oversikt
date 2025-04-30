@@ -78,16 +78,34 @@ public class MineArbeidsforholdTjeneste {
         }
     }
 
-    private Stillingsprosent gjeldendeStillingsprosent(Arbeidsforhold arbeidsforhold) {
+    private static Stillingsprosent gjeldendeStillingsprosent(Arbeidsforhold arbeidsforhold) {
+        if (arbeidsforhold.arbeidsavtaler().isEmpty()) {
+            return null;
+        }
+
         return arbeidsforhold.arbeidsavtaler().stream()
             .filter(s -> erGjeldende(s.getLocalDateInterval()))
             .map(LocalDateSegment::getValue)
-            .findFirst().orElse(null);
+            .findFirst()
+            .orElseGet(() -> hentSistGjeldendeStillingsprsoent(arbeidsforhold));
     }
 
-    private boolean erGjeldende(LocalDateInterval interval) {
-        var idag = LocalDate.now();
-        return interval.contains(idag) || interval.getFomDato().isAfter(idag);
+    private static Stillingsprosent hentSistGjeldendeStillingsprsoent(Arbeidsforhold arbeidsforhold) {
+        if (arbeidsforhold.arbeidsavtaler().getMinLocalDate().isAfter(LocalDate.now())) {
+            return arbeidsforhold.arbeidsavtaler().stream()
+                    .min(Comparator.comparing(LocalDateSegment::getFom))
+                    .map(LocalDateSegment::getValue)
+                    .orElse(null);
+        } else {
+            return arbeidsforhold.arbeidsavtaler().stream()
+                    .max(Comparator.comparing(LocalDateSegment::getFom))
+                    .map(LocalDateSegment::getValue)
+                    .orElse(null);
+        }
+    }
+
+    private static boolean erGjeldende(LocalDateInterval interval) {
+        return interval.overlaps(new LocalDateInterval(LocalDate.now(), LocalDate.now()));
     }
 
     private String tilArbeidsgiverTypeFrontend(ArbeidsforholdIdentifikator a) {
