@@ -2,9 +2,10 @@ package no.nav.foreldrepenger.oversikt.integrasjoner.digdir;
 
 import java.util.Map;
 
-public record Kontaktinformasjoner(Map<String, Kontaktinformasjon> personer, Map<String, FeilKode> feil) {
+public record Kontaktinformasjoner(Map<String, Kontaktinformasjon> personer,
+                                   Map<String, FeilKode> feil) {
 
-    public record Kontaktinformasjon(boolean aktiv, String spraak) {
+    public record Kontaktinformasjon(boolean aktiv, boolean kanVarsles, boolean reservert, String spraak) {
     }
 
     public enum FeilKode {

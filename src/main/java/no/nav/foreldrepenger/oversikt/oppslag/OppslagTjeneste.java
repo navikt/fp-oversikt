@@ -82,7 +82,7 @@ public class OppslagTjeneste {
         var søker = pdlOppslagTjeneste.hentSøker(søkersFnr.value());
         var barn = pdlOppslagTjeneste.hentBarnTilSøker(søker);
         var annenpart = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(barn, søkersFnr);
-        var målform = krrSpråkKlient.finnSpråkkodeForBruker(søkersFnr.value());
+        var målform = krrSpråkKlient.finnSpråkkodeMedFallbackNB(søkersFnr.value());
         var kontonummer = kontaktInformasjonKlient.hentRegistertKontonummer();
         var personinfoDto = PersonDtoMapper.tilPersonDto(søkersAktørid, søker, barn, annenpart, målform, kontonummer);
         PERSONINFO_CACHE.put(søkersFnr.value(), personinfoDto);

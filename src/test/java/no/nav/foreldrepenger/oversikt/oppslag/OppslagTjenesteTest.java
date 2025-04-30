@@ -95,7 +95,7 @@ class OppslagTjenesteTest {
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
-        when(krrSpråkKlient.finnSpråkkodeForBruker(any())).thenReturn(Målform.NB);
+        when(krrSpråkKlient.finnSpråkkodeMedFallbackNB(any())).thenReturn(Målform.NB);
         when(kontaktInformasjonKlient.hentRegistertKontonummer()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of(enkeltArbeidsforhold));
 
@@ -153,7 +153,7 @@ class OppslagTjenesteTest {
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barnPdl)));
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of(BARN_1_IDENT, new PdlOppslagTjeneste.PersonMedIdent(ANNENPART_IDENT, annenpartPdl)));
-        when(krrSpråkKlient.finnSpråkkodeForBruker(any())).thenReturn(Målform.NB);
+        when(krrSpråkKlient.finnSpråkkodeMedFallbackNB(any())).thenReturn(Målform.NB);
         when(kontaktInformasjonKlient.hentRegistertKontonummer()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
 
@@ -227,7 +227,7 @@ class OppslagTjenesteTest {
                 new PdlOppslagTjeneste.PersonMedIdent(BARN_2_IDENT, barn2Pdl)
         ));
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of(BARN_1_IDENT, new PdlOppslagTjeneste.PersonMedIdent(ANNENPART_IDENT, annenpartTilBarn1Pdl)));
-        when(krrSpråkKlient.finnSpråkkodeForBruker(any())).thenReturn(Målform.NB);
+        when(krrSpråkKlient.finnSpråkkodeMedFallbackNB(any())).thenReturn(Målform.NB);
         when(kontaktInformasjonKlient.hentRegistertKontonummer()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
 
@@ -279,7 +279,7 @@ class OppslagTjenesteTest {
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
-        when(krrSpråkKlient.finnSpråkkodeForBruker(any())).thenReturn(Målform.NB);
+        when(krrSpråkKlient.finnSpråkkodeMedFallbackNB(any())).thenReturn(Målform.NB);
         var sveitsBank = new KontonummerDto.UtenlandskKontoInfo("SVEITS BANK", null, null, null, null, null, null, null);
         var kontonummerDto = new KontonummerDto(null, sveitsBank);
         when(kontaktInformasjonKlient.hentRegistertKontonummer()).thenReturn(kontonummerDto);
@@ -330,7 +330,7 @@ class OppslagTjenesteTest {
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
-        when(krrSpråkKlient.finnSpråkkodeForBruker(any())).thenReturn(Målform.EN);
+        when(krrSpråkKlient.finnSpråkkodeMedFallbackNB(any())).thenReturn(Målform.EN);
         when(kontaktInformasjonKlient.hentRegistertKontonummer()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(eksterneArbeidsforhold);
 
