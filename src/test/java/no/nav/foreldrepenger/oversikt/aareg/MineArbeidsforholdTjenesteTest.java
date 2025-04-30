@@ -136,6 +136,46 @@ class MineArbeidsforholdTjenesteTest {
     }
 
     @Test
+    void ett_tilkommet_arbeidsforhold_skal_bruke_stillingsprosent_fra_det_og_ikke_null() {
+        var fom = LocalDate.now().plusYears(1);
+        var tom = LocalDate.now().plusYears(2);
+        var response = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+                new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+                new ArbeidsforholdRS.AnsettelsesperiodeRS(new ArbeidsforholdRS.PeriodeRS(fom, null)),
+                List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, new ArbeidsforholdRS.PeriodeRS(fom, tom)),
+                        new ArbeidsforholdRS.ArbeidsavtaleRS(FEMTI_PROSENT, new ArbeidsforholdRS.PeriodeRS(tom.plusDays(1), null))),
+                List.of(),
+                ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var resultat = kallTjeneste(List.of(response)).getFirst();
+        assertThat(resultat.arbeidsgiverId()).isEqualTo(ARBGIVER1);
+        assertThat(resultat.from()).isEqualTo(fom);
+        assertThat(resultat.to()).isEmpty();
+        assertThat(resultat.stillingsprosent().prosent()).isEqualByComparingTo(HUNDRE_PROSENT);
+        assertThat(resultat.arbeidsgiverNavn()).isEqualTo("Virksomhet");
+    }
+
+    @Test
+    void et_avsluttet_arbeidsforhold_tilbake_i_tid_skal_returnere_sist_gjeldende_stillingsprosent() {
+        var fom = LocalDate.now().minusYears(1);
+        var tom = LocalDate.now().minusMonths(1);
+        var response = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+                new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+                new ArbeidsforholdRS.AnsettelsesperiodeRS(new ArbeidsforholdRS.PeriodeRS(fom, tom)),
+                List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, new ArbeidsforholdRS.PeriodeRS(fom, tom)),
+                        new ArbeidsforholdRS.ArbeidsavtaleRS(FEMTI_PROSENT, new ArbeidsforholdRS.PeriodeRS(fom.minusYears(1), fom.minusDays(1)))),
+                List.of(),
+                ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var resultat = kallTjeneste(List.of(response)).getFirst();
+        assertThat(resultat.arbeidsgiverId()).isEqualTo(ARBGIVER1);
+        assertThat(resultat.from()).isEqualTo(fom);
+        assertThat(resultat.to()).hasValue(tom);
+        assertThat(resultat.stillingsprosent().prosent()).isEqualByComparingTo(HUNDRE_PROSENT);
+        assertThat(resultat.arbeidsgiverNavn()).isEqualTo("Virksomhet");
+    }
+
+    @Test
     void frilans_to_oppdrag() {
         var periode1 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(3).minusWeeks(1), LocalDate.now().minusMonths(3));
         var periode2 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusWeeks(3), LocalDate.now().minusWeeks(1));
