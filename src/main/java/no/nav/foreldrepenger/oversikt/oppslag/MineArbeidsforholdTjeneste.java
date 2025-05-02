@@ -91,12 +91,14 @@ public class MineArbeidsforholdTjeneste {
     }
 
     private static Stillingsprosent hentSistGjeldendeStillingsprsoent(Arbeidsforhold arbeidsforhold) {
-        if (arbeidsforhold.arbeidsavtaler().getMinLocalDate().isAfter(LocalDate.now())) {
+        if (arbeidsforhold.arbeidsavtaler().stream().allMatch(a -> a.getFom().isAfter(LocalDate.now()))) {
+            // Tilkommet arbeidsforhold så bruker vi første stillingsprosent hvis flere
             return arbeidsforhold.arbeidsavtaler().stream()
                     .min(Comparator.comparing(LocalDateSegment::getFom))
                     .map(LocalDateSegment::getValue)
                     .orElse(null);
         } else {
+            // Arbeidsforhold som er avsluttet eller både frem og tilbake i tid så bruker vi siste gjeldende stillingsprosent
             return arbeidsforhold.arbeidsavtaler().stream()
                     .max(Comparator.comparing(LocalDateSegment::getFom))
                     .map(LocalDateSegment::getValue)
