@@ -11,6 +11,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Saksnummer;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,21 +31,27 @@ public class TidslinjeRest {
 
     private TidslinjeTjeneste tidslinjeTjeneste;
     private InnloggetBruker innloggetBruker;
+    private TilgangKontrollTjeneste tilgangkontroll;
 
     public TidslinjeRest() {
         // CDI
     }
 
     @Inject
-    public TidslinjeRest(TidslinjeTjeneste tidslinjeTjeneste, InnloggetBruker innloggetBruker) {
+    public TidslinjeRest(TidslinjeTjeneste tidslinjeTjeneste, InnloggetBruker innloggetBruker, TilgangKontrollTjeneste tilgangkontroll) {
         this.tidslinjeTjeneste = tidslinjeTjeneste;
         this.innloggetBruker = innloggetBruker;
+        this.tilgangkontroll = tilgangkontroll;
     }
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<TidslinjeHendelseDto> hentTidslinje(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
-        var tidslinje = tidslinjeTjeneste.tidslinje(innloggetBruker.fødselsnummer(), new no.nav.foreldrepenger.oversikt.domene.Saksnummer(saksnummer.value()));
+        tilgangkontroll.sjekkAtKallErFraBorger();
+        tilgangkontroll.tilgangssjekkMyndighetsalder();
+        var saksnummerDomene = new no.nav.foreldrepenger.oversikt.domene.Saksnummer(saksnummer.value());
+        tilgangkontroll.sakKobletTilAktørGuard(saksnummerDomene);
+        var tidslinje = tidslinjeTjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummerDomene);
         tidslinjeKonsistensSjekk(tidslinje);
         return tidslinje;
     }

@@ -11,6 +11,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Saksnummer;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 import java.util.Comparator;
 import java.util.List;
@@ -19,17 +20,21 @@ import java.util.List;
 @Path("/dokument")
 public class DokumentRest {
 
-    private InnloggetBruker innloggetBruker;
     private SafSelvbetjeningTjeneste safSelvbetjeningTjeneste;
+    private InnloggetBruker innloggetBruker;
+    private TilgangKontrollTjeneste tilgangkontroll;
 
     public DokumentRest() {
         // CDI
     }
 
     @Inject
-    public DokumentRest(InnloggetBruker innloggetBruker, SafSelvbetjeningTjeneste safSelvbetjeningTjeneste) {
-        this.innloggetBruker = innloggetBruker;
+    public DokumentRest(SafSelvbetjeningTjeneste safSelvbetjeningTjeneste,
+                        InnloggetBruker innloggetBruker,
+                        TilgangKontrollTjeneste tilgangkontroll) {
         this.safSelvbetjeningTjeneste = safSelvbetjeningTjeneste;
+        this.innloggetBruker = innloggetBruker;
+        this.tilgangkontroll = tilgangkontroll;
     }
 
     @GET
@@ -37,6 +42,8 @@ public class DokumentRest {
     @Produces(MediaType.APPLICATION_JSON)
     public byte[] dokument(@QueryParam("journalpostId") @Valid @NotNull JournalpostId journalpostId,
                            @QueryParam("dokumentId") @Valid @NotNull String dokumentId) {
+        tilgangkontroll.sjekkAtKallErFraBorger();
+        tilgangkontroll.tilgangssjekkMyndighetsalder();
         return safSelvbetjeningTjeneste.hentDokument(journalpostId, dokumentId);
     }
 
@@ -44,7 +51,11 @@ public class DokumentRest {
     @Path("/alle")
     @Produces(MediaType.APPLICATION_JSON)
     public List<DokumentDto> alleDokumenterPåSak(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
-        var alleJournalposter = safSelvbetjeningTjeneste.alleJournalposter(innloggetBruker.fødselsnummer(), new no.nav.foreldrepenger.oversikt.domene.Saksnummer(saksnummer.value()));
+        tilgangkontroll.sjekkAtKallErFraBorger();
+        tilgangkontroll.tilgangssjekkMyndighetsalder();
+        var saksnummerDomene = new no.nav.foreldrepenger.oversikt.domene.Saksnummer(saksnummer.value());
+        tilgangkontroll.sakKobletTilAktørGuard(saksnummerDomene);
+        var alleJournalposter = safSelvbetjeningTjeneste.alleJournalposter(innloggetBruker.fødselsnummer(), saksnummerDomene);
         return tilArkivDokumenter(alleJournalposter);
     }
 
