@@ -76,8 +76,6 @@ public class TidslinjeTjeneste {
         var brevkode = enkelJournalpost.dokumenter().stream().findFirst().orElseThrow().brevkode();
         if (brevkode.erVedtak()) {
             return Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK);
-        } else if (brevkode.erFritekstbrev()) {
-            return Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.VEDTAK); // TODO: Er riktig nå, men må mappe til riktig brevkode i fpformidling/fpdokgen
         } else if (brevkode.erInnhentOpplysninger()) {
             return Optional.of(TidslinjeHendelseDto.TidslinjeHendelseType.UTGÅENDE_INNHENT_OPPLYSNINGER);
         } else if (brevkode.erEtterlysIM()) {
@@ -133,8 +131,9 @@ public class TidslinjeTjeneste {
 
     private static TidslinjeHendelseDto tilTidslinjeHendelse(FpOversiktInntektsmeldingDto inntektsmelding) {
         // versjon 1 har ikke journalPostId.
-        var dokumenter = inntektsmelding.versjon() == 2 ?
-            List.of(new TidslinjeHendelseDto.Dokument(inntektsmelding.journalpostId(), null, "")) : List.<TidslinjeHendelseDto.Dokument>of();
+        var dokumenter = inntektsmelding.versjon() == 2
+                ? List.of(new TidslinjeHendelseDto.Dokument(inntektsmelding.journalpostId(), null, ""))
+                : List.<TidslinjeHendelseDto.Dokument>of();
 
         return new TidslinjeHendelseDto(
             inntektsmelding.mottattTidspunkt(),

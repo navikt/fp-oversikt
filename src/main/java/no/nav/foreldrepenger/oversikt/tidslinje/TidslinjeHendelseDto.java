@@ -30,6 +30,6 @@ public record TidslinjeHendelseDto(@NotNull LocalDateTime opprettet,
         UTGÅENDE_VARSEL_TILBAKEBETALING
     }
 
-    public record Dokument(@NotNull String journalpostId, @NotNull String dokumentId, @NotNull String tittel) {
+    public record Dokument(@NotNull String journalpostId, String dokumentId, @NotNull String tittel) {
     }
 }

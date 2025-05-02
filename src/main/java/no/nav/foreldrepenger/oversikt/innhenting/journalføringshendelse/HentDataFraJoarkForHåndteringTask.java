@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostId;
-import no.nav.foreldrepenger.oversikt.arkiv.SafTjeneste;
+import no.nav.foreldrepenger.oversikt.arkiv.SafSystemTjeneste;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
@@ -21,12 +21,12 @@ public class HentDataFraJoarkForHåndteringTask implements ProsessTaskHandler {
     private static final Logger LOG = LoggerFactory.getLogger(HentDataFraJoarkForHåndteringTask.class);
     public static final String JOURNALPOST_ID = "journalpostId";
 
-    private final SafTjeneste arkiv;
+    private final SafSystemTjeneste arkiv;
     private final ProsessTaskTjeneste prosessTaskTjeneste;
     private final JournalføringHendelseTaskUtleder journalføringHendelseTaskUtleder;
 
     @Inject
-    public HentDataFraJoarkForHåndteringTask(SafTjeneste arkiv, ProsessTaskTjeneste prosessTaskTjeneste, JournalføringHendelseTaskUtleder journalføringHendelseTaskUtleder) {
+    public HentDataFraJoarkForHåndteringTask(SafSystemTjeneste arkiv, ProsessTaskTjeneste prosessTaskTjeneste, JournalføringHendelseTaskUtleder journalføringHendelseTaskUtleder) {
         this.arkiv = arkiv;
         this.prosessTaskTjeneste = prosessTaskTjeneste;
         this.journalføringHendelseTaskUtleder = journalføringHendelseTaskUtleder;

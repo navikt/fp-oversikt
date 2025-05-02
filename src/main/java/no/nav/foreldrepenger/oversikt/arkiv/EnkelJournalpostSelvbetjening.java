@@ -47,6 +47,7 @@ public record EnkelJournalpostSelvbetjening(String tittel,
         ETTERLYS_INNTEKTSMELDING_OLD_MF("MF_000096"),
 
         FRITEKSTBREV("FRITEK"), // Bare vedtak p.d.
+        FRITEKSTBREV_HTML("FRIHTM"),
         INNHENTE_OPPLYSNINGER("INNOPP"),
         ETTERLYS_INNTEKTSMELDING("ELYSIM"),
         FORELDREPENGER_FEIL_PRAKSIS_UTSETTELSE_INFOBREV("INFOPU"),
@@ -107,9 +108,10 @@ public record EnkelJournalpostSelvbetjening(String tittel,
             VEDTAK_POSITIVT_OLD_MF,
             VEDTAK_AVSLAG_OLD_MF,
             VEDTAK_FORELDREPENGER_OLD_MF,
-            VEDTAK_AVSLAG_FORELDREPENGER_OLD_MF
+            VEDTAK_AVSLAG_FORELDREPENGER_OLD_MF,
+            FRITEKSTBREV,
+            FRITEKSTBREV_HTML
         );
-
 
         private static final Set<Brevkode> INNHENT_OPPLYSNING_TYPER = Set.of(
             INNHENTE_OPPLYSNINGER,
@@ -145,10 +147,6 @@ public record EnkelJournalpostSelvbetjening(String tittel,
 
         public boolean erVarselOmTilbakebetaling() {
             return VARSEL_OM_TILBAKEBETALING.contains(this);
-        }
-
-        public boolean erFritekstbrev() {
-            return FRITEKSTBREV.equals(this);
         }
 
     }

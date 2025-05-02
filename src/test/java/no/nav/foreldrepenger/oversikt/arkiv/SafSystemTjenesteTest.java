@@ -22,21 +22,21 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
-import static no.nav.foreldrepenger.oversikt.arkiv.SafTjeneste.FP_DOK_TYPE;
+import static no.nav.foreldrepenger.oversikt.arkiv.SafSystemTjeneste.FP_DOK_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class SafTjenesteTest {
+class SafSystemTjenesteTest {
 
     private Saf saf;
-    private SafTjeneste arkivTjeneste;
+    private SafSystemTjeneste arkivTjeneste;
 
     @BeforeEach
     void setUp() {
         saf = mock(Saf.class);
-        arkivTjeneste = new SafTjeneste(saf);
+        arkivTjeneste = new SafSystemTjeneste(saf);
     }
 
     @Test

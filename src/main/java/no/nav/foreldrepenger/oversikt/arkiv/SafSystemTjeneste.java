@@ -28,18 +28,18 @@ import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.
  * Dokumentasjon av SAF: https://confluence.adeo.no/display/BOA/saf
  */
 @ApplicationScoped
-public class SafTjeneste {
+public class SafSystemTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SafTjeneste.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SafSystemTjeneste.class);
     static final String FP_DOK_TYPE = "fp_innholdtype";
 
     private Saf safKlient;
 
-    SafTjeneste() {
+    SafSystemTjeneste() {
     }
 
     @Inject
-    public SafTjeneste(Saf safKlient) {
+    public SafSystemTjeneste(Saf safKlient) {
         this.safKlient = safKlient;
     }
 
@@ -48,7 +48,7 @@ public class SafTjeneste {
         query.setJournalpostId(journalpostId.verdi());
         var resultat = safKlient.hentJournalpostInfo(query, journalpostProjeksjon());
         return Optional.ofNullable(resultat)
-            .map(SafTjeneste::mapTilJournalpost);
+            .map(SafSystemTjeneste::mapTilJournalpost);
     }
 
     private static JournalpostResponseProjection journalpostProjeksjon() {
@@ -102,7 +102,7 @@ public class SafTjeneste {
         return safeStream(journalpost.getTilleggsopplysninger())
             .filter(to -> FP_DOK_TYPE.equals(to.getNokkel()))
             .map(Tilleggsopplysning::getVerdi)
-            .map(SafTjeneste::tilDokumentTypeFraTilleggsopplysninger)
+            .map(SafSystemTjeneste::tilDokumentTypeFraTilleggsopplysninger)
             .findFirst()
             .map(d -> utledFraTittel(journalpost.getTittel()))
             .orElse(utledFraTittel(journalpost.getDokumenter().stream().findFirst().orElseThrow().getTittel()))
