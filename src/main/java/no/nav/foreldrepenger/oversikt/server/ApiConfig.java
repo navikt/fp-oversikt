@@ -11,6 +11,7 @@ import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.arbeid.ArbeidRest;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentRest;
 import no.nav.foreldrepenger.oversikt.drift.ManuellOppdateringAvSakDriftTjeneste;
 import no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingRest;
@@ -18,6 +19,7 @@ import no.nav.foreldrepenger.oversikt.oppgave.OppgaveRest;
 import no.nav.foreldrepenger.oversikt.oppslag.OppslagRest;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
+import no.nav.foreldrepenger.oversikt.tidslinje.TidslinjeRest;
 import no.nav.vedtak.exception.TekniskException;
 import org.glassfish.jersey.server.ServerProperties;
 
@@ -59,7 +61,8 @@ public class ApiConfig extends Application {
     @Override
     public Set<Class<?>> getClasses() {
         // eksponert grensesnitt bak sikkerhet. Nå er vi på max Set.of før varargs-versjonen.
-        return Set.of(OppslagRest.class, InntektsmeldingRest.class, OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ArbeidRest.class,
+        return Set.of(DokumentRest.class, TidslinjeRest.class, OppslagRest.class, InntektsmeldingRest.class,
+            OppgaveRest.class, SakerRest.class, AnnenPartRest.class, ArbeidRest.class,
             ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class,
             AuthenticationFilter.class, OpenApiResource.class, GeneralRestExceptionMapper.class);
     }
