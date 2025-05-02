@@ -41,7 +41,7 @@ public class DokumentRest {
     @Path("/hent-dokument")
     @Produces(MediaType.APPLICATION_JSON)
     public byte[] dokument(@QueryParam("journalpostId") @Valid @NotNull JournalpostId journalpostId,
-                           @QueryParam("dokumentId") @Valid @NotNull String dokumentId) {
+                           @QueryParam("dokumentId") @Valid @NotNull DokumentId dokumentId) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         return safSelvbetjeningTjeneste.hentDokument(journalpostId, dokumentId);

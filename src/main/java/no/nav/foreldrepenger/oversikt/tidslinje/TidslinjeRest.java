@@ -47,13 +47,18 @@ public class TidslinjeRest {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public List<TidslinjeHendelseDto> hentTidslinje(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
-        tilgangkontroll.sjekkAtKallErFraBorger();
-        tilgangkontroll.tilgangssjekkMyndighetsalder();
-        var saksnummerDomene = new no.nav.foreldrepenger.oversikt.domene.Saksnummer(saksnummer.value());
-        tilgangkontroll.sakKobletTilAktørGuard(saksnummerDomene);
-        var tidslinje = tidslinjeTjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummerDomene);
-        tidslinjeKonsistensSjekk(tidslinje);
-        return tidslinje;
+        try {
+            tilgangkontroll.sjekkAtKallErFraBorger();
+            tilgangkontroll.tilgangssjekkMyndighetsalder();
+            var saksnummerDomene = new no.nav.foreldrepenger.oversikt.domene.Saksnummer(saksnummer.value());
+            tilgangkontroll.sakKobletTilAktørGuard(saksnummerDomene);
+            var tidslinje = tidslinjeTjeneste.tidslinje(innloggetBruker.fødselsnummer(), saksnummerDomene);
+            tidslinjeKonsistensSjekk(tidslinje);
+            return tidslinje;
+        } catch (Exception e) {
+            LOG.info("Feil ved henting av tidslinje for saksnummer {}", saksnummer, e);
+            return List.of();
+        }
     }
 
     private static void tidslinjeKonsistensSjekk(List<TidslinjeHendelseDto> tidslinjeHendelseDto) {

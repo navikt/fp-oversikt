@@ -2,6 +2,8 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -47,8 +49,8 @@ public class SafSelvbetjeningTjeneste {
         this.safSelvbetjening = safSelvbetjening;
     }
 
-    public byte[] hentDokument(JournalpostId journalpostId, String dokumentId) {
-        return safSelvbetjening.hentDokument(new HentDokumentQuery(journalpostId.verdi(), dokumentId));
+    public byte[] hentDokument(JournalpostId journalpostId, @Valid @NotNull DokumentId dokumentId) {
+        return safSelvbetjening.hentDokument(new HentDokumentQuery(journalpostId.verdi(), dokumentId.verdi()));
     }
 
     public List<EnkelJournalpostSelvbetjening> alleJournalposter(Fødselsnummer fnr) {
