@@ -1,16 +1,5 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.AKTØRID;
-import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.FNR;
-import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Type.INNGÅENDE_DOKUMENT;
-import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Type.UTGÅENDE_DOKUMENT;
-
-import java.util.Optional;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.felles.DokumentType;
@@ -26,23 +15,31 @@ import no.nav.saf.SakResponseProjection;
 import no.nav.saf.Tilleggsopplysning;
 import no.nav.saf.TilleggsopplysningResponseProjection;
 import no.nav.vedtak.felles.integrasjon.saf.Saf;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
+
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.AKTØRID;
+import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.FNR;
 
 /**
  * Dokumentasjon av SAF: https://confluence.adeo.no/display/BOA/saf
  */
 @ApplicationScoped
-public class SafTjeneste {
+public class SafSystemTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SafTjeneste.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SafSystemTjeneste.class);
     static final String FP_DOK_TYPE = "fp_innholdtype";
 
     private Saf safKlient;
 
-    SafTjeneste() {
+    SafSystemTjeneste() {
     }
 
     @Inject
-    public SafTjeneste(Saf safKlient) {
+    public SafSystemTjeneste(Saf safKlient) {
         this.safKlient = safKlient;
     }
 
@@ -51,7 +48,7 @@ public class SafTjeneste {
         query.setJournalpostId(journalpostId.verdi());
         var resultat = safKlient.hentJournalpostInfo(query, journalpostProjeksjon());
         return Optional.ofNullable(resultat)
-            .map(SafTjeneste::mapTilJournalpost);
+            .map(SafSystemTjeneste::mapTilJournalpost);
     }
 
     private static JournalpostResponseProjection journalpostProjeksjon() {
@@ -74,7 +71,7 @@ public class SafTjeneste {
             journalpost.getSak().getFagsakId(),
             innsendingstype,
             tilBruker(journalpost.getBruker()),
-            innsendingstype.equals(INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : null
+            innsendingstype.equals(JournalpostType.INNGÅENDE_DOKUMENT) ? dokumenttypeFraTilleggsopplysninger(journalpost) : null
         );
     }
 
@@ -93,10 +90,10 @@ public class SafTjeneste {
         };
     }
 
-    private static EnkelJournalpost.Type tilType(Journalposttype journalposttype) {
+    private static JournalpostType tilType(Journalposttype journalposttype) {
         return switch (journalposttype) {
-            case I -> INNGÅENDE_DOKUMENT;
-            case U -> UTGÅENDE_DOKUMENT;
+            case I -> JournalpostType.INNGÅENDE_DOKUMENT;
+            case U -> JournalpostType.UTGÅENDE_DOKUMENT;
             case N -> throw new IllegalStateException("Utviklerfeil: Skal filterer bort notater før mapping!");
         };
     }
@@ -105,7 +102,7 @@ public class SafTjeneste {
         return safeStream(journalpost.getTilleggsopplysninger())
             .filter(to -> FP_DOK_TYPE.equals(to.getNokkel()))
             .map(Tilleggsopplysning::getVerdi)
-            .map(SafTjeneste::tilDokumentTypeFraTilleggsopplysninger)
+            .map(SafSystemTjeneste::tilDokumentTypeFraTilleggsopplysninger)
             .findFirst()
             .map(d -> utledFraTittel(journalpost.getTittel()))
             .orElse(utledFraTittel(journalpost.getDokumenter().stream().findFirst().orElseThrow().getTittel()))

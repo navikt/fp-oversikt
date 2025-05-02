@@ -7,13 +7,9 @@ public record EnkelJournalpost(String journalpostId,
                                String fagsaksystem,
                                String eksternReferanse,
                                String saksnummer,
-                               Type type,
+                               JournalpostType type,
                                Bruker bruker,
                                DokumentType hovedtype) {
-    public enum Type {
-        INNGÅENDE_DOKUMENT,
-        UTGÅENDE_DOKUMENT
-    }
 
     public boolean erInfotrygdSak() {
         return "IT01".equalsIgnoreCase(fagsaksystem);

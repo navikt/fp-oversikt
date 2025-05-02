@@ -58,7 +58,6 @@ public class OppslagTjeneste {
             LOG.info("Feil ved henting av personinfo for søker", e);
             return null;
         }
-
     }
 
     public PersonMedArbeidsforholdDto personinfoMedArbeidsforholdFor() {
