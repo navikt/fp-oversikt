@@ -53,7 +53,7 @@ public class OppslagTjeneste {
             LOG.info("Henter personinfo for søker");
             var søkersFnr = innloggetBruker.fødselsnummer();
             return Optional.ofNullable(PERSONINFO_CACHE.get(søkersFnr.value()))
-                    .orElseGet(() -> hentPersoninfoPåNytt(søkersFnr));
+                    .orElseGet(() -> hentOgCachePersoninfo(søkersFnr));
         } catch (Exception e) {
             LOG.info("Feil ved henting av personinfo for søker", e);
             return null;
@@ -74,10 +74,16 @@ public class OppslagTjeneste {
     private List<EksternArbeidsforholdDto> hentEksternArbeidsforhold() {
         var søkersFnr = innloggetBruker.fødselsnummer();
         return Optional.ofNullable(PERSON_ARBEIDSFORHOLD_CACHE.get(søkersFnr.value()))
-                .orElseGet(() -> mineArbeidsforholdTjeneste.brukersArbeidsforhold(søkersFnr));
+                .orElseGet(() -> hentOgCacheArbeidsforhold(søkersFnr));
     }
 
-    private PersonDto hentPersoninfoPåNytt(Fødselsnummer søkersFnr) {
+    public List<EksternArbeidsforholdDto> hentOgCacheArbeidsforhold(Fødselsnummer søkersFnr) {
+        var arbeidforhold = mineArbeidsforholdTjeneste.brukersArbeidsforhold(søkersFnr);
+        PERSON_ARBEIDSFORHOLD_CACHE.put(søkersFnr.value(), arbeidforhold);
+        return arbeidforhold;
+    }
+
+    private PersonDto hentOgCachePersoninfo(Fødselsnummer søkersFnr) {
         var søkersAktørid = innloggetBruker.aktørId();
         var søker = pdlOppslagTjeneste.hentSøker(søkersFnr.value());
         var barn = pdlOppslagTjeneste.hentBarnTilSøker(søker);
