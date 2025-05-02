@@ -1,20 +1,20 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.UUID;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
+import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.TaskType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.util.UUID;
+
+import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class JournalføringHendelseTaskUtlederTest {
 
@@ -84,7 +84,7 @@ class JournalføringHendelseTaskUtlederTest {
             "FS36",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
-            EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
+            JournalpostType.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.AKTØRID, AktørId.dummy().value()),
             DokumentType.I000001
         );
@@ -96,7 +96,7 @@ class JournalføringHendelseTaskUtlederTest {
             "FS36",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
-            EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
+            JournalpostType.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.FNR, "000000"),
             DokumentType.I000038
         );
@@ -108,7 +108,7 @@ class JournalføringHendelseTaskUtlederTest {
             "FS36",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
-            EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
+            JournalpostType.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.AKTØRID, "000000"),
             DokumentType.I000067
         );
@@ -120,7 +120,7 @@ class JournalføringHendelseTaskUtlederTest {
             "FS36",
             UUID.randomUUID().toString(),
             Saksnummer.dummy().value(),
-            EnkelJournalpost.Type.INNGÅENDE_DOKUMENT,
+            JournalpostType.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.FNR, "000000"),
             DokumentType.I000114
         );

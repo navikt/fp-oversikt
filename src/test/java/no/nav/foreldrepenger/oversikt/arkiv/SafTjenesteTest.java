@@ -1,18 +1,5 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
-import static no.nav.foreldrepenger.oversikt.arkiv.SafTjeneste.FP_DOK_TYPE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -28,6 +15,18 @@ import no.nav.saf.Journalstatus;
 import no.nav.saf.Sak;
 import no.nav.saf.Tilleggsopplysning;
 import no.nav.vedtak.felles.integrasjon.saf.Saf;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+
+import static no.nav.foreldrepenger.oversikt.arkiv.SafTjeneste.FP_DOK_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class SafTjenesteTest {
 

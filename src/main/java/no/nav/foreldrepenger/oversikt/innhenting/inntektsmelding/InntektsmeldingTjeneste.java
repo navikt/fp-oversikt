@@ -29,7 +29,7 @@ public class InntektsmeldingTjeneste {
         // CDI
     }
 
-    List<FpOversiktInntektsmeldingDto> inntektsmeldinger(Saksnummer saksnummer) {
+    public List<FpOversiktInntektsmeldingDto> inntektsmeldinger(Saksnummer saksnummer) {
         return inntektsmeldingerRepository.hentFor(Set.of(saksnummer)).stream().map(InntektsmeldingTjeneste::tilInntektsmeldingDto).toList();
     }
 

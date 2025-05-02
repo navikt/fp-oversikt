@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.arkiv;
+package no.nav.foreldrepenger.oversikt.integrasjoner.saf;
 
 
 import jakarta.enterprise.context.Dependent;
