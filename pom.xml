@@ -21,10 +21,10 @@
 
         <io.confluent.version>7.9.0</io.confluent.version>
 
-        <felles.version>7.5.4</felles.version>
+        <felles.version>7.5.3</felles.version>
         <prosesstask.version>5.1.5</prosesstask.version>
         <fp-kontrakter.version>9.3.0</fp-kontrakter.version>
-        <fpsoknad-felles.version>3.2.7</fpsoknad-felles.version>
+        <fpsoknad-felles.version>3.2.5</fpsoknad-felles.version>
         <fp-tidsserie.version>2.7.3</fp-tidsserie.version>
         <mittnav-varsler.version>2.1.1</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>1.1.6</teamdokumenthandtering-avro-schemas.version>
