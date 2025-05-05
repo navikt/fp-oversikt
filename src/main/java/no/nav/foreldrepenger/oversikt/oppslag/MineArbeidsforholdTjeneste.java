@@ -13,6 +13,7 @@ import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
@@ -80,7 +81,7 @@ public class MineArbeidsforholdTjeneste {
 
     private static Stillingsprosent gjeldendeStillingsprosent(Arbeidsforhold arbeidsforhold) {
         if (arbeidsforhold.arbeidsavtaler().isEmpty()) {
-            return null;
+            return Stillingsprosent.arbeid(BigDecimal.ZERO);
         }
 
         return arbeidsforhold.arbeidsavtaler().stream()
@@ -96,13 +97,13 @@ public class MineArbeidsforholdTjeneste {
             return arbeidsforhold.arbeidsavtaler().stream()
                     .min(Comparator.comparing(LocalDateSegment::getFom))
                     .map(LocalDateSegment::getValue)
-                    .orElse(null);
+                    .orElseThrow();
         } else {
             // Arbeidsforhold som er avsluttet eller både frem og tilbake i tid så bruker vi siste gjeldende stillingsprosent
             return arbeidsforhold.arbeidsavtaler().stream()
                     .max(Comparator.comparing(LocalDateSegment::getFom))
                     .map(LocalDateSegment::getValue)
-                    .orElse(null);
+                    .orElseThrow();
         }
     }
 

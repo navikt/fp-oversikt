@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.aareg;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
+import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
@@ -89,7 +90,7 @@ class MineArbeidsforholdTjenesteTest {
         assertThat(resultat.arbeidsgiverIdType()).isEqualTo("fnr");
         assertThat(resultat.from()).isEqualTo(LocalDate.now().minusMonths(1));
         assertThat(resultat.to()).hasValueSatisfying(d -> assertThat(d).isEqualTo(LocalDate.now().plusWeeks(2)));
-        assertThat(resultat.stillingsprosent()).isNull();
+        assertThat(resultat.stillingsprosent()).isEqualTo(new Stillingsprosent(BigDecimal.ZERO));
         assertThat(resultat.arbeidsgiverNavn()).isEqualTo("Fornavn Etternavn");
     }
 
@@ -198,7 +199,7 @@ class MineArbeidsforholdTjenesteTest {
 
         var resultat = tjeneste.brukersFrilansoppdragSisteSeksMåneder(FNR);
         assertThat(resultat).hasSize(2)
-            .satisfies(d -> assertThat(d.stream().allMatch(a -> a.stillingsprosent() == null)).isTrue());
+            .satisfies(d -> assertThat(d.stream().allMatch(a -> a.stillingsprosent().prosent().compareTo(BigDecimal.ZERO) == 0)).isTrue());
     }
 
 }

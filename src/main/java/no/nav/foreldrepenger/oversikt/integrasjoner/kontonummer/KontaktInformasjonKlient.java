@@ -46,7 +46,7 @@ public class KontaktInformasjonKlient {
         this.endpoint = UriBuilder.fromUri(restConfig.endpoint()).build();
     }
 
-    public KontonummerDto hentRegistertKontonummer() {
+    public KontonummerDto hentRegistertKontonummerMedFallback() {
         try {
             var request = RestRequest.newGET(endpoint, restConfig)
                     .otherCallId(NavHeaders.HEADER_NAV_LOWER_CALL_ID)

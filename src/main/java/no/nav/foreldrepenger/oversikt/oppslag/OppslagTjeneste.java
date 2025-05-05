@@ -49,25 +49,15 @@ public class OppslagTjeneste {
     }
 
     public PersonDto personinfoFor() {
-        try {
-            LOG.info("Henter personinfo for søker");
-            var søkersFnr = innloggetBruker.fødselsnummer();
-            return Optional.ofNullable(PERSONINFO_CACHE.get(søkersFnr.value()))
-                    .orElseGet(() -> hentOgCachePersoninfo(søkersFnr));
-        } catch (Exception e) {
-            LOG.info("Feil ved henting av personinfo for søker", e);
-            return null;
-        }
+        LOG.info("Henter personinfo for søker");
+        var søkersFnr = innloggetBruker.fødselsnummer();
+        return Optional.ofNullable(PERSONINFO_CACHE.get(søkersFnr.value()))
+                .orElseGet(() -> hentOgCachePersoninfo(søkersFnr));
     }
 
     public PersonMedArbeidsforholdDto personinfoMedArbeidsforholdFor() {
-        try {
-            LOG.info("Henter personinfo med arbeidsforhold for søker");
-            return new PersonMedArbeidsforholdDto(personinfoFor(), hentEksternArbeidsforhold());
-        } catch (Exception e) {
-            LOG.info("Feil ved henting av personinfo med arbeidsforhold for søker", e);
-            return null;
-        }
+        LOG.info("Henter personinfo med arbeidsforhold for søker");
+        return new PersonMedArbeidsforholdDto(personinfoFor(), hentEksternArbeidsforhold());
     }
 
     private List<EksternArbeidsforholdDto> hentEksternArbeidsforhold() {
@@ -87,8 +77,8 @@ public class OppslagTjeneste {
         var søker = pdlOppslagTjeneste.hentSøker(søkersFnr.value());
         var barn = pdlOppslagTjeneste.hentBarnTilSøker(søker);
         var annenpart = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(barn, søkersFnr);
-        var målform = krrSpråkKlient.finnSpråkkodeMedFallbackNB(søkersFnr.value());
-        var kontonummer = kontaktInformasjonKlient.hentRegistertKontonummer();
+        var målform = krrSpråkKlient.finnSpråkkodeMedFallback(søkersFnr.value());
+        var kontonummer = kontaktInformasjonKlient.hentRegistertKontonummerMedFallback();
         var personinfoDto = PersonDtoMapper.tilPersonDto(søkersAktørid, søker, barn, annenpart, målform, kontonummer);
         PERSONINFO_CACHE.put(søkersFnr.value(), personinfoDto);
         return personinfoDto;

@@ -52,7 +52,7 @@ public class KrrSpråkKlient {
                 .build();
     }
 
-    public Målform finnSpråkkodeMedFallbackNB(String fnr) {
+    public Målform finnSpråkkodeMedFallback(String fnr) {
         try {
             var personOpt = hentKontaktinformasjon(fnr);
             if (personOpt.isEmpty()) {

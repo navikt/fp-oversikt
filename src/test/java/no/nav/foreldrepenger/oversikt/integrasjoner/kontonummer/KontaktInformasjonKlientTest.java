@@ -40,19 +40,19 @@ class KontaktInformasjonKlientTest {
                 }
                 """;
         when(restClient.sendReturnUnhandled(any())).thenReturn(new HttpResponseImpl(200, body));
-        assertThat(kontaktInformasjonKlient.hentRegistertKontonummer().kontonummer()).isEqualTo("123");
+        assertThat(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback().kontonummer()).isEqualTo("123");
     }
 
     @Test
     void kontonummer_feiler_med_404_skal_returnere_ukjent_kontonummer_og_ikke_feile() {
         when(restClient.sendReturnUnhandled(any())).thenReturn(new HttpResponseImpl(404, null));
-        assertThat(kontaktInformasjonKlient.hentRegistertKontonummer()).isEqualTo(UKJENT);
+        assertThat(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).isEqualTo(UKJENT);
     }
 
     @Test
     void andre_status_kode_skal_hive_exception_men_catches_og_returner_ukjent_men_logges() {
         when(restClient.sendReturnUnhandled(any())).thenReturn(new HttpResponseImpl(500, null));
-        assertThat(kontaktInformasjonKlient.hentRegistertKontonummer()).isEqualTo(UKJENT);
+        assertThat(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).isEqualTo(UKJENT);
     }
 
     record HttpResponseImpl(int status, String body) implements HttpResponse<String> {
