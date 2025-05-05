@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.arbeid;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.common.util.StringUtil;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
@@ -10,6 +11,8 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
 import no.nav.fpsak.tidsserie.StandardCombinators;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
@@ -23,6 +26,7 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class ArbeidsforholdTjeneste {
+    private static final Logger LOG = LoggerFactory.getLogger(ArbeidsforholdTjeneste.class);
 
     private static final Period TID_TILBAKE_ARBEID = Period.ofYears(3);
     private static final Period TID_TILBAKE_FRILANS = Period.ofMonths(6);
@@ -70,8 +74,11 @@ public class ArbeidsforholdTjeneste {
 
         var ansettelsesPeriode = byggAnsettelsesPeriodeRS(arbeidsforhold);
 
-        var arbeidsavtaler = arbeidsforhold.arbeidsavtaler()
-            .stream()
+        LOG.info("Arbeidsavtaler på {} for intervallet {} er {}",
+                StringUtil.mask(arbeidsforhold.arbeidsgiver().organisasjonsnummer()),
+                ansettelsesPeriode,
+                arbeidsforhold.arbeidsavtaler());
+        var arbeidsavtaler = arbeidsforhold.arbeidsavtaler().stream()
             .filter(a -> a.stillingsprosent() != null) // De blir uansett forkastet senere
             .map(this::byggArbeidsavtaleRS)
             .filter(av -> innhentingsIntervall.overlaps(av.getLocalDateInterval()))
