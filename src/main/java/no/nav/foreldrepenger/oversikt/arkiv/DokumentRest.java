@@ -38,7 +38,6 @@ public class DokumentRest {
     }
 
     @GET
-    @Path("/hent-dokument")
     @Produces(MediaType.APPLICATION_JSON)
     public byte[] dokument(@QueryParam("journalpostId") @Valid @NotNull JournalpostId journalpostId,
                            @QueryParam("dokumentId") @Valid @NotNull DokumentId dokumentId) {
