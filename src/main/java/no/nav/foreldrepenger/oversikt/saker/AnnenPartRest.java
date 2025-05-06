@@ -1,11 +1,6 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 
-import java.time.LocalDate;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -15,9 +10,14 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import no.nav.foreldrepenger.common.domain.AktørId;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.AnnenPartSak;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.time.LocalDate;
 
 @Path("/annenPart")
 @ApplicationScoped
@@ -41,6 +41,14 @@ public class AnnenPartRest {
     }
 
     AnnenPartRest() {
+    }
+
+    @Path("/aktorid")
+    @POST
+    @Produces(MediaType.APPLICATION_JSON)
+    public AktørId aktøridForPerson(@Valid @NotNull AnnenPartRequest annenPartRequest) {
+        tilgangkontroll.sjekkAtKallErFraBorger();
+        return new AktørId(personOppslagSystem.aktørId(annenPartRequest.annenPartFødselsnummer()).value());
     }
 
     @Path("/v2")
