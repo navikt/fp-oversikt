@@ -1,22 +1,25 @@
 package no.nav.foreldrepenger.oversikt.arbeid;
 
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 @ApplicationScoped
 public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(AktivitetskravMåDokumentereMorsArbeidTjeneste.class);
+    private static final Environment ENV = Environment.current();
 
     private PersonOppslagSystem personOppslagSystem;
     private AnnenPartSakTjeneste annenPartSakTjeneste;
@@ -39,6 +42,9 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
     }
 
     public boolean krevesDokumentasjonForAktivitetskravArbeid(Fødselsnummer søkersFnr, AktørId søkersAktørid, ArbeidRest.MorArbeidRequest request) {
+        if (ENV.isProd()) {
+            return true; //TODO TFP-5383
+        }
         if (kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(request.annenPartFødselsnummer())) {
             LOG.info("Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
             return true;

@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.oversikt.oppgave;
 
 import static java.time.ZoneOffset.UTC;
-import static no.nav.tms.varsel.builder.OpprettVarselBuilder.eksternVarsling;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -29,6 +28,7 @@ import no.nav.tms.varsel.builder.OpprettVarselBuilder;
 class MinSideTjeneste {
 
     //https://navikt.github.io/tms-dokumentasjon/varsler/
+    //https://aksel.nav.no/god-praksis/artikler/hvordan-fungerer-varsler-til-privatpersoner
 
     private static final Environment ENV = Environment.current();
 
@@ -136,13 +136,12 @@ class MinSideTjeneste {
             return; //TODO TFP-5383
         }
 
-        var varselstekst = "Nav har brukt opplysninger om arbeidsforholdet ditt"; //TODO TFP-5383
+        var varselstekst = "Nav har brukt opplysninger om arbeidsforholdet ditt";
 
         var builder = builder(Varseltype.Beskjed, morsAktørId, eventId)
             .withLink(morsArbeidLenke.toString())
             .withTekst("nb", varselstekst, true)
-            .withEksternVarsling(eksternVarsling())
-            .withAktivFremTil(LocalDateTime.now(UTC).plusDays(14).atZone(UTC));
+            .withEksternVarsling();
         producer.send(eventId, builder.build());
     }
 }
