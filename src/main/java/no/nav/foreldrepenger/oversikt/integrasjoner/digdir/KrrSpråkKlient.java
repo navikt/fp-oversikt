@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -65,6 +66,10 @@ public class KrrSpråkKlient {
             }
             if (person.spraak() == null) {
                 LOG.info("KrrSpråkKlient: bruker har ikke språk, returnerer default");
+                return Målform.NB;
+            }
+            if (Arrays.stream(Målform.values()).noneMatch(m -> m.name().equalsIgnoreCase(person.spraak()))) {
+                LOG.info("KrrSpråkKlient: bruker har språk {}, bruker NB", person.spraak());
                 return Målform.NB;
             }
             return Målform.valueOf(person.spraak().toUpperCase());
