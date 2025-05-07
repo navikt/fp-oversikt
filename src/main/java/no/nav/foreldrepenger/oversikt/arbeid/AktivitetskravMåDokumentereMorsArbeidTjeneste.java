@@ -46,19 +46,32 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
             return true; //TODO TFP-5383
         }
         if (kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(request.annenPartFødselsnummer())) {
-            LOG.info("Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
+            LOG.info("AKTIVTETSKRAV: Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
             return true;
         }
 
         // Tilfelle bare far rett - der kan vi ikke vente at mor har en sak. Dersom mor har engangsstønad så har hun ikke oppgitt far/medmor
-        if (harAnnenpartSakSomGjelderSøkerOgBarn(søkersAktørid, request).isEmpty()) {
+        if (annenpartSomGjelderBarnHvorSøkerErOppgitt(søkersAktørid, request).isEmpty()) {
+            LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder søker og barn");
             if (request.barnFødselsnummer() == null) {
+                LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder søker og barn. og fødselsnummer på barn er ikke oppgitt");
                 return true;
             }
             if (!personOppslagSystem.barnHarDisseForeldrene(request.barnFødselsnummer(), request.annenPartFødselsnummer(), søkersFnr)) {
+                LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder både søker og barn, men barn har ikke relasjon til en eller begge av forelderene");
                 return true;
             }
         }
+        var krevesDokumentasjonForAktivitetskravArbeid = krevesDokumentasjonForAktivitetskravArbeid(request);
+        if (krevesDokumentasjonForAktivitetskravArbeid) {
+            LOG.info("AKTIVTETSKRAV: Mor har ikke arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
+        } else {
+            LOG.info("AKTIVTETSKRAV: Mor har arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
+        }
+        return krevesDokumentasjonForAktivitetskravArbeid;
+    }
+
+    private boolean krevesDokumentasjonForAktivitetskravArbeid(ArbeidRest.MorArbeidRequest request) {
         var intervaller = request.perioder().stream()
                 .map(p -> new LocalDateInterval(p.fom(), p.tom()))
                 .toList();
@@ -66,7 +79,7 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         return aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(aktivitetskravrequest);
     }
 
-    private Optional<ForeldrepengerSak> harAnnenpartSakSomGjelderSøkerOgBarn(AktørId innloggetBrukerAktørid, ArbeidRest.MorArbeidRequest request) {
+    private Optional<ForeldrepengerSak> annenpartSomGjelderBarnHvorSøkerErOppgitt(AktørId innloggetBrukerAktørid, ArbeidRest.MorArbeidRequest request) {
         var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
         var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
