@@ -1,5 +1,12 @@
 package no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer;
 
+import java.net.HttpURLConnection;
+import java.net.URI;
+import java.time.Duration;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
@@ -11,12 +18,6 @@ import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.net.HttpURLConnection;
-import java.net.URI;
-import java.time.Duration;
 
 /*
  * https://github.com/navikt/sokos-kontoregister-person
@@ -63,6 +64,10 @@ public class KontaktInformasjonKlient {
             }
             if (statusKode > 300) {
                 throw new IntegrasjonException("FP-468817", "Feil ved henting av kontonummer for person. " +  response.body());
+            }
+            if (response.body() == null || response.body().isEmpty()) {
+                LOG.info("Tomt svar fra kontoregister. Forsetter uten kontonummer!");
+                return KontonummerDto.UKJENT;
             }
             return DefaultJsonMapper.fromJson(response.body(), KontonummerDto.class);
         } catch (Exception e) {
