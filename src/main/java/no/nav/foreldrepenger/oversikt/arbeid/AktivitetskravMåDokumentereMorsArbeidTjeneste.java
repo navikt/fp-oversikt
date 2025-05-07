@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.oversikt.arbeid;
 
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -10,7 +8,6 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -51,7 +48,7 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         }
 
         // Tilfelle bare far rett - der kan vi ikke vente at mor har en sak. Dersom mor har engangsstønad så har hun ikke oppgitt far/medmor
-        if (annenpartSomGjelderBarnHvorSøkerErOppgitt(søkersAktørid, request).isEmpty()) {
+        if (annenpartHarIkkeSakMedOppgittBarnOgSøker(søkersAktørid, request)) {
             LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder søker og barn");
             if (request.barnFødselsnummer() == null) {
                 LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder søker og barn. og fødselsnummer på barn er ikke oppgitt");
@@ -79,10 +76,10 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         return aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(aktivitetskravrequest);
     }
 
-    private Optional<ForeldrepengerSak> annenpartSomGjelderBarnHvorSøkerErOppgitt(AktørId innloggetBrukerAktørid, ArbeidRest.MorArbeidRequest request) {
+    private boolean annenpartHarIkkeSakMedOppgittBarnOgSøker(AktørId innloggetBrukerAktørid, ArbeidRest.MorArbeidRequest request) {
         var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
         var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
-        return annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(innloggetBrukerAktørid, annenPartAktørId, barnAktørId, familieHendelse);
+        return annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(innloggetBrukerAktørid, annenPartAktørId, barnAktørId, familieHendelse).isEmpty();
     }
 }
