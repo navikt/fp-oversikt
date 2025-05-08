@@ -1,22 +1,23 @@
 package no.nav.foreldrepenger.oversikt.oppslag;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
-import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlient;
+import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientBorger;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
 import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonDto;
 import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonMedArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.oppslag.mapper.PersonDtoMapper;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.vedtak.util.LRUCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 @ApplicationScoped
 public class OppslagTjeneste {
@@ -27,7 +28,7 @@ public class OppslagTjeneste {
 
     private PdlOppslagTjeneste pdlOppslagTjeneste;
     private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
-    private KrrSpråkKlient krrSpråkKlient;
+    private KrrSpråkKlientBorger krrSpråkKlientBorger;
     private KontaktInformasjonKlient kontaktInformasjonKlient;
     private InnloggetBruker innloggetBruker;
 
@@ -38,12 +39,12 @@ public class OppslagTjeneste {
     @Inject
     public OppslagTjeneste(PdlOppslagTjeneste pdlOppslagTjeneste,
                            MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste,
-                           KrrSpråkKlient krrSpråkKlient,
+                           KrrSpråkKlientBorger krrSpråkKlientBorger,
                            KontaktInformasjonKlient kontaktInformasjonKlient,
                            InnloggetBruker innloggetBruker) {
         this.pdlOppslagTjeneste = pdlOppslagTjeneste;
         this.mineArbeidsforholdTjeneste = mineArbeidsforholdTjeneste;
-        this.krrSpråkKlient = krrSpråkKlient;
+        this.krrSpråkKlientBorger = krrSpråkKlientBorger;
         this.kontaktInformasjonKlient = kontaktInformasjonKlient;
         this.innloggetBruker = innloggetBruker;
     }
@@ -77,7 +78,7 @@ public class OppslagTjeneste {
         var søker = pdlOppslagTjeneste.hentSøker(søkersFnr.value());
         var barn = pdlOppslagTjeneste.hentBarnTilSøker(søker);
         var annenpart = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(barn, søkersFnr);
-        var målform = krrSpråkKlient.finnSpråkkodeMedFallback(søkersFnr.value());
+        var målform = krrSpråkKlientBorger.finnSpråkkodeMedFallback(søkersFnr.value());
         var kontonummer = kontaktInformasjonKlient.hentRegistertKontonummerMedFallback();
         var personinfoDto = PersonDtoMapper.tilPersonDto(søkersAktørid, søker, barn, annenpart, målform, kontonummer);
         PERSONINFO_CACHE.put(søkersFnr.value(), personinfoDto);

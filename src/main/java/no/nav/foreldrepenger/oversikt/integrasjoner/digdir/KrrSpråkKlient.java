@@ -1,19 +1,5 @@
 package no.nav.foreldrepenger.oversikt.integrasjoner.digdir;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.core.UriBuilderException;
-import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
-import no.nav.vedtak.felles.integrasjon.rest.NavHeaders;
-import no.nav.vedtak.felles.integrasjon.rest.RestClient;
-import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
-import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
-import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
-import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
-import no.nav.vedtak.util.LRUCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.URI;
 import java.time.Duration;
 import java.util.Arrays;
@@ -21,18 +7,23 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.ws.rs.core.UriBuilder;
+import jakarta.ws.rs.core.UriBuilderException;
+import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
+import no.nav.vedtak.felles.integrasjon.rest.NavHeaders;
+import no.nav.vedtak.felles.integrasjon.rest.RestClient;
+import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
+import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
+import no.nav.vedtak.util.LRUCache;
+
 /*
  * https://github.com/navikt/digdir-krr
  * https://digdir-krr-proxy.intern.dev.nav.no/swagger-ui/index.html#/personer-controller/postPersoner
  */
-
-@ApplicationScoped
-@RestClientConfig(
-        tokenConfig = TokenFlow.ADAPTIVE,
-        endpointProperty = "krr.rs.uri",
-        endpointDefault = "http://digdir-krr-proxy.team-rocket/rest/v1/personer",
-        scopesProperty = "krr.rs.scopes", scopesDefault = "api://prod-gcp.team-rocket.digdir-krr-proxy/.default")
-public class KrrSpråkKlient {
+public abstract class KrrSpråkKlient {
     private static final Logger LOG = LoggerFactory.getLogger(KrrSpråkKlient.class);
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     private static final LRUCache<String, Kontaktinformasjoner.Kontaktinformasjon> KONTAKTINFORMASJON_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
@@ -41,16 +32,12 @@ public class KrrSpråkKlient {
     private final RestClient restClient;
     private final RestConfig restConfig;
 
-    public KrrSpråkKlient() {
-        this(RestClient.client());
-    }
-
-    public KrrSpråkKlient(RestClient restClient) {
+    KrrSpråkKlient(RestClient restClient, RestConfig restConfig) {
         this.restClient = restClient;
-        this.restConfig = RestConfig.forClient(KrrSpråkKlient.class);
+        this.restConfig = restConfig;
         this.endpoint = UriBuilder.fromUri(restConfig.endpoint())
-                .queryParam("inkluderSikkerDigitalPost", "false")
-                .build();
+            .queryParam("inkluderSikkerDigitalPost", "false")
+            .build();
     }
 
     public Målform finnSpråkkodeMedFallback(String fnr) {

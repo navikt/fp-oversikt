@@ -1,19 +1,20 @@
 package no.nav.foreldrepenger.oversikt.arbeid;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.Kontaktinformasjoner;
-import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlient;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
+
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.Kontaktinformasjoner;
+import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientSystem;
 
 @ExtendWith(MockitoExtension.class)
 class KontaktInformasjonTjenesteTest {
@@ -21,8 +22,8 @@ class KontaktInformasjonTjenesteTest {
     private static final Fødselsnummer DUMMY_FNR = new Fødselsnummer("12345678901");
 
     @Mock
-    private KrrSpråkKlient krrSpråkKlient;
-    
+    private KrrSpråkKlientSystem krrSpråkKlient;
+
     private KontaktInformasjonTjeneste kontaktInformasjonTjeneste;
 
     @BeforeEach
