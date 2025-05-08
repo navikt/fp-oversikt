@@ -6,11 +6,6 @@ import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 
-/*
- * https://github.com/navikt/digdir-krr
- * https://digdir-krr-proxy.intern.dev.nav.no/swagger-ui/index.html#/personer-controller/postPersoner
- */
-
 @ApplicationScoped
 @RestClientConfig(
     tokenConfig = TokenFlow.AZUREAD_CC,
