@@ -35,7 +35,7 @@ public abstract class KrrSpråkKlient {
     KrrSpråkKlient(RestClient restClient, RestConfig restConfig) {
         this.restClient = restClient;
         this.restConfig = restConfig;
-        this.endpoint = UriBuilder.fromUri(RestConfig.forClient(KrrSpråkKlientSystem.class).endpoint())
+        this.endpoint = UriBuilder.fromUri(restConfig.endpoint())
             .queryParam("inkluderSikkerDigitalPost", "false")
             .build();
     }
