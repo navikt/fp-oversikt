@@ -1,30 +1,31 @@
 package no.nav.foreldrepenger.oversikt.arbeid;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientSystem;
 
 @ApplicationScoped
 public class KontaktInformasjonTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(KontaktInformasjonTjeneste.class);
 
-    private KrrSpråkKlient krrSpråkKlient;
+    private KrrSpråkKlientSystem krrSpråkKlientSystem;
 
     public KontaktInformasjonTjeneste() {
         // CDI
     }
 
     @Inject
-    public KontaktInformasjonTjeneste(KrrSpråkKlient krrSpråkKlient) {
-        this.krrSpråkKlient = krrSpråkKlient;
+    public KontaktInformasjonTjeneste(KrrSpråkKlientSystem krrSpråkKlientSystem) {
+        this.krrSpråkKlientSystem = krrSpråkKlientSystem;
     }
 
     public boolean harReservertSegEllerKanIkkeVarsles(Fødselsnummer fnr) {
         try {
-            var kontaktinformasjonOpt = krrSpråkKlient.hentKontaktinformasjon(fnr.value());
+            var kontaktinformasjonOpt = krrSpråkKlientSystem.hentKontaktinformasjon(fnr.value());
             if (kontaktinformasjonOpt.isEmpty()) {
                 return true;
             }

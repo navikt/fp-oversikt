@@ -1,34 +1,6 @@
 package no.nav.foreldrepenger.oversikt.oppslag;
 
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.domain.felles.Kjønn;
-import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
-import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
-import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlient;
-import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
-import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
-import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
-import no.nav.pdl.AdressebeskyttelseGradering;
-import no.nav.pdl.ForelderBarnRelasjonRolle;
-import no.nav.pdl.KjoennType;
-import no.nav.pdl.Person;
-import no.nav.pdl.Sivilstandstype;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
 import static no.nav.foreldrepenger.oversikt.oppslag.OppslagTjeneste.PERSONINFO_CACHE;
 import static no.nav.foreldrepenger.oversikt.oppslag.OppslagTjeneste.PERSON_ARBEIDSFORHOLD_CACHE;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.adressebeskyttelse;
@@ -40,6 +12,35 @@ import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.siviltilstand;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.common.domain.felles.Kjønn;
+import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
+import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
+import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientBorger;
+import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
+import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
+import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
+import no.nav.pdl.AdressebeskyttelseGradering;
+import no.nav.pdl.ForelderBarnRelasjonRolle;
+import no.nav.pdl.KjoennType;
+import no.nav.pdl.Person;
+import no.nav.pdl.Sivilstandstype;
 
 @ExtendWith(MockitoExtension.class)
 class OppslagTjenesteTest {
@@ -56,7 +57,7 @@ class OppslagTjenesteTest {
     private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
 
     @Mock
-    private KrrSpråkKlient krrSpråkKlient;
+    private KrrSpråkKlientBorger krrSpråkKlientBorger;
 
     @Mock
     private KontaktInformasjonKlient kontaktInformasjonKlient;
@@ -95,7 +96,7 @@ class OppslagTjenesteTest {
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
-        when(krrSpråkKlient.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
+        when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
         when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of(enkeltArbeidsforhold));
 
@@ -153,7 +154,7 @@ class OppslagTjenesteTest {
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barnPdl)));
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of(BARN_1_IDENT, new PdlOppslagTjeneste.PersonMedIdent(ANNENPART_IDENT, annenpartPdl)));
-        when(krrSpråkKlient.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
+        when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
         when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
 
@@ -227,7 +228,7 @@ class OppslagTjenesteTest {
                 new PdlOppslagTjeneste.PersonMedIdent(BARN_2_IDENT, barn2Pdl)
         ));
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of(BARN_1_IDENT, new PdlOppslagTjeneste.PersonMedIdent(ANNENPART_IDENT, annenpartTilBarn1Pdl)));
-        when(krrSpråkKlient.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
+        when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
         when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
 
@@ -279,7 +280,7 @@ class OppslagTjenesteTest {
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
-        when(krrSpråkKlient.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
+        when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
         var sveitsBank = new KontonummerDto.UtenlandskKontoInfo("SVEITS BANK", null, null, null, null, null, null, null);
         var kontonummerDto = new KontonummerDto(null, sveitsBank);
         when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(kontonummerDto);
@@ -330,7 +331,7 @@ class OppslagTjenesteTest {
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
-        when(krrSpråkKlient.finnSpråkkodeMedFallback(any())).thenReturn(Målform.EN);
+        when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.EN);
         when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(eksterneArbeidsforhold);
 
