@@ -26,6 +26,6 @@ public class KrrSpråkKlientBorger extends KrrSpråkKlient {
     }
 
     public KrrSpråkKlientBorger(RestClient restClient) {
-        super(restClient, RestConfig.forClient(KrrSpråkKlientSystem.class));
+        super(restClient, RestConfig.forClient(KrrSpråkKlientBorger.class));
     }
 }
