@@ -11,13 +11,13 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.common.innsyn.Arbeidstidprosent;
-import no.nav.foreldrepenger.common.innsyn.svp.Arbeidsforhold;
 import no.nav.foreldrepenger.common.innsyn.svp.PeriodeResultat;
+import no.nav.foreldrepenger.common.innsyn.svp.SvpArbeidsforhold;
 import no.nav.foreldrepenger.common.innsyn.svp.SvpSak;
+import no.nav.foreldrepenger.common.innsyn.svp.SvpÅpenBehandling;
 import no.nav.foreldrepenger.common.innsyn.svp.Søknad;
 import no.nav.foreldrepenger.common.innsyn.svp.TilretteleggingType;
 import no.nav.foreldrepenger.common.innsyn.svp.Vedtak;
-import no.nav.foreldrepenger.common.innsyn.svp.ÅpenBehandling;
 import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -36,7 +36,7 @@ final class DtoMapper {
             var behandlingTilstand = BehandlingTilstandUtleder.utled(sak.aksjonspunkt());
             var avslutningDato = sak.familieHendelse() == null ? null : utledDato(sak.familieHendelse());
             var søknadDto = tilDto(s, avslutningDato);
-            return new ÅpenBehandling(behandlingTilstand, søknadDto);
+            return new SvpÅpenBehandling(behandlingTilstand, søknadDto);
         }).orElse(null);
         var familiehendelse = sak.familieHendelse() == null ? null : sak.familieHendelse().tilDto();
         return new SvpSak(sak.saksnummer().tilDto(), familiehendelse, sak.avsluttet(), åpenBehandling, gjeldendeVedtak, sak.oppdatertTidspunkt());
@@ -53,7 +53,7 @@ final class DtoMapper {
             var avslutningÅrsak = utledÅrsak(arbeidsforhold.ikkeOppfyltÅrsak(), arbeidsforhold.svpPerioder());
             var oppholdsperioder = arbeidsforhold.oppholdsperioder().stream().map(DtoMapper::tilDto).collect(Collectors.toSet());
             var tilretteleggingJustertForOpphold = fjernPerioderMedOpphold(tilrettelegginger, oppholdsperioder);
-            return new Arbeidsforhold(arbeidsforhold.aktivitet().tilDto(), arbeidsforhold.behovFom(), arbeidsforhold.risikoFaktorer(),
+            return new SvpArbeidsforhold(arbeidsforhold.aktivitet().tilDto(), arbeidsforhold.behovFom(), arbeidsforhold.risikoFaktorer(),
                 arbeidsforhold.tiltak(), tilretteleggingJustertForOpphold, oppholdsperioder, avslutningÅrsak);
         }).collect(Collectors.toSet());
         var avslagÅrsak = vedtak.avslagÅrsak() == null ? null : switch (vedtak.avslagÅrsak()) {
@@ -88,12 +88,12 @@ final class DtoMapper {
         return new Søknad(arbeidsforhold);
     }
 
-    private static no.nav.foreldrepenger.common.innsyn.svp.Arbeidsforhold tilDto(Tilrettelegging tilrettelegging, LocalDate avslutningDato) {
+    private static SvpArbeidsforhold tilDto(Tilrettelegging tilrettelegging, LocalDate avslutningDato) {
         var oppholdDtos = tilrettelegging.oppholdsperioder().stream().map(DtoMapper::tilDto).collect(Collectors.toSet());
         var tilretteleggingDtos = tilrettelegging.perioder().stream().map(p -> tilDto(p, utledTom(p, tilrettelegging.perioder(), avslutningDato)))
             .collect(Collectors.toSet());
         var tilrettelegginger = fjernPerioderMedOpphold(tilretteleggingDtos, oppholdDtos);
-        return new no.nav.foreldrepenger.common.innsyn.svp.Arbeidsforhold(tilrettelegging.aktivitet().tilDto(), tilrettelegging.behovFom(),
+        return new SvpArbeidsforhold(tilrettelegging.aktivitet().tilDto(), tilrettelegging.behovFom(),
             tilrettelegging.risikoFaktorer(), tilrettelegging.tiltak(), tilrettelegginger, oppholdDtos, null);
     }
 
