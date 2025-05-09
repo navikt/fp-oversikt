@@ -41,4 +41,11 @@ public class Saker {
             .filter(not(Sak::erHenlagt))
             .toList();
     }
+
+    List<Sak> hentSakerInklusivHenlagteSaker(AktørId aktørId) {
+        return sakRepository.hentFor(aktørId).stream()
+            .filter(Sak::harSøknad)
+            .filter(not(Sak::erKomplettForVisning))
+            .toList();
+    }
 }
