@@ -1,29 +1,39 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
-import no.nav.foreldrepenger.common.innsyn.BrukerRolle;
-import no.nav.foreldrepenger.common.innsyn.RettighetType;
-import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpostSelvbetjening;
-import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
-import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
+import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-
-import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpostSelvbetjening;
+import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
+import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
+import no.nav.foreldrepenger.oversikt.domene.Sak;
+import no.nav.foreldrepenger.oversikt.domene.SakRepository;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
+import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
+import no.nav.foreldrepenger.oversikt.domene.fp.Konto;
+import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
+import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
+import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 @ExtendWith(MockitoExtension.class)
 class SakerRestErOppdatertTest {
@@ -32,21 +42,24 @@ class SakerRestErOppdatertTest {
     private final String FAKE_SAKSNUMMER_2 = "987654321";
 
     @Mock
-    private Saker saker;
-    @Mock
     private SafSelvbetjeningTjeneste safSelvbetjeningTjeneste;
+
+    private SakRepository sakRepository;
+    private InnloggetBruker innloggetBruker = myndigInnloggetBruker();
     private SakerRest sakerRest;
 
 
     @BeforeEach
     void initializeKontekst() {
-        sakerRest = new SakerRest(saker, safSelvbetjeningTjeneste,  myndigInnloggetBruker(), mock(TilgangKontrollTjeneste.class));
+        sakRepository = new RepositoryStub();
+        var saker = new Saker(sakRepository, innloggetBruker, mock(PersonOppslagSystem.class));
+        sakerRest = new SakerRest(saker, safSelvbetjeningTjeneste, innloggetBruker, mock(TilgangKontrollTjeneste.class));
     }
 
     @Test
     void sakErOppdatertHvisOppdateringstidspunktErEtterMottattidspunktetTilJournalposten() {
         when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
-        when(saker.hent()).thenReturn(new no.nav.foreldrepenger.common.innsyn.Saker(Set.of(fpsak(FAKE_SAKSNUMMER, LocalDateTime.now())), Set.of(), Set.of()));
+        sakRepository.lagre(fpsak(FAKE_SAKSNUMMER, LocalDateTime.now(), LocalDateTime.now().minusHours(1)));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isTrue();
     }
@@ -54,7 +67,7 @@ class SakerRestErOppdatertTest {
     @Test
     void sakErIkkeOppdatertHvisOppdatertTidspunktetErFørInnsendingstidspunkt() {
         when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
-        when(saker.hent()).thenReturn(new no.nav.foreldrepenger.common.innsyn.Saker(Set.of(fpsak(FAKE_SAKSNUMMER, LocalDateTime.now().minusHours(1))), Set.of(), Set.of()));
+        sakRepository.lagre(fpsak(FAKE_SAKSNUMMER, LocalDateTime.now().minusHours(1), LocalDateTime.now()));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isFalse();
     }
@@ -62,7 +75,6 @@ class SakerRestErOppdatertTest {
     @Test
     void ingenSakerIFpoversiktMenArkivertSøknadSkalReturnereFalse() {
         when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
-        when(saker.hent()).thenReturn(new no.nav.foreldrepenger.common.innsyn.Saker(Set.of(), Set.of(), Set.of()));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isFalse();
     }
@@ -73,7 +85,7 @@ class SakerRestErOppdatertTest {
                 arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(20), FAKE_SAKSNUMMER_2),
                 arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)
         ));
-        when(saker.hent()).thenReturn(new no.nav.foreldrepenger.common.innsyn.Saker(Set.of(fpsak(FAKE_SAKSNUMMER_2, LocalDateTime.now().minusMinutes(15))), Set.of(), Set.of()));
+        sakRepository.lagre(fpsak(FAKE_SAKSNUMMER_2, LocalDateTime.now().minusMinutes(15), LocalDateTime.now()));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isFalse();
     }
@@ -83,7 +95,6 @@ class SakerRestErOppdatertTest {
         when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(20), null)));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isFalse();
-        verify(saker, never()).hent();
     }
 
     @Test
@@ -95,7 +106,6 @@ class SakerRestErOppdatertTest {
                 ));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isTrue();
-        verify(saker, never()).hent();
     }
 
     private static EnkelJournalpostSelvbetjening arkivertJournalpost(DokumentType dokumentType, LocalDateTime mottatt, String saksnummer) {
@@ -109,24 +119,22 @@ class SakerRestErOppdatertTest {
                 List.of());
     }
 
-    private no.nav.foreldrepenger.common.innsyn.FpSak fpsak(String saksnummer, LocalDateTime oppdatertTidspunkt) {
-        return new no.nav.foreldrepenger.common.innsyn.FpSak(
-                new no.nav.foreldrepenger.common.innsyn.Saksnummer(saksnummer),
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                false,
-                RettighetType.BEGGE_RETT,
-                null,
-                null,
-                null,
-                null,
-                Set.of(),
-                null,
-                oppdatertTidspunkt,
-                BrukerRolle.MOR);
+    private Sak fpsak(String saksnummer, LocalDateTime oppdatertTidspunkt, LocalDateTime søknadMottattTidspunkt) {
+        var søknadsperiode = new FpSøknadsperiode(LocalDate.now().minusMonths(1), LocalDate.now(), Konto.FELLESPERIODE, null, null, null, null, null, null, null);
+        var søknad = new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode), Dekningsgrad.HUNDRE, false);
+        return new SakFP0(
+            new Saksnummer(saksnummer),
+            innloggetBruker.aktørId(),
+            false,
+            null,
+            null,
+            new FamilieHendelse(LocalDate.now().minusMonths(1), LocalDate.now(), 1, null),
+            null,
+            Set.of(søknad),
+            no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR,
+            null,
+            new Rettigheter(false, false, false),
+            false,
+            oppdatertTidspunkt);
     }
 }
