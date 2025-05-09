@@ -1,5 +1,11 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import java.time.LocalDateTime;
+import java.util.Comparator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -11,13 +17,6 @@ import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpostSelvbetjening;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
 import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDateTime;
-import java.util.Comparator;
-
-import static java.util.stream.Stream.concat;
 
 @Path("/saker")
 @ApplicationScoped
@@ -78,13 +77,9 @@ public class SakerRest {
         }
 
         // Vi har nylig mottatt dokument. Sjekk at saken er oppdatert etter dette tidspunktet.
-        var sakerFraFpoversikt = saker.hent();
-        var listeMedSakerFraFpoversikt = concat(sakerFraFpoversikt.foreldrepenger().stream(),
-                concat(sakerFraFpoversikt.svangerskapspenger().stream(), sakerFraFpoversikt.engangsstønad().stream()))
-                .toList();
-
+        var sakerMedSøknad = saker.hentSakerInklusivHenlagteSaker(innloggetBruker.aktørId());
         for (var søknad : søkaderMottattNylig) {
-            var erSakOppdatert = listeMedSakerFraFpoversikt.stream()
+            var erSakOppdatert = sakerMedSøknad.stream()
                     .filter(sak -> sak.saksnummer().value().equals(søknad.saksnummer()))
                     .anyMatch(sak -> sak.oppdatertTidspunkt().isAfter(søknad.mottatt()));
             if (!erSakOppdatert) {
