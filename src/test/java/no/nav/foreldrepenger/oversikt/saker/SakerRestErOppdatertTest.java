@@ -85,7 +85,7 @@ class SakerRestErOppdatertTest {
                 arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(20), FAKE_SAKSNUMMER_2),
                 arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)
         ));
-        sakRepository.lagre(fpsak(FAKE_SAKSNUMMER_2, LocalDateTime.now().minusMinutes(15), LocalDateTime.now()));
+        sakRepository.lagre(fpsak(FAKE_SAKSNUMMER_2, LocalDateTime.now().minusMinutes(15), LocalDateTime.now().minusHours(1)));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isFalse();
     }
@@ -121,7 +121,7 @@ class SakerRestErOppdatertTest {
 
     private Sak fpsak(String saksnummer, LocalDateTime oppdatertTidspunkt, LocalDateTime søknadMottattTidspunkt) {
         var søknadsperiode = new FpSøknadsperiode(LocalDate.now().minusMonths(1), LocalDate.now(), Konto.FELLESPERIODE, null, null, null, null, null, null, null);
-        var søknad = new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(søknadsperiode), Dekningsgrad.HUNDRE, false);
+        var søknad = new FpSøknad(SøknadStatus.MOTTATT, søknadMottattTidspunkt, Set.of(søknadsperiode), Dekningsgrad.HUNDRE, false);
         return new SakFP0(
             new Saksnummer(saksnummer),
             innloggetBruker.aktørId(),
