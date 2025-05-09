@@ -112,7 +112,29 @@ class MorsAktivitetTest {
     }
 
     @Test
-    void diskusjonstilfelle_to_arbeidsforhold_som_matcher_søknad_permisjon_fra_null_prosent_trenger_dokumentasjon() {
+    void to_arbeidsforhold_null_og_hundre_prosent_perm_hundre_prosent_trenger_dokumentasjon() {
+        var alltid = new ArbeidsforholdRS.PeriodeRS(LocalDate.MIN, LocalDate.MAX);
+        var perm = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1));
+        var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(alltid),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, alltid)),
+            List.of(new ArbeidsforholdRS.PermisjonPermitteringRS(perm, HUNDRE_PROSENT, PermType.PERMISJON_MED_FORELDREPENGER)),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var response2 = new ArbeidsforholdRS(ARBFORHOLD2, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(alltid),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(NULL_PROSENT, alltid)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var resultat = kallTjeneste(søknad, List.of(response1, response2));
+        assertThat(resultat).isTrue();
+    }
+    
+    @Test
+    void to_arbeidsforhold_null_og_hundre_prosent_perm_null_prosent_trenger_ikke_dokumentasjon() {
         var alltid = new ArbeidsforholdRS.PeriodeRS(LocalDate.MIN, LocalDate.MAX);
         var perm = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1));
         var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
@@ -130,7 +152,7 @@ class MorsAktivitetTest {
 
         var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(new LocalDateInterval(LocalDate.now(), LocalDate.now().plusDays(1))));
         var resultat = kallTjeneste(søknad, List.of(response1, response2));
-        assertThat(resultat).isTrue();
+        assertThat(resultat).isFalse();
     }
 
     @Test

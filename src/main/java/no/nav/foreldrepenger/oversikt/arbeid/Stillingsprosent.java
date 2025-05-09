@@ -11,6 +11,8 @@ import java.util.Objects;
  */
 public record Stillingsprosent(@JsonValue BigDecimal prosent) implements Comparable<Stillingsprosent> {
 
+    public static final Stillingsprosent ZERO = new Stillingsprosent(BigDecimal.ZERO);
+
     private static final RoundingMode AVRUNDINGSMODUS = RoundingMode.HALF_EVEN;
 
     private static final BigDecimal ARBEID_MAX_VERDI = BigDecimal.valueOf(109.99d); // Bør være 100 men legger på litt slack (10,75 vs 107,5)
