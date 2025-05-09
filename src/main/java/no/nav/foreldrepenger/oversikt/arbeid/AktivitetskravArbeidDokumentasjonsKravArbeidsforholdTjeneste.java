@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 /**
@@ -78,7 +79,7 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
         for (var entry : morsAktivitet.entrySet()) {
             var arbeidsforholdMedSammeId = entry.getValue();
             // Sjekker om det finnes permisjoner i noen av de søkte periodene. Denne vil ha behov for tuning etterhvert (fx stilling 0% med permisjon).
-            var permisjonProsentTidslinje = permisjonTidslinje(arbeidsforholdMedSammeId);
+            var permisjonProsentTidslinje = permisjonTidslinje(arbeidsforholdMedSammeId, requestTidslinje);
             var harPermisjonForRequestPerioder = permisjonProsentTidslinje.intersection(requestTidslinje).stream()
                 .anyMatch(s -> s.getValue().compareTo(BigDecimal.ZERO) > 0);
             if (harPermisjonForRequestPerioder) {
@@ -107,11 +108,24 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
             .intersection(requestTidslinje);
     }
 
-    private static LocalDateTimeline<BigDecimal> permisjonTidslinje(List<Arbeidsforhold> arbeidsforholdene) {
+    private static LocalDateTimeline<BigDecimal> permisjonTidslinje(List<Arbeidsforhold> arbeidsforholdene, LocalDateTimeline<BigDecimal> requestTidslinje) {
         return arbeidsforholdene.stream()
-            .flatMap(arbeidsforhold -> arbeidsforhold.permisjoner().stream())
-            .map(s -> new LocalDateSegment<>(s.getLocalDateInterval(), summerPermisjoner(s.getValue())))
+            .flatMap(a -> permisjonSegmenter(a, requestTidslinje))
             .collect(Collectors.collectingAndThen(Collectors.toList(), liste -> new LocalDateTimeline<>(liste, bigDesimalSum())));
+    }
+
+    private static Stream<LocalDateSegment<BigDecimal>> permisjonSegmenter(Arbeidsforhold arbeidsforhold, LocalDateTimeline<BigDecimal> requestTidslinje) {
+        var stillingerSomSkalVurderePermisjon = arbeidsforhold.arbeidsavtaler()
+            .filterValue(s -> s.compareTo(Stillingsprosent.ZERO) > 0)
+            .intersection(requestTidslinje);
+        if (stillingerSomSkalVurderePermisjon.isEmpty()) {
+            return Stream.of();
+        }
+        var permisjoner = arbeidsforhold.permisjoner().stream()
+            .map(s -> new LocalDateSegment<>(s.getLocalDateInterval(), summerPermisjoner(s.getValue())))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), liste -> new LocalDateTimeline<>(liste, bigDesimalSum())))
+            .intersection(stillingerSomSkalVurderePermisjon);
+        return permisjoner.stream();
     }
 
     private static LocalDateSegmentCombinator<BigDecimal, BigDecimal, BigDecimal> bigDesimalSum() {
