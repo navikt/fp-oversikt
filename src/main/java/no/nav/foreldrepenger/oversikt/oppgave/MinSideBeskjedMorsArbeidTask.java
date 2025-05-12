@@ -26,7 +26,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 public class MinSideBeskjedMorsArbeidTask implements ProsessTaskHandler {
 
     public static final String TASK_TYPE = "dittnav.beskjed.morsarbeid";
-    public static final Duration DELAY_MIN = Environment.current().isProd() ? Duration.ofMinutes(15) : Duration.ZERO;
+    public static final Duration DELAY_MIN = Environment.current().isProd() ? Duration.ofMinutes(15) : Duration.ofSeconds(30);
 
     private static final Logger LOG = LoggerFactory.getLogger(MinSideBeskjedMorsArbeidTask.class);
 
