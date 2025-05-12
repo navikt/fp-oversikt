@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.YtelseType;
@@ -25,7 +26,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 public class MinSideBeskjedMorsArbeidTask implements ProsessTaskHandler {
 
     public static final String TASK_TYPE = "dittnav.beskjed.morsarbeid";
-    public static final Duration DELAY_MIN = Duration.ofMinutes(15);
+    public static final Duration DELAY_MIN = Environment.current().isProd() ? Duration.ofMinutes(15) : Duration.ZERO;
 
     private static final Logger LOG = LoggerFactory.getLogger(MinSideBeskjedMorsArbeidTask.class);
 
