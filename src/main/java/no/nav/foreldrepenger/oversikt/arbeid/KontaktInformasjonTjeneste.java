@@ -27,10 +27,12 @@ public class KontaktInformasjonTjeneste {
         try {
             var kontaktinformasjonOpt = krrSpråkKlientSystem.hentKontaktinformasjon(fnr.value());
             if (kontaktinformasjonOpt.isEmpty()) {
+                LOG.info("KrrSpråkKlient: ingen kontaktinformasjon funnet på bruker");
                 return true;
             }
             var kontaktinformasjon = kontaktinformasjonOpt.get();
             if (!kontaktinformasjon.aktiv()) {
+                LOG.info("KrrSpråkKlient: kontaktinformasjon er inaktiv");
                 return true;
             }
             return kontaktinformasjon.reservert() || !kontaktinformasjon.kanVarsles();
