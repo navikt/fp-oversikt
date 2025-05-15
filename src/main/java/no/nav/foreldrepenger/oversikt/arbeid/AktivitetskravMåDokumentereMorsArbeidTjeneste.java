@@ -42,23 +42,25 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         if (ENV.isProd()) {
             return true; //TODO TFP-5383
         }
-        if (kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(request.annenPartFødselsnummer())) {
-            LOG.info("AKTIVTETSKRAV: Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
-            return true;
-        }
 
         // Tilfelle bare far rett - der kan vi ikke vente at mor har en sak. Dersom mor har engangsstønad så har hun ikke oppgitt far/medmor
         if (annenpartHarIkkeSakMedOppgittBarnOgSøker(søkersAktørid, request)) {
-            LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder søker og barn");
             if (request.barnFødselsnummer() == null) {
-                LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder søker og barn. og fødselsnummer på barn er ikke oppgitt");
+                LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak knyttet til søker/barn og vi kan ikke slå opp barnet for å sjekke relasjon");
                 return true;
             }
             if (!personOppslagSystem.barnHarDisseForeldrene(request.barnFødselsnummer(), request.annenPartFødselsnummer(), søkersFnr)) {
                 LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder både søker og barn, men barn har ikke relasjon til en eller begge av forelderene");
                 return true;
             }
+            LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak men barnet er relatert til både søker og annenpart");
         }
+
+        if (kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(request.annenPartFødselsnummer())) {
+            LOG.info("AKTIVTETSKRAV: Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
+            return true;
+        }
+
         var krevesDokumentasjonForAktivitetskravArbeid = krevesDokumentasjonForAktivitetskravArbeid(request);
         if (krevesDokumentasjonForAktivitetskravArbeid) {
             LOG.info("AKTIVTETSKRAV: Mor har ikke arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");

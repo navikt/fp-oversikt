@@ -1,17 +1,11 @@
 package no.nav.foreldrepenger.oversikt.arbeid;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
-import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
-import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
-import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,12 +13,19 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
+import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
+import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 @ExtendWith(MockitoExtension.class)
 class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
@@ -72,6 +73,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     @Test
     void hvis_annenpart_har_reservert_seg_eller_kan_ikke_varsles_så_kreves_dokumentasjon_av_mors_arbeid() {
         // Arrange
+        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
         when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(true);
         // Act
         var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequest());
@@ -99,7 +101,6 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     @Test
     void hvis_annenpart_ikke_har_sak_og_barn_ikke_er_knyttet_til_begge_foreldrene_krever_vi_dokumentasjon() {
         // Arrange
-        when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(false);
         when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.empty());
         when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
 
