@@ -136,11 +136,10 @@ class MinSideTjeneste {
             return; //TODO TFP-5383
         }
 
-        var varselstekst = "Nav har brukt opplysninger om arbeidsforholdet ditt";
-
         var builder = builder(Varseltype.Beskjed, morsAktørId, eventId)
             .withLink(morsArbeidLenke.toString())
-            .withTekst("nb", varselstekst, true)
+            .withTekst("nb", "Nav har brukt opplysninger om arbeidsforholdet ditt", true)
+            .withTekst("nn", "Nav har brukt opplysningar om arbeidsforholdet ditt")
             .withEksternVarsling();
         producer.send(eventId, builder.build());
     }
