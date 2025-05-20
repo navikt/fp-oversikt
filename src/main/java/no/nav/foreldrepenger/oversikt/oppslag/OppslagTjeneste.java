@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientBorger;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
@@ -23,9 +22,7 @@ import no.nav.vedtak.util.LRUCache;
 @ApplicationScoped
 public class OppslagTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(OppslagTjeneste.class);
-    private static final long CACHE_ELEMENT_LIVE_TIME_MS = !Environment.current().isProd() //TODO TFP-5383
-        ? TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES)
-        : TimeUnit.MILLISECONDS.convert(10, TimeUnit.SECONDS);
+    private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     public static final LRUCache<String, PersonDto> PERSONINFO_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
     public static final LRUCache<String, List<EksternArbeidsforholdDto>> PERSON_ARBEIDSFORHOLD_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
 

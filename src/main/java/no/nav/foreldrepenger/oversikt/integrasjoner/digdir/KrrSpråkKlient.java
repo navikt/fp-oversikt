@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriBuilderException;
 import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.vedtak.felles.integrasjon.rest.NavHeaders;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
@@ -26,9 +25,7 @@ import no.nav.vedtak.util.LRUCache;
  */
 public abstract class KrrSpråkKlient {
     private static final Logger LOG = LoggerFactory.getLogger(KrrSpråkKlient.class);
-    private static final long CACHE_ELEMENT_LIVE_TIME_MS = !Environment.current().isProd() //TODO TFP-5383
-        ? TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES)
-        : TimeUnit.MILLISECONDS.convert(10, TimeUnit.SECONDS);
+    private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     private static final LRUCache<String, Kontaktinformasjoner.Kontaktinformasjon> KONTAKTINFORMASJON_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
 
     private final URI endpoint;

@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.konfig.KonfigVerdi;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
@@ -29,8 +28,6 @@ class MinSideTjeneste {
 
     //https://navikt.github.io/tms-dokumentasjon/varsler/
     //https://aksel.nav.no/god-praksis/artikler/hvordan-fungerer-varsler-til-privatpersoner
-
-    private static final Environment ENV = Environment.current();
 
     private static final Logger LOG = LoggerFactory.getLogger(MinSideTjeneste.class);
     private MinSideProducer producer;
@@ -132,10 +129,6 @@ class MinSideTjeneste {
     }
 
     public void sendBeskjedMorsArbeid(AktørId morsAktørId, UUID eventId) {
-        if (ENV.isProd()) {
-            return; //TODO TFP-5383
-        }
-
         var builder = builder(Varseltype.Beskjed, morsAktørId, eventId)
             .withLink(morsArbeidLenke.toString())
             .withTekst("nb", "Nav har brukt opplysninger om arbeidsforholdet ditt", true)
