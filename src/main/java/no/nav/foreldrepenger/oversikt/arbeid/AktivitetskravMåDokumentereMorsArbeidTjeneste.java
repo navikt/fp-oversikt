@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
@@ -16,7 +15,6 @@ import no.nav.fpsak.tidsserie.LocalDateInterval;
 public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
 
     private static final Logger LOG = LoggerFactory.getLogger(AktivitetskravMåDokumentereMorsArbeidTjeneste.class);
-    private static final Environment ENV = Environment.current();
 
     private PersonOppslagSystem personOppslagSystem;
     private AnnenPartSakTjeneste annenPartSakTjeneste;
@@ -39,10 +37,6 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
     }
 
     public boolean krevesDokumentasjonForAktivitetskravArbeid(Fødselsnummer søkersFnr, AktørId søkersAktørid, ArbeidRest.MorArbeidRequest request) {
-        if (ENV.isProd()) {
-            return true; //TODO TFP-5383
-        }
-
         // Tilfelle bare far rett - der kan vi ikke vente at mor har en sak. Dersom mor har engangsstønad så har hun ikke oppgitt far/medmor
         if (annenpartHarIkkeSakMedOppgittBarnOgSøker(søkersAktørid, request)) {
             if (request.barnFødselsnummer() == null) {
