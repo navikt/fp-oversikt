@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
 
 @ApplicationScoped
 public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
@@ -65,11 +65,16 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
     }
 
     private boolean krevesDokumentasjonForAktivitetskravArbeid(ArbeidRest.MorArbeidRequest request) {
-        var intervaller = request.perioder().stream()
-                .map(p -> new LocalDateInterval(p.fom(), p.tom()))
-                .toList();
-        var aktivitetskravrequest = new PerioderMedAktivitetskravArbeid(request.annenPartFødselsnummer(), intervaller);
+        var segmenter = request.perioder().stream()
+            .map(AktivitetskravMåDokumentereMorsArbeidTjeneste::mapPeriode)
+            .toList();
+        var aktivitetskravrequest = new PerioderMedAktivitetskravArbeid(request.annenPartFødselsnummer(), segmenter);
         return aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(aktivitetskravrequest);
+    }
+
+    private static LocalDateSegment<PeriodeMedAktivitetskravType> mapPeriode(ArbeidRest.PeriodeRequest periode) {
+        return new LocalDateSegment<>(periode.fom(), periode.tom(),
+            periode.periodeType() != null ? periode.periodeType() : PeriodeMedAktivitetskravType.UTTAK);
     }
 
     private boolean annenpartHarIkkeSakMedOppgittBarnOgSøker(AktørId innloggetBrukerAktørid, ArbeidRest.MorArbeidRequest request) {

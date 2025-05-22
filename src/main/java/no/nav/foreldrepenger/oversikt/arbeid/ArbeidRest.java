@@ -1,6 +1,12 @@
 package no.nav.foreldrepenger.oversikt.arbeid;
 
 
+import java.time.LocalDate;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -18,11 +24,6 @@ import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDate;
-import java.util.List;
 
 @Path("/arbeid")
 @ApplicationScoped
@@ -93,5 +94,6 @@ public class ArbeidRest {
                                    LocalDate familiehendelse, @Valid @Size(min = 1) List<@Valid PeriodeRequest> perioder) {
     }
 
-    public record PeriodeRequest(@Valid @NotNull LocalDate fom, @Valid @NotNull LocalDate tom) {}
+    public record PeriodeRequest(@Valid @NotNull LocalDate fom, @Valid @NotNull LocalDate tom, @Valid PeriodeMedAktivitetskravType periodeType) {}
+
 }
