@@ -5,7 +5,6 @@ import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -22,6 +21,7 @@ import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
+import no.nav.fpsak.tidsserie.LocalDateInterval;
 
 @ApplicationScoped
 public class AnnenPartSakTjeneste {
@@ -162,17 +162,17 @@ public class AnnenPartSakTjeneste {
             }
         }
         if (familiehendelse != null && sak.familieHendelse() != null) {
-            if (isEquals(familiehendelse, sak.familieHendelse())) {
+            if (gjelderSammeBarn(familiehendelse, sak.familieHendelse())) {
                 return true;
             }
         }
         return false;
     }
 
-    private static boolean isEquals(LocalDate dato, FamilieHendelse fh) {
-        if (fh.omsorgsovertakelse() != null) return fh.omsorgsovertakelse().equals(dato);
-        if (fh.fødselsdato() != null) return fh.fødselsdato().equals(dato);
-        return Objects.equals(fh.termindato(), dato);
+    private static boolean gjelderSammeBarn(LocalDate dato, FamilieHendelse fh) {
+        var gjeldende = Optional.ofNullable(fh.omsorgsovertakelse()).orElse(Optional.ofNullable(fh.fødselsdato()).orElse(fh.termindato()));
+        var interval = new LocalDateInterval(gjeldende.minusWeeks(5), gjeldende.plusWeeks(5));
+        return interval.contains(dato);
     }
 }
 
