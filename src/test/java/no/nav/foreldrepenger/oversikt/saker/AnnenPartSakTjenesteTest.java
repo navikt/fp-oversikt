@@ -174,6 +174,66 @@ class AnnenPartSakTjenesteTest {
         assertThat(annenPartSak.termindato()).isEqualTo(termindato);
     }
 
+    @Test
+    void henter_annen_parts_vedtak_på_nesten_lik_termindato() {
+        var repository = new RepositoryStub();
+        var aktørIdAnnenPart = AktørId.dummy();
+        var aktørIdSøker = AktørId.dummy();
+        var termindato = LocalDate.of(2025, 1, 1);
+        var annenPartsSak = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, AktørId.dummy(), null, now(), termindato);
+        var annenPartsSakPåAnnetBarn = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, AktørId.dummy(), termindato.minusYears(1), now().minusYears(1),
+            termindato.minusYears(1));
+        repository.lagre(annenPartsSak);
+        repository.lagre(annenPartsSakPåAnnetBarn);
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, termindato.plusWeeks(1));
+
+        assertThat(annenPartSak).isNotEmpty();
+    }
+
+    @Test
+    void henter_annen_parts_vedtak_matcher_termindato_med_annen_parts_fødselsdato() {
+        var repository = new RepositoryStub();
+        var aktørIdAnnenPart = AktørId.dummy();
+        var aktørIdSøker = AktørId.dummy();
+        var termindato = LocalDate.of(2025, 1, 1);
+        var termindatoAnnenPart = termindato.minusWeeks(4);
+        var annenPartsSak = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, AktørId.dummy(), termindato.minusWeeks(1), now(), termindatoAnnenPart);
+        repository.lagre(annenPartsSak);
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, termindato).orElseThrow();
+
+        assertThat(annenPartSak.termindato()).isEqualTo(termindatoAnnenPart);
+    }
+
+    @Test
+    void henter_annen_parts_vedtak_på_nesten_lik_fødselsdato() {
+        var repository = new RepositoryStub();
+        var aktørIdAnnenPart = AktørId.dummy();
+        var aktørIdSøker = AktørId.dummy();
+        var fødselsdatoAnnenpart = LocalDate.now();
+        var annenPartsSak = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, AktørId.dummy(), fødselsdatoAnnenpart, now(), null);
+        repository.lagre(annenPartsSak);
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, fødselsdatoAnnenpart.plusWeeks(2));
+
+        assertThat(annenPartSak).isNotEmpty();
+    }
+
+    @Test
+    void skal_ikke_hente_annen_parts_vedtak_hvis_internval_mellom_datoene_er_for_stor() {
+        var repository = new RepositoryStub();
+        var aktørIdAnnenPart = AktørId.dummy();
+        var aktørIdSøker = AktørId.dummy();
+        var fødselsdatoAnnenpart = LocalDate.now();
+        var annenPartsSak = sakMedVedtak(aktørIdAnnenPart, aktørIdSøker, AktørId.dummy(), fødselsdatoAnnenpart, now(), null);
+        repository.lagre(annenPartsSak);
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+        var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, fødselsdatoAnnenpart.plusWeeks(10));
+
+        assertThat(annenPartSak).isEmpty();
+    }
+
     private static SakFP0 sakMedVedtak(AktørId aktørId,
                                        AktørId annenPartAktørId,
                                        AktørId aktørIdBarn,

@@ -1,8 +1,6 @@
 package no.nav.foreldrepenger.oversikt.oppslag;
 
 
-import static no.nav.foreldrepenger.oversikt.oppslag.OppslagTjeneste.PERSONINFO_CACHE;
-import static no.nav.foreldrepenger.oversikt.oppslag.OppslagTjeneste.PERSON_ARBEIDSFORHOLD_CACHE;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.adressebeskyttelse;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.forelderBarnRelasjon;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.fødselsdato;
@@ -18,24 +16,21 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.domain.felles.Kjønn;
 import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientBorger;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
-import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
+import no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.ForelderBarnRelasjonRolle;
 import no.nav.pdl.KjoennType;
@@ -44,11 +39,6 @@ import no.nav.pdl.Sivilstandstype;
 
 @ExtendWith(MockitoExtension.class)
 class OppslagTjenesteTest {
-
-    private static final String SØKER_IDENT = "12345678901";
-    private static final String BARN_1_IDENT = "111111";
-    private static final String BARN_2_IDENT = "222222";
-    private static final String ANNENPART_IDENT = "987654321";
 
     @Mock
     private PdlOppslagTjeneste pdlOppslagTjeneste;
@@ -62,22 +52,10 @@ class OppslagTjenesteTest {
     @Mock
     private KontaktInformasjonKlient kontaktInformasjonKlient;
 
-    @Mock
-    private InnloggetBruker innloggetBruker;
-
-    @InjectMocks
-    private OppslagTjeneste oppslagTjeneste;
-
-    @BeforeEach
-    void setUp() {
-        PERSONINFO_CACHE.remove(SØKER_IDENT);
-        PERSON_ARBEIDSFORHOLD_CACHE.remove(SØKER_IDENT);
-        when(innloggetBruker.fødselsnummer()).thenReturn(new Fødselsnummer("12345678901"));
-        when(innloggetBruker.aktørId()).thenReturn(new AktørId("00012345678901"));
-    }
-
     @Test
     void søker_happy_case_uten_barn_registert() {
+        var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
+        var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
         søkerPdl.setNavn(navn("Kari", null, "Kanari"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
@@ -93,7 +71,7 @@ class OppslagTjenesteTest {
                 Optional.empty()
         );
 
-        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
+        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(innloggetBruker.fødselsnummer().value(), søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
         when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
@@ -124,15 +102,22 @@ class OppslagTjenesteTest {
         assertThat(arbeidsforholdDto.to()).isEmpty();
     }
 
+    private OppslagTjeneste tjeneste(DummyInnloggetTestbruker innloggetBruker) {
+        return new OppslagTjeneste(pdlOppslagTjeneste, mineArbeidsforholdTjeneste, krrSpråkKlientBorger, kontaktInformasjonKlient, innloggetBruker);
+    }
+
     @Test
     void happy_case_søker_med_ett_barn_og_annenpart_registert() {
+        var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
+        var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
         søkerPdl.setNavn(navn("Kari", null, "Kanari"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
         søkerPdl.setSivilstand(siviltilstand(Sivilstandstype.UGIFT));
-        søkerPdl.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
+        var barn1Ident = UUID.randomUUID().toString();
+        søkerPdl.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(barn1Ident, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
 
         var annenpartPdl = new Person();
         annenpartPdl.setNavn(navn("Ola", null, "Nordmann"));
@@ -146,14 +131,16 @@ class OppslagTjenesteTest {
         barnPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusMonths(3)));
         barnPdl.setDoedsfall(List.of());
         barnPdl.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT));
+        var søkersIdent = innloggetBruker.fødselsnummer().value();
+        var annenpartIdent = UUID.randomUUID().toString();
         barnPdl.setForelderBarnRelasjon(List.of(
-                forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
-                forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
+                forelderBarnRelasjon(søkersIdent, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
+                forelderBarnRelasjon(annenpartIdent, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         ));
 
-        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
-        when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of(new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barnPdl)));
-        when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of(BARN_1_IDENT, new PdlOppslagTjeneste.PersonMedIdent(ANNENPART_IDENT, annenpartPdl)));
+        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(søkersIdent, søkerPdl));
+        when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of(new PdlOppslagTjeneste.PersonMedIdent(barn1Ident, barnPdl)));
+        when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of(barn1Ident, new PdlOppslagTjeneste.PersonMedIdent(annenpartIdent, annenpartPdl)));
         when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
         when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
@@ -187,13 +174,17 @@ class OppslagTjenesteTest {
 
     @Test
     void søker_med_flere_barn_hvor_det_ene_barnet_ikke_har_en_annenpart_registrert() {
+        var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
+        var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
         søkerPdl.setNavn(navn("Kari", null, "Kanari"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
         søkerPdl.setSivilstand(siviltilstand(Sivilstandstype.UGIFT));
-        søkerPdl.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
+        var barn1Ident = UUID.randomUUID().toString();
+        var barn2Ident = UUID.randomUUID().toString();
+        søkerPdl.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(barn1Ident, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
 
         var annenpartTilBarn1Pdl = new Person();
         annenpartTilBarn1Pdl.setNavn(navn("Ola", null, "Nordmann"));
@@ -207,9 +198,11 @@ class OppslagTjenesteTest {
         barn1Pdl.setFoedselsdato(fødselsdato(LocalDate.now().minusMonths(11)));
         barn1Pdl.setDoedsfall(List.of());
         barn1Pdl.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT));
+        var søkersIdent = innloggetBruker.fødselsnummer().value();
+        var annenpartIdent = UUID.randomUUID().toString();
         barn1Pdl.setForelderBarnRelasjon(List.of(
-                forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
-                forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
+                forelderBarnRelasjon(søkersIdent, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
+                forelderBarnRelasjon(annenpartIdent, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         ));
         var barn2Pdl = new Person();
         barn2Pdl.setNavn(navn("Barn", "Barnesen", "Den andre"));
@@ -218,16 +211,16 @@ class OppslagTjenesteTest {
         barn2Pdl.setDoedsfall(List.of());
         barn2Pdl.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT));
         barn2Pdl.setForelderBarnRelasjon(List.of(
-                forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN)
+                forelderBarnRelasjon(søkersIdent, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN)
                 // Far har ikke fult ut farskasp erklæringen enda siden det bare er 2 uker siden fødsel
         ));
 
-        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
+        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(søkersIdent, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of(
-                new PdlOppslagTjeneste.PersonMedIdent(BARN_1_IDENT, barn1Pdl),
-                new PdlOppslagTjeneste.PersonMedIdent(BARN_2_IDENT, barn2Pdl)
+                new PdlOppslagTjeneste.PersonMedIdent(barn1Ident, barn1Pdl),
+                new PdlOppslagTjeneste.PersonMedIdent(barn2Ident, barn2Pdl)
         ));
-        when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of(BARN_1_IDENT, new PdlOppslagTjeneste.PersonMedIdent(ANNENPART_IDENT, annenpartTilBarn1Pdl)));
+        when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of(barn1Ident, new PdlOppslagTjeneste.PersonMedIdent(annenpartIdent, annenpartTilBarn1Pdl)));
         when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
         when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(new KontonummerDto("123456789", null));
         when(mineArbeidsforholdTjeneste.brukersArbeidsforhold(any())).thenReturn(List.of());
@@ -246,7 +239,7 @@ class OppslagTjenesteTest {
         assertThat(søkerDto.bankkonto().kontonummer()).isEqualTo("123456789");
         assertThat(søkerDto.barn()).hasSize(2);
 
-        var barn1Dto = søkerDto.barn().get(0);
+        var barn1Dto = søkerDto.barn().getFirst();
         assertThat(barn1Dto.navn().fornavn()).isEqualTo("Barn");
         assertThat(barn1Dto.navn().mellomnavn()).isEqualTo("Barnesen");
         assertThat(barn1Dto.navn().etternavn()).isEqualTo("Den Første");
@@ -269,6 +262,8 @@ class OppslagTjenesteTest {
 
     @Test
     void utenlandsk_kontonummer_mappes_riktig() {
+        var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
+        var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
         søkerPdl.setNavn(navn("Kari", null, "Kanari"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
@@ -277,7 +272,8 @@ class OppslagTjenesteTest {
         søkerPdl.setSivilstand(siviltilstand(Sivilstandstype.UGIFT));
         søkerPdl.setForelderBarnRelasjon(List.of());
 
-        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
+        var søkersIdent = innloggetBruker.fødselsnummer().value();
+        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(søkersIdent, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
         when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.NB);
@@ -296,6 +292,8 @@ class OppslagTjenesteTest {
 
     @Test
     void flere_arbeidsforhold_mappes_rikitg_fra_domenemodell_til_dto() {
+        var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
+        var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
         søkerPdl.setNavn(navn("Kari", null, "Kanari"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
@@ -328,7 +326,8 @@ class OppslagTjenesteTest {
                 enkeltArbeidsforhold3
         );
 
-        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(SØKER_IDENT, søkerPdl));
+        var søkersIdent = innloggetBruker.fødselsnummer().value();
+        when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(søkersIdent, søkerPdl));
         when(pdlOppslagTjeneste.hentBarnTilSøker(any())).thenReturn(List.of());
         when(pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(any(), any())).thenReturn(Map.of());
         when(krrSpråkKlientBorger.finnSpråkkodeMedFallback(any())).thenReturn(Målform.EN);
@@ -341,7 +340,7 @@ class OppslagTjenesteTest {
         // Assert
         assertThat(søkerinfo.arbeidsforhold()).hasSameSizeAs(eksterneArbeidsforhold);
 
-        var arbeidsforholdDto1 = søkerinfo.arbeidsforhold().get(0);
+        var arbeidsforholdDto1 = søkerinfo.arbeidsforhold().getFirst();
         assertThat(arbeidsforholdDto1.arbeidsgiverId()).isEqualTo("2");
         assertThat(arbeidsforholdDto1.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver 1");
         assertThat(arbeidsforholdDto1.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(100));
