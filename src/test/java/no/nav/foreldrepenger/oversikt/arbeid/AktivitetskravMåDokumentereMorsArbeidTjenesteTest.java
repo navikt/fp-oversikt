@@ -63,7 +63,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
         when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(false);
 
         // Act
-        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequest());
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
 
         // Assert
         verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, times(1)).krevesDokumentasjonForAktivitetskravArbeid(any());
@@ -76,7 +76,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
         when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
         when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(true);
         // Act
-        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequest());
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
 
         // Assert
         verify(kontaktInformasjonTjeneste, times(1)).harReservertSegEllerKanIkkeVarsles(any());
@@ -91,7 +91,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
         when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(true);
         when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(true);
         // Act
-        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequest());
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
 
         // Assert
         verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, times(1)).krevesDokumentasjonForAktivitetskravArbeid(any());
@@ -105,16 +105,39 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
         when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
 
         // Act
-        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequest());
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
 
         // Assert
         verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
         assertThat(krevesDokumentasjonForAktivitetskravArbeid).isTrue();
     }
 
-    private static ArbeidRest.MorArbeidRequest dummyRequest() {
+    @Test
+    void happy_kombinert_case_hvor_mor_kan_varsles_og_har_arbeid_i_intervallet() {
+        // Arrange
+        when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(false);
+        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
+        when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(false);
+
+        // Act
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyKombinertRequestUttak());
+
+        // Assert
+        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, times(1)).krevesDokumentasjonForAktivitetskravArbeid(any());
+        assertThat(krevesDokumentasjonForAktivitetskravArbeid).isFalse();
+    }
+
+    private static ArbeidRest.MorArbeidRequest dummyRequestUttak() {
         return new ArbeidRest.MorArbeidRequest(DUMMY_FNR_ANNENPART, DUMMY_FNR_BARN, LocalDate.now(),
-                List.of(new ArbeidRest.PeriodeRequest(LocalDate.now().minusWeeks(3), LocalDate.now())));
+                List.of(new ArbeidRest.PeriodeRequest(LocalDate.now().minusWeeks(3), LocalDate.now(), null)));
+    }
+
+    private static ArbeidRest.MorArbeidRequest dummyKombinertRequestUttak() {
+        return new ArbeidRest.MorArbeidRequest(DUMMY_FNR_ANNENPART, DUMMY_FNR_BARN, LocalDate.now(),
+            List.of(new ArbeidRest.PeriodeRequest(LocalDate.now().minusWeeks(3), LocalDate.now(), PeriodeMedAktivitetskravType.UTTAK),
+                new ArbeidRest.PeriodeRequest(LocalDate.now().plusDays(1), LocalDate.now().plusWeeks(4), PeriodeMedAktivitetskravType.UTSETTELSE),
+                new ArbeidRest.PeriodeRequest(LocalDate.now().plusWeeks(4).plusDays(1), LocalDate.now().plusWeeks(6), PeriodeMedAktivitetskravType.UTTAK)
+            ));
     }
 
     private static SakFP0 dummySak() {

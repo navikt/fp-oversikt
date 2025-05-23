@@ -1,13 +1,5 @@
 package no.nav.foreldrepenger.oversikt.arbeid;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
-import no.nav.fpsak.tidsserie.LocalDateSegment;
-import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
-import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
-
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,6 +7,14 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
+import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
+import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateSegmentCombinator;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 
 
 /**
@@ -28,7 +28,8 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
 
     private static final Set<ArbeidType> RELEVANT_ARBEID = Set.of(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, ArbeidType.MARITIMT_ARBEIDSFORHOLD);
 
-    private static final BigDecimal KRAV_FOR_DOKUMENTASJON = BigDecimal.valueOf(75);
+    private static final BigDecimal KRAV_FOR_DOKUMENTASJON_UTTAK = BigDecimal.valueOf(75);
+    private static final BigDecimal KRAV_FOR_DOKUMENTASJON_UTSETTELSE = BigDecimal.ONE;
 
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
 
@@ -44,9 +45,7 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
     public boolean krevesDokumentasjonForAktivitetskravArbeid(PerioderMedAktivitetskravArbeid request) {
 
         // Lager en tidslinje som inneholder periodene som skal sjekkes med hensyn på behov for dokumenasjon av aktivitetskrav = arbeid.
-        var requestTidslinje = request.aktivitetskravPerioder().stream()
-            .map(p -> new LocalDateSegment<>(p, BigDecimal.ZERO))
-            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
+        var requestTidslinje = new LocalDateTimeline<>(request.aktivitetskravPerioder());
 
         // Ingen perioder i request = ikke behov for dokumentasjon
         if (requestTidslinje.isEmpty()) {
@@ -65,10 +64,21 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
             return true;
         }
 
-        return finnesBehovForDokumentasjon(requestTidslinje, morsAktivitet);
+        var tidslinjeUttak = request.aktivitetskravPerioder().stream()
+            .filter(p -> PeriodeMedAktivitetskravType.UTTAK.equals(p.getValue()))
+            .map(p -> new LocalDateSegment<>(p.getLocalDateInterval(), BigDecimal.ZERO))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
+
+        var tidslinjeUtsettelse = request.aktivitetskravPerioder().stream()
+            .filter(p -> PeriodeMedAktivitetskravType.UTSETTELSE.equals(p.getValue()))
+            .map(p -> new LocalDateSegment<>(p.getLocalDateInterval(), BigDecimal.ZERO))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
+
+        return (!tidslinjeUttak.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttak, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet))
+            || !tidslinjeUtsettelse.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUtsettelse, KRAV_FOR_DOKUMENTASJON_UTSETTELSE, morsAktivitet);
     }
 
-    private boolean finnesBehovForDokumentasjon(LocalDateTimeline<BigDecimal> requestTidslinje,
+    private boolean finnesBehovForDokumentasjon(LocalDateTimeline<BigDecimal> requestTidslinje, BigDecimal minsteStillingsprosent,
                                                 Map<ArbeidsforholdIdentifikator, List<Arbeidsforhold>> morsAktivitet) {
         List<LocalDateTimeline<BigDecimal>> tidslinjerPrArbeidsforhold = new ArrayList<>();
 
@@ -96,7 +106,7 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
         var summertStillingsprosent = summerStillingsprosentTidslinje(requestTidslinje, tidslinjerPrArbeidsforhold);
 
         // Krever dokumentasjon dersom en av request-periodene har arbeid under 75%.
-        return summertStillingsprosent.stream().anyMatch(s -> s.getValue().compareTo(KRAV_FOR_DOKUMENTASJON) < 0);
+        return summertStillingsprosent.stream().anyMatch(s -> s.getValue().compareTo(minsteStillingsprosent) < 0);
     }
 
     private static LocalDateTimeline<BigDecimal> summerStillingsprosentTidslinje(LocalDateTimeline<BigDecimal> requestTidslinje,
