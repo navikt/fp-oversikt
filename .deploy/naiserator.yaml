@@ -71,6 +71,13 @@ spec:
     autoInstrumentation:
       enabled: true
       runtime: java
+      destinations:
+        - id: "grafana-lgtm"
+        - id: "elastic-apm"
+    logging:
+      destinations:
+        - id: loki
+        - id: elastic
   accessPolicy:
     inbound:
       rules:
