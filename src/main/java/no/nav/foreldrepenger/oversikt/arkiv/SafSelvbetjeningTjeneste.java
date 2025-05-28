@@ -1,5 +1,14 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -7,6 +16,8 @@ import jakarta.validation.constraints.NotNull;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 import no.nav.safselvbetjening.Datotype;
 import no.nav.safselvbetjening.DokumentInfo;
 import no.nav.safselvbetjening.DokumentInfoResponseProjection;
@@ -23,14 +34,6 @@ import no.nav.safselvbetjening.SakResponseProjection;
 import no.nav.safselvbetjening.Tema;
 import no.nav.vedtak.felles.integrasjon.safselvbetjening.HentDokumentQuery;
 import no.nav.vedtak.felles.integrasjon.safselvbetjening.SafSelvbetjening;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 
 @ApplicationScoped
 public class SafSelvbetjeningTjeneste {
@@ -50,7 +53,11 @@ public class SafSelvbetjeningTjeneste {
     }
 
     public byte[] hentDokument(JournalpostId journalpostId, @Valid @NotNull DokumentId dokumentId) {
-        return safSelvbetjening.hentDokument(new HentDokumentQuery(journalpostId.verdi(), dokumentId.verdi()));
+        try {
+            return safSelvbetjening.hentDokument(new HentDokumentQuery(journalpostId.verdi(), dokumentId.verdi()));
+        } catch (no.nav.vedtak.exception.ManglerTilgangException manglerTilgangException) {
+            throw new ManglerTilgangException(FeilKode.IKKE_TILGANG_TIL_DOKUMENT, manglerTilgangException);
+        }
     }
 
     public List<EnkelJournalpostSelvbetjening> alleJournalposter(Fødselsnummer fnr) {
