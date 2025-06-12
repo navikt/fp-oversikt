@@ -267,6 +267,21 @@ class SakFP0Test {
         assertThat(dto.ønskerJustertUttakVedFødsel()).isTrue();
     }
 
+    @Test
+    void skal_mappe_rettigheter_begge_rett_hvis_søkt_aleneomsorg_men_uttak_er_innvilget_kvote() {
+        var uttaksperioder = List.of(uttaksperiode(now(), now(),
+            new Uttaksperiode.Resultat(INNVILGET, ANNET, uttaksperiodeAktivitet(new Trekkdager(20), MØDREKVOTE), false)));
+
+        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE);
+        var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
+            new Rettigheter(true, false, false), false, LocalDateTime.now());
+
+        var dto = sak.tilSakDto(annenpartUbeskyttetAdresse());
+        assertThat(dto.rettighetType()).isEqualTo(RettighetType.BEGGE_RETT);
+        assertThat(dto.morUføretrygd()).isFalse();
+        assertThat(dto.harAnnenForelderTilsvarendeRettEØS()).isFalse();
+    }
+
     private static FamilieHendelse fh() {
         return new FamilieHendelse(now(), now().plusDays(1), 1, now().plusDays(2));
     }
