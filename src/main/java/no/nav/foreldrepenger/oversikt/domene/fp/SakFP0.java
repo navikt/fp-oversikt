@@ -105,15 +105,18 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         if (rettigheter == null) {
             return null;
         }
+        if (!uttaksperioder.isEmpty()) {
+            var trekkDagerMedForeldrepengerKonto = uttaksperioder.stream().anyMatch(p -> p.resultat().trekkerFraKonto(FORELDREPENGER));
+            if (trekkDagerMedForeldrepengerKonto) {
+                return rettigheter.aleneomsorg() ? RettighetType.ALENEOMSORG : RettighetType.BARE_SØKER_RETT;
+            }
+            return RettighetType.BEGGE_RETT;
+        }
         if (rettigheter.aleneomsorg()) {
             return RettighetType.ALENEOMSORG;
         }
         if (rettigheter.annenForelderTilsvarendeRettEØS()) {
             return RettighetType.BARE_SØKER_RETT;
-        }
-        if (!uttaksperioder.isEmpty()) {
-            var trekkDagerMedForeldrepengerKonto = uttaksperioder.stream().anyMatch(p -> p.resultat().trekkerFraKonto(FORELDREPENGER));
-            return trekkDagerMedForeldrepengerKonto ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
         }
         return søknadsperioder.stream().anyMatch(sp -> FORELDREPENGER.equals(sp.konto())) ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
     }
