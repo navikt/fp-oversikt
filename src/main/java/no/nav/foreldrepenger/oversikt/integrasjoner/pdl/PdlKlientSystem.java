@@ -38,6 +38,7 @@ public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppsl
     private static final LRUCache<String, Fødselsnummer> AKTØR_FNR = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
     private static final LRUCache<String, AktørId> FNR_AKTØR = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
     private static final LRUCache<String, AdresseBeskyttelse> FNR_ADRESSE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
+    private static final LRUCache<String, String> IDENT_NAVN = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
 
     @Override
     public Fødselsnummer fødselsnummer(AktørId aktørId) {
@@ -86,6 +87,9 @@ public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppsl
 
     @Override
     public String navn(String ident) {
+        if (IDENT_NAVN.get(ident) != null) {
+            return IDENT_NAVN.get(ident);
+        }
         var request = new HentPersonQueryRequest();
         request.setIdent(ident);
         var projection = new PersonResponseProjection()
@@ -95,10 +99,12 @@ public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppsl
         if (person == null) {
             return "Ukjent person";
         }
-        return person.getNavn().stream()
+        var navn = person.getNavn().stream()
             .map(PdlKlientSystem::mapNavn)
             .filter(Objects::nonNull)
             .findFirst().orElse("Ukjent navn");
+        IDENT_NAVN.put(ident, navn);
+        return navn;
     }
 
     @Override

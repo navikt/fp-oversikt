@@ -111,7 +111,7 @@ public class MineArbeidsforholdTjeneste {
         return interval.overlaps(new LocalDateInterval(LocalDate.now(), LocalDate.now()));
     }
 
-    private String tilArbeidsgiverTypeFrontend(ArbeidsforholdIdentifikator a) {
+    private static String tilArbeidsgiverTypeFrontend(ArbeidsforholdIdentifikator a) {
         if (VirksomhetTjeneste.erOrganisasjonsNummer(a.arbeidsgiver())) {
             return "orgnr";
         } else if (erIdent(a.arbeidsgiver())) {
