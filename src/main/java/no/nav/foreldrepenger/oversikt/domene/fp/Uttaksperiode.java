@@ -77,6 +77,9 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
     }
 
     private Optional<UttaksperiodeAktivitet> finnGradertAktivitet(Resultat resultat) {
+        if (Resultat.Type.INNVILGET.equals(resultat.type())) {
+            return Optional.empty();
+        }
         return safeStream(resultat.aktiviteter())
             .max(Comparator.comparing(UttaksperiodeAktivitet::arbeidstidsprosent))
             .filter(a -> a.arbeidstidsprosent.merEnn0());
