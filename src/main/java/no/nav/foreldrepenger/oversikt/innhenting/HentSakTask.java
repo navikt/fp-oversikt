@@ -369,7 +369,7 @@ public class HentSakTask implements ProsessTaskHandler {
         if (vedtakDto == null) {
             return null;
         }
-        return new FpVedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()), tilDekningsgrad(vedtakDto.dekningsgrad()));
+        return new FpVedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()),tilDekningsgrad(vedtakDto.dekningsgrad()));
     }
 
     private static List<Uttaksperiode> tilUttaksperiode(List<FpSak.Uttaksperiode> perioder) {

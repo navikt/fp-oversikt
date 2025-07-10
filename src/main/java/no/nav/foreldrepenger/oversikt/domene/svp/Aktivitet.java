@@ -17,11 +17,11 @@ public record Aktivitet(@JsonProperty("type") Type type,
         SELVSTENDIG_NÆRINGSDRIVENDE,
         FRILANS;
 
-        public no.nav.foreldrepenger.common.innsyn.Aktivitet.Type tilDto() {
+        public no.nav.foreldrepenger.common.innsyn.Aktivitet.AktivitetType tilDto() {
             return switch (this) {
-                case ORDINÆRT_ARBEID -> no.nav.foreldrepenger.common.innsyn.Aktivitet.Type.ORDINÆRT_ARBEID;
-                case SELVSTENDIG_NÆRINGSDRIVENDE -> no.nav.foreldrepenger.common.innsyn.Aktivitet.Type.SELVSTENDIG_NÆRINGSDRIVENDE;
-                case FRILANS -> no.nav.foreldrepenger.common.innsyn.Aktivitet.Type.FRILANS;
+                case ORDINÆRT_ARBEID -> no.nav.foreldrepenger.common.innsyn.Aktivitet.AktivitetType.ORDINÆRT_ARBEID;
+                case SELVSTENDIG_NÆRINGSDRIVENDE -> no.nav.foreldrepenger.common.innsyn.Aktivitet.AktivitetType.SELVSTENDIG_NÆRINGSDRIVENDE;
+                case FRILANS -> no.nav.foreldrepenger.common.innsyn.Aktivitet.AktivitetType.FRILANS;
             };
         }
     }

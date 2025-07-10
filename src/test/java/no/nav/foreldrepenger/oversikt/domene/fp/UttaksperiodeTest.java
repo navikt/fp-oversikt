@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
-import static no.nav.foreldrepenger.common.innsyn.BrukerRolle.*;
+import static no.nav.foreldrepenger.common.innsyn.BrukerRolleSak.FAR_MEDMOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -25,19 +25,19 @@ class UttaksperiodeTest {
         assertThat(dto.fom()).isEqualTo(periode.fom());
         var uttaksperiodeAktivitet = periode.resultat().aktiviteter().stream().findFirst().orElseThrow();
         assertThat(dto.gradering().arbeidstidprosent().value()).isEqualTo(uttaksperiodeAktivitet.arbeidstidsprosent().decimalValue());
-        assertThat(dto.gradering().aktivitet().type()).isEqualTo(Aktivitet.Type.ORDINÆRT_ARBEID);
+        assertThat(dto.gradering().aktivitet().type()).isEqualTo(Aktivitet.AktivitetType.ORDINÆRT_ARBEID);
         assertThat(dto.gradering().aktivitet().arbeidsgiver().type()).isEqualTo(no.nav.foreldrepenger.common.innsyn.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON);
         assertThat(dto.gradering().aktivitet().arbeidsgiver().id()).isEqualTo(uttaksperiodeAktivitet.aktivitet().arbeidsgiver().identifikator());
         assertThat(dto.kontoType()).isEqualTo(KontoType.MØDREKVOTE);
         assertThat(dto.morsAktivitet()).isEqualTo(no.nav.foreldrepenger.common.innsyn.MorsAktivitet.ARBEID);
         assertThat(dto.flerbarnsdager()).isTrue();
         assertThat(dto.samtidigUttak()).isNull();
-        assertThat(dto.oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER);
-        assertThat(dto.utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UtsettelseÅrsak.SØKER_SYKDOM);
-        assertThat(dto.overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.SYKDOM_ANNEN_FORELDER);
+        assertThat(dto.oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakOppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER);
+        assertThat(dto.utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakUtsettelseÅrsak.SØKER_SYKDOM);
+        assertThat(dto.overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakOverføringÅrsak.SYKDOM_ANNEN_FORELDER);
         assertThat(dto.resultat().trekkerDager()).isTrue();
         assertThat(dto.resultat().trekkerMinsterett()).isTrue();
-        assertThat(dto.resultat().årsak()).isEqualTo(UttakPeriodeResultat.Årsak.ANNET);
+        assertThat(dto.resultat().årsak()).isEqualTo(UttakPeriodeResultat.UttakPeriodeResultatÅrsak.ANNET);
         assertThat(dto.forelder()).isEqualTo(FAR_MEDMOR);
     }
 

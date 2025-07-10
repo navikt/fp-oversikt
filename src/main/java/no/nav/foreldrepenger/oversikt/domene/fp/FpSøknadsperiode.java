@@ -10,7 +10,7 @@ public record FpSøknadsperiode(LocalDate fom, LocalDate tom, Konto konto, Utset
                                OverføringÅrsak overføringÅrsak, Gradering gradering, Prosent samtidigUttak, Boolean flerbarnsdager,
                                MorsAktivitet morsAktivitet) {
 
-    public UttakPeriode tilDto(no.nav.foreldrepenger.common.innsyn.BrukerRolle brukerRolle) {
+    public UttakPeriode tilDto(no.nav.foreldrepenger.common.innsyn.BrukerRolleSak brukerRolle) {
         var kontoType = konto == null ? null : konto.tilDto();
         var utsettelse = utsettelseÅrsak() == null ? null : utsettelseÅrsak().tilDto();
         var opphold = oppholdÅrsak() == null ? null : oppholdÅrsak().tilDto();

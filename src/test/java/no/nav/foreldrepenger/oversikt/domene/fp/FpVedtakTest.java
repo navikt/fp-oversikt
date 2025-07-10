@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.common.innsyn.BrukerRolle;
+import no.nav.foreldrepenger.common.innsyn.BrukerRolleSak;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 
@@ -26,7 +26,7 @@ class FpVedtakTest {
         var vedtak = new FpVedtak(LocalDateTime.now(),
             List.of(uttaksperiode1, uttaksperiode2, uttaksperiode3, uttaksperiode4, uttaksperiode5, uttaksperiode6), Dekningsgrad.HUNDRE);
 
-        var resultat = vedtak.tilDto(BrukerRolle.MOR).perioder();
+        var resultat = vedtak.tilDto(BrukerRolleSak.MOR).perioder();
         assertThat(resultat).hasSize(3);
         assertThat(resultat.getFirst().fom()).isEqualTo(uttaksperiode1.fom());
         assertThat(resultat.getFirst().tom()).isEqualTo(uttaksperiode4.tom());

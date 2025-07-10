@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.innsyn.AnnenPartSak;
-import no.nav.foreldrepenger.common.innsyn.Dekningsgrad;
+import no.nav.foreldrepenger.common.innsyn.DekningsgradSak;
 import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
@@ -71,8 +71,8 @@ public class AnnenPartSakTjeneste {
         var termindato = gjeldendeSak.familieHendelse().termindato();
         var antallBarn = gjeldendeSak.familieHendelse().antallBarn();
         var dekningsgrad = switch (gjeldendeSak.dekningsgrad()) {
-            case ÅTTI -> Dekningsgrad.ÅTTI;
-            case HUNDRE -> Dekningsgrad.HUNDRE;
+            case ÅTTI -> DekningsgradSak.ÅTTI;
+            case HUNDRE -> DekningsgradSak.HUNDRE;
         };
         var uttakperioder = finnUttaksperioder(gjeldendeSak);
         return Optional.of(new AnnenPartSak(fjernArbeidsgivere(uttakperioder), termindato, dekningsgrad, antallBarn));
@@ -98,8 +98,8 @@ public class AnnenPartSakTjeneste {
         var termindato = gjeldendeSak.familieHendelse().termindato();
         var antallBarn = gjeldendeSak.familieHendelse().antallBarn();
         var dekningsgrad = switch (gjeldendeSak.dekningsgrad()) {
-            case ÅTTI -> Dekningsgrad.ÅTTI;
-            case HUNDRE -> Dekningsgrad.HUNDRE;
+            case ÅTTI -> DekningsgradSak.ÅTTI;
+            case HUNDRE -> DekningsgradSak.HUNDRE;
         };
         var vedtaksperioder = safeStream(gjeldendeVedtak.get().perioder()).map(p -> p.tilDto(gjeldendeSak.brukerRolle().tilDto())).toList();
         return Optional.of(new AnnenPartSak(compress(fjernArbeidsgivere(vedtaksperioder)), termindato, dekningsgrad, antallBarn));
