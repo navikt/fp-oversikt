@@ -78,7 +78,7 @@ class DtoMapperTest {
         assertThat(dto.åpenBehandling().søknad().arbeidsforhold()).hasSize(1);
         var arbeidsforholdSøknad = dto.åpenBehandling().søknad().arbeidsforhold().stream().findFirst().orElseThrow();
         assertThat(arbeidsforholdSøknad.aktivitet().arbeidsgiver().id()).isEqualTo(aktivitet.arbeidsgiver().identifikator());
-        assertThat(arbeidsforholdSøknad.aktivitet().type()).isEqualTo(no.nav.foreldrepenger.common.innsyn.Aktivitet.Type.ORDINÆRT_ARBEID);
+        assertThat(arbeidsforholdSøknad.aktivitet().type()).isEqualTo(no.nav.foreldrepenger.common.innsyn.Aktivitet.AktivitetType.ORDINÆRT_ARBEID);
         assertThat(arbeidsforholdSøknad.behovFrom()).isEqualTo(tilrettelegging.behovFom());
         assertThat(arbeidsforholdSøknad.tiltak()).isEqualTo(tilrettelegging.tiltak());
         assertThat(arbeidsforholdSøknad.risikofaktorer()).isEqualTo(tilrettelegging.risikoFaktorer());

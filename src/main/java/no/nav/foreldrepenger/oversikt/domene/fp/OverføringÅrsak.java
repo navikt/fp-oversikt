@@ -7,12 +7,12 @@ public enum OverføringÅrsak {
     ALENEOMSORG,
     ;
 
-    public no.nav.foreldrepenger.common.innsyn.OverføringÅrsak tilDto() {
+    public no.nav.foreldrepenger.common.innsyn.UttakOverføringÅrsak tilDto() {
         return switch (this) {
-            case INSTITUSJONSOPPHOLD_ANNEN_FORELDER -> no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.INSTITUSJONSOPPHOLD_ANNEN_FORELDER;
-            case SYKDOM_ANNEN_FORELDER -> no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.SYKDOM_ANNEN_FORELDER;
-            case IKKE_RETT_ANNEN_FORELDER -> no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER;
-            case ALENEOMSORG -> no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.ALENEOMSORG;
+            case INSTITUSJONSOPPHOLD_ANNEN_FORELDER -> no.nav.foreldrepenger.common.innsyn.UttakOverføringÅrsak.INSTITUSJONSOPPHOLD_ANNEN_FORELDER;
+            case SYKDOM_ANNEN_FORELDER -> no.nav.foreldrepenger.common.innsyn.UttakOverføringÅrsak.SYKDOM_ANNEN_FORELDER;
+            case IKKE_RETT_ANNEN_FORELDER -> no.nav.foreldrepenger.common.innsyn.UttakOverføringÅrsak.IKKE_RETT_ANNEN_FORELDER;
+            case ALENEOMSORG -> no.nav.foreldrepenger.common.innsyn.UttakOverføringÅrsak.ALENEOMSORG;
         };
     }
 }

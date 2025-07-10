@@ -143,7 +143,7 @@ class AnnenPartSakTjenesteTest {
 
         assertThat(annenPartSak.termindato()).isEqualTo(termindato);
         assertThat(annenPartSak.antallBarn()).isEqualTo(antallBarn);
-        assertThat(annenPartSak.dekningsgrad()).isEqualTo(no.nav.foreldrepenger.common.innsyn.Dekningsgrad.ÅTTI);
+        assertThat(annenPartSak.dekningsgrad()).isEqualTo(no.nav.foreldrepenger.common.innsyn.DekningsgradSak.ÅTTI);
         assertThat(annenPartSak.perioder()).hasSize(1);
         assertThat(annenPartSak.perioder().getFirst().fom()).isEqualTo(søknadsperiode.fom());
         assertThat(annenPartSak.perioder().getFirst().tom()).isEqualTo(søknadsperiode.tom());

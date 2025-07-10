@@ -1,5 +1,14 @@
 package no.nav.foreldrepenger.oversikt.oppslag.mapper;
 
+import static java.util.Comparator.comparing;
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.domain.felles.Bankkonto;
 import no.nav.foreldrepenger.common.domain.felles.Kjønn;
@@ -14,15 +23,6 @@ import no.nav.pdl.Foedselsdato;
 import no.nav.pdl.Kjoenn;
 import no.nav.pdl.Navn;
 import no.nav.pdl.Person;
-
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import static java.util.Comparator.comparing;
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 public class PersonDtoMapper {
 
@@ -98,22 +98,22 @@ public class PersonDtoMapper {
                 .filter(Objects::nonNull)
                 .map(PersonDtoMapper::tilSivilstand)
                 .findFirst()
-                .orElse(new Sivilstand(Sivilstand.Type.UOPPGITT));
+                .orElse(new Sivilstand(Sivilstand.SivilstandType.UOPPGITT));
     }
 
     private static Sivilstand tilSivilstand(no.nav.pdl.Sivilstand sivilstand) {
         var type = switch (sivilstand.getType()) {
-            case UOPPGITT -> Sivilstand.Type.UOPPGITT;
-            case UGIFT -> Sivilstand.Type.UGIFT;
-            case GIFT -> Sivilstand.Type.GIFT;
-            case ENKE_ELLER_ENKEMANN -> Sivilstand.Type.ENKE_ELLER_ENKEMANN;
-            case SKILT -> Sivilstand.Type.SKILT;
-            case SEPARERT -> Sivilstand.Type.SEPARERT;
-            case REGISTRERT_PARTNER -> Sivilstand.Type.REGISTRERT_PARTNER;
-            case SEPARERT_PARTNER -> Sivilstand.Type.SEPARERT_PARTNER;
-            case SKILT_PARTNER -> Sivilstand.Type.SKILT_PARTNER;
-            case GJENLEVENDE_PARTNER -> Sivilstand.Type.GJENLEVENDE_PARTNER;
-            case null -> Sivilstand.Type.UOPPGITT;
+            case UOPPGITT -> Sivilstand.SivilstandType.UOPPGITT;
+            case UGIFT -> Sivilstand.SivilstandType.UGIFT;
+            case GIFT -> Sivilstand.SivilstandType.GIFT;
+            case ENKE_ELLER_ENKEMANN -> Sivilstand.SivilstandType.ENKE_ELLER_ENKEMANN;
+            case SKILT -> Sivilstand.SivilstandType.SKILT;
+            case SEPARERT -> Sivilstand.SivilstandType.SEPARERT;
+            case REGISTRERT_PARTNER -> Sivilstand.SivilstandType.REGISTRERT_PARTNER;
+            case SEPARERT_PARTNER -> Sivilstand.SivilstandType.SEPARERT_PARTNER;
+            case SKILT_PARTNER -> Sivilstand.SivilstandType.SKILT_PARTNER;
+            case GJENLEVENDE_PARTNER -> Sivilstand.SivilstandType.GJENLEVENDE_PARTNER;
+            case null -> Sivilstand.SivilstandType.UOPPGITT;
         };
         return new Sivilstand(type);
     }

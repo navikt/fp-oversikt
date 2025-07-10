@@ -24,6 +24,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import no.nav.foreldrepenger.common.domain.felles.Kjønn;
+import no.nav.foreldrepenger.common.domain.felles.Sivilstand;
 import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
@@ -88,7 +89,7 @@ class OppslagTjenesteTest {
         assertThat(søkerDto.navn().etternavn()).isEqualTo("Kanari");
         assertThat(søkerDto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(søkerDto.fødselsdato()).isEqualTo(LocalDate.now().minusYears(28));
-        assertThat(søkerDto.sivilstand()).isEqualTo(new no.nav.foreldrepenger.common.domain.felles.Sivilstand(no.nav.foreldrepenger.common.domain.felles.Sivilstand.Type.UGIFT));
+        assertThat(søkerDto.sivilstand()).isEqualTo(new no.nav.foreldrepenger.common.domain.felles.Sivilstand(Sivilstand.SivilstandType.UGIFT));
         assertThat(søkerDto.målform()).isEqualTo(Målform.NB);
         assertThat(søkerDto.bankkonto().kontonummer()).isEqualTo("123456789");
         assertThat(søkerDto.barn()).isEmpty();
@@ -155,7 +156,7 @@ class OppslagTjenesteTest {
         assertThat(søkerDto.navn().etternavn()).isEqualTo("Kanari");
         assertThat(søkerDto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(søkerDto.fødselsdato()).isEqualTo(LocalDate.now().minusYears(28));
-        assertThat(søkerDto.sivilstand()).isEqualTo(new no.nav.foreldrepenger.common.domain.felles.Sivilstand(no.nav.foreldrepenger.common.domain.felles.Sivilstand.Type.UGIFT));
+        assertThat(søkerDto.sivilstand()).isEqualTo(new no.nav.foreldrepenger.common.domain.felles.Sivilstand(Sivilstand.SivilstandType.UGIFT));
         assertThat(søkerDto.målform()).isEqualTo(Målform.NB);
         assertThat(søkerDto.bankkonto().kontonummer()).isEqualTo("123456789");
         assertThat(søkerDto.barn()).hasSize(1);
@@ -234,7 +235,7 @@ class OppslagTjenesteTest {
         assertThat(søkerDto.navn().etternavn()).isEqualTo("Kanari");
         assertThat(søkerDto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(søkerDto.fødselsdato()).isEqualTo(LocalDate.now().minusYears(28));
-        assertThat(søkerDto.sivilstand()).isEqualTo(new no.nav.foreldrepenger.common.domain.felles.Sivilstand(no.nav.foreldrepenger.common.domain.felles.Sivilstand.Type.UGIFT));
+        assertThat(søkerDto.sivilstand()).isEqualTo(new no.nav.foreldrepenger.common.domain.felles.Sivilstand(Sivilstand.SivilstandType.UGIFT));
         assertThat(søkerDto.målform()).isEqualTo(Målform.NB);
         assertThat(søkerDto.bankkonto().kontonummer()).isEqualTo("123456789");
         assertThat(søkerDto.barn()).hasSize(2);

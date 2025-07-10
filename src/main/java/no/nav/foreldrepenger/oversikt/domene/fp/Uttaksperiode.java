@@ -11,7 +11,7 @@ import java.util.stream.Collectors;
 
 import no.nav.foreldrepenger.common.innsyn.Aktivitet;
 import no.nav.foreldrepenger.common.innsyn.Arbeidstidprosent;
-import no.nav.foreldrepenger.common.innsyn.BrukerRolle;
+import no.nav.foreldrepenger.common.innsyn.BrukerRolleSak;
 import no.nav.foreldrepenger.common.innsyn.Gradering;
 import no.nav.foreldrepenger.common.innsyn.SamtidigUttak;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
@@ -25,7 +25,7 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
                             OverføringÅrsak overføringÅrsak, Prosent samtidigUttak, Boolean flerbarnsdager,
                             MorsAktivitet morsAktivitet, Resultat resultat) {
 
-    public UttakPeriode tilDto(BrukerRolle brukerRolle) {
+    public UttakPeriode tilDto(BrukerRolleSak brukerRolle) {
         var trekkerDager = safeStream(resultat().aktiviteter()).anyMatch(a -> a.trekkdager().merEnn0());
 
         var utsettelse = utsettelseÅrsak() == null ? null : utsettelseÅrsak().tilDto();
@@ -108,13 +108,13 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
             INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID,
             ANNET;
 
-            public UttakPeriodeResultat.Årsak tilDto() {
+            public UttakPeriodeResultat.UttakPeriodeResultatÅrsak tilDto() {
                 return switch (this) {
-                    case AVSLAG_HULL_I_UTTAKSPLAN -> UttakPeriodeResultat.Årsak.AVSLAG_HULL_MELLOM_FORELDRENES_PERIODER;
-                    case AVSLAG_FRATREKK_PLEIEPENGER -> UttakPeriodeResultat.Årsak.AVSLAG_FRATREKK_PLEIEPENGER;
-                    case AVSLAG_UTSETTELSE_TILBAKE_I_TID -> UttakPeriodeResultat.Årsak.AVSLAG_UTSETTELSE_TILBAKE_I_TID;
-                    case INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID -> UttakPeriodeResultat.Årsak.INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID;
-                    case ANNET -> UttakPeriodeResultat.Årsak.ANNET;
+                    case AVSLAG_HULL_I_UTTAKSPLAN -> UttakPeriodeResultat.UttakPeriodeResultatÅrsak.AVSLAG_HULL_MELLOM_FORELDRENES_PERIODER;
+                    case AVSLAG_FRATREKK_PLEIEPENGER -> UttakPeriodeResultat.UttakPeriodeResultatÅrsak.AVSLAG_FRATREKK_PLEIEPENGER;
+                    case AVSLAG_UTSETTELSE_TILBAKE_I_TID -> UttakPeriodeResultat.UttakPeriodeResultatÅrsak.AVSLAG_UTSETTELSE_TILBAKE_I_TID;
+                    case INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID -> UttakPeriodeResultat.UttakPeriodeResultatÅrsak.INNVILGET_UTTAK_AVSLÅTT_GRADERING_TILBAKE_I_TID;
+                    case ANNET -> UttakPeriodeResultat.UttakPeriodeResultatÅrsak.ANNET;
                 };
             }
         }

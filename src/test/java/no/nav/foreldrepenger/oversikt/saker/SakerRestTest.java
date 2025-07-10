@@ -1,8 +1,28 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
+import static java.time.LocalDate.now;
+import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
+import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettHentSakTask;
+import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
+import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Type;
+import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Årsak;
+import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
+import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
-import no.nav.foreldrepenger.common.innsyn.Dekningsgrad;
+import no.nav.foreldrepenger.common.innsyn.DekningsgradSak;
 import no.nav.foreldrepenger.common.innsyn.KontoType;
 import no.nav.foreldrepenger.common.innsyn.Person;
 import no.nav.foreldrepenger.common.innsyn.RettighetType;
@@ -30,25 +50,6 @@ import no.nav.foreldrepenger.oversikt.innhenting.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.stub.FpsakTjenesteStub;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
-import static java.time.LocalDate.now;
-import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
-import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettHentSakTask;
-import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
-import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Type;
-import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.Uttaksperiode.Resultat.Årsak;
-import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
 
 class SakerRestTest {
 
@@ -95,7 +96,7 @@ class SakerRestTest {
         var sakFraDbOmgjortTilDto = sakerFraDBtilDto.getFirst();
         assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
         assertThat(sakFraDbOmgjortTilDto.sakAvsluttet()).isTrue();
-        assertThat(sakFraDbOmgjortTilDto.dekningsgrad()).isEqualTo(Dekningsgrad.HUNDRE);
+        assertThat(sakFraDbOmgjortTilDto.dekningsgrad()).isEqualTo(DekningsgradSak.HUNDRE);
         var vedtaksperioder = sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder();
         assertThat(vedtaksperioder).hasSameSizeAs(vedtak.uttaksperioder());
         assertThat(vedtaksperioder.getFirst().fom()).isEqualTo(vedtak.uttaksperioder().getFirst().fom());
@@ -104,9 +105,9 @@ class SakerRestTest {
         assertThat(vedtaksperioder.getFirst().resultat().trekkerDager()).isTrue();
         assertThat(vedtaksperioder.getFirst().kontoType()).isEqualTo(KontoType.FORELDREPENGER);
         assertThat(vedtaksperioder.getFirst().gradering().arbeidstidprosent().value()).isEqualTo(arbeidstidsprosent.decimalValue());
-        assertThat(vedtaksperioder.getFirst().utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UtsettelseÅrsak.FRI);
-        assertThat(vedtaksperioder.getFirst().oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER);
-        assertThat(vedtaksperioder.getFirst().overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER);
+        assertThat(vedtaksperioder.getFirst().utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakUtsettelseÅrsak.FRI);
+        assertThat(vedtaksperioder.getFirst().oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakOppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER);
+        assertThat(vedtaksperioder.getFirst().overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakOverføringÅrsak.IKKE_RETT_ANNEN_FORELDER);
         assertThat(vedtaksperioder.getFirst().samtidigUttak()).isNull();
         assertThat(vedtaksperioder.getFirst().morsAktivitet()).isEqualTo(no.nav.foreldrepenger.common.innsyn.MorsAktivitet.INNLAGT);
         assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());

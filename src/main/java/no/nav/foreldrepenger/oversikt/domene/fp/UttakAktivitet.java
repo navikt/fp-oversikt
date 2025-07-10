@@ -10,13 +10,13 @@ public record UttakAktivitet(Type type, Arbeidsgiver arbeidsgiver, String arbeid
         FRILANS,
         ANNET;
 
-        public Aktivitet.Type tilDto() {
+        public Aktivitet.AktivitetType tilDto() {
             return switch (this) {
 
-                case ORDINÆRT_ARBEID -> Aktivitet.Type.ORDINÆRT_ARBEID;
-                case SELVSTENDIG_NÆRINGSDRIVENDE -> Aktivitet.Type.SELVSTENDIG_NÆRINGSDRIVENDE;
-                case FRILANS -> Aktivitet.Type.FRILANS;
-                case ANNET -> Aktivitet.Type.ANNET;
+                case ORDINÆRT_ARBEID -> Aktivitet.AktivitetType.ORDINÆRT_ARBEID;
+                case SELVSTENDIG_NÆRINGSDRIVENDE -> Aktivitet.AktivitetType.SELVSTENDIG_NÆRINGSDRIVENDE;
+                case FRILANS -> Aktivitet.AktivitetType.FRILANS;
+                case ANNET -> Aktivitet.AktivitetType.ANNET;
             };
         }
     }

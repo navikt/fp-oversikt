@@ -9,14 +9,14 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.common.innsyn.BrukerRolle;
+import no.nav.foreldrepenger.common.innsyn.BrukerRolleSak;
 import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 
 public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
                        @JsonProperty("perioder") List<Uttaksperiode> perioder,
                        @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad) {
 
-    public no.nav.foreldrepenger.common.innsyn.FpVedtak tilDto(BrukerRolle brukerRolle) {
+    public no.nav.foreldrepenger.common.innsyn.FpVedtak tilDto(BrukerRolleSak brukerRolle) {
         var sortert = safeStream(perioder).map(p -> p.tilDto(brukerRolle)).sorted(Comparator.comparing(UttakPeriode::fom)).toList();
         var compressed = compress(sortert);
         return new no.nav.foreldrepenger.common.innsyn.FpVedtak(compressed);
