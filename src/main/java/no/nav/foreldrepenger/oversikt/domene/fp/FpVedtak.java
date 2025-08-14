@@ -14,12 +14,19 @@ import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
 
 public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
                        @JsonProperty("perioder") List<Uttaksperiode> perioder,
-                       @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad) {
+                       @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad,
+                       @JsonProperty("annenpartEøsUttaksperioder") List<UttakPeriodeAnnenpartEøs> annenpartEøsUttaksperioder) {
 
     public no.nav.foreldrepenger.common.innsyn.FpVedtak tilDto(BrukerRolleSak brukerRolle) {
-        var sortert = safeStream(perioder).map(p -> p.tilDto(brukerRolle)).sorted(Comparator.comparing(UttakPeriode::fom)).toList();
-        var compressed = compress(sortert);
-        return new no.nav.foreldrepenger.common.innsyn.FpVedtak(compressed);
+        var sortertUttaksperioder = safeStream(perioder)
+            .map(p -> p.tilDto(brukerRolle))
+            .sorted(Comparator.comparing(UttakPeriode::fom))
+            .toList();
+        var sortertUttaksperioderAnnenpartEøs = safeStream(annenpartEøsUttaksperioder)
+            .map(UttakPeriodeAnnenpartEøs::tilDto)
+            .sorted(Comparator.comparing(no.nav.foreldrepenger.common.innsyn.UttakPeriodeAnnenpartEøs::fom))
+            .toList();
+        return new no.nav.foreldrepenger.common.innsyn.FpVedtak(compress(sortertUttaksperioder), sortertUttaksperioderAnnenpartEøs);
     }
 
     public boolean innvilget() {

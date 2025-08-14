@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +29,11 @@ public record FpSak(String saksnummer,
         HUNDRE
     }
 
-    public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, FpSak.Dekningsgrad dekningsgrad) {
+    public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, Dekningsgrad dekningsgrad,
+                         List<UttaksperiodeAnnenpartEøs> annenpartEøsUttaksperioder) {
+    }
+
+    public record UttaksperiodeAnnenpartEøs(LocalDate fom, LocalDate tom, Konto konto, BigDecimal trekkdager) {
     }
 
     public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utsettelseÅrsak, OppholdÅrsak oppholdÅrsak,

@@ -77,7 +77,7 @@ class SakerRestTest {
             new Resultat(Type.INNVILGET_GRADERING, Årsak.ANNET,
                 Set.of(new Uttaksperiode.UttaksperiodeAktivitet(aktivitet, Konto.FORELDREPENGER, new Trekkdager(10), arbeidstidsprosent)), false));
         var uttaksperioder = List.of(uttaksperiodeDto);
-        var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Dekningsgrad.HUNDRE);
+        var vedtak = new FpSak.Vedtak(LocalDateTime.now(), uttaksperioder, FpSak.Dekningsgrad.HUNDRE, null);
 
         var aktørIdAnnenPart = AktørId.dummy();
         var aktørIdBarn = AktørId.dummy();
