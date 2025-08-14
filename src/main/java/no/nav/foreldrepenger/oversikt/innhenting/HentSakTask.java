@@ -37,6 +37,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.fp.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
+import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
 import no.nav.foreldrepenger.oversikt.domene.svp.Aktivitet;
 import no.nav.foreldrepenger.oversikt.domene.svp.ArbeidsforholdUttak;
@@ -369,7 +370,17 @@ public class HentSakTask implements ProsessTaskHandler {
         if (vedtakDto == null) {
             return null;
         }
-        return new FpVedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()),tilDekningsgrad(vedtakDto.dekningsgrad()));
+        return new FpVedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()), tilDekningsgrad(vedtakDto.dekningsgrad()),
+            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()));
+    }
+
+    private static List<UttakPeriodeAnnenpartEøs> tilUttaksperiodeAnnenpartEøs(List<FpSak.UttaksperiodeAnnenpartEøs> uttaksperiodeAnnenpartEøs) {
+        if (uttaksperiodeAnnenpartEøs == null) {
+            return List.of();
+        }
+        return uttaksperiodeAnnenpartEøs.stream()
+            .map(p -> new UttakPeriodeAnnenpartEøs(p.fom(), p.tom(), tilKonto(p.konto()), p.trekkdager()))
+            .toList();
     }
 
     private static List<Uttaksperiode> tilUttaksperiode(List<FpSak.Uttaksperiode> perioder) {
