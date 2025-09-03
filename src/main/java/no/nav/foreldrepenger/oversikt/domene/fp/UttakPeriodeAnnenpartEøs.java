@@ -11,6 +11,6 @@ public record UttakPeriodeAnnenpartEøs(@NotNull LocalDate fom,
                                        @NotNull BigDecimal trekkdager) {
 
     public no.nav.foreldrepenger.common.innsyn.UttakPeriodeAnnenpartEøs tilDto() {
-        return new no.nav.foreldrepenger.common.innsyn.UttakPeriodeAnnenpartEøs(fom, tom, kontoType.tilDto(), new no.nav.foreldrepenger.common.innsyn.UttakPeriodeAnnenpartEøs.Trekkdager(trekkdager));
+        return new no.nav.foreldrepenger.common.innsyn.UttakPeriodeAnnenpartEøs(fom, tom, kontoType.tilDto(), kontoType.tilDto(), new no.nav.foreldrepenger.common.innsyn.UttakPeriodeAnnenpartEøs.Trekkdager(trekkdager));
     }
 }
