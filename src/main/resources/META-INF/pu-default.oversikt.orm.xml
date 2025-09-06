@@ -2,8 +2,8 @@
 <entity-mappings xmlns="https://jakarta.ee/xml/ns/persistence/orm"
                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                  xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence/orm
-                 https://jakarta.ee/xml/ns/persistence/orm/orm_3_0.xsd"
-                 version="3.0">
+                 https://jakarta.ee/xml/ns/persistence/orm/orm_3_2.xsd"
+                 version="3.2">
 
     <sequence-generator name="SEQ_SAK" allocation-size="50" sequence-name="SEQ_SAK" />
     <sequence-generator name="SEQ_TILBAKEKREVING" allocation-size="50" sequence-name="SEQ_TILBAKEKREVING" />
