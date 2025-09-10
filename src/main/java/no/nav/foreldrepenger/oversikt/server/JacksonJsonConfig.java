@@ -18,6 +18,10 @@ public class JacksonJsonConfig implements ContextResolver<ObjectMapper>, FormatM
     private static final ObjectMapper MAPPER = DefaultJsonMapper.getObjectMapper();
     private static final FormatMapper FORMAT_MAPPER = new JacksonJsonFormatMapper(MAPPER);
 
+    public JacksonJsonConfig() {
+        // CDI
+    }
+
     @Override
     public ObjectMapper getContext(Class<?> type) {
         return MAPPER;
