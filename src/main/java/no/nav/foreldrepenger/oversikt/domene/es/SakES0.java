@@ -57,7 +57,7 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
 
     private EsÅpenBehandling tilÅpenBehandling() {
         return søknadUnderBehandling()
-            .map(s -> new EsÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt())))
+            .map(s -> new EsÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt(), s.mottattTidspunkt())))
             .orElse(null);
     }
 

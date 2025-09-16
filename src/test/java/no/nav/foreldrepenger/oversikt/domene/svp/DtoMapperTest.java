@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
 import no.nav.foreldrepenger.common.innsyn.svp.Vedtak;
+import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
@@ -41,8 +42,8 @@ class DtoMapperTest {
             Set.of(oppholdPeriode), null);
         var vedtak = new SvpVedtak(LocalDateTime.now(), Set.of(arbeidsforholdVedtak), SvpVedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON);
         var sakSVP0 = new SakSVP0(Saksnummer.dummy(), AktørId.dummy(), false, new FamilieHendelse(null, termindato, antallBarn, null),
-            Set.of(), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(), Set.of(tilrettelegging))), Set.of(vedtak),
-            LocalDateTime.now());
+            Set.of(new Aksjonspunkt(Aksjonspunkt.Type.ANNET, null, null)), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(),
+            Set.of(tilrettelegging))), Set.of(vedtak), LocalDateTime.now());
 
         var dto = sakSVP0.tilSakDto(annenpartUbeskyttetAdresse());
         assertThat(dto.sakAvsluttet()).isFalse();
