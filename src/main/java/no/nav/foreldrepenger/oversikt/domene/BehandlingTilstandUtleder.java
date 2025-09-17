@@ -26,7 +26,7 @@ public final class BehandlingTilstandUtleder {
 
         var aksjonspunkt = safeStream(ap).collect(Collectors.toSet());
         var tilstand = utledGittOpprettetAksjonspunkt(aksjonspunkt, søknadMottattTidspunkt);
-        LOG.info("Utledet behandlingtilstand {} for aksjonspunkter {} søknad mottatt {}", tilstand, ap, søknadMottattTidspunkt);
+        LOG.info("Utledet behandlingtilstand {} for aksjonspunkter {} søknad mottatt {}", tilstand, aksjonspunkt, søknadMottattTidspunkt);
         if (tilstand == BehandlingTilstand.PROSESSERER && ENV.isProd()) {
             return BehandlingTilstand.UNDER_BEHANDLING; // TODO TFP-5621 Til frontend er over på ny status
         }
