@@ -64,6 +64,7 @@ public interface Sak {
             VENT_SYKEMELDING,
             VENT_KABAL_KLAGE,
             VENT_PÅ_KABAL_ANKE,
+            ANNET,
         }
     }
 }

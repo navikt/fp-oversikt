@@ -134,7 +134,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
                 })
                 .sorted(Comparator.comparing(UttakPeriode::fom))
                 .toList();
-            return new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()), compress(perioder));
+            return new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt(), s.mottattTidspunkt()), compress(perioder));
         }).orElse(null);
     }
 

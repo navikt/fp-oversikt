@@ -352,6 +352,7 @@ public class HentSakTask implements ProsessTaskHandler {
                 case VENT_SYKEMELDING -> Aksjonspunkt.Type.VENT_SYKEMELDING;
                 case VENT_KABAL_KLAGE -> Aksjonspunkt.Type.VENT_KABAL_KLAGE;
                 case VENT_PÅ_KABAL_ANKE -> Aksjonspunkt.Type.VENT_PÅ_KABAL_ANKE;
+                case ANNET -> Aksjonspunkt.Type.ANNET;
             };
             return new Aksjonspunkt(type, venteårsak, a.tidsfrist());
         }).collect(Collectors.toSet());

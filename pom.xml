@@ -24,7 +24,7 @@
         <felles.version>7.6.0</felles.version>
         <prosesstask.version>5.2.0</prosesstask.version>
         <fp-kontrakter.version>9.4.1</fp-kontrakter.version>
-        <fpsoknad-felles.version>3.3.3</fpsoknad-felles.version>
+        <fpsoknad-felles.version>3.3.4</fpsoknad-felles.version>
 
         <fp-tidsserie.version>2.7.3</fp-tidsserie.version>
         <mittnav-varsler.version>2.1.1</mittnav-varsler.version>
@@ -353,7 +353,7 @@
             <url>https://packages.confluent.io/maven/</url>
         </repository>
         <repository>
-            <id>dok-github</id>
+            <id>github</id>
             <url>https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas</url>
         </repository>
         <!--Ditt nav brukernotifikasjoner-->

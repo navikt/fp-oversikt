@@ -41,6 +41,6 @@ public record Aksjonspunkt(@JsonProperty("type") Type type,
         VENT_SYKEMELDING,
         VENT_KABAL_KLAGE,
         VENT_PÅ_KABAL_ANKE,
-
+        ANNET,
     }
 }
