@@ -16,23 +16,10 @@ public class JettyDevServer extends JettyServer {
 
     protected static JettyDevServer jettyServer(String[] args) {
         // Resolve paths
-        String absolutePathHome = System.getProperty("user.home");
-        String keystoreRelativPath = ENV.getProperty("keystore.relativ.path");
-        String truststoreRelativPath = ENV.getProperty("truststore.relativ.path");
-        String keystoreTruststorePassword = ENV.getProperty("vtp.ssl.passord");
-
-        System.out.println("user.home: " + absolutePathHome);
-        System.out.println("keystore.relativ.path: " + keystoreRelativPath);
-        System.out.println("truststore.relativ.path: " + truststoreRelativPath);
-        System.out.println("vtp.ssl.passord: " + keystoreTruststorePassword);
-        System.out.println("TrustStore path: " + absolutePathHome + truststoreRelativPath + " exists: " + new java.io.File(absolutePathHome + truststoreRelativPath).exists());
-        System.out.println("KeyStore path: " + absolutePathHome + keystoreRelativPath + " exists: " + new java.io.File(absolutePathHome + keystoreRelativPath).exists());
-
-
         if (args.length > 0) {
             return new JettyDevServer(Integer.parseUnsignedInt(args[0]));
         }
-        return new JettyDevServer(ENV.getProperty("server.port", Integer.class, 8080));
+        return new JettyDevServer(8889);
     }
 
     private JettyDevServer(int serverPort) {
