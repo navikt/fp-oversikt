@@ -78,6 +78,13 @@ spec:
   accessPolicy:
     inbound:
       rules:
+        - application: engangsstonad
+        - application: foreldrepengeoversikt
+        - application: foreldrepengesoknad
+        - application: svangerskapspengesoknad
+        - application: planlegger
+        - application: veiviser-fp-eller-es
+        - application: veiviser-hvor-mye
         - application: foreldrepengesoknad-api
           namespace: teamforeldrepenger
           cluster: {{environment}}-gcp
