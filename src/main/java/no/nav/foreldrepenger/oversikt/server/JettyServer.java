@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.oversikt.server;
 
 import static org.eclipse.jetty.ee11.webapp.MetaInfConfiguration.CONTAINER_JAR_PATTERN;
 
-import java.io.File;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,32 +81,8 @@ public class JettyServer {
         return ctx;
     }
 
-    private static void konfigurerSikkerhet() {
-        if (ENV.isLocal()) {
-            initTrustStore();
-        }
-    }
-
-    private static void initTrustStore() {
-        final var trustStorePathProp = "javax.net.ssl.trustStore";
-        final var trustStorePasswordProp = "javax.net.ssl.trustStorePassword";
-
-        var defaultLocation = ENV.getProperty("user.home", ".") + "/.modig/truststore.jks";
-        var storePath = ENV.getProperty(trustStorePathProp, defaultLocation);
-        var storeFile = new File(storePath);
-        if (!storeFile.exists()) {
-            throw new IllegalStateException(
-                "Finner ikke truststore i " + storePath + "\n\tKonfigurer enten som System property '" + trustStorePathProp
-                    + "' eller environment variabel '" + trustStorePathProp.toUpperCase().replace('.', '_') + "'");
-        }
-        var password = ENV.getProperty(trustStorePasswordProp, "changeit");
-        System.setProperty(trustStorePathProp, storeFile.getAbsolutePath());
-        System.setProperty(trustStorePasswordProp, password);
-    }
-
     void bootStrap() throws Exception {
         System.setProperty("task.manager.runner.threads", "4");
-        konfigurerSikkerhet();
         var dataSource = setupDataSource();
         migrer(dataSource);
         start();
