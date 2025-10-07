@@ -26,7 +26,6 @@ public class UttakRest {
 
 
     @POST
-    @Path("/info")
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, KontoBeregningDto> personinfo(@Valid @NotNull KontoBeregningGrunnlagDto grunnlag) {
         guardFamiliehendelse(grunnlag);
