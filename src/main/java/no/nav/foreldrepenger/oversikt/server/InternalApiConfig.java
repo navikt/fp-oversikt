@@ -4,6 +4,7 @@ import java.util.Set;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import no.nav.foreldrepenger.oversikt.uttak.UttakRest;
 
 @ApplicationPath(InternalApiConfig.API_URI)
 public class InternalApiConfig extends Application {
@@ -16,7 +17,7 @@ public class InternalApiConfig extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return Set.of(HealtCheckRest.class, PrometheusRestService.class);
+        return Set.of(HealtCheckRest.class, PrometheusRestService.class, UttakRest.class);
     }
 
 }
