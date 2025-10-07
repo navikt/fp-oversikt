@@ -23,8 +23,6 @@ public class UttakRest {
 
     private static final StønadskontoRegelOrkestrering REGEL_ORKESTRERING = new StønadskontoRegelOrkestrering();
 
-
-
     @POST
     @Produces(MediaType.APPLICATION_JSON)
     public Map<String, KontoBeregningDto> personinfo(@Valid @NotNull KontoBeregningGrunnlagDto grunnlag) {
