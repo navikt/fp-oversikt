@@ -1,9 +1,12 @@
 package no.nav.foreldrepenger.oversikt.server;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.glassfish.jersey.server.ServerProperties;
 
@@ -27,6 +30,7 @@ import no.nav.foreldrepenger.oversikt.oppslag.OppslagRest;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
 import no.nav.foreldrepenger.oversikt.tidslinje.TidslinjeRest;
+import no.nav.foreldrepenger.oversikt.uttak.UttakRest;
 import no.nav.vedtak.exception.TekniskException;
 
 @ApplicationPath(ApiConfig.API_URI)
@@ -44,10 +48,14 @@ public class ApiConfig extends Application {
             .description("REST grensesnitt for FPOVERSIKT.");
 
         oas.info(info).addServersItem(new Server().url("/"));
+        var resourceClassesToInclude = Stream.of(getImplementationClasses(), getForvaltningClasses(), Set.of(UttakRest.class))
+            .flatMap(Set::stream)
+            .map(Class::getName)
+            .collect(Collectors.toSet());
         var oasConfig = new SwaggerConfiguration()
             .openAPI(oas)
             .prettyPrint(true)
-            .resourceClasses(Set.of(ProsessTaskRestTjeneste.class.getName(), ManuellOppdateringAvSakDriftTjeneste.class.getName()));
+            .resourceClasses(resourceClassesToInclude);
 
         try {
             new GenericOpenApiContextBuilder<>()
@@ -61,25 +69,30 @@ public class ApiConfig extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        // eksponert grensesnitt bak sikkerhet. Nå er vi på max Set.of før varargs-versjonen.
-        return Set.of(
-            // Providers/filters/teknisk
-            AuthenticationFilter.class,
-            OpenApiResource.class,
-            GeneralRestExceptionMapper.class,
-            JacksonJsonConfig.class,
+        Set<Class<?>> classes = new HashSet<>();
+        classes.addAll(getImplementationClasses());
+        classes.addAll(getForvaltningClasses());
+        classes.addAll(getFellesConfigClasses());
+        return classes;
+    }
 
-            // API
-            DokumentRest.class,
+    private Set<Class<?>> getFellesConfigClasses() {
+        return Set.of(AuthenticationFilter.class, GeneralRestExceptionMapper.class, JacksonJsonConfig.class);
+    }
+
+    private Set<Class<?>> getForvaltningClasses() {
+        return Set.of(OpenApiResource.class, ProsessTaskRestTjeneste.class, ManuellOppdateringAvSakDriftTjeneste.class);
+    }
+
+    private Set<Class<?>> getImplementationClasses() {
+        return Set.of(DokumentRest.class,
             TidslinjeRest.class,
             OppslagRest.class,
             InntektsmeldingRest.class,
             OppgaveRest.class,
             SakerRest.class,
             AnnenPartRest.class,
-            ArbeidRest.class,
-            ProsessTaskRestTjeneste.class,
-            ManuellOppdateringAvSakDriftTjeneste.class);
+            ArbeidRest.class);
     }
 
     @Override
