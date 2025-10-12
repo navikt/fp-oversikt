@@ -4,10 +4,11 @@ import static java.util.Comparator.comparing;
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
 import no.nav.foreldrepenger.common.domain.felles.Bankkonto;
@@ -18,11 +19,11 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
 import no.nav.foreldrepenger.oversikt.oppslag.PdlOppslagTjeneste;
 import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonDto;
-import no.nav.pdl.Doedsfall;
-import no.nav.pdl.Foedselsdato;
-import no.nav.pdl.Kjoenn;
+import no.nav.pdl.KjoennType;
 import no.nav.pdl.Navn;
 import no.nav.pdl.Person;
+import no.nav.vedtak.felles.integrasjon.person.FalskIdentitet;
+import no.nav.vedtak.felles.integrasjon.person.PersonMappers;
 
 public class PersonDtoMapper {
 
@@ -40,13 +41,13 @@ public class PersonDtoMapper {
                                          Målform målform,
                                          KontonummerDto kontonummer) {
         var søkerPerson = søker.person();
-        var fødselsdato = fødselsdatoFor(søkerPerson);
+        var fødselsdato = fødselsdatoFor(søker);
         return new PersonDto(
                 new no.nav.foreldrepenger.common.domain.AktørId(aktøridSøker.value()),
                 new Fødselsnummer(søker.ident()),
                 fødselsdato,
-                navnFor(søkerPerson),
-                kjønnFor(søkerPerson),
+                navnFor(søker),
+                kjønnFor(søker),
                 målform,
                 tilBankkonto(kontonummer),
                 tilSivilstand(søkerPerson),
@@ -65,8 +66,8 @@ public class PersonDtoMapper {
         if (barnet.ident() == null) { // Dødfødt barn
             return new PersonDto.BarnDto(
                     null,
-                    fødselsdatoFor(barnet.person()),
-                    dødsdatoFor(barnet.person()),
+                    fødselsdatoFor(barnet),
+                    dødsdatoFor(barnet),
                     null,
                     null,
                     null
@@ -75,10 +76,10 @@ public class PersonDtoMapper {
 
         return new PersonDto.BarnDto(
                 new Fødselsnummer(barnet.ident()),
-                fødselsdatoFor(barnet.person()),
-                dødsdatoFor(barnet.person()),
-                navnFor(barnet.person()),
-                kjønnFor(barnet.person()),
+                fødselsdatoFor(barnet),
+                dødsdatoFor(barnet),
+                navnFor(barnet),
+                kjønnFor(barnet),
                 annenpart.containsKey(barnet.ident()) ? tilAnnenpart(annenpart.get(barnet.ident())) : null
         );
     }
@@ -87,8 +88,8 @@ public class PersonDtoMapper {
         var person = personMedIdent.person();
         return new PersonDto.AnnenForelderDto(
                 new Fødselsnummer(personMedIdent.ident()),
-                navnFor(person),
-                fødselsdatoFor(person)
+                navnFor(personMedIdent),
+                fødselsdatoFor(personMedIdent)
         );
     }
 
@@ -132,15 +133,15 @@ public class PersonDtoMapper {
         return utenlandskKontoInfo.banknavn();
     }
 
-    private static Kjønn kjønnFor(Person person) {
-        return safeStream(person.getKjoenn())
-                .map(PersonDtoMapper::tilKjønn)
-                .findFirst()
-                .orElse(Kjønn.U);
+    private static Kjønn kjønnFor(PdlOppslagTjeneste.PersonMedIdent person) {
+        var kjønn = Optional.ofNullable(person.falskIdentitet()).map(FalskIdentitet.Informasjon::kjønn)
+            .or(() -> Optional.of(PersonMappers.mapKjønn(person.person())))
+            .orElse(KjoennType.UKJENT);
+        return tilKjønn(kjønn);
     }
 
-    private static Kjønn tilKjønn(Kjoenn kjoenn) {
-        return switch (kjoenn.getKjoenn()) {
+    private static Kjønn tilKjønn(KjoennType kjoenn) {
+        return switch (kjoenn) {
             case MANN -> Kjønn.M;
             case KVINNE -> Kjønn.K;
             case UKJENT -> Kjønn.U;
@@ -149,12 +150,22 @@ public class PersonDtoMapper {
     }
 
 
-    private static no.nav.foreldrepenger.common.domain.Navn navnFor(Person person) {
-        return safeStream(person.getNavn())
+    private static no.nav.foreldrepenger.common.domain.Navn navnFor(PdlOppslagTjeneste.PersonMedIdent person) {
+        return Optional.ofNullable(person.falskIdentitet()).map(FalskIdentitet.Informasjon::navn).map(PersonDtoMapper::falskNavn)
+            .or(() -> safeStream(person.person().getNavn())
                 .filter(Objects::nonNull)
                 .map(PersonDtoMapper::navn)
-                .findFirst()
-                .orElse(null);
+                .findFirst())
+            .orElse(null);
+    }
+
+    private static no.nav.foreldrepenger.common.domain.Navn falskNavn(String navn) {
+        var oppdelt = Arrays.stream(navn.split(" ")).toList();
+        return new no.nav.foreldrepenger.common.domain.Navn(
+            !oppdelt.isEmpty() ? oppdelt.getFirst() : "",
+            oppdelt.size() > 2 ? oppdelt.get(1) : null,
+            oppdelt.size() > 1 ? oppdelt.getLast() : ""
+        );
     }
 
     private static no.nav.foreldrepenger.common.domain.Navn navn(Navn navn) {
@@ -164,25 +175,13 @@ public class PersonDtoMapper {
                 navn.getEtternavn()
         );
     }
-    private static LocalDate fødselsdatoFor(Person søkerPerson) {
-        return safeStream(søkerPerson.getFoedselsdato())
-                .map(Foedselsdato::getFoedselsdato)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .map(PersonDtoMapper::tilLocalDato)
-                .orElse(null);
+    private static LocalDate fødselsdatoFor(PdlOppslagTjeneste.PersonMedIdent personMedIdent) {
+        return Optional.ofNullable(personMedIdent.falskIdentitet()).map(FalskIdentitet.Informasjon::fødselsdato)
+            .or(() -> PersonMappers.mapFødselsdato(personMedIdent.person()))
+            .orElse(null);
     }
 
-    private static LocalDate dødsdatoFor(Person person) {
-        return safeStream(person.getDoedsfall())
-                .map(Doedsfall::getDoedsdato)
-                .filter(Objects::nonNull)
-                .findFirst()
-                .map(PersonDtoMapper::tilLocalDato)
-                .orElse(null);
-    }
-
-    private static LocalDate tilLocalDato(String date) {
-        return LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE); // FORMTER?
+    private static LocalDate dødsdatoFor(PdlOppslagTjeneste.PersonMedIdent person) {
+        return PersonMappers.mapDødsdato(person.person()).orElse(null);
     }
 }

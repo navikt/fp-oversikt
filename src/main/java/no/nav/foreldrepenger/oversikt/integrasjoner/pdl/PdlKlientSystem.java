@@ -14,13 +14,15 @@ import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.pdl.Adressebeskyttelse;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.AdressebeskyttelseResponseProjection;
+import no.nav.pdl.FolkeregisteridentifikatorResponseProjection;
 import no.nav.pdl.ForelderBarnRelasjonResponseProjection;
 import no.nav.pdl.ForelderBarnRelasjonRolle;
 import no.nav.pdl.HentPersonQueryRequest;
-import no.nav.pdl.Navn;
 import no.nav.pdl.NavnResponseProjection;
 import no.nav.pdl.PersonResponseProjection;
 import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
+import no.nav.vedtak.felles.integrasjon.person.FalskIdentitet;
+import no.nav.vedtak.felles.integrasjon.person.PersonMappers;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 import no.nav.vedtak.util.LRUCache;
@@ -93,16 +95,21 @@ public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppsl
         var request = new HentPersonQueryRequest();
         request.setIdent(ident);
         var projection = new PersonResponseProjection()
+            .folkeregisteridentifikator(new FolkeregisteridentifikatorResponseProjection().identifikasjonsnummer().status())
             .navn(new NavnResponseProjection().fornavn().mellomnavn().etternavn());
         var person = hentPerson(request, projection, true);
 
         if (person == null) {
             return "Ukjent person";
         }
-        var navn = person.getNavn().stream()
-            .map(PdlKlientSystem::mapNavn)
-            .filter(Objects::nonNull)
-            .findFirst().orElse("Ukjent navn");
+        if (PersonMappers.manglerIdentifikator(person)) {
+            var falskId = FalskIdentitet.finnFalskIdentitet(ident, this).orElse(null);
+            if (falskId != null) {
+                IDENT_NAVN.put(ident, falskId.navn());
+                return falskId.navn();
+            }
+        }
+        var navn = PersonMappers.mapNavn(person).orElse("Ukjent navn");
         IDENT_NAVN.put(ident, navn);
         return navn;
     }
@@ -137,17 +144,6 @@ public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppsl
             case STRENGT_FORTROLIG_UTLAND, STRENGT_FORTROLIG, FORTROLIG -> AdresseBeskyttelse.Gradering.GRADERT;
             case UGRADERT -> AdresseBeskyttelse.Gradering.UGRADERT;
         };
-    }
-
-    private static String mapNavn(Navn navn) {
-        if (navn.getFornavn() == null) {
-            return null;
-        }
-        return navn.getFornavn() + leftPad(navn.getMellomnavn()) + leftPad(navn.getEtternavn());
-    }
-
-    private static String leftPad(String navn) {
-        return Optional.ofNullable(navn).map(n -> " " + navn).orElse("");
     }
 
 }

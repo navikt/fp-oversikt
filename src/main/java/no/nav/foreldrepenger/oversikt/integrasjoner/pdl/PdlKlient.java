@@ -1,21 +1,24 @@
 package no.nav.foreldrepenger.oversikt.integrasjoner.pdl;
 
-import jakarta.enterprise.context.Dependent;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.pdl.Foedselsdato;
-import no.nav.pdl.FoedselsdatoResponseProjection;
-import no.nav.pdl.HentPersonQueryRequest;
-import no.nav.pdl.PersonResponseProjection;
-import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
-import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
-import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
-import no.nav.vedtak.util.LRUCache;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import jakarta.enterprise.context.Dependent;
+import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.pdl.FoedselsdatoResponseProjection;
+import no.nav.pdl.FolkeregisteridentifikatorResponseProjection;
+import no.nav.pdl.HentPersonQueryRequest;
+import no.nav.pdl.PersonResponseProjection;
+import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
+import no.nav.vedtak.felles.integrasjon.person.FalskIdentitet;
+import no.nav.vedtak.felles.integrasjon.person.PersonMappers;
+import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
+import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
+import no.nav.vedtak.util.LRUCache;
 
 @RestClientConfig(
     tokenConfig = TokenFlow.ADAPTIVE,
@@ -40,13 +43,17 @@ public class PdlKlient extends AbstractPersonKlient {
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr);
         var projection = new PersonResponseProjection()
+            .folkeregisteridentifikator(new FolkeregisteridentifikatorResponseProjection().identifikasjonsnummer().status())
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato());
         var person = hentPerson(request, projection);
-        var fødselsdato = person.getFoedselsdato().stream()
-            .findFirst()
-            .map(Foedselsdato::getFoedselsdato)
-            .map(LocalDate::parse)
-            .orElseThrow();
+        if (PersonMappers.manglerIdentifikator(person)) {
+            var falskId = FalskIdentitet.finnFalskIdentitet(fnr, this).orElse(null);
+            if (falskId != null) {
+                FNR_FØDT.put(fnr, falskId.fødselsdato());
+                return falskId.fødselsdato();
+            }
+        }
+        var fødselsdato = PersonMappers.mapFødselsdato(person).orElseThrow();
         FNR_FØDT.put(fnr, fødselsdato);
         return fødselsdato;
     }

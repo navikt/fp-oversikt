@@ -1,24 +1,5 @@
 package no.nav.foreldrepenger.oversikt.oppslag;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
-import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
-import no.nav.pdl.AdressebeskyttelseGradering;
-import no.nav.pdl.DoedfoedtBarn;
-import no.nav.pdl.Doedsfall;
-import no.nav.pdl.Foedselsdato;
-import no.nav.pdl.ForelderBarnRelasjonRolle;
-import no.nav.pdl.HentPersonBolkResult;
-import no.nav.pdl.Person;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.time.LocalDate;
-import java.util.List;
-
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.adressebeskyttelse;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.forelderBarnRelasjon;
 import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.fødselsdato;
@@ -27,6 +8,27 @@ import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.tilStreng;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
+import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
+import no.nav.pdl.AdressebeskyttelseGradering;
+import no.nav.pdl.DoedfoedtBarn;
+import no.nav.pdl.Doedsfall;
+import no.nav.pdl.Foedselsdato;
+import no.nav.pdl.Folkeregisteridentifikator;
+import no.nav.pdl.ForelderBarnRelasjonRolle;
+import no.nav.pdl.HentPersonBolkResult;
+import no.nav.pdl.Person;
 
 @ExtendWith(MockitoExtension.class)
 class PdlOppslagTjenesteTest {
@@ -49,6 +51,7 @@ class PdlOppslagTjenesteTest {
     void skal_returnere_søker_selv_om_en_selv_har_adressebeskyttelse() {
         var person = new Person();
         person.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.STRENGT_FORTROLIG));
+        person.setFolkeregisteridentifikator(List.of(new Folkeregisteridentifikator("012345678901", "I_BRUK", "FNR", null, null)));
         when(pdlKlient.hentPerson(any(), any())).thenReturn(person);
 
         var result = pdlOppslagTjeneste.hentSøker(SØKER_IDENT);
