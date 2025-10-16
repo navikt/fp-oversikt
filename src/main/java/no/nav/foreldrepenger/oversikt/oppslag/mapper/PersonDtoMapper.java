@@ -4,7 +4,6 @@ import static java.util.Comparator.comparing;
 import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -151,21 +150,12 @@ public class PersonDtoMapper {
 
 
     private static no.nav.foreldrepenger.common.domain.Navn navnFor(PdlOppslagTjeneste.PersonMedIdent person) {
-        return Optional.ofNullable(person.falskIdentitet()).map(FalskIdentitet.Informasjon::navn).map(PersonDtoMapper::falskNavn)
+        return Optional.ofNullable(person.falskIdentitet()).map(PersonDtoMapper::navn)
             .or(() -> safeStream(person.person().getNavn())
                 .filter(Objects::nonNull)
                 .map(PersonDtoMapper::navn)
                 .findFirst())
             .orElse(null);
-    }
-
-    private static no.nav.foreldrepenger.common.domain.Navn falskNavn(String navn) {
-        var oppdelt = Arrays.stream(navn.split(" ")).toList();
-        return new no.nav.foreldrepenger.common.domain.Navn(
-            !oppdelt.isEmpty() ? oppdelt.getFirst() : "",
-            oppdelt.size() > 2 ? oppdelt.get(1) : null,
-            oppdelt.size() > 1 ? oppdelt.getLast() : ""
-        );
     }
 
     private static no.nav.foreldrepenger.common.domain.Navn navn(Navn navn) {
@@ -175,6 +165,15 @@ public class PersonDtoMapper {
                 navn.getEtternavn()
         );
     }
+
+    private static no.nav.foreldrepenger.common.domain.Navn navn(FalskIdentitet.Informasjon falskId) {
+        return new no.nav.foreldrepenger.common.domain.Navn(
+            falskId.fornavn(),
+            falskId.mellomnavn(),
+            falskId.etternavn()
+        );
+    }
+
     private static LocalDate fødselsdatoFor(PdlOppslagTjeneste.PersonMedIdent personMedIdent) {
         return Optional.ofNullable(personMedIdent.falskIdentitet()).map(FalskIdentitet.Informasjon::fødselsdato)
             .or(() -> PersonMappers.mapFødselsdato(personMedIdent.person()))

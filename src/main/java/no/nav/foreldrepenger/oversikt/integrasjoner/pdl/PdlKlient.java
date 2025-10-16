@@ -49,8 +49,10 @@ public class PdlKlient extends AbstractPersonKlient {
         if (PersonMappers.manglerIdentifikator(person)) {
             var falskId = FalskIdentitet.finnFalskIdentitet(fnr, this).orElse(null);
             if (falskId != null) {
-                FNR_FØDT.put(fnr, falskId.fødselsdato());
-                return falskId.fødselsdato();
+                // Gir en umyndig alder dersom fødselsdato mangler. Får da ikke gjort noe i søknad / oversikt.
+                var fødselsdatoEllerIkketilgang = Optional.ofNullable(falskId.fødselsdato()).orElseGet(LocalDate::now);
+                FNR_FØDT.put(fnr, fødselsdatoEllerIkketilgang);
+                return fødselsdatoEllerIkketilgang;
             }
         }
         var fødselsdato = PersonMappers.mapFødselsdato(person).orElseThrow();

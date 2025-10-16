@@ -109,7 +109,7 @@ public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppsl
                 return falskId.navn();
             }
         }
-        var navn = PersonMappers.mapNavn(person).orElse("Ukjent navn");
+        var navn = PersonMappers.mapNavn(person).orElse("Ukjent Navn");
         IDENT_NAVN.put(ident, navn);
         return navn;
     }
