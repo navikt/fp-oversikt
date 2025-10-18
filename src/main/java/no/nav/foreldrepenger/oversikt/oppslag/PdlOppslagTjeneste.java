@@ -185,9 +185,7 @@ public class PdlOppslagTjeneste {
     }
 
     private static boolean barnErYngreEnn40Mnd(PersonMedIdent barnet) {
-        var fødselsdato = Optional.ofNullable(barnet.falskIdentitet()).map(FalskIdentitet.Informasjon::fødselsdato)
-            .or(() -> PersonMappers.mapFødselsdato(barnet.person()))
-            .orElseThrow();
+        var fødselsdato = PersonMappers.mapFødselsdato(barnet.person()).orElseThrow();
         return fødselsdato.isAfter(LocalDate.now().minusMonths(IKKE_ELDRE_ENN_40_MND_BARN));
     }
 
