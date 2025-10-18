@@ -8,13 +8,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
+import no.nav.foreldrepenger.common.util.StringUtil;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 import no.nav.pdl.FoedselsdatoResponseProjection;
 import no.nav.pdl.FolkeregisteridentifikatorResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
 import no.nav.pdl.PersonResponseProjection;
 import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
-import no.nav.vedtak.felles.integrasjon.person.FalskIdentitet;
 import no.nav.vedtak.felles.integrasjon.person.PersonMappers;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
@@ -47,15 +49,10 @@ public class PdlKlient extends AbstractPersonKlient {
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato());
         var person = hentPerson(request, projection);
         if (PersonMappers.manglerIdentifikator(person)) {
-            var falskId = FalskIdentitet.finnFalskIdentitet(fnr, this).orElse(null);
-            if (falskId != null) {
-                // Gir en umyndig alder dersom fødselsdato mangler. Får da ikke gjort noe i søknad / oversikt.
-                var fødselsdatoEllerIkketilgang = Optional.ofNullable(falskId.fødselsdato()).orElseGet(LocalDate::now);
-                FNR_FØDT.put(fnr, fødselsdatoEllerIkketilgang);
-                return fødselsdatoEllerIkketilgang;
-            }
+            // TODO vurder ikke-tilgang for alle tilfelle der man mangler en aktiv (i_bruk) identifikator
+            LOG.warn("Person uten aktiv identifikator i PDL for fnr {}", StringUtil.partialMask(fnr));
         }
-        var fødselsdato = PersonMappers.mapFødselsdato(person).orElseThrow();
+        var fødselsdato = PersonMappers.mapFødselsdato(person).orElseThrow(() -> new ManglerTilgangException(FeilKode.IKKE_TILGANG_INAKTIV));
         FNR_FØDT.put(fnr, fødselsdato);
         return fødselsdato;
     }

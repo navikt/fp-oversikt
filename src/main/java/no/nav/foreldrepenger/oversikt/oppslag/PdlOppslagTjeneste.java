@@ -199,7 +199,6 @@ public class PdlOppslagTjeneste {
         return new AdresseBeskyttelse(graderinger).harBeskyttetAdresse();
     }
 
-    // TODO: Skriv om til domenemapping. Denne wrappingen bryter ACL-tanken og eksponerer produsent-internals
     public record PersonMedIdent(String ident, Person person, FalskIdentitet.Informasjon falskIdentitet) {
         public PersonMedIdent(String ident, Person person) {
             this(ident, person, null);

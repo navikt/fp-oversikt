@@ -84,7 +84,6 @@ public class PersonDtoMapper {
     }
 
     private static PersonDto.AnnenForelderDto tilAnnenpart(PdlOppslagTjeneste.PersonMedIdent personMedIdent) {
-        var person = personMedIdent.person();
         return new PersonDto.AnnenForelderDto(
                 new Fødselsnummer(personMedIdent.ident()),
                 navnFor(personMedIdent),

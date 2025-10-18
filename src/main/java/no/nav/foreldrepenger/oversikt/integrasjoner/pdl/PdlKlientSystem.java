@@ -14,14 +14,12 @@ import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.pdl.Adressebeskyttelse;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.AdressebeskyttelseResponseProjection;
-import no.nav.pdl.FolkeregisteridentifikatorResponseProjection;
 import no.nav.pdl.ForelderBarnRelasjonResponseProjection;
 import no.nav.pdl.ForelderBarnRelasjonRolle;
 import no.nav.pdl.HentPersonQueryRequest;
 import no.nav.pdl.NavnResponseProjection;
 import no.nav.pdl.PersonResponseProjection;
 import no.nav.vedtak.felles.integrasjon.person.AbstractPersonKlient;
-import no.nav.vedtak.felles.integrasjon.person.FalskIdentitet;
 import no.nav.vedtak.felles.integrasjon.person.PersonMappers;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
@@ -95,21 +93,12 @@ public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppsl
         var request = new HentPersonQueryRequest();
         request.setIdent(ident);
         var projection = new PersonResponseProjection()
-            .folkeregisteridentifikator(new FolkeregisteridentifikatorResponseProjection().identifikasjonsnummer().status())
             .navn(new NavnResponseProjection().fornavn().mellomnavn().etternavn());
         var person = hentPerson(request, projection, true);
 
-        if (person == null) {
-            return "Ukjent person";
-        }
-        if (PersonMappers.manglerIdentifikator(person)) {
-            var falskId = FalskIdentitet.finnFalskIdentitet(ident, this).orElse(null);
-            if (falskId != null) {
-                IDENT_NAVN.put(ident, falskId.navn());
-                return falskId.navn();
-            }
-        }
-        var navn = PersonMappers.mapNavn(person).orElse("Ukjent Navn");
+        var navn = Optional.ofNullable(person)
+            .flatMap(PersonMappers::mapNavn)
+            .orElse("Ukjent person");
         IDENT_NAVN.put(ident, navn);
         return navn;
     }
