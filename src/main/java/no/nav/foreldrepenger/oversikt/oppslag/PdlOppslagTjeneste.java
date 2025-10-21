@@ -1,5 +1,15 @@
 package no.nav.foreldrepenger.oversikt.oppslag;
 
+import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.common.domain.Fødselsnummer;
@@ -14,6 +24,7 @@ import no.nav.pdl.Doedsfall;
 import no.nav.pdl.DoedsfallResponseProjection;
 import no.nav.pdl.Foedselsdato;
 import no.nav.pdl.FoedselsdatoResponseProjection;
+import no.nav.pdl.FolkeregisteridentifikatorResponseProjection;
 import no.nav.pdl.ForelderBarnRelasjon;
 import no.nav.pdl.ForelderBarnRelasjonResponseProjection;
 import no.nav.pdl.ForelderBarnRelasjonRolle;
@@ -25,16 +36,8 @@ import no.nav.pdl.NavnResponseProjection;
 import no.nav.pdl.Person;
 import no.nav.pdl.PersonResponseProjection;
 import no.nav.pdl.SivilstandResponseProjection;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
+import no.nav.vedtak.felles.integrasjon.person.FalskIdentitet;
+import no.nav.vedtak.felles.integrasjon.person.PersonMappers;
 
 @ApplicationScoped
 public class PdlOppslagTjeneste {
@@ -57,13 +60,19 @@ public class PdlOppslagTjeneste {
         var request = new HentPersonQueryRequest();
         request.setIdent(fnr);
         var projection = new PersonResponseProjection()
+                .folkeregisteridentifikator(new FolkeregisteridentifikatorResponseProjection().identifikasjonsnummer().status())
                 .navn(new NavnResponseProjection().fornavn().mellomnavn().etternavn())
                 .kjoenn(new KjoennResponseProjection().kjoenn())
                 .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
                 .doedfoedtBarn(new DoedfoedtBarnResponseProjection().dato())
                 .sivilstand(new SivilstandResponseProjection().type())
                 .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsIdent().relatertPersonsRolle().minRolleForPerson());
-        return new PersonMedIdent(fnr, pdlKlient.hentPerson(request, projection));
+        var person = pdlKlient.hentPerson(request, projection);
+        if (PersonMappers.manglerIdentifikator(person)) {
+            var falskId = FalskIdentitet.finnFalskIdentitet(fnr, pdlKlient).orElse(null);
+            return new PersonMedIdent(fnr, person, falskId);
+        }
+        return new PersonMedIdent(fnr, person);
     }
 
     public List<PersonMedIdent> hentBarnTilSøker(PersonMedIdent søker) {
@@ -176,11 +185,8 @@ public class PdlOppslagTjeneste {
     }
 
     private static boolean barnErYngreEnn40Mnd(PersonMedIdent barnet) {
-        return safeStream(barnet.person().getFoedselsdato()).findFirst()
-                .map(Foedselsdato::getFoedselsdato)
-                .map(LocalDate::parse)
-                .orElseThrow()
-                .isAfter(LocalDate.now().minusMonths(IKKE_ELDRE_ENN_40_MND_BARN));
+        var fødselsdato = PersonMappers.mapFødselsdato(barnet.person()).orElseThrow();
+        return fødselsdato.isAfter(LocalDate.now().minusMonths(IKKE_ELDRE_ENN_40_MND_BARN));
     }
 
     private static boolean harAdressebeskyttelse(no.nav.pdl.Person barnet) {
@@ -191,6 +197,9 @@ public class PdlOppslagTjeneste {
         return new AdresseBeskyttelse(graderinger).harBeskyttetAdresse();
     }
 
-    public record PersonMedIdent(String ident, Person person) {
+    public record PersonMedIdent(String ident, Person person, FalskIdentitet.Informasjon falskIdentitet) {
+        public PersonMedIdent(String ident, Person person) {
+            this(ident, person, null);
+        }
     }
 }

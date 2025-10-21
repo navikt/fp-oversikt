@@ -19,9 +19,9 @@
         <sonar.projectName>fp-oversikt</sonar.projectName>
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
-        <io.confluent.version>8.0.2</io.confluent.version>
+        <io.confluent.version>8.1.0</io.confluent.version>
 
-        <felles.version>7.6.6</felles.version>
+        <felles.version>7.6.8</felles.version>
         <prosesstask.version>5.2.1</prosesstask.version>
         <fp-kontrakter.version>9.4.3</fp-kontrakter.version>
         <fpsoknad-felles.version>3.3.5</fpsoknad-felles.version>
