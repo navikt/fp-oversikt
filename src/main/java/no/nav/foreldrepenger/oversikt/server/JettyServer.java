@@ -32,11 +32,17 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 import no.nav.foreldrepenger.konfig.Environment;
+import no.nav.foreldrepenger.oversikt.server.app.ApiConfig;
+import no.nav.foreldrepenger.oversikt.server.app.ApiConfigOLD;
+import no.nav.foreldrepenger.oversikt.server.app.InternalApiConfig;
+import no.nav.foreldrepenger.oversikt.server.app.InternalApiConfigOLD;
 
 public class JettyServer {
 
     private static final Environment ENV = Environment.current();
 
+    // TODO: Aktiver og fjern ApiConfigOLD og InternalApiConfigOLD + fjern /fpoversikt prefix i ApiConfig og InternalApiConfig
+    // private static final String CONTEXT_PATH = ENV.getProperty("context.path", "/fpoversikt");
     private static final String CONTEXT_PATH = "/";
 
     private static final String JETTY_SCAN_LOCATIONS = "^.*jersey-.*\\.jar$|^.*felles-.*\\.jar$|^.*app.*\\.jar$";
@@ -150,9 +156,11 @@ public class JettyServer {
     private static ConstraintSecurityHandler simpleConstraints() {
         var handler = new ConstraintSecurityHandler();
         // Slipp gjennom kall fra plattform til JaxRs. Foreløpig kun behov for GET
+        handler.addConstraintMapping(pathConstraint(Constraint.ALLOWED, InternalApiConfigOLD.API_URI + "/*"));
         handler.addConstraintMapping(pathConstraint(Constraint.ALLOWED, InternalApiConfig.API_URI + "/*"));
         // Slipp gjennom til autentisering i JaxRs / auth-filter
         handler.addConstraintMapping(pathConstraint(Constraint.ALLOWED, ApiConfig.API_URI + "/*"));
+        handler.addConstraintMapping(pathConstraint(Constraint.ALLOWED, ApiConfigOLD.API_URI + "/*"));
         // Alt annet av paths og metoder forbudt - 403
         handler.addConstraintMapping(pathConstraint(Constraint.FORBIDDEN, "/*"));
         return handler;

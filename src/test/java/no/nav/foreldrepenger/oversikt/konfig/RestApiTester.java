@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.Path;
-import no.nav.foreldrepenger.oversikt.server.ApiConfig;
+import no.nav.foreldrepenger.oversikt.server.app.ApiConfigOLD;
 
 class RestApiTester {
 
@@ -30,7 +30,7 @@ class RestApiTester {
 
 
     static Collection<Class<?>> finnAlleRestTjenester() {
-        ApiConfig config = new ApiConfig();
+        ApiConfigOLD config = new ApiConfigOLD();
         return config.getClasses()
             .stream()
             .filter(c -> c.getAnnotation(Path.class) != null)
