@@ -5,16 +5,18 @@ import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.format.FormatMapper;
 import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.ws.rs.ext.ContextResolver;
 import jakarta.ws.rs.ext.Provider;
-import no.nav.foreldrepenger.common.mapper.DefaultJsonMapper;
+import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 
 @Provider
 public class JacksonJsonConfig implements ContextResolver<ObjectMapper>, FormatMapper {
 
-    private static final ObjectMapper MAPPER = DefaultJsonMapper.MAPPER;
+    private static final ObjectMapper MAPPER = DefaultJsonMapper.getObjectMapper()
+        .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
     private static final FormatMapper FORMAT_MAPPER = new JacksonJsonFormatMapper(MAPPER);
 
     public JacksonJsonConfig() {
