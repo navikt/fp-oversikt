@@ -13,23 +13,23 @@ spec:
      - {{url}}
   {{/each}}
   liveness:
-    path: /internal/health/isAlive
+    path: /fpoversikt/internal/health/isAlive
     initialDelay: 15
     periodSeconds: 10
     failureThreshold: 20
     timeout: 3
   readiness:
-    path: /internal/health/isReady
+    path: /fpoversikt/internal/health/isReady
     initialDelay: 15
     periodSeconds: 10
     failureThreshold: 20
     timeout: 3
   prometheus:
     enabled: true
-    path: /internal/metrics/prometheus
+    path: /fpoversikt/internal/metrics/prometheus
   preStopHook:
     http:
-      path: /internal/health/preStop
+      path: /fpoversikt/internal/health/preStop
   replicas:
     min: {{minReplicas}}
     max: {{maxReplicas}}
