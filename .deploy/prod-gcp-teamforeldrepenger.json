@@ -13,7 +13,10 @@
         "https://fpoversikt.intern.nav.no"
     ],
     "groups": [
-        "0d226374-4748-4367-a38a-062dcad70034"
+        {
+            "uuid": "0d226374-4748-4367-a38a-062dcad70034",
+            "kommentar": "drift"
+        }
     ],
     "limits": {
         "cpu": "2",
