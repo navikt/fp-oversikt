@@ -9,10 +9,12 @@ import java.util.Map;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import jakarta.ws.rs.OPTIONS;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import no.nav.foreldrepenger.stønadskonto.regelmodell.StønadskontoRegelOrkestrering;
 import no.nav.foreldrepenger.stønadskonto.regelmodell.grunnlag.BeregnKontoerGrunnlag;
 import no.nav.foreldrepenger.stønadskonto.regelmodell.grunnlag.Dekningsgrad;
@@ -25,14 +27,27 @@ public class UttakRest {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    public Map<String, KontoBeregningDto> personinfo(@Valid @NotNull KontoBeregningGrunnlagDto grunnlag) {
+    public Response konto(@Valid @NotNull KontoBeregningGrunnlagDto grunnlag) {
         guardFamiliehendelse(grunnlag);
         var kontoberegning80 = kontoberegningFra(grunnlag, DEKNINGSGRAD_80);
         var kontoberegning100 = kontoberegningFra(grunnlag, DEKNINGSGRAD_100);
-        return Map.of(
+        var result = Map.of(
             "80", kontoberegning80,
             "100", kontoberegning100
         );
+
+        return Response.ok(result)
+            .header("Access-Control-Allow-Origin", "*")
+            .build();
+    }
+
+    @OPTIONS
+    public Response options() {
+        return Response.ok()
+            .header("Access-Control-Allow-Origin", "*")
+            .header("Access-Control-Allow-Methods", "POST, OPTIONS")
+            .header("Access-Control-Allow-Headers", "Content-Type, Accept")
+            .build();
     }
 
     private KontoBeregningDto kontoberegningFra(KontoBeregningGrunnlagDto grunnlag, Dekningsgrad dekningsgrad) {
