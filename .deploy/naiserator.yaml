@@ -91,9 +91,10 @@ spec:
         - application: fpsoknad-mottak
           namespace: teamforeldrepenger
           cluster: {{environment}}-fss
+        {{#if azure-token-generator}}
         - application: azure-token-generator
           namespace: nais
-          cluster: dev-gcp
+        {{/if}}
         - application: fp-swagger
           namespace: teamforeldrepenger
           cluster: {{environment}}-gcp

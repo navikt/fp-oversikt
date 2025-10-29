@@ -9,6 +9,7 @@
     "dbPointInTimeRecovery": "false",
     "minReplicas": "1",
     "maxReplicas": "2",
+    "azure-token-generator": true,
     "ingresses": [
         "https://fpoversikt.intern.dev.nav.no"
     ],
