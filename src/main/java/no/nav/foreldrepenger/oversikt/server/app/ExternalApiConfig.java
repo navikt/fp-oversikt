@@ -4,6 +4,8 @@ import java.util.Set;
 
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
+import no.nav.foreldrepenger.oversikt.server.GeneralRestExceptionMapper;
+import no.nav.foreldrepenger.oversikt.server.JacksonJsonConfig;
 import no.nav.foreldrepenger.oversikt.uttak.UttakRest;
 
 @ApplicationPath(ExternalApiConfig.API_URI)
@@ -17,7 +19,11 @@ public class ExternalApiConfig extends Application {
 
     @Override
     public Set<Class<?>> getClasses() {
-        return Set.of(UttakRest.class);
+        return Set.of(
+            GeneralRestExceptionMapper.class,
+            JacksonJsonConfig.class,
+            UttakRest.class
+        );
     }
 
 }
