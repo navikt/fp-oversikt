@@ -11,7 +11,7 @@ import no.nav.foreldrepenger.oversikt.uttak.UttakRest;
 @ApplicationPath(InternalApiConfig.API_URI)
 public class InternalApiConfig extends Application {
 
-    public static final String API_URI ="/fpoversikt/internal";
+    public static final String API_URI ="/internal";
 
     public InternalApiConfig() {
         // CDI

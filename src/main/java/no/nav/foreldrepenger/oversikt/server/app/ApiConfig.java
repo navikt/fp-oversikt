@@ -35,7 +35,7 @@ import no.nav.vedtak.exception.TekniskException;
 @ApplicationPath(ApiConfig.API_URI)
 public class ApiConfig extends Application {
 
-    public static final String API_URI ="/fpoversikt/api";
+    public static final String API_URI ="/api";
 
     private static final Environment ENV = Environment.current();
 
@@ -46,7 +46,7 @@ public class ApiConfig extends Application {
             .version(Optional.ofNullable(ENV.imageName()).orElse("1.0"))
             .description("REST grensesnitt for FPOVERSIKT.");
 
-        oas.info(info).addServersItem(new Server().url("/"));
+        oas.info(info).addServersItem(new Server().url(ENV.getProperty("context.path", "/fpoversikt")));
         var oasConfig = new SwaggerConfiguration()
             .openAPI(oas)
             .prettyPrint(true)
