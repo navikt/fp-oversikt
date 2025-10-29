@@ -33,7 +33,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.server.app.ApiConfig;
-import no.nav.foreldrepenger.oversikt.server.app.ApiConfigOLD;
 import no.nav.foreldrepenger.oversikt.server.app.ExternalApiConfig;
 import no.nav.foreldrepenger.oversikt.server.app.InternalApiConfig;
 
