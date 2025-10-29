@@ -46,7 +46,7 @@ public class ApiConfig extends Application {
             .version(Optional.ofNullable(ENV.imageName()).orElse("1.0"))
             .description("REST grensesnitt for FPOVERSIKT.");
 
-        oas.info(info).addServersItem(new Server().url(ENV.getProperty("context.path", "/fpoversikt")));
+        oas.info(info).addServersItem(new Server().url("/"));
         var oasConfig = new SwaggerConfiguration()
             .openAPI(oas)
             .prettyPrint(true)
