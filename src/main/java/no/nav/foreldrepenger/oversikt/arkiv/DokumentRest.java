@@ -1,5 +1,8 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
+import java.util.Comparator;
+import java.util.List;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
@@ -12,9 +15,6 @@ import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.common.domain.Saksnummer;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
-
-import java.util.Comparator;
-import java.util.List;
 
 @ApplicationScoped
 @Path("/dokument")
@@ -38,7 +38,7 @@ public class DokumentRest {
     }
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
+    @Produces("application/pdf")
     public byte[] dokument(@QueryParam("journalpostId") @Valid @NotNull JournalpostId journalpostId,
                            @QueryParam("dokumentId") @Valid @NotNull DokumentId dokumentId) {
         tilgangkontroll.sjekkAtKallErFraBorger();
