@@ -9,8 +9,6 @@ import no.nav.foreldrepenger.common.domain.felles.Kjønn;
 import no.nav.foreldrepenger.common.domain.felles.Sivilstand;
 import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
 
-import org.checkerframework.checker.units.qual.N;
-
 import java.time.LocalDate;
 import java.util.List;
 
