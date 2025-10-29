@@ -9,7 +9,7 @@ import no.nav.foreldrepenger.oversikt.uttak.UttakRest;
 @ApplicationPath(ExternalApiConfig.API_URI)
 public class ExternalApiConfig extends Application {
 
-    public static final String API_URI ="/fpoversikt/external";
+    public static final String API_URI ="/external";
 
     public ExternalApiConfig() {
         // CDI
