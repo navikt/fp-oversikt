@@ -6,6 +6,9 @@ import static no.nav.foreldrepenger.stønadskonto.regelmodell.grunnlag.Dekningsg
 
 import java.util.Map;
 
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -27,6 +30,8 @@ public class UttakRest {
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
+    @ApiResponse(responseCode = "200",
+        content = @Content(schema = @Schema(implementation = KontoBeregningResponseDto.class)))
     public Response konto(@Valid @NotNull KontoBeregningGrunnlagDto grunnlag) {
         guardFamiliehendelse(grunnlag);
         var kontoberegning80 = kontoberegningFra(grunnlag, DEKNINGSGRAD_80);

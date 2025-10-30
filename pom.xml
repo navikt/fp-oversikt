@@ -26,6 +26,7 @@
         <fp-kontrakter.version>9.4.3</fp-kontrakter.version>
         <fpsoknad-felles.version>3.3.5</fpsoknad-felles.version>
         <stonadskonto-regler.version>2.1.1</stonadskonto-regler.version>
+        <openapi-spec-utils.version>2.0.6</openapi-spec-utils.version>
 
         <fp-tidsserie.version>2.7.3</fp-tidsserie.version>
         <mittnav-varsler.version>2.1.1</mittnav-varsler.version>
@@ -148,6 +149,11 @@
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-micrometer</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.openapi.spec.utils</groupId>
+            <artifactId>openapi-spec-utils</artifactId>
+            <version>${openapi-spec-utils.version}</version>
         </dependency>
 
         <!-- Server -->
