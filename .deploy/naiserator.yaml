@@ -85,6 +85,10 @@ spec:
         - application: planlegger
         - application: veiviser-fp-eller-es
         - application: veiviser-hvor-mye
+        {{#if azure-token-generator}}
+        - application: azure-token-generator
+          namespace: nais
+        {{/if}}
         - application: fp-swagger
           namespace: teamforeldrepenger
           cluster: {{environment}}-gcp
