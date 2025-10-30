@@ -8,10 +8,6 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
-  ingresses:
-  {{#each ingresses as |url|}}
-     - {{url}}
-  {{/each}}
   liveness:
     path: /fpoversikt/internal/health/isAlive
     initialDelay: 15

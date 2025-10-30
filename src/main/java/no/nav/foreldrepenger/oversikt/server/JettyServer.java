@@ -33,7 +33,6 @@ import com.zaxxer.hikari.HikariDataSource;
 
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.server.app.ApiConfig;
-import no.nav.foreldrepenger.oversikt.server.app.ExternalApiConfig;
 import no.nav.foreldrepenger.oversikt.server.app.InternalApiConfig;
 
 public class JettyServer {
@@ -154,7 +153,6 @@ public class JettyServer {
         var handler = new ConstraintSecurityHandler();
         // Slipp gjennom kall fra plattform til JaxRs. Foreløpig kun behov for GET
         handler.addConstraintMapping(pathConstraint(Constraint.ALLOWED, InternalApiConfig.API_URI + "/*"));
-        handler.addConstraintMapping(pathConstraint(Constraint.ALLOWED, ExternalApiConfig.API_URI + "/*"));
         // Slipp gjennom til autentisering i JaxRs / auth-filter
         handler.addConstraintMapping(pathConstraint(Constraint.ALLOWED, ApiConfig.API_URI + "/*"));
         // Alt annet av paths og metoder forbudt - 403
