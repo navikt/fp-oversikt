@@ -85,12 +85,6 @@ spec:
         - application: planlegger
         - application: veiviser-fp-eller-es
         - application: veiviser-hvor-mye
-        - application: foreldrepengesoknad-api
-          namespace: teamforeldrepenger
-          cluster: {{environment}}-gcp
-        - application: fpsoknad-mottak
-          namespace: teamforeldrepenger
-          cluster: {{environment}}-fss
         {{#if azure-token-generator}}
         - application: azure-token-generator
           namespace: nais
