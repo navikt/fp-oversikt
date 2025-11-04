@@ -62,7 +62,7 @@ public record SakSVP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.svp.SvpSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
+    public no.nav.foreldrepenger.kontrakter.fpoversikt.svp.SvpSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
         return DtoMapper.mapFra(this);
     }
 

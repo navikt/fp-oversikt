@@ -23,8 +23,7 @@
 
         <felles.version>7.6.8</felles.version>
         <prosesstask.version>5.2.1</prosesstask.version>
-        <fp-kontrakter.version>9.4.3</fp-kontrakter.version>
-        <fpsoknad-felles.version>3.3.5</fpsoknad-felles.version>
+        <fp-kontrakter.version>1.0-SNAPSHOT</fp-kontrakter.version>
         <stonadskonto-regler.version>2.1.1</stonadskonto-regler.version>
 
         <fp-tidsserie.version>2.7.3</fp-tidsserie.version>
@@ -110,6 +109,11 @@
         <dependency>
             <groupId>no.nav.foreldrepenger.felles.integrasjon</groupId>
             <artifactId>ereg-klient</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.kontrakter</groupId>
+            <artifactId>fp-oversikt-v1</artifactId>
+            <version>${fp-kontrakter.version}</version>
         </dependency>
 
         <!-- CDI -->
@@ -240,11 +244,6 @@
             <groupId>no.nav.foreldrepenger</groupId>
             <artifactId>stonadskonto-regler</artifactId>
             <version>${stonadskonto-regler.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>no.nav.foreldrepenger</groupId>
-            <artifactId>fpsoknad-felles</artifactId>
-            <version>${fpsoknad-felles.version}</version>
         </dependency>
         <dependency>
             <groupId>no.nav.vedtak.prosesstask</groupId>

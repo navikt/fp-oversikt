@@ -12,7 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 @Entity(name = "manglendeVedlegg")
@@ -29,9 +29,9 @@ public class ManglendeVedleggEntitet {
 
     @Column(name = "json")
     @JdbcTypeCode(SqlTypes.JSON)
-    private List<DokumentType> json;
+    private List<DokumentTypeHistoriske> json;
 
-    public ManglendeVedleggEntitet(Saksnummer saksnummer, List<DokumentType> json) {
+    public ManglendeVedleggEntitet(Saksnummer saksnummer, List<DokumentTypeHistoriske> json) {
         this.saksnummer = saksnummer.value();
         this.json = json;
     }
@@ -39,11 +39,11 @@ public class ManglendeVedleggEntitet {
     protected ManglendeVedleggEntitet() {
     }
 
-    public List<DokumentType> manglendeVedlegg() {
+    public List<DokumentTypeHistoriske> manglendeVedlegg() {
         return json;
     }
 
-    public ManglendeVedleggEntitet setJson(List<DokumentType> manglendeVedlegg) {
+    public ManglendeVedleggEntitet setJson(List<DokumentTypeHistoriske> manglendeVedlegg) {
         this.json = manglendeVedlegg;
         return this;
     }

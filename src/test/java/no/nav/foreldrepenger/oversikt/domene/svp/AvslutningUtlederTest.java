@@ -14,7 +14,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.common.innsyn.svp.AvslutningÅrsak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.AvslutningÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.svp.ArbeidsforholdUttak.ArbeidsforholdIkkeOppfyltÅrsak;

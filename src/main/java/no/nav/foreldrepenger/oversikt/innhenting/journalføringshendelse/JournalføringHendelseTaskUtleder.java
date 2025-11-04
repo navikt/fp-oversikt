@@ -16,8 +16,8 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.YtelseType;
@@ -90,7 +90,7 @@ public class JournalføringHendelseTaskUtleder {
         return t;
     }
 
-    private ProsessTaskData lagSendBrukernotifikasjonBeskjedTask(String saksnummer, DokumentType dokumentType, EnkelJournalpost journalpost) {
+    private ProsessTaskData lagSendBrukernotifikasjonBeskjedTask(String saksnummer, DokumentTypeHistoriske dokumentType, EnkelJournalpost journalpost) {
         var b = ProsessTaskData.forProsessTask(MinSideBeskjedVedMottattSøknadTask.class);
         b.setSaksnummer(saksnummer);
         b.setProperty(YTELSE_TYPE, gjelderYtelse(dokumentType).name());
@@ -115,7 +115,7 @@ public class JournalføringHendelseTaskUtleder {
         return personOppslagSystem.aktørId(new Fødselsnummer(bruker.ident()));
     }
 
-    private static YtelseType gjelderYtelse(DokumentType dokumentType) {
+    private static YtelseType gjelderYtelse(DokumentTypeHistoriske dokumentType) {
         return switch (dokumentType) {
             case I000001 -> YtelseType.SVANGERSKAPSPENGER;
             case I000002, I000005,  I000006, I000050 -> YtelseType.FORELDREPENGER;

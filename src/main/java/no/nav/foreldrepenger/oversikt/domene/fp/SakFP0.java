@@ -1,24 +1,25 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.Konto.FORELDREPENGER;
 import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.common.innsyn.FpSak;
-import no.nav.foreldrepenger.common.innsyn.FpÅpenBehandling;
-import no.nav.foreldrepenger.common.innsyn.Person;
-import no.nav.foreldrepenger.common.innsyn.RettighetType;
-import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.FpSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.FpÅpenBehandling;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Person;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.RettighetType;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
@@ -64,7 +65,10 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
 
         var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
-        var barna = safeStream(fødteBarn).flatMap(b -> mapPerson(personOppslagSystem, b).stream()).collect(Collectors.toSet());
+        var barna = Stream.ofNullable(fødteBarn)
+            .flatMap(Collection::stream)
+            .flatMap(b -> mapPerson(personOppslagSystem, b).stream())
+            .collect(Collectors.toSet());
         var gjelderAdopsjon = familieHendelse() != null && familieHendelse().gjelderAdopsjon();
         var morUføretrygd = rettigheter != null && rettigheter.morUføretrygd();
         var harAnnenForelderTilsvarendeRettEØS = rettigheter != null && rettigheter.annenForelderTilsvarendeRettEØS();
@@ -86,7 +90,9 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
 
     @Override
     public Optional<FpSøknad> sisteSøknad() {
-        return safeStream(søknader).max(Comparator.comparing(FpSøknad::mottattTidspunkt));
+        return Stream.ofNullable(søknader)
+            .flatMap(Collection::stream)
+            .max(Comparator.comparing(FpSøknad::mottattTidspunkt));
     }
 
     @Override
@@ -96,7 +102,9 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
 
     @Override
     public Optional<FpVedtak> gjeldendeVedtak() {
-        return safeStream(vedtak()).max(Comparator.comparing(FpVedtak::vedtakstidspunkt));
+        return Stream.ofNullable(vedtak())
+            .flatMap(Collection::stream)
+            .max(Comparator.comparing(FpVedtak::vedtakstidspunkt));
     }
 
     private static RettighetType utledRettighetType(Rettigheter rettigheter,
@@ -139,6 +147,9 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     private Optional<FpSøknad> søknadUnderBehandling() {
-        return safeStream(søknader()).max(Comparator.comparing(FpSøknad::mottattTidspunkt)).filter(sisteSøknad -> !sisteSøknad.status().behandlet());
+        return Stream.ofNullable(søknader())
+            .flatMap(Collection::stream)
+            .max(Comparator.comparing(FpSøknad::mottattTidspunkt))
+            .filter(sisteSøknad -> !sisteSøknad.status().behandlet());
     }
 }

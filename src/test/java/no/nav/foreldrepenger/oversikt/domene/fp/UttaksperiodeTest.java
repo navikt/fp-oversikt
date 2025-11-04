@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
-import static no.nav.foreldrepenger.common.innsyn.BrukerRolleSak.FAR_MEDMOR;
+import static no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak.FAR_MEDMOR;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
@@ -8,9 +8,9 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.common.innsyn.Aktivitet;
-import no.nav.foreldrepenger.common.innsyn.KontoType;
-import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
+import no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Aktivitet;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeResultat;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 
@@ -26,15 +26,15 @@ class UttaksperiodeTest {
         var uttaksperiodeAktivitet = periode.resultat().aktiviteter().stream().findFirst().orElseThrow();
         assertThat(dto.gradering().arbeidstidprosent().value()).isEqualTo(uttaksperiodeAktivitet.arbeidstidsprosent().decimalValue());
         assertThat(dto.gradering().aktivitet().type()).isEqualTo(Aktivitet.AktivitetType.ORDINÆRT_ARBEID);
-        assertThat(dto.gradering().aktivitet().arbeidsgiver().type()).isEqualTo(no.nav.foreldrepenger.common.innsyn.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON);
+        assertThat(dto.gradering().aktivitet().arbeidsgiver().type()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON);
         assertThat(dto.gradering().aktivitet().arbeidsgiver().id()).isEqualTo(uttaksperiodeAktivitet.aktivitet().arbeidsgiver().identifikator());
         assertThat(dto.kontoType()).isEqualTo(KontoType.MØDREKVOTE);
-        assertThat(dto.morsAktivitet()).isEqualTo(no.nav.foreldrepenger.common.innsyn.MorsAktivitet.ARBEID);
+        assertThat(dto.morsAktivitet()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.ARBEID);
         assertThat(dto.flerbarnsdager()).isTrue();
         assertThat(dto.samtidigUttak()).isNull();
-        assertThat(dto.oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakOppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER);
-        assertThat(dto.utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakUtsettelseÅrsak.SØKER_SYKDOM);
-        assertThat(dto.overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.common.innsyn.UttakOverføringÅrsak.SYKDOM_ANNEN_FORELDER);
+        assertThat(dto.oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.UttakOppholdÅrsak.FEDREKVOTE_ANNEN_FORELDER);
+        assertThat(dto.utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.UttakUtsettelseÅrsak.SØKER_SYKDOM);
+        assertThat(dto.overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.Overføringsårsak.SYKDOM_ANNEN_FORELDER);
         assertThat(dto.resultat().trekkerDager()).isTrue();
         assertThat(dto.resultat().trekkerMinsterett()).isTrue();
         assertThat(dto.resultat().årsak()).isEqualTo(UttakPeriodeResultat.UttakPeriodeResultatÅrsak.ANNET);

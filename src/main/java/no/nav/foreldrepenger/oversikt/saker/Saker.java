@@ -29,7 +29,7 @@ public class Saker {
         //CDI
     }
 
-    public no.nav.foreldrepenger.common.innsyn.Saker hent() {
+    public no.nav.foreldrepenger.kontrakter.fpoversikt.Saker hent() {
         var saker = hentSaker(innloggetBruker.aktørId());
         return tilDto(saker, fødselsnummerOppslag);
     }

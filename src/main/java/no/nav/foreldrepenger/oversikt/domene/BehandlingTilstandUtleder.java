@@ -1,17 +1,17 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
 import no.nav.foreldrepenger.konfig.Environment;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand;
 
 public final class BehandlingTilstandUtleder {
 
@@ -24,7 +24,9 @@ public final class BehandlingTilstandUtleder {
 
     public static BehandlingTilstand utled(Set<Aksjonspunkt> ap, LocalDateTime søknadMottattTidspunkt) {
 
-        var aksjonspunkt = safeStream(ap).collect(Collectors.toSet());
+        var aksjonspunkt = Stream.ofNullable(ap)
+            .flatMap(Collection::stream)
+            .collect(Collectors.toSet());
         var tilstand = utledGittOpprettetAksjonspunkt(aksjonspunkt, søknadMottattTidspunkt);
         LOG.info("Utledet behandlingtilstand {} for aksjonspunkter {} søknad mottatt {}", tilstand, aksjonspunkt, søknadMottattTidspunkt);
         if (tilstand == BehandlingTilstand.PROSESSERER && ENV.isProd()) {

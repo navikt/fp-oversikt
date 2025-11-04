@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.ws.rs.core.UriBuilder;
 import jakarta.ws.rs.core.UriBuilderException;
-import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
+import no.nav.foreldrepenger.oversikt.oppslag.dto.Målform;
 import no.nav.vedtak.felles.integrasjon.rest.NavHeaders;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;

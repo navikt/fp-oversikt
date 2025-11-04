@@ -5,10 +5,10 @@ public enum Dekningsgrad {
     HUNDRE,
     ;
 
-    public no.nav.foreldrepenger.common.innsyn.DekningsgradSak tilDto() {
+    public no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak tilDto() {
         return switch (this) {
-            case HUNDRE -> no.nav.foreldrepenger.common.innsyn.DekningsgradSak.HUNDRE;
-            case ÅTTI -> no.nav.foreldrepenger.common.innsyn.DekningsgradSak.ÅTTI;
+            case HUNDRE -> no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak.HUNDRE;
+            case ÅTTI -> no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak.ÅTTI;
         };
     }
 }

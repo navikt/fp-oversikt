@@ -3,9 +3,9 @@ package no.nav.foreldrepenger.oversikt.saker;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.common.innsyn.EsSak;
-import no.nav.foreldrepenger.common.innsyn.FpSak;
-import no.nav.foreldrepenger.common.innsyn.svp.SvpSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.EsSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.FpSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.SvpSak;
 import no.nav.foreldrepenger.oversikt.domene.Sak;
 
 final class SakerDtoMapper {
@@ -13,7 +13,7 @@ final class SakerDtoMapper {
     private SakerDtoMapper() {
     }
 
-    static no.nav.foreldrepenger.common.innsyn.Saker tilDto(List<Sak> saker, PersonOppslagSystem personOppslagSystem) {
+    static no.nav.foreldrepenger.kontrakter.fpoversikt.Saker tilDto(List<Sak> saker, PersonOppslagSystem personOppslagSystem) {
         var sakerDtoer = saker.stream()
             .map(s -> map(personOppslagSystem, s))
             .collect(Collectors.toSet());
@@ -30,10 +30,10 @@ final class SakerDtoMapper {
             .filter(EsSak.class::isInstance)
             .map(EsSak.class::cast)
             .collect(Collectors.toSet());
-        return new no.nav.foreldrepenger.common.innsyn.Saker(foreldrepenger, engangsstønad, svangeskapspenger);
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Saker(foreldrepenger, engangsstønad, svangeskapspenger);
     }
 
-    private static no.nav.foreldrepenger.common.innsyn.Sak map(PersonOppslagSystem personOppslagSystem, Sak s) {
+    private static no.nav.foreldrepenger.kontrakter.fpoversikt.Sak map(PersonOppslagSystem personOppslagSystem, Sak s) {
         try {
             return s.tilSakDto(personOppslagSystem);
         } catch (Exception e) {

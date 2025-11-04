@@ -43,7 +43,7 @@ public class SakerRest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public no.nav.foreldrepenger.common.innsyn.Saker hent() {
+    public no.nav.foreldrepenger.kontrakter.fpoversikt.Saker hent() {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         LOG.debug("Kall mot saker endepunkt");

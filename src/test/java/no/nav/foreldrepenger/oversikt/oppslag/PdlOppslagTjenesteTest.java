@@ -18,7 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
 import no.nav.pdl.AdressebeskyttelseGradering;

@@ -1,6 +1,18 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+import static no.nav.foreldrepenger.oversikt.arkiv.SafSystemTjeneste.FP_DOK_TYPE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.time.Instant;
+import java.util.Date;
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.saf.AvsenderMottaker;
@@ -15,18 +27,6 @@ import no.nav.saf.Journalstatus;
 import no.nav.saf.Sak;
 import no.nav.saf.Tilleggsopplysning;
 import no.nav.vedtak.felles.integrasjon.saf.Saf;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.time.Instant;
-import java.util.Date;
-import java.util.List;
-
-import static no.nav.foreldrepenger.oversikt.arkiv.SafSystemTjeneste.FP_DOK_TYPE;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class SafSystemTjenesteTest {
 
@@ -41,7 +41,7 @@ class SafSystemTjenesteTest {
 
     @Test
     void verifiserInnholdMappesKorrektForJournalpost() {
-        var dokumentTypeId = DokumentType.I000001;
+        var dokumentTypeId = DokumentTypeHistoriske.I000001;
         var journalførtSøknad = journalførtSøknad(dokumentTypeId);
         when(saf.hentJournalpostInfo(any(), any())).thenReturn(journalførtSøknad);
 
@@ -56,7 +56,7 @@ class SafSystemTjenesteTest {
 
     @Test
     void verifiserAtDokumentIdUtledesFraTittelVedManglendeTilleggopplysningsfelt() {
-        var dokumentTypeId = DokumentType.I000001;
+        var dokumentTypeId = DokumentTypeHistoriske.I000001;
         var journalpostUtenTilleggsopplysninger = journalpostUtenTilleggsopplysninger(dokumentTypeId);
         when(saf.hentJournalpostInfo(any(), any())).thenReturn(journalpostUtenTilleggsopplysninger);
 
@@ -68,7 +68,7 @@ class SafSystemTjenesteTest {
     }
 
 
-    private static Journalpost journalpostUtenTilleggsopplysninger(DokumentType dokumentTypeId) {
+    private static Journalpost journalpostUtenTilleggsopplysninger(DokumentTypeHistoriske dokumentTypeId) {
         var journalpost = new Journalpost();
         journalpost.setJournalposttype(Journalposttype.I);
         journalpost.setJournalstatus(Journalstatus.MOTTATT);
@@ -88,7 +88,7 @@ class SafSystemTjenesteTest {
         return journalpost;
     }
 
-    private static Journalpost journalførtSøknad(DokumentType dokumentTypeId) {
+    private static Journalpost journalførtSøknad(DokumentTypeHistoriske dokumentTypeId) {
         var journalpost = new Journalpost();
         journalpost.setJournalposttype(Journalposttype.I);
         journalpost.setJournalstatus(Journalstatus.MOTTATT);
@@ -108,7 +108,7 @@ class SafSystemTjenesteTest {
         return journalpost;
     }
 
-    private static DokumentInfo pdfDokument(DokumentType dokumentTypeId) {
+    private static DokumentInfo pdfDokument(DokumentTypeHistoriske dokumentTypeId) {
         var dokument = new DokumentInfo();
         dokument.setDokumentInfoId("123");
         dokument.setTittel(dokumentTypeId.getTittel());
@@ -118,7 +118,7 @@ class SafSystemTjenesteTest {
         return dokument;
     }
 
-    private static DokumentInfo xmlDokument(DokumentType dokumentTypeId) {
+    private static DokumentInfo xmlDokument(DokumentTypeHistoriske dokumentTypeId) {
         var dokument = new DokumentInfo();
         dokument.setDokumentInfoId("456");
         dokument.setTittel(dokumentTypeId.getTittel());

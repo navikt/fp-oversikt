@@ -1,16 +1,16 @@
 package no.nav.foreldrepenger.oversikt.domene.es;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.common.innsyn.EsSak;
-import no.nav.foreldrepenger.common.innsyn.EsÅpenBehandling;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.EsSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.EsÅpenBehandling;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
@@ -50,7 +50,7 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     @Override
-    public no.nav.foreldrepenger.common.innsyn.EsSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
+    public no.nav.foreldrepenger.kontrakter.fpoversikt.EsSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
         var familiehendelse = familieHendelse == null ? null : familieHendelse.tilDto();
         return new EsSak(saksnummer.tilDto(), familiehendelse, avsluttet, tilÅpenBehandling(), false, oppdatertTidspunkt());
     }
@@ -62,7 +62,8 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     private Optional<EsSøknad> søknadUnderBehandling() {
-        return safeStream(søknader())
+        return Stream.ofNullable(søknader())
+            .flatMap(Collection::stream)
             .max(Comparator.comparing(EsSøknad::mottattTidspunkt))
             .filter(sisteSøknad -> !sisteSøknad.status().behandlet());
     }

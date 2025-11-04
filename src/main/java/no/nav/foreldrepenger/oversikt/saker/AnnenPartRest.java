@@ -1,6 +1,11 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 
+import java.time.LocalDate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
@@ -10,14 +15,10 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.foreldrepenger.common.domain.AktørId;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.innsyn.AnnenPartSak;
+import no.nav.foreldrepenger.kontrakter.felles.typer.AktørId;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.AnnenPartSak;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.time.LocalDate;
 
 @Path("/annenPart")
 @ApplicationScoped

@@ -21,10 +21,10 @@ public record Arbeidsgiver(@JsonValue String identifikator) {
         return "Arbeidsgiver{" + "identifikator='***'}'";
     }
 
-    public no.nav.foreldrepenger.common.innsyn.Arbeidsgiver tilDto() {
-        var arbeidsgiverType = erOrg() ? no.nav.foreldrepenger.common.innsyn.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON :
-            no.nav.foreldrepenger.common.innsyn.Arbeidsgiver.ArbeidsgiverType.PRIVAT;
-        return new no.nav.foreldrepenger.common.innsyn.Arbeidsgiver(identifikator, arbeidsgiverType);
+    public no.nav.foreldrepenger.kontrakter.fpoversikt.Arbeidsgiver tilDto() {
+        var arbeidsgiverType = erOrg() ? no.nav.foreldrepenger.kontrakter.fpoversikt.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON :
+            no.nav.foreldrepenger.kontrakter.fpoversikt.Arbeidsgiver.ArbeidsgiverType.PRIVAT;
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Arbeidsgiver(identifikator, arbeidsgiverType);
     }
 
     private boolean erOrg() {

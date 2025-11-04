@@ -1,23 +1,24 @@
 package no.nav.foreldrepenger.oversikt.oppslag.mapper;
 
 import static java.util.Comparator.comparing;
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.domain.felles.Bankkonto;
-import no.nav.foreldrepenger.common.domain.felles.Kjønn;
-import no.nav.foreldrepenger.common.domain.felles.Sivilstand;
-import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.kontrakter.felles.typer.AktørId;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
 import no.nav.foreldrepenger.oversikt.oppslag.PdlOppslagTjeneste;
+import no.nav.foreldrepenger.oversikt.oppslag.dto.Bankkonto;
+import no.nav.foreldrepenger.oversikt.oppslag.dto.Kjønn;
+import no.nav.foreldrepenger.oversikt.oppslag.dto.Målform;
 import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonDto;
+import no.nav.foreldrepenger.oversikt.oppslag.dto.Sivilstand;
 import no.nav.pdl.KjoennType;
 import no.nav.pdl.Navn;
 import no.nav.pdl.Person;
@@ -42,7 +43,7 @@ public class PersonDtoMapper {
         var søkerPerson = søker.person();
         var fødselsdato = fødselsdatoFor(søker);
         return new PersonDto(
-                new no.nav.foreldrepenger.common.domain.AktørId(aktøridSøker.value()),
+                new AktørId(aktøridSøker.value()),
                 new Fødselsnummer(søker.ident()),
                 fødselsdato,
                 navnFor(søker),
@@ -55,7 +56,8 @@ public class PersonDtoMapper {
     }
 
     private static List<PersonDto.BarnDto> tilBarn(List<PdlOppslagTjeneste.PersonMedIdent> barn, Map<String, PdlOppslagTjeneste.PersonMedIdent> annenpart) {
-        return safeStream(barn)
+        return Stream.ofNullable(barn)
+                .flatMap(Collection::stream)
                 .map(barnet -> tilBarn(barnet, annenpart))
                 .sorted(comparing(PersonDto.BarnDto::fødselsdato))
                 .toList();
@@ -93,7 +95,8 @@ public class PersonDtoMapper {
 
 
     private static Sivilstand tilSivilstand(Person søkerPerson) {
-        return safeStream(søkerPerson.getSivilstand())
+        return Stream.ofNullable(søkerPerson.getSivilstand())
+                .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .map(PersonDtoMapper::tilSivilstand)
                 .findFirst()
@@ -148,25 +151,26 @@ public class PersonDtoMapper {
     }
 
 
-    private static no.nav.foreldrepenger.common.domain.Navn navnFor(PdlOppslagTjeneste.PersonMedIdent person) {
+    private static no.nav.foreldrepenger.oversikt.oppslag.dto.Navn navnFor(PdlOppslagTjeneste.PersonMedIdent person) {
         return Optional.ofNullable(person.falskIdentitet()).map(PersonDtoMapper::navn)
-            .or(() -> safeStream(person.person().getNavn())
+            .or(() -> Stream.ofNullable(person.person().getNavn())
+                .flatMap(Collection::stream)
                 .filter(Objects::nonNull)
                 .map(PersonDtoMapper::navn)
                 .findFirst())
             .orElse(null);
     }
 
-    private static no.nav.foreldrepenger.common.domain.Navn navn(Navn navn) {
-        return new no.nav.foreldrepenger.common.domain.Navn(
+    private static no.nav.foreldrepenger.oversikt.oppslag.dto.Navn navn(Navn navn) {
+        return new no.nav.foreldrepenger.oversikt.oppslag.dto.Navn(
                 navn.getFornavn(),
                 navn.getMellomnavn(),
                 navn.getEtternavn()
         );
     }
 
-    private static no.nav.foreldrepenger.common.domain.Navn navn(FalskIdentitet.Informasjon falskId) {
-        return new no.nav.foreldrepenger.common.domain.Navn(
+    private static no.nav.foreldrepenger.oversikt.oppslag.dto.Navn navn(FalskIdentitet.Informasjon falskId) {
+        return new no.nav.foreldrepenger.oversikt.oppslag.dto.Navn(
             falskId.fornavn(),
             falskId.mellomnavn(),
             falskId.etternavn()

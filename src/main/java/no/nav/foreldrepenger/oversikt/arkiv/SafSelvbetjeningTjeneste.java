@@ -13,8 +13,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
@@ -193,15 +192,15 @@ public class SafSelvbetjeningTjeneste {
         };
     }
 
-    private static DokumentType dokumenttypeFraTittel(Journalpost journalpost) {
+    private static DokumentTypeHistoriske dokumenttypeFraTittel(Journalpost journalpost) {
         return utledFraTittel(journalpost.getTittel())
                 .or(() -> utledFraTittel(journalpost.getDokumenter().stream().findFirst().orElseThrow().getTittel()))
                 .orElse(null);
     }
 
-    private static Optional<DokumentType> utledFraTittel(String tittel) {
+    private static Optional<DokumentTypeHistoriske> utledFraTittel(String tittel) {
         try {
-            return Optional.of(DokumentType.fraTittel(tittel));
+            return Optional.of(DokumentTypeHistoriske.fraTittel(tittel));
         } catch (Exception e) {
             LOG.info("Klarte ikke utlede dokumentTypeId fra SAF tittel: {}", tittel);
             return Optional.empty();

@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.oversikt.stub;
 
 import java.util.Set;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;

@@ -1,21 +1,22 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
-import no.nav.foreldrepenger.common.innsyn.Aktivitet;
-import no.nav.foreldrepenger.common.innsyn.Arbeidstidprosent;
-import no.nav.foreldrepenger.common.innsyn.BrukerRolleSak;
-import no.nav.foreldrepenger.common.innsyn.Gradering;
-import no.nav.foreldrepenger.common.innsyn.SamtidigUttak;
-import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
-import no.nav.foreldrepenger.common.innsyn.UttakPeriodeResultat;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Aktivitet;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Arbeidstidprosent;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Gradering;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.SamtidigUttak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeResultat;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -26,7 +27,9 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
                             MorsAktivitet morsAktivitet, Resultat resultat) {
 
     public UttakPeriode tilDto(BrukerRolleSak brukerRolle) {
-        var trekkerDager = safeStream(resultat().aktiviteter()).anyMatch(a -> a.trekkdager().merEnn0());
+        var trekkerDager = Stream.ofNullable(resultat().aktiviteter())
+            .flatMap(Collection::stream)
+            .anyMatch(a -> a.trekkdager().merEnn0());
 
         var utsettelse = utsettelseÅrsak() == null ? null : utsettelseÅrsak().tilDto();
         var opphold = oppholdÅrsak() == null ? null : oppholdÅrsak().tilDto();
@@ -71,7 +74,8 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
         if (gradertAktivitet.isPresent()) {
             return Optional.of(gradertAktivitet.get().konto());
         }
-        return safeStream(resultat().aktiviteter())
+        return Stream.ofNullable(resultat().aktiviteter())
+            .flatMap(Collection::stream)
             .max(Comparator.comparing(UttaksperiodeAktivitet::trekkdager))
             .map(UttaksperiodeAktivitet::konto);
     }
@@ -80,7 +84,8 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
         if (Resultat.Type.INNVILGET.equals(resultat.type())) {
             return Optional.empty();
         }
-        return safeStream(resultat.aktiviteter())
+        return Stream.ofNullable(resultat.aktiviteter())
+            .flatMap(Collection::stream)
             .max(Comparator.comparing(UttaksperiodeAktivitet::arbeidstidsprosent))
             .filter(a -> a.arbeidstidsprosent.merEnn0());
     }
@@ -92,7 +97,9 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
         }
 
         public boolean trekkerFraKonto(Konto konto) {
-            return safeStream(aktiviteter()).anyMatch(a -> a.trekkdager().merEnn0() && konto.equals(a.konto()));
+            return Stream.ofNullable(aktiviteter())
+                .flatMap(Collection::stream)
+                .anyMatch(a -> a.trekkdager().merEnn0() && konto.equals(a.konto()));
         }
 
         public enum Type {

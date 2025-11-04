@@ -18,7 +18,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.oppslag.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;

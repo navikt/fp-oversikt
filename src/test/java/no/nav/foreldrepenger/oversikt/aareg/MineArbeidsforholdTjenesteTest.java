@@ -1,6 +1,21 @@
 package no.nav.foreldrepenger.oversikt.aareg;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.when;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
@@ -11,20 +26,6 @@ import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
 import no.nav.foreldrepenger.oversikt.integrasjoner.ereg.VirksomhetTjeneste;
 import no.nav.foreldrepenger.oversikt.oppslag.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class MineArbeidsforholdTjenesteTest {

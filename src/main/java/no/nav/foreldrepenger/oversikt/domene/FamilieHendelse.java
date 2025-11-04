@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import no.nav.foreldrepenger.common.innsyn.Familiehendelse;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Familiehendelse;
 
 public record FamilieHendelse(@JsonProperty("fødselsdato") LocalDate fødselsdato,
                               @JsonProperty("termindato") LocalDate termindato,
