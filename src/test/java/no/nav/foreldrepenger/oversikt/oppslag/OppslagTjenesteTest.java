@@ -163,7 +163,7 @@ class OppslagTjenesteTest {
         var barnDto = søkerDto.barn().getFirst();
         assertThat(barnDto.navn().fornavn()).isEqualTo("Barn");
         assertThat(barnDto.navn().mellomnavn()).isEqualTo("Barnesen");
-        assertThat(barnDto.navn().etternavn()).isEqualTo("Den Første");
+        assertThat(barnDto.navn().etternavn()).isEqualTo("Den første");
         assertThat(barnDto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(barnDto.fødselsdato()).isEqualTo(LocalDate.now().minusMonths(3));
         var annenpartDto = barnDto.annenPart();
@@ -243,7 +243,7 @@ class OppslagTjenesteTest {
         var barn1Dto = søkerDto.barn().getFirst();
         assertThat(barn1Dto.navn().fornavn()).isEqualTo("Barn");
         assertThat(barn1Dto.navn().mellomnavn()).isEqualTo("Barnesen");
-        assertThat(barn1Dto.navn().etternavn()).isEqualTo("Den Første");
+        assertThat(barn1Dto.navn().etternavn()).isEqualTo("Den første");
         assertThat(barn1Dto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(barn1Dto.fødselsdato()).isEqualTo(LocalDate.now().minusMonths(11));
         assertThat(barn1Dto.annenPart().navn().fornavn()).isEqualTo("Ola");
@@ -253,7 +253,7 @@ class OppslagTjenesteTest {
         var barn2Dto = søkerDto.barn().get(1);
         assertThat(barn2Dto.navn().fornavn()).isEqualTo("Barn");
         assertThat(barn2Dto.navn().mellomnavn()).isEqualTo("Barnesen");
-        assertThat(barn2Dto.navn().etternavn()).isEqualTo("Den Andre");
+        assertThat(barn2Dto.navn().etternavn()).isEqualTo("Den andre");
         assertThat(barn2Dto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(barn2Dto.fødselsdato()).isEqualTo(LocalDate.now().minusWeeks(2));
         assertThat(barn2Dto.annenPart()).isNull();
