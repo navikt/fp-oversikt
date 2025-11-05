@@ -12,7 +12,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.common.innsyn.KontoType;
+import no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -143,7 +143,7 @@ class AnnenPartSakTjenesteTest {
 
         assertThat(annenPartSak.termindato()).isEqualTo(termindato);
         assertThat(annenPartSak.antallBarn()).isEqualTo(antallBarn);
-        assertThat(annenPartSak.dekningsgrad()).isEqualTo(no.nav.foreldrepenger.common.innsyn.DekningsgradSak.ÅTTI);
+        assertThat(annenPartSak.dekningsgrad()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak.ÅTTI);
         assertThat(annenPartSak.perioder()).hasSize(1);
         assertThat(annenPartSak.perioder().getFirst().fom()).isEqualTo(søknadsperiode.fom());
         assertThat(annenPartSak.perioder().getFirst().tom()).isEqualTo(søknadsperiode.tom());

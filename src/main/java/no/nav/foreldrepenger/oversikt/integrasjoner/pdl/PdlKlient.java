@@ -8,7 +8,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
-import no.nav.foreldrepenger.common.util.StringUtil;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
@@ -50,7 +49,7 @@ public class PdlKlient extends AbstractPersonKlient {
         var person = hentPerson(request, projection);
         if (PersonMappers.manglerIdentifikator(person)) {
             // TODO vurder ikke-tilgang for alle tilfelle der man mangler en aktiv (i_bruk) identifikator
-            LOG.warn("Person uten aktiv identifikator i PDL for fnr {}", StringUtil.partialMask(fnr));
+            LOG.warn("Person uten aktiv identifikator i PDL for fnr {}", partialMask(fnr, 5));
         }
         var fødselsdato = PersonMappers.mapFødselsdato(person).orElseThrow(() -> new ManglerTilgangException(FeilKode.IKKE_TILGANG_INAKTIV));
         FNR_FØDT.put(fnr, fødselsdato);
@@ -64,5 +63,12 @@ public class PdlKlient extends AbstractPersonKlient {
                     FNR_AKTØR.put(fnr, aktørId);
                     return aktørId;
                 });
+    }
+
+    private static String partialMask(String value, int maskFraIndex) {
+        return Optional.ofNullable(value)
+            .filter(t -> t.length() >= maskFraIndex)
+            .map(s -> s.substring(0, maskFraIndex) + "*".repeat(s.length() - maskFraIndex))
+            .orElse(value);
     }
 }

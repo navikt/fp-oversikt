@@ -12,8 +12,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
-import no.nav.foreldrepenger.common.innsyn.svp.Vedtak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Vedtak;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
@@ -61,25 +61,25 @@ class DtoMapperTest {
         //Splittet på opphold
         var sortert = arbeidsforhold.tilrettelegginger()
             .stream()
-            .sorted(Comparator.comparing(no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging::fom))
+            .sorted(Comparator.comparing(no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging::fom))
             .toList();
         var tl1 = sortert.get(0);
         var tl2 = sortert.get(1);
         assertThat(tl1.fom()).isEqualTo(svpPeriode.fom());
         assertThat(tl1.tom()).isEqualTo(oppholdPeriode.fom().minusDays(1));
         assertThat(tl1.arbeidstidprosent().value()).isEqualTo(arbeidstidprosent.decimalValue());
-        assertThat(tl1.type()).isEqualTo(no.nav.foreldrepenger.common.innsyn.svp.TilretteleggingType.DELVIS);
+        assertThat(tl1.type()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.svp.TilretteleggingType.DELVIS);
         assertThat(tl2.fom()).isEqualTo(oppholdPeriode.tom().plusDays(1));
         assertThat(tl2.tom()).isEqualTo(svpPeriode.tom());
         assertThat(tl2.arbeidstidprosent().value()).isEqualTo(arbeidstidprosent.decimalValue());
-        assertThat(tl2.type()).isEqualTo(no.nav.foreldrepenger.common.innsyn.svp.TilretteleggingType.DELVIS);
+        assertThat(tl2.type()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.svp.TilretteleggingType.DELVIS);
         assertThat(arbeidsforhold.oppholdsperioder()).hasSize(1);
-        assertThat(arbeidsforhold.oppholdsperioder().stream().toList().get(0).oppholdKilde()).isEqualTo(no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
+        assertThat(arbeidsforhold.oppholdsperioder().stream().toList().get(0).oppholdKilde()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
 
         assertThat(dto.åpenBehandling().søknad().arbeidsforhold()).hasSize(1);
         var arbeidsforholdSøknad = dto.åpenBehandling().søknad().arbeidsforhold().stream().findFirst().orElseThrow();
         assertThat(arbeidsforholdSøknad.aktivitet().arbeidsgiver().id()).isEqualTo(aktivitet.arbeidsgiver().identifikator());
-        assertThat(arbeidsforholdSøknad.aktivitet().type()).isEqualTo(no.nav.foreldrepenger.common.innsyn.Aktivitet.AktivitetType.ORDINÆRT_ARBEID);
+        assertThat(arbeidsforholdSøknad.aktivitet().type()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.Aktivitet.AktivitetType.ORDINÆRT_ARBEID);
         assertThat(arbeidsforholdSøknad.behovFrom()).isEqualTo(tilrettelegging.behovFom());
         assertThat(arbeidsforholdSøknad.tiltak()).isEqualTo(tilrettelegging.tiltak());
         assertThat(arbeidsforholdSøknad.risikofaktorer()).isEqualTo(tilrettelegging.risikoFaktorer());

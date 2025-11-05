@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
-import static no.nav.foreldrepenger.common.domain.validation.InputValideringRegex.BARE_TALL;
+
+import static no.nav.foreldrepenger.kontrakter.felles.validering.InputValideringRegex.BARE_TALL;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonValue;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+
 
 public record Saksnummer(@JsonValue @NotNull @Pattern(regexp = BARE_TALL) String value) {
 
@@ -27,8 +29,8 @@ public record Saksnummer(@JsonValue @NotNull @Pattern(regexp = BARE_TALL) String
         return value;
     }
 
-    public no.nav.foreldrepenger.common.innsyn.Saksnummer tilDto() {
-        return new no.nav.foreldrepenger.common.innsyn.Saksnummer(value);
+    public no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer tilDto() {
+        return new no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer(value);
     }
 
 }

@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.oversikt.arkiv;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
 import no.nav.saf.Bruker;
 import no.nav.saf.BrukerIdType;
 import no.nav.saf.BrukerResponseProjection;
@@ -20,7 +19,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.AKTØRID;
 import static no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost.Bruker.Type.FNR;
 
@@ -98,8 +96,11 @@ public class SafSystemTjeneste {
         };
     }
 
-    private static DokumentType dokumenttypeFraTilleggsopplysninger(Journalpost journalpost) {
-        return safeStream(journalpost.getTilleggsopplysninger())
+    private static DokumentTypeHistoriske dokumenttypeFraTilleggsopplysninger(Journalpost journalpost) {
+        if (journalpost.getTilleggsopplysninger() == null) {
+            return null;
+        }
+        return journalpost.getTilleggsopplysninger().stream()
             .filter(to -> FP_DOK_TYPE.equals(to.getNokkel()))
             .map(Tilleggsopplysning::getVerdi)
             .map(SafSystemTjeneste::tilDokumentTypeFraTilleggsopplysninger)
@@ -109,18 +110,18 @@ public class SafSystemTjeneste {
             .orElse(null);
     }
 
-    private static Optional<DokumentType> tilDokumentTypeFraTilleggsopplysninger(String dokumentType) {
+    private static Optional<DokumentTypeHistoriske> tilDokumentTypeFraTilleggsopplysninger(String dokumentType) {
         try {
-            return Optional.of(DokumentType.valueOf(dokumentType));
+            return Optional.of(DokumentTypeHistoriske.valueOf(dokumentType));
         } catch (Exception e) {
             LOG.info("Ukjent/urelevant dokumentTypeId fra SAF tilleggsopplysninger: {}", dokumentType);
             return Optional.empty();
         }
     }
 
-    private static Optional<DokumentType> utledFraTittel(String tittel) {
+    private static Optional<DokumentTypeHistoriske> utledFraTittel(String tittel) {
         try {
-            return Optional.of(DokumentType.fraTittel(tittel));
+            return Optional.of(DokumentTypeHistoriske.fraTittel(tittel));
         } catch (Exception e) {
             LOG.info("Klarte ikke utlede dokumentTypeId fra SAF tittel: {}", tittel);
             return Optional.empty();

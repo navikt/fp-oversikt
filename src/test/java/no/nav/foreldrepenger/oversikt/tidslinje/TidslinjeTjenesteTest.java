@@ -1,23 +1,24 @@
 package no.nav.foreldrepenger.oversikt.tidslinje;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.FpOversiktInntektsmeldingDto;
-import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpostSelvbetjening;
-import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
-import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
-import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingTjeneste;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.FpOversiktInntektsmeldingDto;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
+import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpostSelvbetjening;
+import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
+import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
+import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingTjeneste;
 
 class TidslinjeTjenesteTest {
         private static final Saksnummer DUMMY_SAKSNUMMER = new Saksnummer("0000000");
@@ -219,56 +220,56 @@ class TidslinjeTjenesteTest {
 
         public static EnkelJournalpostSelvbetjening søknadMed1Vedlegg(Saksnummer saksnummer, LocalDateTime mottatt) {
             return new EnkelJournalpostSelvbetjening(
-                    DokumentType.I000003.getTittel(),
+                    DokumentTypeHistoriske.I000003.getTittel(),
                     "1",
                     saksnummer.value(),
                     JournalpostType.INNGÅENDE_DOKUMENT, mottatt,
-                    DokumentType.I000003,
+                    DokumentTypeHistoriske.I000003,
                     List.of(
-                            new EnkelJournalpostSelvbetjening.Dokument("1", DokumentType.I000003.getTittel(), null),
-                            new EnkelJournalpostSelvbetjening.Dokument("2", DokumentType.I000036.getTittel(), null)
+                            new EnkelJournalpostSelvbetjening.Dokument("1", DokumentTypeHistoriske.I000003.getTittel(), null),
+                            new EnkelJournalpostSelvbetjening.Dokument("2", DokumentTypeHistoriske.I000036.getTittel(), null)
                     )
             );
         }
 
         public static EnkelJournalpostSelvbetjening endringssøknadUtenVedlegg(Saksnummer saksnummer, LocalDateTime tidspunkt) {
             return new EnkelJournalpostSelvbetjening(
-                    DokumentType.I000050.getTittel(),
+                    DokumentTypeHistoriske.I000050.getTittel(),
                     "2",
                     saksnummer.value(),
                     JournalpostType.INNGÅENDE_DOKUMENT,
                     tidspunkt,
-                    DokumentType.I000050,
+                    DokumentTypeHistoriske.I000050,
                     List.of(
-                            new EnkelJournalpostSelvbetjening.Dokument("1", DokumentType.I000050.getTittel(), null)
+                            new EnkelJournalpostSelvbetjening.Dokument("1", DokumentTypeHistoriske.I000050.getTittel(), null)
                     )
             );
         }
 
         public static EnkelJournalpostSelvbetjening ettersender2Vedlegg(Saksnummer saksnummer, LocalDateTime tidspunkt) {
             return new EnkelJournalpostSelvbetjening(
-                    DokumentType.I000036.getTittel(),
+                    DokumentTypeHistoriske.I000036.getTittel(),
                     "3",
                     saksnummer.value(),
                     JournalpostType.INNGÅENDE_DOKUMENT, tidspunkt,
-                    DokumentType.I000023,
+                    DokumentTypeHistoriske.I000023,
                     List.of(
-                            new EnkelJournalpostSelvbetjening.Dokument("1", DokumentType.I000023.getTittel(), null),
-                            new EnkelJournalpostSelvbetjening.Dokument("2", DokumentType.I000036.getTittel(), null)
+                            new EnkelJournalpostSelvbetjening.Dokument("1", DokumentTypeHistoriske.I000023.getTittel(), null),
+                            new EnkelJournalpostSelvbetjening.Dokument("2", DokumentTypeHistoriske.I000036.getTittel(), null)
                     )
             );
         }
 
         public static EnkelJournalpostSelvbetjening innteksmeldingJournalpost(Saksnummer saksnummer) {
             return new EnkelJournalpostSelvbetjening(
-                    DokumentType.I000067.getTittel(),
+                    DokumentTypeHistoriske.I000067.getTittel(),
                     "4",
                     saksnummer.value(),
                     JournalpostType.INNGÅENDE_DOKUMENT,
                     LocalDateTime.now(),
-                    DokumentType.I000067,
+                    DokumentTypeHistoriske.I000067,
                     List.of(
-                            new EnkelJournalpostSelvbetjening.Dokument("1", DokumentType.I000067.getTittel(), null)
+                            new EnkelJournalpostSelvbetjening.Dokument("1", DokumentTypeHistoriske.I000067.getTittel(), null)
                     )
             );
         }

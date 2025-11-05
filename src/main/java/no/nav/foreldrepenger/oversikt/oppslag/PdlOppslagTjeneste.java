@@ -1,8 +1,7 @@
 package no.nav.foreldrepenger.oversikt.oppslag;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -12,7 +11,7 @@ import java.util.stream.Stream;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
@@ -77,7 +76,8 @@ public class PdlOppslagTjeneste {
 
     public List<PersonMedIdent> hentBarnTilSøker(PersonMedIdent søker) {
         var relaterteBarn = relaterteBarn(søker);
-        var dødfødteBarn = safeStream(søker.person().getDoedfoedtBarn())
+        var dødfødteBarn = Stream.ofNullable(søker.person().getDoedfoedtBarn())
+                .flatMap(Collection::stream)
                 .filter(d -> d.getDato() != null)
                 .map(PdlOppslagTjeneste::dødfødtBarn)
                 .map(person -> new PersonMedIdent(null, person))
@@ -168,7 +168,8 @@ public class PdlOppslagTjeneste {
     }
 
     private static List<String> barnRelatertTil(PersonMedIdent person) {
-        return safeStream(person.person().getForelderBarnRelasjon())
+        return Stream.ofNullable(person.person().getForelderBarnRelasjon())
+                .flatMap(Collection::stream)
                 .filter(r -> r.getRelatertPersonsRolle().equals(ForelderBarnRelasjonRolle.BARN))
                 .map(ForelderBarnRelasjon::getRelatertPersonsIdent)
                 .filter(Objects::nonNull)
@@ -176,7 +177,8 @@ public class PdlOppslagTjeneste {
     }
 
     private static Optional<String> annenForelderRegisterertPåBarnet(Fødselsnummer søkersFnr, PersonMedIdent barnet) {
-        return safeStream(barnet.person().getForelderBarnRelasjon())
+        return Stream.ofNullable(barnet.person().getForelderBarnRelasjon())
+                .flatMap(Collection::stream)
                 .filter(r -> !r.getRelatertPersonsRolle().equals(ForelderBarnRelasjonRolle.BARN))
                 .map(ForelderBarnRelasjon::getRelatertPersonsIdent)
                 .filter(Objects::nonNull)
@@ -190,7 +192,8 @@ public class PdlOppslagTjeneste {
     }
 
     private static boolean harAdressebeskyttelse(no.nav.pdl.Person barnet) {
-        var graderinger = safeStream(barnet.getAdressebeskyttelse())
+        var graderinger = Stream.ofNullable(barnet.getAdressebeskyttelse())
+                .flatMap(Collection::stream)
                 .map(Adressebeskyttelse::getGradering)
                 .map(PdlKlientSystem::tilGradering)
                 .collect(Collectors.toSet());

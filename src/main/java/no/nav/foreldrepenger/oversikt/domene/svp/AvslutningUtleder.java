@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.Set;
 
-import no.nav.foreldrepenger.common.innsyn.svp.AvslutningÅrsak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.AvslutningÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 
 final class AvslutningUtleder {

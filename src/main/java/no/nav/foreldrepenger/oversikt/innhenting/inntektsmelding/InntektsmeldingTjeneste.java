@@ -2,9 +2,9 @@ package no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.BortfaltNaturalytelse;
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.FpOversiktInntektsmeldingDto;
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.Refusjon;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.BortfaltNaturalytelse;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.FpOversiktInntektsmeldingDto;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.Refusjon;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.Inntektsmelding;
 import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingV1;

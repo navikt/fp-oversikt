@@ -9,7 +9,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.common.innsyn.BrukerRolleSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 

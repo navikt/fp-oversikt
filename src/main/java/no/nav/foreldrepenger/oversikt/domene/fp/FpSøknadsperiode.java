@@ -2,15 +2,15 @@ package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import java.time.LocalDate;
 
-import no.nav.foreldrepenger.common.innsyn.SamtidigUttak;
-import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.SamtidigUttak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 
 public record FpSøknadsperiode(LocalDate fom, LocalDate tom, Konto konto, UtsettelseÅrsak utsettelseÅrsak, OppholdÅrsak oppholdÅrsak,
                                OverføringÅrsak overføringÅrsak, Gradering gradering, Prosent samtidigUttak, Boolean flerbarnsdager,
                                MorsAktivitet morsAktivitet) {
 
-    public UttakPeriode tilDto(no.nav.foreldrepenger.common.innsyn.BrukerRolleSak brukerRolle) {
+    public UttakPeriode tilDto(no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak brukerRolle) {
         var kontoType = konto == null ? null : konto.tilDto();
         var utsettelse = utsettelseÅrsak() == null ? null : utsettelseÅrsak().tilDto();
         var opphold = oppholdÅrsak() == null ? null : oppholdÅrsak().tilDto();

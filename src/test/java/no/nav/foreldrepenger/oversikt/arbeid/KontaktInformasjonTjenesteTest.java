@@ -12,7 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.Kontaktinformasjoner;
 import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientSystem;
 

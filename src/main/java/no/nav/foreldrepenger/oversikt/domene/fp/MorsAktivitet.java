@@ -11,17 +11,17 @@ public enum MorsAktivitet {
     UFØRE,
     IKKE_OPPGITT;
 
-    public no.nav.foreldrepenger.common.innsyn.MorsAktivitet tilDto() {
+    public no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet tilDto() {
         return switch (this) {
-            case ARBEID -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.ARBEID;
-            case UTDANNING -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.UTDANNING;
-            case KVALPROG -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.KVALPROG;
-            case INTROPROG -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.INTROPROG;
-            case TRENGER_HJELP -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.TRENGER_HJELP;
-            case INNLAGT -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.INNLAGT;
-            case ARBEID_OG_UTDANNING -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.ARBEID_OG_UTDANNING;
-            case UFØRE -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.UFØRE;
-            case IKKE_OPPGITT -> no.nav.foreldrepenger.common.innsyn.MorsAktivitet.IKKE_OPPGITT;
+            case ARBEID -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.ARBEID;
+            case UTDANNING -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.UTDANNING;
+            case KVALPROG -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.KVALPROG;
+            case INTROPROG -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.INTROPROG;
+            case TRENGER_HJELP -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.TRENGER_HJELP;
+            case INNLAGT -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.INNLAGT;
+            case ARBEID_OG_UTDANNING -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.ARBEID_OG_UTDANNING;
+            case UFØRE -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.UFØRE;
+            case IKKE_OPPGITT -> no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.IKKE_OPPGITT;
         };
     }
 }

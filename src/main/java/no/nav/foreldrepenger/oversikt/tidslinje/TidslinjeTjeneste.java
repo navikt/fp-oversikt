@@ -1,21 +1,22 @@
 package no.nav.foreldrepenger.oversikt.tidslinje;
 
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.FpOversiktInntektsmeldingDto;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.FpOversiktInntektsmeldingDto;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpostSelvbetjening;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
 import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingTjeneste;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Stream;
 
 
 @ApplicationScoped

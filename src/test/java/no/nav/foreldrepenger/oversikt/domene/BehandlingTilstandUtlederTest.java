@@ -1,12 +1,12 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
 import static java.time.LocalDateTime.now;
-import static no.nav.foreldrepenger.common.innsyn.BehandlingTilstand.PROSESSERER;
-import static no.nav.foreldrepenger.common.innsyn.BehandlingTilstand.UNDER_BEHANDLING;
-import static no.nav.foreldrepenger.common.innsyn.BehandlingTilstand.VENT_DOKUMENTASJON;
-import static no.nav.foreldrepenger.common.innsyn.BehandlingTilstand.VENT_INNTEKTSMELDING;
-import static no.nav.foreldrepenger.common.innsyn.BehandlingTilstand.VENT_MELDEKORT;
-import static no.nav.foreldrepenger.common.innsyn.BehandlingTilstand.VENT_TIDLIG_SØKNAD;
+import static no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand.PROSESSERER;
+import static no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand.UNDER_BEHANDLING;
+import static no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand.VENT_DOKUMENTASJON;
+import static no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand.VENT_INNTEKTSMELDING;
+import static no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand.VENT_MELDEKORT;
+import static no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand.VENT_TIDLIG_SØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Set;

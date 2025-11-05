@@ -10,14 +10,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import no.nav.foreldrepenger.common.innsyn.Arbeidstidprosent;
-import no.nav.foreldrepenger.common.innsyn.svp.PeriodeResultat;
-import no.nav.foreldrepenger.common.innsyn.svp.SvpArbeidsforhold;
-import no.nav.foreldrepenger.common.innsyn.svp.SvpSak;
-import no.nav.foreldrepenger.common.innsyn.svp.SvpÅpenBehandling;
-import no.nav.foreldrepenger.common.innsyn.svp.Søknad;
-import no.nav.foreldrepenger.common.innsyn.svp.TilretteleggingType;
-import no.nav.foreldrepenger.common.innsyn.svp.Vedtak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Arbeidstidprosent;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.PeriodeResultat;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.SvpArbeidsforhold;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.SvpSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.SvpÅpenBehandling;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Søknad;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.TilretteleggingType;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Vedtak;
 import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -66,7 +66,7 @@ final class DtoMapper {
     }
 
 
-    private static no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging tilDto(SvpPeriode periode) {
+    private static no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging tilDto(SvpPeriode periode) {
         var resultatType = switch (periode.resultatÅrsak()) {
             case INNVILGET -> PeriodeResultat.ResultatType.INNVILGET;
             case AVSLAG_SØKNADSFRIST -> PeriodeResultat.ResultatType.AVSLAG_SØKNADSFRIST;
@@ -80,7 +80,7 @@ final class DtoMapper {
             case INGEN -> TilretteleggingType.INGEN;
         };
         var arbeidstidprosent = periode.arbeidstidprosent() == null ? null : new Arbeidstidprosent(periode.arbeidstidprosent().decimalValue());
-        return new no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging(periode.fom(), periode.tom(), tilretteleggingType, arbeidstidprosent, resultat);
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging(periode.fom(), periode.tom(), tilretteleggingType, arbeidstidprosent, resultat);
     }
 
     private static Søknad tilDto(SvpSøknad søknad, LocalDate avslutningDato) {
@@ -97,8 +97,8 @@ final class DtoMapper {
             tilrettelegging.risikoFaktorer(), tilrettelegging.tiltak(), tilrettelegginger, oppholdDtos, null);
     }
 
-    private static Set<no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging> fjernPerioderMedOpphold(Set<no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging> tilretteleggingDtos,
-                                                                                                        Set<no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode> oppholdDtos) {
+    private static Set<no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging> fjernPerioderMedOpphold(Set<no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging> tilretteleggingDtos,
+                                                                                                        Set<no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode> oppholdDtos) {
         var timelineOpphold = oppholdDtos.stream()
             .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), Boolean.TRUE))
             .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, StandardCombinators::alwaysTrueForMatch)));
@@ -106,7 +106,7 @@ final class DtoMapper {
             .map(p -> new LocalDateSegment<>(p.fom(), p.tom(), p))
             .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new));
         return timelineTilrettelegginger.disjoint(timelineOpphold, (datoInterval, tl, opphold) -> {
-            var t = new no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging(datoInterval.getFomDato(), datoInterval.getTomDato(),
+            var t = new no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging(datoInterval.getFomDato(), datoInterval.getTomDato(),
                 tl.getValue().type(), tl.getValue().arbeidstidprosent(), tl.getValue().resultat());
             return new LocalDateSegment<>(datoInterval, t);
         }).stream().map(LocalDateSegment::getValue).collect(Collectors.toSet());
@@ -120,27 +120,27 @@ final class DtoMapper {
             .orElseGet(() -> avslutningDato.isBefore(periode.fom()) ? periode.fom() : avslutningDato);
     }
 
-    private static no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode tilDto(OppholdPeriode opphold) {
-        return new no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode(opphold.fom(), opphold.tom(),
+    private static no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode tilDto(OppholdPeriode opphold) {
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode(opphold.fom(), opphold.tom(),
             switch (opphold.årsak()) {
-            case FERIE -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdÅrsak.FERIE;
-            case SYKEPENGER -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdÅrsak.SYKEPENGER;
+            case FERIE -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdÅrsak.FERIE;
+            case SYKEPENGER -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdÅrsak.SYKEPENGER;
             },
             switch (opphold.kilde()) {
-            case SAKSBEHANDLER -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
-            case INNTEKTSMELDING -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
-            case SØKNAD -> no.nav.foreldrepenger.common.innsyn.svp.OppholdPeriode.OppholdKilde.SØKNAD;
+            case SAKSBEHANDLER -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
+            case INNTEKTSMELDING -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
+            case SØKNAD -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdKilde.SØKNAD;
             });
     }
 
-    private static no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging tilDto(TilretteleggingPeriode tilretteleggingPeriode, LocalDate tom) {
+    private static no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging tilDto(TilretteleggingPeriode tilretteleggingPeriode, LocalDate tom) {
         var type = switch (tilretteleggingPeriode.type()) {
             case HEL -> TilretteleggingType.HEL;
             case DELVIS -> TilretteleggingType.DELVIS;
             case INGEN -> TilretteleggingType.INGEN;
         };
         var arbeidstidprosent = tilretteleggingPeriode.arbeidstidprosent() == null ? null : new Arbeidstidprosent(tilretteleggingPeriode.arbeidstidprosent().decimalValue());
-        return new no.nav.foreldrepenger.common.innsyn.svp.Tilrettelegging(tilretteleggingPeriode.fom(), tom, type, arbeidstidprosent,
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging(tilretteleggingPeriode.fom(), tom, type, arbeidstidprosent,
             null);
     }
 
