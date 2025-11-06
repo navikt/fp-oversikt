@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.server;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+import no.nav.foreldrepenger.oversikt.server.error.GeneralRestExceptionMapper;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;

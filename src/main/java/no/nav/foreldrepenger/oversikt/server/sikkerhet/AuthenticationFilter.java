@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.server;
+package no.nav.foreldrepenger.oversikt.server.sikkerhet;
 
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;

@@ -10,6 +10,7 @@
     "minReplicas": "1",
     "maxReplicas": "2",
     "azure-token-generator": true,
+    "ingress": "https://fpoversikt.intern.dev.nav.no",
     "groups": [
         {
             "uuid": "f1b82579-c5b5-4617-9673-8ace5ff67f63",
