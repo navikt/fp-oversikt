@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding;
 
 import jakarta.persistence.EntityManager;
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.FpOversiktInntektsmeldingDto;
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.NaturalytelseType;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.FpOversiktInntektsmeldingDto;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.NaturalytelseType;
 import no.nav.foreldrepenger.oversikt.JpaExtension;
 
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;

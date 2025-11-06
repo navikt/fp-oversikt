@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static java.time.LocalDate.now;
 import static java.util.Set.of;
-import static no.nav.foreldrepenger.common.innsyn.BrukerRolleSak.FAR_MEDMOR;
+import static no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak.FAR_MEDMOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.FAR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MEDMOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
@@ -23,10 +23,10 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.innsyn.BehandlingTilstand;
-import no.nav.foreldrepenger.common.innsyn.Person;
-import no.nav.foreldrepenger.common.innsyn.RettighetType;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Person;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.RettighetType;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
@@ -93,7 +93,7 @@ class SakFP0Test {
             uttaksperiode(LocalDate.of(2024, 10, 10).plusMonths(1), LocalDate.of(2024, 10, 10).plusMonths(2), innvilget(ZERO)));
         var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null);
 
-        var vedtakDto = vedtak.tilDto(no.nav.foreldrepenger.common.innsyn.BrukerRolleSak.MOR);
+        var vedtakDto = vedtak.tilDto(no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak.MOR);
 
         assertThat(vedtakDto.perioder()).hasSameSizeAs(vedtak.perioder());
     }

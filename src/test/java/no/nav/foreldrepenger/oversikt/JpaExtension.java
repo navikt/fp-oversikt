@@ -24,7 +24,7 @@ public class JpaExtension extends EntityManagerAwareExtension {
 
     private static DataSource DS;
 
-    private static final String TEST_DB_CONTAINER = Environment.current().getProperty("testcontainer.test.db", String.class, "postgres:17-alpine");
+    private static final String TEST_DB_CONTAINER = Environment.current().getProperty("testcontainer.test.db", String.class, "postgres:18-alpine");
     private static final PostgreSQLContainer TEST_DATABASE;
 
     static {

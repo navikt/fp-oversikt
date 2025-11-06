@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.felles.typer.AktørId;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientBorger;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
@@ -74,7 +75,7 @@ public class OppslagTjeneste {
     }
 
     private PersonDto hentOgCachePersoninfo(Fødselsnummer søkersFnr) {
-        var søkersAktørid = innloggetBruker.aktørId();
+        var søkersAktørid = new AktørId(innloggetBruker.aktørId().value());
         var søker = pdlOppslagTjeneste.hentSøker(søkersFnr.value());
         var barn = pdlOppslagTjeneste.hentBarnTilSøker(søker);
         var annenpart = pdlOppslagTjeneste.hentAnnenpartRelatertTilBarn(barn, søkersFnr);

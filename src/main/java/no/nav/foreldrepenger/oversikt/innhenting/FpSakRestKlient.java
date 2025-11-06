@@ -5,9 +5,9 @@ import java.util.List;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.UriBuilder;
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 import no.nav.vedtak.felles.integrasjon.rest.FpApplication;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
 import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
@@ -38,10 +38,10 @@ class FpSakRestKlient implements FpsakTjeneste {
     }
 
     @Override
-    public List<DokumentType> hentManglendeVedlegg(Saksnummer saksnummer) {
+    public List<DokumentTypeHistoriske> hentManglendeVedlegg(Saksnummer saksnummer) {
         var uri = uri("/fpoversikt/manglendeVedlegg", saksnummer);
         var request = RestRequest.newGET(uri, restConfig);
-        return restClient.sendReturnList(request, DokumentType.class);
+        return restClient.sendReturnList(request, DokumentTypeHistoriske.class);
     }
 
     @Override

@@ -1,7 +1,5 @@
 package no.nav.foreldrepenger.oversikt.arkiv;
 
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
-
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -12,7 +10,7 @@ public record EnkelJournalpostSelvbetjening(String tittel,
                                             String saksnummer,
                                             JournalpostType type,
                                             LocalDateTime mottatt,
-                                            DokumentType hovedtype,
+                                            DokumentTypeHistoriske hovedtype,
                                             List<Dokument> dokumenter) {
 
     public record Dokument(String dokumentId, String tittel, Brevkode brevkode) {

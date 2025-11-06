@@ -1,16 +1,11 @@
 package no.nav.foreldrepenger.oversikt.oppslag.dto;
 
-import jakarta.validation.constraints.NotNull;
-import no.nav.foreldrepenger.common.domain.AktørId;
-import no.nav.foreldrepenger.common.domain.Fødselsnummer;
-import no.nav.foreldrepenger.common.domain.Navn;
-import no.nav.foreldrepenger.common.domain.felles.Bankkonto;
-import no.nav.foreldrepenger.common.domain.felles.Kjønn;
-import no.nav.foreldrepenger.common.domain.felles.Sivilstand;
-import no.nav.foreldrepenger.common.oppslag.dkif.Målform;
-
 import java.time.LocalDate;
 import java.util.List;
+
+import jakarta.validation.constraints.NotNull;
+import no.nav.foreldrepenger.kontrakter.felles.typer.AktørId;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 
 public record PersonDto(AktørId aktørid,
                         @NotNull Fødselsnummer fnr,

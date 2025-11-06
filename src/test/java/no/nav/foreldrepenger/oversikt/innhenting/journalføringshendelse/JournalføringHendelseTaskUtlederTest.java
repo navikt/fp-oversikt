@@ -1,6 +1,14 @@
 package no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse;
 
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.UUID;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
@@ -8,13 +16,6 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.TaskType;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.util.UUID;
-
-import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
-import static org.assertj.core.api.Assertions.assertThat;
 
 class JournalføringHendelseTaskUtlederTest {
 
@@ -86,7 +87,7 @@ class JournalføringHendelseTaskUtlederTest {
             Saksnummer.dummy().value(),
             JournalpostType.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.AKTØRID, AktørId.dummy().value()),
-            DokumentType.I000001
+            DokumentTypeHistoriske.I000001
         );
     }
 
@@ -98,7 +99,7 @@ class JournalføringHendelseTaskUtlederTest {
             Saksnummer.dummy().value(),
             JournalpostType.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.FNR, "000000"),
-            DokumentType.I000038
+            DokumentTypeHistoriske.I000038
         );
     }
 
@@ -110,7 +111,7 @@ class JournalføringHendelseTaskUtlederTest {
             Saksnummer.dummy().value(),
             JournalpostType.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.AKTØRID, "000000"),
-            DokumentType.I000067
+            DokumentTypeHistoriske.I000067
         );
     }
 
@@ -122,7 +123,7 @@ class JournalføringHendelseTaskUtlederTest {
             Saksnummer.dummy().value(),
             JournalpostType.INNGÅENDE_DOKUMENT,
             new EnkelJournalpost.Bruker(EnkelJournalpost.Bruker.Type.FNR, "000000"),
-            DokumentType.I000114
+            DokumentTypeHistoriske.I000114
         );
     }
 }

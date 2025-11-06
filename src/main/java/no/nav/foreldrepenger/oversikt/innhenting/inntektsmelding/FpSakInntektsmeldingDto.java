@@ -7,7 +7,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.NaturalytelseType;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.NaturalytelseType;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record FpSakInntektsmeldingDto(Boolean erAktiv, BigDecimal stillingsprosent,

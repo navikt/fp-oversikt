@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 })
 public interface Sak {
 
-    no.nav.foreldrepenger.common.innsyn.Sak tilSakDto(PersonOppslagSystem personOppslagSystem);
+    no.nav.foreldrepenger.kontrakter.fpoversikt.Sak tilSakDto(PersonOppslagSystem personOppslagSystem);
 
     Saksnummer saksnummer();
 

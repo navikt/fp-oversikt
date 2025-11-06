@@ -1,23 +1,24 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
 import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
 
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.common.innsyn.AnnenPartSak;
-import no.nav.foreldrepenger.common.innsyn.DekningsgradSak;
-import no.nav.foreldrepenger.common.innsyn.Gradering;
-import no.nav.foreldrepenger.common.innsyn.UttakPeriode;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.AnnenPartSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.Gradering;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
@@ -101,7 +102,10 @@ public class AnnenPartSakTjeneste {
             case ÅTTI -> DekningsgradSak.ÅTTI;
             case HUNDRE -> DekningsgradSak.HUNDRE;
         };
-        var vedtaksperioder = safeStream(gjeldendeVedtak.get().perioder()).map(p -> p.tilDto(gjeldendeSak.brukerRolle().tilDto())).toList();
+        var vedtaksperioder = Stream.ofNullable(gjeldendeVedtak.get().perioder())
+            .flatMap(Collection::stream)
+            .map(p -> p.tilDto(gjeldendeSak.brukerRolle().tilDto()))
+            .toList();
         return Optional.of(new AnnenPartSak(compress(fjernArbeidsgivere(vedtaksperioder)), termindato, dekningsgrad, antallBarn));
     }
 
@@ -109,7 +113,10 @@ public class AnnenPartSakTjeneste {
         //Fra vedtak, ellers søknad
         var brukerRolle = gjeldendeSak.brukerRolle().tilDto();
         return gjeldendeSak.gjeldendeVedtak().map(gjeldendeVedtak -> {
-            var perioder = safeStream(gjeldendeVedtak.perioder()).map(p -> p.tilDto(brukerRolle)).toList();
+            var perioder = Stream.ofNullable(gjeldendeVedtak.perioder())
+                .flatMap(Collection::stream)
+                .map(p -> p.tilDto(brukerRolle))
+                .toList();
             return compress(perioder);
         }).orElseGet(() -> {
             LOG.info("Annen parts gjeldende sak har ingen gjeldende vedtak. Saksnummer {}", gjeldendeSak.saksnummer());

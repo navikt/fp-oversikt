@@ -1,12 +1,12 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
-import static no.nav.foreldrepenger.common.util.StreamUtil.safeStream;
-
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -111,7 +111,10 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<SvpVedtak> tilSvpVedtak(Set<SvpSak.Vedtak> vedtak) {
-        return safeStream(vedtak).map(v -> {
+        if (vedtak == null) {
+            return Set.of();
+        }
+        return vedtak.stream().map(v -> {
             var arbeidsforhold = v.arbeidsforhold().stream().map(HentSakTask::tilArbeidsforhold).collect(Collectors.toSet());
             var avslagÅrsak = v.avslagÅrsak() == null ? null : switch (v.avslagÅrsak()) {
                 case ARBEIDSGIVER_KAN_TILRETTELEGGE -> SvpVedtak.AvslagÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE;
@@ -153,7 +156,10 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<EsVedtak> tilEsVedtak(Set<EsSak.Vedtak> vedtak) {
-        return safeStream(vedtak).map(v -> new EsVedtak(v.vedtakstidspunkt())).collect(Collectors.toSet());
+        return Stream.ofNullable(vedtak)
+            .flatMap(Collection::stream)
+            .map(v -> new EsVedtak(v.vedtakstidspunkt()))
+            .collect(Collectors.toSet());
     }
 
     private static Rettigheter tilRettigheter(FpSak.Rettigheter rettigheter) {
@@ -319,7 +325,9 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<Aksjonspunkt> tilAksjonspunkt(Set<Sak.Aksjonspunkt> aksjonspunkt) {
-        return safeStream(aksjonspunkt).map(a -> {
+        return Stream.ofNullable(aksjonspunkt)
+            .flatMap(Collection::stream)
+            .map(a -> {
             var venteårsak = a.venteårsak() == null ? null : switch (a.venteårsak()) {
                 case ANKE_VENTER_PÅ_MERKNADER_FRA_BRUKER -> Aksjonspunkt.Venteårsak.ANKE_VENTER_PÅ_MERKNADER_FRA_BRUKER;
                 case AVVENT_DOKUMTANSJON -> Aksjonspunkt.Venteårsak.AVVENT_DOKUMTANSJON;
@@ -364,7 +372,10 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<FpVedtak> tilFpVedtak(Set<FpSak.Vedtak> vedtakene) {
-        return safeStream(vedtakene).map(HentSakTask::tilFpVedtak).collect(Collectors.toSet());
+        return Stream.ofNullable(vedtakene)
+            .flatMap(Collection::stream)
+            .map(HentSakTask::tilFpVedtak)
+            .collect(Collectors.toSet());
     }
 
     private static FpVedtak tilFpVedtak(FpSak.Vedtak vedtakDto) {
@@ -385,7 +396,10 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static List<Uttaksperiode> tilUttaksperiode(List<FpSak.Uttaksperiode> perioder) {
-        return safeStream(perioder).map(HentSakTask::tilUttaksperiode).toList();
+        return Stream.ofNullable(perioder)
+            .flatMap(Collection::stream)
+            .map(HentSakTask::tilUttaksperiode)
+            .toList();
     }
 
     private static Uttaksperiode tilUttaksperiode(FpSak.Uttaksperiode uttaksperiodeDto) {

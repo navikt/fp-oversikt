@@ -17,7 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import no.nav.foreldrepenger.common.domain.felles.DokumentType;
+import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
 import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpostSelvbetjening;
 import no.nav.foreldrepenger.oversikt.arkiv.JournalpostType;
 import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
@@ -58,7 +58,7 @@ class SakerRestErOppdatertTest {
 
     @Test
     void sakErOppdatertHvisOppdateringstidspunktErEtterMottattidspunktetTilJournalposten() {
-        when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
+        when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentTypeHistoriske.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
         sakRepository.lagre(fpsak(FAKE_SAKSNUMMER, LocalDateTime.now(), LocalDateTime.now().minusHours(1)));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isTrue();
@@ -66,7 +66,7 @@ class SakerRestErOppdatertTest {
 
     @Test
     void sakErIkkeOppdatertHvisOppdatertTidspunktetErFørInnsendingstidspunkt() {
-        when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
+        when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentTypeHistoriske.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
         sakRepository.lagre(fpsak(FAKE_SAKSNUMMER, LocalDateTime.now().minusHours(1), LocalDateTime.now()));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isFalse();
@@ -74,7 +74,7 @@ class SakerRestErOppdatertTest {
 
     @Test
     void ingenSakerIFpoversiktMenArkivertSøknadSkalReturnereFalse() {
-        when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
+        when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentTypeHistoriske.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isFalse();
     }
@@ -82,8 +82,8 @@ class SakerRestErOppdatertTest {
     @Test
     void ingenSakerMedLiktSaksnummerIFpoversiktMenArkivertSøknadSkalReturnereFalse() {
         when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(
-                arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(20), FAKE_SAKSNUMMER_2),
-                arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)
+                arkivertJournalpost(DokumentTypeHistoriske.I000001, LocalDateTime.now().minusMinutes(20), FAKE_SAKSNUMMER_2),
+                arkivertJournalpost(DokumentTypeHistoriske.I000001, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)
         ));
         sakRepository.lagre(fpsak(FAKE_SAKSNUMMER_2, LocalDateTime.now().minusMinutes(15), LocalDateTime.now().minusHours(1)));
 
@@ -92,7 +92,7 @@ class SakerRestErOppdatertTest {
 
     @Test
     void nårSøknadIkkeHarSaksnummerAntarViAtSakenIkkeErOppdatert() {
-        when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentType.I000001, LocalDateTime.now().minusMinutes(20), null)));
+        when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(List.of(arkivertJournalpost(DokumentTypeHistoriske.I000001, LocalDateTime.now().minusMinutes(20), null)));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isFalse();
     }
@@ -101,14 +101,14 @@ class SakerRestErOppdatertTest {
     void har_andre_journalførte_dokumenter_men_ingen_søknad_skal_da_være_oppdatert_og_vi_venter_ikke_på_noe_søknad() {
         when(safSelvbetjeningTjeneste.alleJournalposter(any())).thenReturn(
                 List.of(
-                        arkivertJournalpost(DokumentType.I000039, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER),
-                        arkivertJournalpost(DokumentType.I000067, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)
+                        arkivertJournalpost(DokumentTypeHistoriske.I000039, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER),
+                        arkivertJournalpost(DokumentTypeHistoriske.I000067, LocalDateTime.now().minusMinutes(1), FAKE_SAKSNUMMER)
                 ));
 
         assertThat(sakerRest.erSakOppdatertEtterMottattSøknad()).isTrue();
     }
 
-    private static EnkelJournalpostSelvbetjening arkivertJournalpost(DokumentType dokumentType, LocalDateTime mottatt, String saksnummer) {
+    private static EnkelJournalpostSelvbetjening arkivertJournalpost(DokumentTypeHistoriske dokumentType, LocalDateTime mottatt, String saksnummer) {
         return new EnkelJournalpostSelvbetjening(
                 dokumentType.getTittel(),
                 "123456",

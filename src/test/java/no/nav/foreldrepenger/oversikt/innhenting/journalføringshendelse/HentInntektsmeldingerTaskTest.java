@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import no.nav.foreldrepenger.common.innsyn.inntektsmelding.NaturalytelseType;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.NaturalytelseType;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 
 import no.nav.vedtak.konfig.Tid;
