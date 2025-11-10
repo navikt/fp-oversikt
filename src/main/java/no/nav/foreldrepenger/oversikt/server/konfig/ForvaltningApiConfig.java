@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.server.konfig;
 
 import static no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig.getApplicationProperties;
+import static no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig.getFellesConfigClasses;
 
 import java.util.Set;
 
@@ -8,9 +9,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import no.nav.foreldrepenger.oversikt.drift.ManuellOppdateringAvSakDriftTjeneste;
-import no.nav.foreldrepenger.oversikt.server.JacksonJsonConfig;
-import no.nav.foreldrepenger.oversikt.server.error.GeneralRestExceptionMapper;
-import no.nav.foreldrepenger.oversikt.server.error.ValidationExceptionMapper;
 import no.nav.foreldrepenger.oversikt.server.konfig.swagger.OpenApiUtils;
 import no.nav.foreldrepenger.oversikt.server.sikkerhet.ForvaltningAuthorizationFilter;
 import no.nav.vedtak.felles.prosesstask.rest.ProsessTaskRestTjeneste;
@@ -19,10 +17,8 @@ public class ForvaltningApiConfig extends ResourceConfig {
     public static final String API_URI = "/forvaltning/api";
 
     public ForvaltningApiConfig() {
-        register(ForvaltningAuthorizationFilter.class); // Sikkerhet
-        register(GeneralRestExceptionMapper.class); // Exception handling
-        register(ValidationExceptionMapper.class); // Exception handling
-        register(JacksonJsonConfig.class); // Json
+        register(ForvaltningAuthorizationFilter.class); // Autorisering - drift
+        registerClasses(getFellesConfigClasses());
         registerOpenApi();
         registerClasses(getForvaltningKlasser());
         setProperties(getApplicationProperties());

@@ -14,12 +14,14 @@ public class KontekstTestHelper {
     public static void innloggetBorger() {
         var kontekst = mock(Kontekst.class);
         when(kontekst.harKontekst()).thenReturn(true);
+        when(kontekst.erAutentisert()).thenReturn(true);
         when(kontekst.getIdentType()).thenReturn(IdentType.EksternBruker);
         KontekstHolder.setKontekst(kontekst);
     }
 
     public static void innloggetSaksbehandlerUtenDrift() {
         var kontekst = mock(RequestKontekst.class);
+        when(kontekst.erAutentisert()).thenReturn(true);
         when(kontekst.harKontekst()).thenReturn(true);
         when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
         KontekstHolder.setKontekst(kontekst);
@@ -28,6 +30,7 @@ public class KontekstTestHelper {
     public static void innloggetSaksbehandlerMedDriftRolle() {
         var kontekst = mock(RequestKontekst.class);
         when(kontekst.harKontekst()).thenReturn(true);
+        when(kontekst.erAutentisert()).thenReturn(true);
         when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
         when(kontekst.harGruppe(AnsattGruppe.DRIFT)).thenReturn(true);
         KontekstHolder.setKontekst(kontekst);

@@ -1,8 +1,6 @@
 package no.nav.foreldrepenger.oversikt.drift;
 
 
-import static no.nav.foreldrepenger.oversikt.drift.ProsessTaskRestTjeneste.sjekkAtSaksbehandlerHarRollenDrift;
-
 import java.time.Instant;
 import java.util.List;
 
@@ -59,7 +57,6 @@ public class ManuellOppdateringAvSakDriftTjeneste {
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
     public Response opprettHentSakTaskForSaksnummre(@Parameter(description = "Liste med saksnummre som skal oppdateres") @Valid @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
-        sjekkAtSaksbehandlerHarRollenDrift();
         for (var saksnummer : saksnummre) {
             LOG.info("Lager task for å oppdatere følgende sak {}", saksnummer.value());
             lagreHentSakTask(saksnummer);
@@ -74,7 +71,6 @@ public class ManuellOppdateringAvSakDriftTjeneste {
         @ApiResponse(responseCode = "200", description = "Task for å oppdatere oppgaver er opprettet per sak")
     })
     public Response oppdaterOppgaver(@Parameter(description = "Liste med saksnummre som skal oppdateres") @Valid @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
-        sjekkAtSaksbehandlerHarRollenDrift();
         for (var saksnummer : saksnummre) {
             LOG.info("Lager task for å oppdatere oppgaver {}", saksnummer.value());
             lagreOpprettOppgaveTask(saksnummer);
