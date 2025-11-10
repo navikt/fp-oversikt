@@ -20,7 +20,7 @@ public record PersonDto(AktørId aktørid,
     public record BarnDto(@NotNull Fødselsnummer fnr,
                           @NotNull LocalDate fødselsdato,
                           LocalDate dødsdato,
-                          @NotNull Navn navn,
+                          Navn navn,
                           @NotNull Kjønn kjønn,
                           AnnenForelderDto annenPart) {
     }
