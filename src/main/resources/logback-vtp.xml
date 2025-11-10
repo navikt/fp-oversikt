@@ -1,3 +1,6 @@
 <included>
     <logger name="no.nav.foreldrepenger" level="DEBUG" />
+    <logger name="secureLogger" level="INFO" additivity="false">
+        <appender-ref ref="stdoutConsoleLogger"/>
+    </logger>
 </included>

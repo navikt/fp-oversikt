@@ -18,6 +18,7 @@
         <sonar.projectName>fp-oversikt</sonar.projectName>
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
+        <openapi-spec-utils.version>2.0.6</openapi-spec-utils.version>
         <io.confluent.version>8.1.0</io.confluent.version>
 
         <felles.version>7.6.9</felles.version>
@@ -124,11 +125,12 @@
         <!-- SWAGGER -->
         <dependency>
             <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-core-jakarta</artifactId>
+            <artifactId>swagger-jaxrs2-jakarta</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.swagger.core.v3</groupId>
-            <artifactId>swagger-jaxrs2-jakarta</artifactId>
+            <groupId>no.nav.openapi.spec.utils</groupId>
+            <artifactId>openapi-spec-utils</artifactId>
+            <version>${openapi-spec-utils.version}</version>
         </dependency>
 
         <dependency>

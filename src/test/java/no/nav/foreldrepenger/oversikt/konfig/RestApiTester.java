@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.Path;
-import no.nav.foreldrepenger.oversikt.server.app.ApiConfig;
+import no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig;
 
 class RestApiTester {
 

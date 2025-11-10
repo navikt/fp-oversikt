@@ -8,6 +8,10 @@ metadata:
 spec:
   image: {{image}}
   port: 8080
+  {{#if ingress}}
+  ingresses:
+    - {{ingress}}
+  {{/if}}
   liveness:
     path: /fpoversikt/internal/health/isAlive
     initialDelay: 15
@@ -71,6 +75,9 @@ spec:
       destinations:
         - id: loki
         - id: elastic
+        - id: secure_logs
+  secureLogs:
+    enabled: true
   accessPolicy:
     inbound:
       rules:

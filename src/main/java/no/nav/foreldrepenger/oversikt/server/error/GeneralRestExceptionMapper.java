@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.server;
+package no.nav.foreldrepenger.oversikt.server.error;
 
 import org.eclipse.jetty.http.HttpStatus;
 import org.slf4j.Logger;
@@ -8,6 +8,7 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
+import no.nav.foreldrepenger.oversikt.server.ProblemDetails;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.FpoversiktException;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
 
