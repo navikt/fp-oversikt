@@ -8,12 +8,13 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 
 @JsonPropertyOrder({"fornavn", "mellomnavn", "etternavn"})
-public record Navn(@Pattern(regexp = FRITEKST) String fornavn,
+public record Navn(@Pattern(regexp = FRITEKST) @NotNull String fornavn,
                    @Pattern(regexp = FRITEKST) String mellomnavn,
-                   @Pattern(regexp = FRITEKST) String etternavn) {
+                   @Pattern(regexp = FRITEKST) @NotNull String etternavn) {
 
     @JsonIgnore
     public String navn() {
