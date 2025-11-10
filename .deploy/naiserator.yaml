@@ -75,6 +75,9 @@ spec:
       destinations:
         - id: loki
         - id: elastic
+        - id: secure_logs
+  secureLogs:
+    enabled: true
   accessPolicy:
     inbound:
       rules:
