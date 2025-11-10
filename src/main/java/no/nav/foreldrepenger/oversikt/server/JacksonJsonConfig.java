@@ -16,7 +16,7 @@ import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 public class JacksonJsonConfig implements ContextResolver<ObjectMapper>, FormatMapper {
 
     private static final ObjectMapper MAPPER = DefaultJsonMapper.getObjectMapper()
-        .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL);
+        .setDefaultPropertyInclusion(JsonInclude.Include.NON_ABSENT);
     private static final FormatMapper FORMAT_MAPPER = new JacksonJsonFormatMapper(MAPPER);
 
     public JacksonJsonConfig() {
