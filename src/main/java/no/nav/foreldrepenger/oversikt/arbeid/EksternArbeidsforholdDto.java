@@ -10,8 +10,8 @@ public record EksternArbeidsforholdDto(@NotNull String arbeidsgiverId,
                                        @NotNull String arbeidsgiverIdType,
                                        @NotNull String arbeidsgiverNavn,
                                        @NotNull Stillingsprosent stillingsprosent,
-                                       @NotNull LocalDate tom,
-                                       LocalDate fom,
+                                       @NotNull LocalDate fom,
+                                       LocalDate tom,
                                        @NotNull LocalDate from,
                                        Optional<LocalDate> to) {
 }
