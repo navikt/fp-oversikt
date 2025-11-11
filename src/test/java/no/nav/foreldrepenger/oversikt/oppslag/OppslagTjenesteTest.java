@@ -68,7 +68,10 @@ class OppslagTjenesteTest {
         var enkeltArbeidsforhold = new EksternArbeidsforholdDto(
                 "123456789",
                 "fnr",
-                "Navn på arbeidsgiver", Stillingsprosent.arbeid(BigDecimal.valueOf(100)), LocalDate.now().minusYears(5),
+                "Navn på arbeidsgiver", Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
+                LocalDate.now().minusYears(5),
+                null,
+                LocalDate.now().minusYears(5),
                 Optional.empty()
         );
 
@@ -306,19 +309,28 @@ class OppslagTjenesteTest {
         var enkeltArbeidsforhold1 = new EksternArbeidsforholdDto(
                 "2",
                 "org",
-                "Navn på arbeidsgiver 1", Stillingsprosent.arbeid(BigDecimal.valueOf(100)), LocalDate.now().minusYears(5),
+                "Navn på arbeidsgiver 1", Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
+                LocalDate.now().minusYears(5),
+                null,
+                LocalDate.now().minusYears(5),
                 Optional.of(LocalDate.now())
         );
         var enkeltArbeidsforhold2 = new EksternArbeidsforholdDto(
                 "12312312312",
                 "org",
-                "Navn på arbeidsgiver 2", Stillingsprosent.arbeid(BigDecimal.valueOf(100)), LocalDate.now().minusYears(5),
+                "Navn på arbeidsgiver 2", Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
+                LocalDate.now().minusYears(5),
+                null,
+                LocalDate.now().minusYears(5),
                 Optional.empty()
         );
         var enkeltArbeidsforhold3 = new EksternArbeidsforholdDto(
                 "1",
                 "fnr",
-                "Navn på arbeidsgiver 3", Stillingsprosent.arbeid(BigDecimal.valueOf(55)), LocalDate.now(),
+                "Navn på arbeidsgiver 3", Stillingsprosent.arbeid(BigDecimal.valueOf(55)),
+                LocalDate.now(),
+                null,
+                LocalDate.now(),
                 Optional.empty()
         );
         var eksterneArbeidsforhold = List.of(
