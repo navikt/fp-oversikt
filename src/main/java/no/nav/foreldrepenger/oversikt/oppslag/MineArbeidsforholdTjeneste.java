@@ -65,6 +65,8 @@ public class MineArbeidsforholdTjeneste {
                 arbeidsgiverNavn(a.arbeidsforholdIdentifikator()),
                 gjeldendeStillingsprosent(a),
                 a.ansettelsesPeriode().getFomDato(),
+                Optional.of(a.ansettelsesPeriode().getTomDato()).filter(d -> d.isBefore(LocalDate.MAX)).orElse(null),
+                a.ansettelsesPeriode().getFomDato(),
                 Optional.of(a.ansettelsesPeriode().getTomDato()).filter(d -> d.isBefore(LocalDate.MAX))
         );
     }
