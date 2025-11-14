@@ -58,7 +58,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
@@ -115,7 +115,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
@@ -124,13 +124,13 @@ class OppslagTjenesteTest {
         søkerPdl.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(barn1Ident, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
 
         var annenpartPdl = new Person();
-        annenpartPdl.setNavn(navn("Ola", null, "Nordmann"));
+        annenpartPdl.setNavn(navn("OLA", null, "NORDMANN"));
         annenpartPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(32)));
         annenpartPdl.setDoedsfall(List.of());
         annenpartPdl.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT));
 
         var barnPdl = new Person();
-        barnPdl.setNavn(navn("Barn", "Barnesen", "Den første"));
+        barnPdl.setNavn(navn("BARN", "BARNESEN", "DEN FØRSTE"));
         barnPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         barnPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusMonths(3)));
         barnPdl.setDoedsfall(List.of());
@@ -166,7 +166,7 @@ class OppslagTjenesteTest {
         var barnDto = søkerDto.barn().getFirst();
         assertThat(barnDto.navn().fornavn()).isEqualTo("Barn");
         assertThat(barnDto.navn().mellomnavn()).isEqualTo("Barnesen");
-        assertThat(barnDto.navn().etternavn()).isEqualTo("Den første");
+        assertThat(barnDto.navn().etternavn()).isEqualTo("Den Første");
         assertThat(barnDto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(barnDto.fødselsdato()).isEqualTo(LocalDate.now().minusMonths(3));
         var annenpartDto = barnDto.annenPart();
@@ -181,7 +181,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
@@ -191,13 +191,13 @@ class OppslagTjenesteTest {
         søkerPdl.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(barn1Ident, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
 
         var annenpartTilBarn1Pdl = new Person();
-        annenpartTilBarn1Pdl.setNavn(navn("Ola", null, "Nordmann"));
+        annenpartTilBarn1Pdl.setNavn(navn("OLA", null, "NORDMANN"));
         annenpartTilBarn1Pdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(32)));
         annenpartTilBarn1Pdl.setDoedsfall(List.of());
         annenpartTilBarn1Pdl.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT));
 
         var barn1Pdl = new Person();
-        barn1Pdl.setNavn(navn("Barn", "Barnesen", "Den første"));
+        barn1Pdl.setNavn(navn("BARN", "BARNESEN", "DEN FØRSTE"));
         barn1Pdl.setKjoenn(kjønn(KjoennType.KVINNE));
         barn1Pdl.setFoedselsdato(fødselsdato(LocalDate.now().minusMonths(11)));
         barn1Pdl.setDoedsfall(List.of());
@@ -209,7 +209,7 @@ class OppslagTjenesteTest {
                 forelderBarnRelasjon(annenpartIdent, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         ));
         var barn2Pdl = new Person();
-        barn2Pdl.setNavn(navn("Barn", "Barnesen", "Den andre"));
+        barn2Pdl.setNavn(navn("BARN", "BARNESEN", "DEN ANDRE"));
         barn2Pdl.setKjoenn(kjønn(KjoennType.KVINNE));
         barn2Pdl.setFoedselsdato(fødselsdato(LocalDate.now().minusWeeks(2)));
         barn2Pdl.setDoedsfall(List.of());
@@ -246,7 +246,7 @@ class OppslagTjenesteTest {
         var barn1Dto = søkerDto.barn().getFirst();
         assertThat(barn1Dto.navn().fornavn()).isEqualTo("Barn");
         assertThat(barn1Dto.navn().mellomnavn()).isEqualTo("Barnesen");
-        assertThat(barn1Dto.navn().etternavn()).isEqualTo("Den første");
+        assertThat(barn1Dto.navn().etternavn()).isEqualTo("Den Første");
         assertThat(barn1Dto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(barn1Dto.fødselsdato()).isEqualTo(LocalDate.now().minusMonths(11));
         assertThat(barn1Dto.annenPart().navn().fornavn()).isEqualTo("Ola");
@@ -256,7 +256,7 @@ class OppslagTjenesteTest {
         var barn2Dto = søkerDto.barn().get(1);
         assertThat(barn2Dto.navn().fornavn()).isEqualTo("Barn");
         assertThat(barn2Dto.navn().mellomnavn()).isEqualTo("Barnesen");
-        assertThat(barn2Dto.navn().etternavn()).isEqualTo("Den andre");
+        assertThat(barn2Dto.navn().etternavn()).isEqualTo("Den Andre");
         assertThat(barn2Dto.kjønn()).isEqualTo(Kjønn.K);
         assertThat(barn2Dto.fødselsdato()).isEqualTo(LocalDate.now().minusWeeks(2));
         assertThat(barn2Dto.annenPart()).isNull();
@@ -269,7 +269,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
@@ -299,7 +299,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
