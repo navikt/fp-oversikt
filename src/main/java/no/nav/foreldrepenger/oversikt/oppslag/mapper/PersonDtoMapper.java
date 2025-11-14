@@ -163,9 +163,9 @@ public class PersonDtoMapper {
 
     private static no.nav.foreldrepenger.oversikt.oppslag.dto.Navn navn(Navn navn) {
         return new no.nav.foreldrepenger.oversikt.oppslag.dto.Navn(
-                navn.getFornavn(),
-                navn.getMellomnavn(),
-                navn.getEtternavn()
+                PersonMappers.titlecaseNavn(navn.getFornavn()),
+                PersonMappers.titlecaseNavn(navn.getMellomnavn()),
+                PersonMappers.titlecaseNavn(navn.getEtternavn())
         );
     }
 

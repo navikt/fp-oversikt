@@ -58,7 +58,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
@@ -115,7 +115,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
@@ -181,7 +181,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
@@ -269,7 +269,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
@@ -299,7 +299,7 @@ class OppslagTjenesteTest {
         var innloggetBruker = DummyInnloggetTestbruker.myndigInnloggetBruker();
         var oppslagTjeneste = tjeneste(innloggetBruker);
         var søkerPdl = new Person();
-        søkerPdl.setNavn(navn("Kari", null, "Kanari"));
+        søkerPdl.setNavn(navn("KARI", null, "KANARI"));
         søkerPdl.setKjoenn(kjønn(KjoennType.KVINNE));
         søkerPdl.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(28)));
         søkerPdl.setDoedfoedtBarn(List.of());
