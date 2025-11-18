@@ -19,7 +19,6 @@ import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
-import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
@@ -34,11 +33,9 @@ class MineArbeidsforholdTjenesteTest {
     private static final String ARBGIVER2A = "1234567891111";
     private static final String ARBGIVER2F = "12345678922";
     private static final String ARBFORHOLD1 = "AltInnn-123";
-    private static final String ARBFORHOLD2 = "AltInnn-456";
     private static final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
     private static final BigDecimal FEMTI_PROSENT = new BigDecimal(50);
     private static final BigDecimal NULL_PROSENT = BigDecimal.ZERO;
-    private static final AktørId AKTOER_ID = new AktørId("1234567890123");
     private static final Fødselsnummer FNR = new Fødselsnummer("12345678901");
 
 
@@ -70,8 +67,8 @@ class MineArbeidsforholdTjenesteTest {
         var resultat = kallTjeneste(List.of(response)).getFirst();
         assertThat(resultat.arbeidsgiverId()).isEqualTo(ARBGIVER1);
         assertThat(resultat.arbeidsgiverIdType()).isEqualTo("orgnr");
-        assertThat(resultat.from()).isEqualTo(LocalDate.MIN);
-        assertThat(resultat.to()).isEmpty();
+        assertThat(resultat.fom()).isEqualTo(LocalDate.MIN);
+        assertThat(resultat.tom()).isNull();
         assertThat(resultat.stillingsprosent().prosent()).isEqualByComparingTo(HUNDRE_PROSENT);
         assertThat(resultat.arbeidsgiverNavn()).isEqualTo("Virksomhet");
     }
@@ -89,8 +86,8 @@ class MineArbeidsforholdTjenesteTest {
         var resultat = kallTjeneste(List.of(response)).getFirst();
         assertThat(resultat.arbeidsgiverId()).isEqualTo(ARBGIVER2F);
         assertThat(resultat.arbeidsgiverIdType()).isEqualTo("fnr");
-        assertThat(resultat.from()).isEqualTo(LocalDate.now().minusMonths(1));
-        assertThat(resultat.to()).hasValueSatisfying(d -> assertThat(d).isEqualTo(LocalDate.now().plusWeeks(2)));
+        assertThat(resultat.fom()).isEqualTo(LocalDate.now().minusMonths(1));
+        assertThat(resultat.tom()).isEqualTo(LocalDate.now().plusWeeks(2));
         assertThat(resultat.stillingsprosent()).isEqualTo(new Stillingsprosent(BigDecimal.ZERO));
         assertThat(resultat.arbeidsgiverNavn()).isEqualTo("Fornavn Etternavn");
     }
@@ -109,8 +106,8 @@ class MineArbeidsforholdTjenesteTest {
 
         var resultat = kallTjeneste(List.of(response)).getFirst();
         assertThat(resultat.arbeidsgiverId()).isEqualTo(ARBGIVER1);
-        assertThat(resultat.from()).isEqualTo(LocalDate.MIN);
-        assertThat(resultat.to()).hasValueSatisfying(d -> assertThat(d).isEqualTo(LocalDate.now().plusYears(1)));
+        assertThat(resultat.fom()).isEqualTo(LocalDate.MIN);
+        assertThat(resultat.tom()).isEqualTo(LocalDate.now().plusYears(1));
         assertThat(resultat.stillingsprosent().prosent()).isEqualByComparingTo(HUNDRE_PROSENT);
         assertThat(resultat.arbeidsgiverNavn()).isEqualTo("Virksomhet");
     }
@@ -151,8 +148,8 @@ class MineArbeidsforholdTjenesteTest {
 
         var resultat = kallTjeneste(List.of(response)).getFirst();
         assertThat(resultat.arbeidsgiverId()).isEqualTo(ARBGIVER1);
-        assertThat(resultat.from()).isEqualTo(fom);
-        assertThat(resultat.to()).isEmpty();
+        assertThat(resultat.fom()).isEqualTo(fom);
+        assertThat(resultat.tom()).isNull();
         assertThat(resultat.stillingsprosent().prosent()).isEqualByComparingTo(HUNDRE_PROSENT);
         assertThat(resultat.arbeidsgiverNavn()).isEqualTo("Virksomhet");
     }
@@ -171,8 +168,8 @@ class MineArbeidsforholdTjenesteTest {
 
         var resultat = kallTjeneste(List.of(response)).getFirst();
         assertThat(resultat.arbeidsgiverId()).isEqualTo(ARBGIVER1);
-        assertThat(resultat.from()).isEqualTo(fom);
-        assertThat(resultat.to()).hasValue(tom);
+        assertThat(resultat.fom()).isEqualTo(fom);
+        assertThat(resultat.tom()).isEqualTo(tom);
         assertThat(resultat.stillingsprosent().prosent()).isEqualByComparingTo(HUNDRE_PROSENT);
         assertThat(resultat.arbeidsgiverNavn()).isEqualTo("Virksomhet");
     }

@@ -15,7 +15,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
@@ -70,9 +69,7 @@ class OppslagTjenesteTest {
                 "fnr",
                 "Navn på arbeidsgiver", Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
                 LocalDate.now().minusYears(5),
-                null,
-                LocalDate.now().minusYears(5),
-                Optional.empty()
+                null
         );
 
         when(pdlOppslagTjeneste.hentSøker(any())).thenReturn(new PdlOppslagTjeneste.PersonMedIdent(innloggetBruker.fødselsnummer().value(), søkerPdl));
@@ -102,8 +99,8 @@ class OppslagTjenesteTest {
         assertThat(arbeidsforholdDto.arbeidsgiverId()).isEqualTo("123456789");
         assertThat(arbeidsforholdDto.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver");
         assertThat(arbeidsforholdDto.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(100));
-        assertThat(arbeidsforholdDto.from()).isEqualTo(LocalDate.now().minusYears(5));
-        assertThat(arbeidsforholdDto.to()).isEmpty();
+        assertThat(arbeidsforholdDto.fom()).isEqualTo(LocalDate.now().minusYears(5));
+        assertThat(arbeidsforholdDto.tom()).isNull();
     }
 
     private OppslagTjeneste tjeneste(DummyInnloggetTestbruker innloggetBruker) {
@@ -311,27 +308,21 @@ class OppslagTjenesteTest {
                 "org",
                 "Navn på arbeidsgiver 1", Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
                 LocalDate.now().minusYears(5),
-                null,
-                LocalDate.now().minusYears(5),
-                Optional.of(LocalDate.now())
+                LocalDate.now()
         );
         var enkeltArbeidsforhold2 = new EksternArbeidsforholdDto(
                 "12312312312",
                 "org",
                 "Navn på arbeidsgiver 2", Stillingsprosent.arbeid(BigDecimal.valueOf(100)),
                 LocalDate.now().minusYears(5),
-                null,
-                LocalDate.now().minusYears(5),
-                Optional.empty()
+                null
         );
         var enkeltArbeidsforhold3 = new EksternArbeidsforholdDto(
                 "1",
                 "fnr",
                 "Navn på arbeidsgiver 3", Stillingsprosent.arbeid(BigDecimal.valueOf(55)),
                 LocalDate.now(),
-                null,
-                LocalDate.now(),
-                Optional.empty()
+                null
         );
         var eksterneArbeidsforhold = List.of(
                 enkeltArbeidsforhold1,
@@ -357,21 +348,21 @@ class OppslagTjenesteTest {
         assertThat(arbeidsforholdDto1.arbeidsgiverId()).isEqualTo("2");
         assertThat(arbeidsforholdDto1.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver 1");
         assertThat(arbeidsforholdDto1.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(100));
-        assertThat(arbeidsforholdDto1.from()).isEqualTo(LocalDate.now().minusYears(5));
-        assertThat(arbeidsforholdDto1.to()).contains(LocalDate.now());
+        assertThat(arbeidsforholdDto1.fom()).isEqualTo(LocalDate.now().minusYears(5));
+        assertThat(arbeidsforholdDto1.tom()).isEqualTo(LocalDate.now());
 
         var arbeidsforholdDto2 = søkerinfo.arbeidsforhold().get(1);
         assertThat(arbeidsforholdDto2.arbeidsgiverId()).isEqualTo("12312312312");
         assertThat(arbeidsforholdDto2.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver 2");
         assertThat(arbeidsforholdDto2.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(100));
-        assertThat(arbeidsforholdDto2.from()).isEqualTo(LocalDate.now().minusYears(5));
-        assertThat(arbeidsforholdDto2.to()).isEmpty();
+        assertThat(arbeidsforholdDto2.fom()).isEqualTo(LocalDate.now().minusYears(5));
+        assertThat(arbeidsforholdDto2.tom()).isNull();
 
         var arbeidsforholdDto3 = søkerinfo.arbeidsforhold().get(2);
         assertThat(arbeidsforholdDto3.arbeidsgiverId()).isEqualTo("1");
         assertThat(arbeidsforholdDto3.arbeidsgiverNavn()).isEqualTo("Navn på arbeidsgiver 3");
         assertThat(arbeidsforholdDto3.stillingsprosent().prosent()).isEqualTo(BigDecimal.valueOf(55));
-        assertThat(arbeidsforholdDto3.from()).isEqualTo(LocalDate.now());
-        assertThat(arbeidsforholdDto2.to()).isEmpty();
+        assertThat(arbeidsforholdDto3.fom()).isEqualTo(LocalDate.now());
+        assertThat(arbeidsforholdDto2.tom()).isNull();
     }
 }
