@@ -11,6 +11,7 @@ public record UttakPeriodeAnnenpartEøs(@NotNull LocalDate fom,
                                        @NotNull BigDecimal trekkdager) {
 
     public no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs tilDto() {
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs(fom, tom, kontoType.tilDto(), kontoType.tilDto(), new no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs.Trekkdager(trekkdager));
+        var trekkdagerDto = new no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs.Trekkdager(trekkdager);
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs(fom, tom, kontoType.tilDto(), trekkdagerDto);
     }
 }
