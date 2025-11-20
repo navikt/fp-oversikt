@@ -21,7 +21,7 @@
         <openapi-spec-utils.version>2.0.6</openapi-spec-utils.version>
         <io.confluent.version>8.1.0</io.confluent.version>
 
-        <felles.version>7.6.9</felles.version>
+        <felles.version>7.6.10</felles.version>
         <prosesstask.version>5.2.1</prosesstask.version>
         <fp-kontrakter.version>9.4.12</fp-kontrakter.version>
         <fp-tidsserie.version>2.7.3</fp-tidsserie.version>
