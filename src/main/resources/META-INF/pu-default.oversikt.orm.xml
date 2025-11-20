@@ -9,10 +9,12 @@
     <sequence-generator name="SEQ_TILBAKEKREVING" allocation-size="50" sequence-name="SEQ_TILBAKEKREVING" />
     <sequence-generator name="SEQ_MANGLENDE_VEDLEGG" allocation-size="50" sequence-name="SEQ_MANGLENDE_VEDLEGG" />
     <sequence-generator name="SEQ_INNTEKTSMELDINGER" allocation-size="50" sequence-name="SEQ_INNTEKTSMELDINGER" />
+    <sequence-generator name="SEQ_BEREGNINGER" allocation-size="50" sequence-name="SEQ_BEREGNINGER" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.SakEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende.ManglendeVedleggEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerEntitet" />
+    <entity class="no.nav.foreldrepenger.oversikt.domene.beregning.BeregningerEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.oppgave.OppgaveEntitet" />
 
 </entity-mappings>

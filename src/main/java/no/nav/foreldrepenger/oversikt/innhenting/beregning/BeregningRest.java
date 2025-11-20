@@ -9,16 +9,14 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.inntektsmelding.FpOversiktInntektsmeldingDto;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingRest;
-import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingTjeneste;
+import no.nav.foreldrepenger.oversikt.domene.beregning.Beregning;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
+import java.util.Set;
 
 @Path("/beregning")
 @ApplicationScoped
@@ -40,7 +38,8 @@ public class BeregningRest {
 
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<FpOversiktInntektsmeldingDto> beregning(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
+    // TODO: lag DTO type
+    public Set<Beregning> beregning(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         tilgangkontroll.sakKobletTilAktørGuard(saksnummer);

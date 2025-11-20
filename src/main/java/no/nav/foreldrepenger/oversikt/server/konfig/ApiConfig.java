@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import no.nav.foreldrepenger.oversikt.innhenting.beregning.BeregningRest;
+
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
 
@@ -45,6 +47,7 @@ public class ApiConfig extends ResourceConfig {
             TidslinjeRest.class,
             OppslagRest.class,
             InntektsmeldingRest.class,
+            BeregningRest.class,
             OppgaveRest.class,
             SakerRest.class,
             AnnenPartRest.class,

@@ -19,7 +19,7 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 public class BeregningerEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEREGNING")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEREGNINGER")
     private Long id;
 
     @Column(name = "saksnummer")
