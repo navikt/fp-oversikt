@@ -1,23 +1,31 @@
 package no.nav.foreldrepenger.oversikt.innhenting.beregning;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerRepository;
+import no.nav.foreldrepenger.oversikt.domene.beregning.Beregning;
+import no.nav.foreldrepenger.oversikt.domene.beregning.BeregningRepository;
 
+import java.util.Collections;
+import java.util.Set;
+
+@ApplicationScoped
 public class BeregningTjeneste {
-    private InntektsmeldingerRepository inntektsmeldingerRepository;
+    private BeregningRepository beregningRepository;
 
     @Inject
-    public InntektsmeldingTjeneste(InntektsmeldingerRepository inntektsmeldingerRepository) {
-        this.inntektsmeldingerRepository = inntektsmeldingerRepository;
+    public BeregningTjeneste(BeregningRepository beregningRepository) {
+        this.beregningRepository = beregningRepository;
     }
 
-    InntektsmeldingTjeneste() {
+    BeregningTjeneste() {
         // CDI
     }
 
-    public Object finnBeregning(@Valid @NotNull Saksnummer saksnummer) {
+    public Set<Beregning> finnBeregning(@Valid @NotNull Saksnummer saksnummer) {
+        // TODO: usikker på hvorfor set
+        return beregningRepository.hentFor(Collections.singleton(saksnummer));
     }
 }
