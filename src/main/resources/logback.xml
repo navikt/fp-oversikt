@@ -57,6 +57,9 @@
     <logger name="org.apache" level="${log.level.org.apache:-ERROR}"/>
     <logger name="org.jboss.weld" level="${log.level.org.jboss.weld:-WARN}"/>
 
+    <logger name="jdbc.sql" level="${log.level.jdbc.sql:-ERROR}"/>
+    <logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}"/>
+
     <include optional="true" resource="logback-${NAIS_CLUSTER_NAME}.xml"/>
 
     <root level="${log.level.root:-INFO}">
