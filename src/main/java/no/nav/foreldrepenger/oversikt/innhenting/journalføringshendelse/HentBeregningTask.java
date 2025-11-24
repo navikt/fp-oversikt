@@ -57,8 +57,25 @@ public class HentBeregningTask implements ProsessTaskHandler {
         }
     }
 
+    // TODO -- AI generert. verifiser
     public static BeregningV1 map(FpSakBeregningDto fpSakBeregningDto) {
-        return new BeregningV1(fpSakBeregningDto.dagsats());
+        var beregningsAndeler = fpSakBeregningDto.beregningsAndeler().stream()
+            .map(andel -> new BeregningV1.BeregningsAndel(
+                andel.aktivitetStatus(),
+                andel.fastsattPrMnd(),
+                BeregningV1.InntektsKilde.valueOf(andel.inntektsKilde().name()),
+                andel.arbeidsforhold() != null
+                    ? new BeregningV1.Arbeidsforhold(andel.arbeidsforhold().arbeidsgiverIdent(), andel.arbeidsforhold().refusjonPrMnd())
+                    : null,
+                andel.dagsats()
+            ))
+            .toList();
+
+        var beregningAktivitetStatuser = fpSakBeregningDto.beregningAktivitetStatuser().stream()
+            .map(status -> new BeregningV1.BeregningAktivitetStatus(status.aktivitetStatus(), status.hjemmel()))
+            .toList();
+
+        return new BeregningV1(fpSakBeregningDto.skjæringsTidspunkt(), beregningsAndeler, beregningAktivitetStatuser);
     }
 
 }
