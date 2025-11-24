@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.innhenting;
 
 import java.util.List;
+import java.util.Optional;
 
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
@@ -14,6 +15,6 @@ public interface FpsakTjeneste {
 
     List<FpSakInntektsmeldingDto> hentInntektsmeldinger(Saksnummer saksnummer);
 
-    List<FpSakBeregningDto> hentBeregninger(Saksnummer saksnummer);
+    Optional<FpSakBeregningDto> hentBeregning(Saksnummer saksnummer);
 
 }

@@ -9,7 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
-import java.util.Set;
 
 import static no.nav.vedtak.felles.jpa.HibernateVerktøy.hentUniktResultat;
 
@@ -31,41 +30,40 @@ public class DBBeregningRepository implements BeregningRepository {
     }
 
     @Override
-    public void lagre(Saksnummer saksnummer, Set<Beregning> beregninger) {
-        var eksisterende = hentBeregninger(saksnummer);
+    public void lagre(Saksnummer saksnummer, Beregning beregning) {
+        var eksisterende = hentBeregning(saksnummer);
         if (eksisterende.isEmpty()) {
-            entityManager.persist(new BeregningerEntitet(saksnummer, beregninger));
+            entityManager.persist(new BeregningEntitet(saksnummer, beregning));
         } else {
-            eksisterende.get().setJson(beregninger);
+            eksisterende.get().setJson(beregning);
             entityManager.merge(eksisterende.get());
         }
         entityManager.flush();
     }
 
-    private Optional<BeregningerEntitet> hentBeregninger(Saksnummer saksnummer) {
-        var query = entityManager.createQuery("from beregninger where saksnummer =:saksnummer", BeregningerEntitet.class)
+    private Optional<BeregningEntitet> hentBeregning(Saksnummer saksnummer) {
+        var query = entityManager.createQuery("from beregning where saksnummer =:saksnummer", BeregningEntitet.class)
             .setParameter("saksnummer", saksnummer.value());
         return hentUniktResultat(query);
     }
 
     @Override
-    public Set<Beregning> hentFor(Set<Saksnummer> saksnummer) {
-        var entitet = hent(saksnummer);
-        return entitet.map(BeregningerEntitet::map).orElse(Set.of());
+    public Optional<Beregning> hentFor(Saksnummer saksnummer) {
+        return hent(saksnummer).map(BeregningEntitet::map);
     }
 
     @Override
     public void slett(Saksnummer saksnummer) {
-        hent(Set.of(saksnummer)).ifPresent(ims -> {
-            LOG.info("Sletter beregninger for sak {}", saksnummer);
+        hent(saksnummer).ifPresent(ims -> {
+            LOG.info("Sletter beregning for sak {}", saksnummer);
             entityManager.remove(ims);
             entityManager.flush();
         });
     }
 
-    private Optional<BeregningerEntitet> hent(Set<Saksnummer> saksnummer) {
-        var query = entityManager.createQuery("from beregninger where saksnummer in (:saksnummer)", BeregningerEntitet.class);
-        query.setParameter("saksnummer", saksnummer.stream().map(Saksnummer::value).toList());
+    private Optional<BeregningEntitet> hent(Saksnummer saksnummer) {
+        var query = entityManager.createQuery("from beregning where saksnummer =:saksnummer", BeregningEntitet.class);
+        query.setParameter("saksnummer", saksnummer);
         return hentUniktResultat(query);
     }
 
