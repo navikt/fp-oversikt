@@ -9,7 +9,6 @@ import no.nav.foreldrepenger.oversikt.domene.beregning.Beregning;
 import no.nav.foreldrepenger.oversikt.domene.beregning.BeregningRepository;
 
 import java.util.Collections;
-import java.util.Set;
 
 @ApplicationScoped
 public class BeregningTjeneste {
@@ -24,8 +23,8 @@ public class BeregningTjeneste {
         // CDI
     }
 
-    public Set<Beregning> finnBeregning(@Valid @NotNull Saksnummer saksnummer) {
+    public Beregning finnBeregning(@Valid @NotNull Saksnummer saksnummer) {
         // TODO: usikker på hvorfor set
-        return beregningRepository.hentFor(Collections.singleton(saksnummer));
+        return beregningRepository.hentFor(saksnummer).stream().findFirst().orElseThrow();
     }
 }

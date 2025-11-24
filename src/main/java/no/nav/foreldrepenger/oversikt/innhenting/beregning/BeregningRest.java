@@ -39,7 +39,7 @@ public class BeregningRest {
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     // TODO: lag DTO type
-    public Set<Beregning> beregning(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
+    public Beregning beregning(@QueryParam("saksnummer") @Valid @NotNull Saksnummer saksnummer) {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
         tilgangkontroll.sakKobletTilAktørGuard(saksnummer);

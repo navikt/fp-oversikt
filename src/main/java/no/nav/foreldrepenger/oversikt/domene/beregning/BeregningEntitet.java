@@ -14,12 +14,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
-@Entity(name = "beregninger")
-@Table(name = "beregninger")
-public class BeregningerEntitet {
+@Entity(name = "beregning")
+@Table(name = "beregning")
+public class BeregningEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEREGNINGER")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_BEREGNING")
     private Long id;
 
     @Column(name = "saksnummer")
@@ -27,21 +27,21 @@ public class BeregningerEntitet {
 
     @Column(name = "json")
     @JdbcTypeCode(SqlTypes.JSON)
-    private Set<Beregning> json;
+    private Beregning json;
 
-    public BeregningerEntitet(Saksnummer saksnummer, Set<Beregning> json) {
+    public BeregningEntitet(Saksnummer saksnummer, Beregning json) {
         this.json = json;
         this.saksnummer = saksnummer.value();
     }
 
-    protected BeregningerEntitet() {
+    protected BeregningEntitet() {
     }
 
-    void setJson(Set<Beregning> beregninger) {
-        this.json = beregninger;
+    void setJson(Beregning beregning) {
+        this.json = beregning;
     }
 
-    public Set<Beregning> map() {
+    public Beregning map() {
         return json;
     }
 
@@ -51,7 +51,7 @@ public class BeregningerEntitet {
             return true;
         if (o == null || getClass() != o.getClass())
             return false;
-        BeregningerEntitet that = (BeregningerEntitet) o;
+        BeregningEntitet that = (BeregningEntitet) o;
         return Objects.equals(id, that.id);
     }
 
