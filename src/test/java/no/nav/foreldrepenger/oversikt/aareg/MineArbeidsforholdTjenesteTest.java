@@ -200,4 +200,28 @@ class MineArbeidsforholdTjenesteTest {
             .satisfies(d -> assertThat(d.stream().allMatch(a -> a.stillingsprosent().prosent().compareTo(BigDecimal.ZERO) == 0)).isTrue());
     }
 
+    @Test
+    void to_arbeidsforhold_hos_sammer_arbeidsgiver_med_samme_stillinprosent_slås_sammen_hvis_kant_i_kant() {
+        var AFperiode1 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(2).minusDays(1));
+        var AFperiode2 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(2), LocalDate.MAX);
+        var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(AFperiode1),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, AFperiode1)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var response2 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(AFperiode2),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, AFperiode2)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var resultat = kallTjeneste(List.of(response1, response2));
+        assertThat(resultat).hasSize(1);
+        var first = resultat.getFirst();
+        assertThat(first.arbeidsgiverId()).isEqualTo(ARBGIVER1);
+        assertThat(first.fom()).isEqualTo(AFperiode1.fom());
+        assertThat(first.tom()).isNull();
+    }
 }
