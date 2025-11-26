@@ -80,7 +80,8 @@ public class ArbeidsforholdTjeneste {
             .map(this::byggArbeidsavtaleRS)
             .filter(av -> innhentingsIntervall.overlaps(av.getLocalDateInterval()))
             .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new))
-            .intersection(ansettelsesPeriode);
+            .intersection(ansettelsesPeriode)
+            .compress();
 
         var permisjoner = arbeidsforhold.getPermisjonPermitteringer().stream()
             .filter(p -> p.prosent() != null) // De blir uansett forkastet senere

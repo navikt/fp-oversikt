@@ -1,9 +1,8 @@
 package no.nav.foreldrepenger.oversikt.oppslag;
 
-import static no.nav.fpsak.tidsserie.LocalDateInterval.TIDENES_ENDE;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +21,6 @@ import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
-import no.nav.fpsak.tidsserie.StandardCombinators;
 
 
 /**
@@ -40,48 +38,45 @@ public class MineArbeidsforholdTjeneste {
 
     @Inject
     public MineArbeidsforholdTjeneste(ArbeidsforholdTjeneste arbeidsforholdTjeneste,
-                                      PersonOppslagSystem personOppslagSystem, VirksomhetTjeneste virksomhetTjeneste) {
+                                      PersonOppslagSystem personOppslagSystem,
+                                      VirksomhetTjeneste virksomhetTjeneste) {
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
         this.personOppslagSystem = personOppslagSystem;
-
         this.virksomhetTjeneste = virksomhetTjeneste;
     }
 
     public List<EksternArbeidsforholdDto> brukersArbeidsforhold(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
-        var alleArbeidsforhold = arbeidsforholdTjeneste.finnAktiveArbeidsforholdForIdent(brukerFødselsnummer).stream()
-            .map(this::tilEksternArbeidsforhold)
-            .toList();
-        return slåSammenLikeArbeidsforhold(alleArbeidsforhold).stream()
+        var alleAktiveArbeidsforhold = arbeidsforholdTjeneste.finnAktiveArbeidsforholdForIdent(brukerFødselsnummer);
+        return slåSammenLikeArbeidsforhold(alleAktiveArbeidsforhold).stream()
             .sorted(Comparator.comparing(EksternArbeidsforholdDto::arbeidsgiverNavn))
             .toList();
     }
 
-    private record ArbeidsgiverNøkkel(String arbeidsgiverId, Stillingsprosent stillingsprosent) {}
-
-    private static List<EksternArbeidsforholdDto> slåSammenLikeArbeidsforhold(List<EksternArbeidsforholdDto> alleArbeidsforhold) {
+    private List<EksternArbeidsforholdDto> slåSammenLikeArbeidsforhold(List<Arbeidsforhold> alleArbeidsforhold) {
         return alleArbeidsforhold.stream()
-            .collect(Collectors.groupingBy(a -> new ArbeidsgiverNøkkel(a.arbeidsgiverId(), a.stillingsprosent())))
-            .values().stream()
-            .map(MineArbeidsforholdTjeneste::slåSammeArbeidsforholdFraSammeArbeidsgiver)
-            .flatMap(List::stream)
+            .collect(Collectors.groupingBy(Arbeidsforhold::arbeidsforholdIdentifikator))
+            .values()
+            .stream()
+            .map(this::slåSammeArbeidsforholdFraSammeArbeidsgiver)
+            .flatMap(Collection::stream)
             .toList();
     }
 
-    private static List<EksternArbeidsforholdDto> slåSammeArbeidsforholdFraSammeArbeidsgiver(List<EksternArbeidsforholdDto> arbeidsforholdListe) {
-        var timeline = arbeidsforholdListe.stream()
-            .map(a -> new LocalDateSegment<>(a.fom(), a.tom(), a))
-            .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new));
-        return timeline
-            .compress((l, r) -> new ArbeidsgiverNøkkel(l.arbeidsgiverId(), l.stillingsprosent()).equals(new ArbeidsgiverNøkkel(r.arbeidsgiverId(), r.stillingsprosent())), StandardCombinators::leftOnly)
+    private List<EksternArbeidsforholdDto> slåSammeArbeidsforholdFraSammeArbeidsgiver(List<Arbeidsforhold> arbeidsforholdListe) {
+        var arbeidsforholdIdentifikator = arbeidsforholdListe.getFirst().arbeidsforholdIdentifikator();
+        return arbeidsforholdListe.stream()
+            .map(a -> new LocalDateSegment<>(a.ansettelsesPeriode(), gjeldendeStillingsprosent(a)))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new))
+            .compress()
             .stream()
             .map(seg -> new EksternArbeidsforholdDto(
-                seg.getValue().arbeidsgiverId(),
-                seg.getValue().arbeidsgiverIdType(),
-                seg.getValue().arbeidsgiverNavn(),
-                seg.getValue().stillingsprosent(),
+                arbeidsforholdIdentifikator.arbeidsgiver(),
+                tilArbeidsgiverTypeFrontend(arbeidsforholdIdentifikator),
+                arbeidsgiverNavn(arbeidsforholdIdentifikator),
+                seg.getValue(),
                 seg.getFom(),
-                seg.getTom().equals(TIDENES_ENDE) ? null : seg.getTom()
+                Optional.of(seg.getTom()).filter(d -> d.isBefore(LocalDate.MAX)).orElse(null)
             ))
             .toList();
     }
@@ -150,14 +145,13 @@ public class MineArbeidsforholdTjeneste {
     private static String tilArbeidsgiverTypeFrontend(ArbeidsforholdIdentifikator a) {
         if (VirksomhetTjeneste.erOrganisasjonsNummer(a.arbeidsgiver())) {
             return "orgnr";
-        } else if (erIdent(a.arbeidsgiver())) {
-            return "fnr";
         } else {
-            return null;
+            return "fnr";
         }
     }
 
     private static boolean erIdent(String ident) {
         return ident != null && ident.matches("\\d{11}|\\d{13}");
     }
+
 }
