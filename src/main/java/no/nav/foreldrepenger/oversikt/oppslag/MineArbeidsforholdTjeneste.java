@@ -145,8 +145,10 @@ public class MineArbeidsforholdTjeneste {
     private static String tilArbeidsgiverTypeFrontend(ArbeidsforholdIdentifikator a) {
         if (VirksomhetTjeneste.erOrganisasjonsNummer(a.arbeidsgiver())) {
             return "orgnr";
-        } else {
+        } else if (erIdent(a.arbeidsgiver())) {
             return "fnr";
+        } else {
+            return null;
         }
     }
 

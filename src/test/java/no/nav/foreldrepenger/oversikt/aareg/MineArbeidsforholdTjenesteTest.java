@@ -178,13 +178,13 @@ class MineArbeidsforholdTjenesteTest {
     }
 
     @Test
-    void to_arbeidsforhold_hos_sammer_arbeidsgiver_med_samme_stillinprosent_skal_ikke_slås_sammen_hvis_ikke_kant_i_kant() {
-        var annesettelselsperiodeAf1 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(2).minusDays(1));
-        var annesettelsesperiodeAf2 = new ArbeidsforholdRS.PeriodeRS(annesettelselsperiodeAf1.tom().plusMonths(1), LocalDate.MAX);
+    void to_arbeidsforhold_hos_samme_arbeidsgiver_med_samme_stillinprosent_skal_ikke_slås_sammen_hvis_ikke_kant_i_kant() {
+        var annesettelsesperiodeAf1 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(2).minusDays(1));
+        var annesettelsesperiodeAf2 = new ArbeidsforholdRS.PeriodeRS(annesettelsesperiodeAf1.tom().plusMonths(1), LocalDate.MAX);
         var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
             new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
-            new ArbeidsforholdRS.AnsettelsesperiodeRS(annesettelselsperiodeAf1),
-            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, annesettelselsperiodeAf1)),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(annesettelsesperiodeAf1),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, annesettelsesperiodeAf1)),
             List.of(),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         var response2 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
@@ -200,13 +200,13 @@ class MineArbeidsforholdTjenesteTest {
     }
 
     @Test
-    void to_arbeidsforhold_hos_sammer_arbeidsgiver_med_samme_stillinprosent_slås_sammen_hvis_kant_i_kant() {
-        var annesettelselsperiodeAf1 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(2).minusDays(1));
+    void to_arbeidsforhold_hos_samme_arbeidsgiver_med_samme_stillinprosent_slås_sammen_hvis_kant_i_kant() {
+        var annesettelsesperiodeAf1 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(2).minusDays(1));
         var annesettelsesperiodeAf2 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(2), LocalDate.MAX);
         var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
             new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
-            new ArbeidsforholdRS.AnsettelsesperiodeRS(annesettelselsperiodeAf1),
-            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, annesettelselsperiodeAf1)),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(annesettelsesperiodeAf1),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, annesettelsesperiodeAf1)),
             List.of(),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
         var response2 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
@@ -220,7 +220,7 @@ class MineArbeidsforholdTjenesteTest {
         assertThat(resultat).hasSize(1);
         var first = resultat.getFirst();
         assertThat(first.arbeidsgiverId()).isEqualTo(ARBGIVER1);
-        assertThat(first.fom()).isEqualTo(annesettelselsperiodeAf1.fom());
+        assertThat(first.fom()).isEqualTo(annesettelsesperiodeAf1.fom());
         assertThat(first.tom()).isNull();
     }
 }
