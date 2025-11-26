@@ -35,7 +35,6 @@ class MineArbeidsforholdTjenesteTest {
     private static final String ARBFORHOLD1 = "AltInnn-123";
     private static final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
     private static final BigDecimal FEMTI_PROSENT = new BigDecimal(50);
-    private static final BigDecimal NULL_PROSENT = BigDecimal.ZERO;
     private static final Fødselsnummer FNR = new Fødselsnummer("12345678901");
 
 
