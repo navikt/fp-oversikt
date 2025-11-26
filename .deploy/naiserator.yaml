@@ -50,6 +50,7 @@ spec:
       - type: POSTGRES_14
         databases:
           - name: fpoversikt
+            envVarPrefix: DB
         tier: {{dbTier}}
         diskAutoresize: {{dbDiskAutoresize}}
         highAvailability: {{dbHighAvailability}}
