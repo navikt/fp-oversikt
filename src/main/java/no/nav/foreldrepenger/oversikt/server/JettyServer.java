@@ -89,7 +89,6 @@ public class JettyServer {
         context.addServlet(servlet, path + "/*");
     }
 
-
     void bootStrap() throws Exception {
         System.setProperty("task.manager.runner.threads", "4");
         var dataSource = setupDataSource();
@@ -115,8 +114,6 @@ public class JettyServer {
     public static DataSource dataSource() {
         var config = new HikariConfig();
         config.setJdbcUrl(ENV.getRequiredProperty("DB_JDBC_URL"));
-        config.setUsername(ENV.getRequiredProperty("DB_USERNAME"));
-        config.setPassword(ENV.getRequiredProperty("DB_PASSWORD"));
         config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(1));
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(6);
