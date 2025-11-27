@@ -89,7 +89,6 @@ public class JettyServer {
         context.addServlet(servlet, path + "/*");
     }
 
-
     void bootStrap() throws Exception {
         System.setProperty("task.manager.runner.threads", "4");
         var dataSource = setupDataSource();
@@ -114,9 +113,7 @@ public class JettyServer {
 
     public static DataSource dataSource() {
         var config = new HikariConfig();
-        config.setJdbcUrl(dbUrl());
-        config.setUsername(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_USERNAME", "fpoversikt"));
-        config.setPassword(ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PASSWORD", "fpoversikt"));
+        config.setJdbcUrl(ENV.getRequiredProperty("DB_JDBC_URL"));
         config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(1));
         config.setMinimumIdle(1);
         config.setMaximumPoolSize(6);
@@ -131,13 +128,6 @@ public class JettyServer {
         config.setDataSourceProperties(dsProperties);
 
         return new HikariDataSource(config);
-    }
-
-    private static String dbUrl() {
-        var host = ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_HOST", "fpoversikt");
-        var port = ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_PORT", "5432");
-        var databaseName = ENV.getProperty("NAIS_DATABASE_FPOVERSIKT_FPOVERSIKT_DATABASE", "fpoversikt");
-        return "jdbc:postgresql://" + host + ":" + port + "/" + databaseName;
     }
 
     private void start() throws Exception {
