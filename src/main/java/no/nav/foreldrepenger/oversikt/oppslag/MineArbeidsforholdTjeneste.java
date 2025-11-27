@@ -21,6 +21,7 @@ import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 
 
 /**
@@ -67,37 +68,29 @@ public class MineArbeidsforholdTjeneste {
         var arbeidsforholdIdentifikator = arbeidsforholdListe.getFirst().arbeidsforholdIdentifikator();
         return arbeidsforholdListe.stream()
             .map(a -> new LocalDateSegment<>(a.ansettelsesPeriode(), gjeldendeStillingsprosent(a)))
-            .collect(Collectors.collectingAndThen(Collectors.toList(), LocalDateTimeline::new))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), datoSegmenter -> new LocalDateTimeline<>(datoSegmenter, StandardCombinators::max)))
             .compress()
             .stream()
-            .map(seg -> new EksternArbeidsforholdDto(
-                arbeidsforholdIdentifikator.arbeidsgiver(),
-                tilArbeidsgiverTypeFrontend(arbeidsforholdIdentifikator),
-                arbeidsgiverNavn(arbeidsforholdIdentifikator),
-                seg.getValue(),
-                seg.getFom(),
-                Optional.of(seg.getTom()).filter(d -> d.isBefore(LocalDate.MAX)).orElse(null)
-            ))
+            .map(seg -> tilEksternArbeidsforholdDto(arbeidsforholdIdentifikator, seg.getValue(), seg.getFom(), seg.getTom()))
             .toList();
+    }
+
+    private EksternArbeidsforholdDto tilEksternArbeidsforholdDto(ArbeidsforholdIdentifikator arbeidsforholdIdentifikator, Stillingsprosent stillingsprosent, LocalDate fom, LocalDate tom) {
+        return new EksternArbeidsforholdDto(
+            arbeidsforholdIdentifikator.arbeidsgiver(),
+            tilArbeidsgiverTypeFrontend(arbeidsforholdIdentifikator),
+            arbeidsgiverNavn(arbeidsforholdIdentifikator),
+            stillingsprosent,
+            fom,
+            Optional.of(tom).filter(d -> d.isBefore(LocalDate.MAX)).orElse(null));
     }
 
     public List<EksternArbeidsforholdDto> brukersFrilansoppdragSisteSeksMåneder(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
-        return arbeidsforholdTjeneste.finnFrilansForIdent(brukerFødselsnummer).stream()
-            .map(this::tilEksternArbeidsforhold)
+        var alleFrilansOppdrag = arbeidsforholdTjeneste.finnFrilansForIdent(brukerFødselsnummer);
+        return slåSammenLikeArbeidsforhold(alleFrilansOppdrag).stream()
             .sorted(Comparator.comparing(EksternArbeidsforholdDto::arbeidsgiverNavn))
             .toList();
-    }
-
-    private EksternArbeidsforholdDto tilEksternArbeidsforhold(Arbeidsforhold a) {
-        return new EksternArbeidsforholdDto(
-                a.arbeidsforholdIdentifikator().arbeidsgiver(),
-                tilArbeidsgiverTypeFrontend(a.arbeidsforholdIdentifikator()),
-                arbeidsgiverNavn(a.arbeidsforholdIdentifikator()),
-                gjeldendeStillingsprosent(a),
-                a.ansettelsesPeriode().getFomDato(),
-                Optional.of(a.ansettelsesPeriode().getTomDato()).filter(d -> d.isBefore(LocalDate.MAX)).orElse(null)
-        );
     }
 
     private String arbeidsgiverNavn(ArbeidsforholdIdentifikator a) {
