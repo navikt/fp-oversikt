@@ -52,7 +52,8 @@ public record SakES0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     @Override
     public no.nav.foreldrepenger.kontrakter.fpoversikt.EsSak tilSakDto(PersonOppslagSystem personOppslagSystem) {
         var familiehendelse = familieHendelse == null ? null : familieHendelse.tilDto();
-        return new EsSak(saksnummer.tilDto(), familiehendelse, avsluttet, tilÅpenBehandling(), false, oppdatertTidspunkt());
+        var gjelderAdopsjon = familieHendelse != null && familieHendelse.gjelderAdopsjon();
+        return new EsSak(saksnummer.tilDto(), familiehendelse, avsluttet, tilÅpenBehandling(), gjelderAdopsjon, oppdatertTidspunkt());
     }
 
     private EsÅpenBehandling tilÅpenBehandling() {
