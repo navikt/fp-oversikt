@@ -35,7 +35,6 @@ class MineArbeidsforholdTjenesteTest {
     private static final String ARBFORHOLD1 = "AltInnn-123";
     private static final BigDecimal HUNDRE_PROSENT = new BigDecimal(100);
     private static final BigDecimal FEMTI_PROSENT = new BigDecimal(50);
-    private static final BigDecimal NULL_PROSENT = BigDecimal.ZERO;
     private static final Fødselsnummer FNR = new Fødselsnummer("12345678901");
 
 
@@ -113,28 +112,6 @@ class MineArbeidsforholdTjenesteTest {
     }
 
     @Test
-    void happy_case_to_arbeidsforhold_ordinært_arbeid() {
-        var alltid = new ArbeidsforholdRS.PeriodeRS(LocalDate.MIN, LocalDate.MAX);
-        var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
-            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
-            new ArbeidsforholdRS.AnsettelsesperiodeRS(alltid),
-            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, alltid)),
-            List.of(),
-            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-        var response2 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
-            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
-            new ArbeidsforholdRS.AnsettelsesperiodeRS(alltid),
-            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(NULL_PROSENT, alltid)),
-            List.of(),
-            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
-
-        var resultat = kallTjeneste(List.of(response1, response2));
-        assertThat(resultat).hasSize(2)
-            .satisfiesOnlyOnce(d -> assertThat(d.stillingsprosent().prosent()).isEqualTo(new BigDecimal(100)))
-            .satisfiesOnlyOnce(d -> assertThat(d.stillingsprosent().prosent()).isEqualTo(BigDecimal.ZERO));
-    }
-
-    @Test
     void ett_tilkommet_arbeidsforhold_skal_bruke_stillingsprosent_fra_det_og_ikke_null() {
         var fom = LocalDate.now().plusYears(1);
         var tom = LocalDate.now().plusYears(2);
@@ -200,4 +177,50 @@ class MineArbeidsforholdTjenesteTest {
             .satisfies(d -> assertThat(d.stream().allMatch(a -> a.stillingsprosent().prosent().compareTo(BigDecimal.ZERO) == 0)).isTrue());
     }
 
+    @Test
+    void to_arbeidsforhold_hos_samme_arbeidsgiver_med_samme_stillinprosent_skal_ikke_slås_sammen_hvis_ikke_kant_i_kant() {
+        var annesettelsesperiodeAf1 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(2).minusDays(1));
+        var annesettelsesperiodeAf2 = new ArbeidsforholdRS.PeriodeRS(annesettelsesperiodeAf1.tom().plusMonths(1), LocalDate.MAX);
+        var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(annesettelsesperiodeAf1),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, annesettelsesperiodeAf1)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var response2 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(annesettelsesperiodeAf2),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, annesettelsesperiodeAf2)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var resultat = kallTjeneste(List.of(response1, response2));
+        assertThat(resultat).hasSize(2)
+            .allSatisfy(d -> assertThat(d.stillingsprosent().prosent()).isEqualTo(new BigDecimal(100)));
+    }
+
+    @Test
+    void to_arbeidsforhold_hos_samme_arbeidsgiver_med_samme_stillinprosent_slås_sammen_hvis_kant_i_kant() {
+        var annesettelsesperiodeAf1 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(4), LocalDate.now().minusMonths(2).minusDays(1));
+        var annesettelsesperiodeAf2 = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(2), LocalDate.MAX);
+        var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(annesettelsesperiodeAf1),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, annesettelsesperiodeAf1)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var response2 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(annesettelsesperiodeAf2),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, annesettelsesperiodeAf2)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var resultat = kallTjeneste(List.of(response1, response2));
+        assertThat(resultat).hasSize(1);
+        var first = resultat.getFirst();
+        assertThat(first.arbeidsgiverId()).isEqualTo(ARBGIVER1);
+        assertThat(first.fom()).isEqualTo(annesettelsesperiodeAf1.fom());
+        assertThat(first.tom()).isNull();
+    }
 }

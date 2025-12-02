@@ -2,9 +2,11 @@ package no.nav.foreldrepenger.oversikt.oppslag;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -18,6 +20,8 @@ import no.nav.foreldrepenger.oversikt.integrasjoner.ereg.VirksomhetTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
+import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 
 
 /**
@@ -35,38 +39,58 @@ public class MineArbeidsforholdTjeneste {
 
     @Inject
     public MineArbeidsforholdTjeneste(ArbeidsforholdTjeneste arbeidsforholdTjeneste,
-                                      PersonOppslagSystem personOppslagSystem, VirksomhetTjeneste virksomhetTjeneste) {
+                                      PersonOppslagSystem personOppslagSystem,
+                                      VirksomhetTjeneste virksomhetTjeneste) {
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
         this.personOppslagSystem = personOppslagSystem;
-
         this.virksomhetTjeneste = virksomhetTjeneste;
     }
 
     public List<EksternArbeidsforholdDto> brukersArbeidsforhold(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
-        return arbeidsforholdTjeneste.finnAktiveArbeidsforholdForIdent(brukerFødselsnummer).stream()
-            .map(this::tilEksternArbeidsforhold)
+        var alleAktiveArbeidsforhold = arbeidsforholdTjeneste.finnAktiveArbeidsforholdForIdent(brukerFødselsnummer);
+        return slåSammenLikeArbeidsforhold(alleAktiveArbeidsforhold).stream()
             .sorted(Comparator.comparing(EksternArbeidsforholdDto::arbeidsgiverNavn))
             .toList();
+    }
+
+    private List<EksternArbeidsforholdDto> slåSammenLikeArbeidsforhold(List<Arbeidsforhold> alleArbeidsforhold) {
+        return alleArbeidsforhold.stream()
+            .collect(Collectors.groupingBy(Arbeidsforhold::arbeidsforholdIdentifikator))
+            .values()
+            .stream()
+            .map(this::slåSammeArbeidsforholdFraSammeArbeidsgiver)
+            .flatMap(Collection::stream)
+            .toList();
+    }
+
+    private List<EksternArbeidsforholdDto> slåSammeArbeidsforholdFraSammeArbeidsgiver(List<Arbeidsforhold> arbeidsforholdListe) {
+        var arbeidsforholdIdentifikator = arbeidsforholdListe.getFirst().arbeidsforholdIdentifikator();
+        return arbeidsforholdListe.stream()
+            .map(a -> new LocalDateSegment<>(a.ansettelsesPeriode(), gjeldendeStillingsprosent(a)))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), datoSegmenter -> new LocalDateTimeline<>(datoSegmenter, StandardCombinators::max)))
+            .compress()
+            .stream()
+            .map(seg -> tilEksternArbeidsforholdDto(arbeidsforholdIdentifikator, seg.getValue(), seg.getFom(), seg.getTom()))
+            .toList();
+    }
+
+    private EksternArbeidsforholdDto tilEksternArbeidsforholdDto(ArbeidsforholdIdentifikator arbeidsforholdIdentifikator, Stillingsprosent stillingsprosent, LocalDate fom, LocalDate tom) {
+        return new EksternArbeidsforholdDto(
+            arbeidsforholdIdentifikator.arbeidsgiver(),
+            tilArbeidsgiverTypeFrontend(arbeidsforholdIdentifikator),
+            arbeidsgiverNavn(arbeidsforholdIdentifikator),
+            stillingsprosent,
+            fom,
+            Optional.of(tom).filter(d -> d.isBefore(LocalDate.MAX)).orElse(null));
     }
 
     public List<EksternArbeidsforholdDto> brukersFrilansoppdragSisteSeksMåneder(Fødselsnummer brukerFødselsnummer) {
         // Slår opp i Aa-register, velger typer arbeidsforhold som er relevante og mapper om til eksternt format (med navn)
-        return arbeidsforholdTjeneste.finnFrilansForIdent(brukerFødselsnummer).stream()
-            .map(this::tilEksternArbeidsforhold)
+        var alleFrilansOppdrag = arbeidsforholdTjeneste.finnFrilansForIdent(brukerFødselsnummer);
+        return slåSammenLikeArbeidsforhold(alleFrilansOppdrag).stream()
             .sorted(Comparator.comparing(EksternArbeidsforholdDto::arbeidsgiverNavn))
             .toList();
-    }
-
-    private EksternArbeidsforholdDto tilEksternArbeidsforhold(Arbeidsforhold a) {
-        return new EksternArbeidsforholdDto(
-                a.arbeidsforholdIdentifikator().arbeidsgiver(),
-                tilArbeidsgiverTypeFrontend(a.arbeidsforholdIdentifikator()),
-                arbeidsgiverNavn(a.arbeidsforholdIdentifikator()),
-                gjeldendeStillingsprosent(a),
-                a.ansettelsesPeriode().getFomDato(),
-                Optional.of(a.ansettelsesPeriode().getTomDato()).filter(d -> d.isBefore(LocalDate.MAX)).orElse(null)
-        );
     }
 
     private String arbeidsgiverNavn(ArbeidsforholdIdentifikator a) {
@@ -124,4 +148,5 @@ public class MineArbeidsforholdTjeneste {
     private static boolean erIdent(String ident) {
         return ident != null && ident.matches("\\d{11}|\\d{13}");
     }
+
 }
