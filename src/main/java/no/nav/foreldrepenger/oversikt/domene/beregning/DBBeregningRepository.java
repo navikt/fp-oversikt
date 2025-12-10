@@ -63,7 +63,7 @@ public class DBBeregningRepository implements BeregningRepository {
 
     private Optional<BeregningEntitet> hent(Saksnummer saksnummer) {
         var query = entityManager.createQuery("from beregning where saksnummer =:saksnummer", BeregningEntitet.class);
-        query.setParameter("saksnummer", saksnummer);
+        query.setParameter("saksnummer", saksnummer.value());
         return hentUniktResultat(query);
     }
 
