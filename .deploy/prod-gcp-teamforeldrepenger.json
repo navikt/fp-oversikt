@@ -3,10 +3,15 @@
     "namespace": "teamforeldrepenger",
     "environment": "prod",
     "kafkaPool": "nav-prod",
-    "dbTier": "db-custom-1-3840",
-    "dbDiskAutoresize": "true",
-    "dbHighAvailability": "true",
-    "dbPointInTimeRecovery": "true",
+    "db": {
+        "dbVersion": "POSTGRES_14",
+        "dbName": "fpoversikt",
+        "dbTier": "db-custom-1-3840",
+        "dbDiskAutoresize": "true",
+        "dbHighAvailability": "true",
+        "dbPointInTimeRecovery": "true",
+        "dbRetainedBackups": "14"
+    },
     "minReplicas": "2",
     "maxReplicas": "4",
     "groups": [
