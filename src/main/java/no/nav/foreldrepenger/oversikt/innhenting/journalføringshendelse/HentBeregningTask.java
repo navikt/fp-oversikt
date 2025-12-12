@@ -40,6 +40,9 @@ public class HentBeregningTask implements ProsessTaskHandler {
 
     @Override
     public void doTask(ProsessTaskData prosessTaskData) {
+        if (true) {
+            return;
+        }
         var saksnummer = new Saksnummer(prosessTaskData.getSaksnummer());
         hentOgLagre(fpsakTjeneste, beregningRepository, saksnummer);
     }

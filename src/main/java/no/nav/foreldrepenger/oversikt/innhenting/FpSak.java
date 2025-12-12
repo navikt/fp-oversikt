@@ -30,7 +30,7 @@ public record FpSak(String saksnummer,
     }
 
     public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, Dekningsgrad dekningsgrad,
-                         List<UttaksperiodeAnnenpartEøs> annenpartEøsUttaksperioder) {
+                         List<UttaksperiodeAnnenpartEøs> annenpartEøsUttaksperioder, Beregningsgrunnlag beregningsgrunnlag) {
     }
 
     public record UttaksperiodeAnnenpartEøs(LocalDate fom, LocalDate tom, Konto konto, BigDecimal trekkdager) {
@@ -70,6 +70,41 @@ public record FpSak(String saksnummer,
             ANNET
         }
     }
+
+    record Beregningsgrunnlag(LocalDate skjæringstidspunkt, List<BeregningsAndel> beregningsAndeler, List<BeregningAktivitetStatus> beregningAktivitetStatuser) {
+
+        record BeregningsAndel(AktivitetStatus aktivitetStatus, BigDecimal fastsattPrÅr, InntektsKilde inntektsKilde,
+                               Arbeidsforhold arbeidsforhold, BigDecimal dagsatsArbeidsgiver, BigDecimal dagsatsSøker) {}
+
+        record Arbeidsforhold(String arbeidsgiverIdent, BigDecimal refusjonPrMnd) {}
+
+        // Lar hjemmel være string til vi vet om vi skal ha det med
+        record BeregningAktivitetStatus(AktivitetStatus aktivitetStatus, String hjemmel) {}
+
+        enum InntektsKilde {
+            INNTEKTSMELDING,
+            A_INNTEKT,
+            VEDTAK_ANNEN_YTELSE,
+            SKJØNNSFASTSATT,
+            PGI // Pensjonsgivendeinntekt
+        }
+
+        enum AktivitetStatus {
+            ARBEIDSAVKLARINGSPENGER,
+            ARBEIDSTAKER,
+            DAGPENGER,
+            FRILANSER,
+            MILITÆR_ELLER_SIVIL,
+            SELVSTENDIG_NÆRINGSDRIVENDE,
+            KOMBINERT_AT_FL,
+            KOMBINERT_AT_SN,
+            KOMBINERT_FL_SN,
+            KOMBINERT_AT_FL_SN,
+            BRUKERS_ANDEL,
+            KUN_YTELSE,
+        }
+    }
+
     public record Søknad(SøknadStatus status, LocalDateTime mottattTidspunkt, Set<Periode> perioder, Dekningsgrad dekningsgrad,
                          boolean morArbeidUtenDok) {
 
