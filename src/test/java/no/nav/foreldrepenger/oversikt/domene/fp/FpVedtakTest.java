@@ -24,7 +24,7 @@ class FpVedtakTest {
         var uttaksperiode5 = lagPeriode(LocalDate.of(2024, 9, 18), LocalDate.of(2024, 9, 20), Konto.FELLESPERIODE);
         var uttaksperiode6 = lagPeriode(LocalDate.of(2024, 9, 21), LocalDate.of(2024, 9, 27), Konto.MØDREKVOTE);
         var vedtak = new FpVedtak(LocalDateTime.now(),
-            List.of(uttaksperiode1, uttaksperiode2, uttaksperiode3, uttaksperiode4, uttaksperiode5, uttaksperiode6), Dekningsgrad.HUNDRE, null);
+            List.of(uttaksperiode1, uttaksperiode2, uttaksperiode3, uttaksperiode4, uttaksperiode5, uttaksperiode6), Dekningsgrad.HUNDRE, null, null);
 
         var resultat = vedtak.tilDto(BrukerRolleSak.MOR).perioder();
         assertThat(resultat).hasSize(3);

@@ -16,7 +16,8 @@ import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
                        @JsonProperty("perioder") List<Uttaksperiode> perioder,
                        @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad,
-                       @JsonProperty("annenpartEøsUttaksperioder") List<UttakPeriodeAnnenpartEøs> annenpartEøsUttaksperioder) {
+                       @JsonProperty("annenpartEøsUttaksperioder") List<UttakPeriodeAnnenpartEøs> annenpartEøsUttaksperioder,
+                       @JsonProperty("beregningsgrunnlag") Beregningsgrunnlag beregningsgrunnlag) {
 
     public no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak tilDto(BrukerRolleSak brukerRolle) {
         var sortertUttaksperioder = Stream.ofNullable(perioder)
