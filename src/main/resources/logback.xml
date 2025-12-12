@@ -59,11 +59,16 @@
 
     <logger name="jdbc.sql" level="${log.level.jdbc.sql:-ERROR}"/>
     <logger name="org.hibernate" level="${log.level.org.hibernate:-WARN}"/>
+    <logger name="com.zaxxer.hikari" level="${log.level.com.zaxxer.hikari:-WARN}"/>
 
-    <include optional="true" resource="logback-${NAIS_CLUSTER_NAME}.xml"/>
+    <logger name="secureLogger" level="INFO" additivity="false">
+        <appender-ref ref="secureLogger"/>
+        <appender-ref ref="teamLogger"/>
+    </logger>
 
     <root level="${log.level.root:-INFO}">
         <appender-ref ref="stdoutConsoleLogger"/>
     </root>
 
+    <include optional="true" resource="logback-${NAIS_CLUSTER_NAME}.xml"/>
 </configuration>
