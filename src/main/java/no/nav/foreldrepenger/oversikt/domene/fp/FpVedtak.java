@@ -30,7 +30,8 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
             .map(UttakPeriodeAnnenpartEøs::tilDto)
             .sorted(Comparator.comparing(no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs::fom))
             .toList();
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak(compress(sortertUttaksperioder), sortertUttaksperioderAnnenpartEøs, null);
+        var bgDto = beregningsgrunnlag == null ? null : beregningsgrunnlag.tilDto();
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak(compress(sortertUttaksperioder), sortertUttaksperioderAnnenpartEøs, bgDto);
     }
 
     public boolean innvilget() {
