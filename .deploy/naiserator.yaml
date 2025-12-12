@@ -48,6 +48,7 @@ spec:
   gcp:
     sqlInstances:
       - type: {{db.dbVersion}}
+        name: {{db.dbName}}
         databases:
           - name: {{db.dbName}}
             envVarPrefix: DB
