@@ -107,6 +107,8 @@ spec:
               - swagger
     outbound:
       rules:
+        - application: logging
+          namespace: nais-system
         - application: digdir-krr-proxy
           namespace: team-rocket
         - application: sokos-kontoregister-person
