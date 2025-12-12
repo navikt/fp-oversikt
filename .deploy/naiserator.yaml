@@ -50,7 +50,7 @@ spec:
       - type: {{db.dbVersion}}
         name: {{db.dbName}}
         databases:
-          - name: {{db.dbName}}
+          - name: fpoversikt
             envVarPrefix: DB
         tier: {{db.dbTier}}
         diskAutoresize: {{db.dbDiskAutoresize}}
