@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 import java.util.Set;
 import java.util.UUID;
 
-import no.nav.foreldrepenger.oversikt.innhenting.journalføringshendelse.HentBeregningTask;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,7 +76,6 @@ public class BehandlingHendelseHåndterer implements KafkaMessageHandler.KafkaSt
                     lagreHentInntektsmeldingerSak(hendelseUuid, saksnummer);
                     //Henter vedlegg for å fjerne manglende vedlegg etter vedtak
                     lagreHentManglendeVedlegg(hendelseUuid, saksnummer);
-                    lagreHentBeregningSak(hendelseUuid, saksnummer);
                 }
                 if (hendelse.getKildesystem() == Kildesystem.FPTILBAKE) {
                     lagreHentTilbakekrevingTask(hendelseUuid, saksnummer, hendelseType);
@@ -104,22 +101,8 @@ public class BehandlingHendelseHåndterer implements KafkaMessageHandler.KafkaSt
         taskTjeneste.lagre(task);
     }
 
-    private void lagreHentBeregningSak(UUID hendelseUuid, Saksnummer saksnummer) {
-        var task = opprettHentBeregningTask(hendelseUuid, saksnummer);
-        taskTjeneste.lagre(task);
-    }
-
     private static ProsessTaskData opprettHentInntektsmeldingerTask(UUID hendelseUuid, Saksnummer saksnummer) {
         var task = ProsessTaskData.forProsessTask(HentInntektsmeldingerTask.class);
-        task.setCallId(hendelseUuid.toString());
-        task.setSaksnummer(saksnummer.value());
-        task.setGruppe(saksnummer.value() + "-I");
-        task.setSekvens(String.valueOf(Instant.now().toEpochMilli()));
-        return task;
-    }
-
-    private static ProsessTaskData opprettHentBeregningTask(UUID hendelseUuid, Saksnummer saksnummer) {
-        var task = ProsessTaskData.forProsessTask(HentBeregningTask.class);
         task.setCallId(hendelseUuid.toString());
         task.setSaksnummer(saksnummer.value());
         task.setGruppe(saksnummer.value() + "-I");

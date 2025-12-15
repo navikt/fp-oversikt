@@ -2,14 +2,12 @@ package no.nav.foreldrepenger.oversikt.stub;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.innhenting.FpsakTjeneste;
 import no.nav.foreldrepenger.oversikt.innhenting.Sak;
-import no.nav.foreldrepenger.oversikt.innhenting.beregning.FpSakBeregningDto;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 
 public class FpsakTjenesteStub implements FpsakTjeneste {
@@ -46,11 +44,5 @@ public class FpsakTjenesteStub implements FpsakTjeneste {
     @Override
     public List<FpSakInntektsmeldingDto> hentInntektsmeldinger(Saksnummer saksnummer) {
         return inntektsmeldinger.get(saksnummer);
-    }
-
-    // TODO
-    @Override
-    public Optional<FpSakBeregningDto> hentBeregning(Saksnummer saksnummer) {
-        return Optional.empty();
     }
 }

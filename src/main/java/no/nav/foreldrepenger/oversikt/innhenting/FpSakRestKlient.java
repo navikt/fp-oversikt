@@ -2,13 +2,11 @@ package no.nav.foreldrepenger.oversikt.innhenting;
 
 import java.net.URI;
 import java.util.List;
-import java.util.Optional;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.UriBuilder;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentTypeHistoriske;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.innhenting.beregning.FpSakBeregningDto;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.FpSakInntektsmeldingDto;
 import no.nav.vedtak.felles.integrasjon.rest.FpApplication;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
@@ -51,19 +49,6 @@ class FpSakRestKlient implements FpsakTjeneste {
         var uri = uri("/fpoversikt/inntektsmeldinger", saksnummer);
         var request = RestRequest.newGET(uri, restConfig);
         return restClient.sendReturnList(request, FpSakInntektsmeldingDto.class);
-    }
-
-    @Override
-    public Optional<FpSakBeregningDto> hentBeregning(Saksnummer saksnummer) {
-        var uri = uri("/fpoversikt/beregning", saksnummer);
-        var request = RestRequest.newGET(uri, restConfig);
-
-        // TODO: hvordan?
-        var res  = restClient.send(request, FpSakBeregningDto.class);
-        if (res == null) {
-            return Optional.empty();
-        }
-        return Optional.of(res);
     }
 
     private URI uri(String path, Saksnummer saksnummer) {
