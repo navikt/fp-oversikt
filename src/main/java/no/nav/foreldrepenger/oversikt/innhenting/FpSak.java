@@ -86,7 +86,7 @@ public record FpSak(String saksnummer,
             A_INNTEKT,
             VEDTAK_ANNEN_YTELSE,
             SKJØNNSFASTSATT,
-            PGI // Pensjonsgivendeinntekt
+            PENSJONSGIVENDE_INNTEKT,
         }
 
         enum AktivitetStatus {

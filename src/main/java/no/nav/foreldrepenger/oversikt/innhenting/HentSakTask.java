@@ -419,7 +419,7 @@ public class HentSakTask implements ProsessTaskHandler {
             case INNTEKTSMELDING -> Beregningsgrunnlag.InntektsKilde.INNTEKTSMELDING;
             case A_INNTEKT -> Beregningsgrunnlag.InntektsKilde.A_INNTEKT;
             case SKJØNNSFASTSATT -> Beregningsgrunnlag.InntektsKilde.SKJØNNSFASTSATT;
-            case PGI -> Beregningsgrunnlag.InntektsKilde.PGI;
+            case PENSJONSGIVENDE_INNTEKT -> Beregningsgrunnlag.InntektsKilde.PENSJONSGIVENDE_INNTEKT;
             case VEDTAK_ANNEN_YTELSE -> Beregningsgrunnlag.InntektsKilde.VEDTAK_ANNEN_YTELSE;
         };
     }

@@ -24,7 +24,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
         A_INNTEKT,
         VEDTAK_ANNEN_YTELSE,
         SKJØNNSFASTSATT,
-        PGI // Pensjonsgivendeinntekt
+        PENSJONSGIVENDE_INNTEKT,
     }
 
     public no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag tilDto() {
@@ -59,7 +59,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
             case A_INNTEKT -> Inntektskilde.A_INNTEKT;
             case VEDTAK_ANNEN_YTELSE -> Inntektskilde.VEDTAK_ANNEN_YTELSE;
             case SKJØNNSFASTSATT -> Inntektskilde.SKJØNNSFASTSATT;
-            case PGI -> Inntektskilde.PGI;
+            case PENSJONSGIVENDE_INNTEKT -> Inntektskilde.PGI;
         };
     }
 
