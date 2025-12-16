@@ -16,7 +16,8 @@ import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
                        @JsonProperty("perioder") List<Uttaksperiode> perioder,
                        @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad,
-                       @JsonProperty("annenpartEøsUttaksperioder") List<UttakPeriodeAnnenpartEøs> annenpartEøsUttaksperioder) {
+                       @JsonProperty("annenpartEøsUttaksperioder") List<UttakPeriodeAnnenpartEøs> annenpartEøsUttaksperioder,
+                       @JsonProperty("beregningsgrunnlag") Beregningsgrunnlag beregningsgrunnlag) {
 
     public no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak tilDto(BrukerRolleSak brukerRolle) {
         var sortertUttaksperioder = Stream.ofNullable(perioder)
@@ -29,7 +30,8 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
             .map(UttakPeriodeAnnenpartEøs::tilDto)
             .sorted(Comparator.comparing(no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs::fom))
             .toList();
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak(compress(sortertUttaksperioder), sortertUttaksperioderAnnenpartEøs, null);
+        var bgDto = beregningsgrunnlag == null ? null : beregningsgrunnlag.tilDto();
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak(compress(sortertUttaksperioder), sortertUttaksperioderAnnenpartEøs, bgDto);
     }
 
     public boolean innvilget() {

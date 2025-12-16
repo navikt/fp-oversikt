@@ -8,6 +8,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import no.nav.foreldrepenger.oversikt.domene.fp.AktivitetStatus;
+import no.nav.foreldrepenger.oversikt.domene.fp.Beregningsgrunnlag;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -202,7 +205,7 @@ public class HentSakTask implements ProsessTaskHandler {
             switch (oppholdPeriode.årsak()) {
             case FERIE -> OppholdPeriode.Årsak.FERIE;
             case SYKEPENGER -> OppholdPeriode.Årsak.SYKEPENGER;
-        },
+            },
             switch (oppholdPeriode.kilde()) {
             case SAKSBEHANDLER -> OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
             case INNTEKTSMELDING -> OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
@@ -383,8 +386,61 @@ public class HentSakTask implements ProsessTaskHandler {
             return null;
         }
         return new FpVedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()), tilDekningsgrad(vedtakDto.dekningsgrad()),
-            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()));
+            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()), tilBeregningsgrunnlag(vedtakDto.beregningsgrunnlag()));
     }
+
+    private static Beregningsgrunnlag tilBeregningsgrunnlag(FpSak.Beregningsgrunnlag beregningsgrunnlag) {
+        if (beregningsgrunnlag == null) {
+            return null;
+        }
+        List<Beregningsgrunnlag.BeregningsAndel> andeler = beregningsgrunnlag.beregningsAndeler() == null ? List.of() : beregningsgrunnlag.beregningsAndeler().stream().map(HentSakTask::mapAndel).toList();
+        List<Beregningsgrunnlag.BeregningAktivitetStatus> statuser = beregningsgrunnlag.beregningAktivitetStatuser() == null ? List.of() : beregningsgrunnlag.beregningAktivitetStatuser().stream().map(HentSakTask::mapStatusMedHjemmel).toList();
+        return new Beregningsgrunnlag(beregningsgrunnlag.skjæringstidspunkt(), andeler, statuser);
+    }
+
+    private static Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(FpSak.Beregningsgrunnlag.BeregningAktivitetStatus statusMedHjemmelDto) {
+        return new Beregningsgrunnlag.BeregningAktivitetStatus(mapAktivitetstatus(statusMedHjemmelDto.aktivitetStatus()), statusMedHjemmelDto.hjemmel());
+    }
+
+    private static Beregningsgrunnlag.BeregningsAndel mapAndel(FpSak.Beregningsgrunnlag.BeregningsAndel andelDto) {
+        return new Beregningsgrunnlag.BeregningsAndel(mapAktivitetstatus(andelDto.aktivitetStatus()), andelDto.fastsattPrÅr(), mapInntektkilde(andelDto.inntektsKilde()),
+            mapArbeidsforhold(andelDto.arbeidsforhold()), andelDto.dagsatsArbeidsgiver(), andelDto.dagsatsSøker());
+    }
+
+    private static Beregningsgrunnlag.Arbeidsforhold mapArbeidsforhold(FpSak.Beregningsgrunnlag.Arbeidsforhold arbeidsforholdDto) {
+        if (arbeidsforholdDto == null) {
+            return null;
+        }
+        return new Beregningsgrunnlag.Arbeidsforhold(arbeidsforholdDto.arbeidsgiverIdent(), arbeidsforholdDto.refusjonPrMnd());
+    }
+
+    private static Beregningsgrunnlag.InntektsKilde mapInntektkilde(FpSak.Beregningsgrunnlag.InntektsKilde inntektsKilde) {
+        return switch (inntektsKilde) {
+            case INNTEKTSMELDING -> Beregningsgrunnlag.InntektsKilde.INNTEKTSMELDING;
+            case A_INNTEKT -> Beregningsgrunnlag.InntektsKilde.A_INNTEKT;
+            case SKJØNNSFASTSATT -> Beregningsgrunnlag.InntektsKilde.SKJØNNSFASTSATT;
+            case PENSJONSGIVENDE_INNTEKT -> Beregningsgrunnlag.InntektsKilde.PENSJONSGIVENDE_INNTEKT;
+            case VEDTAK_ANNEN_YTELSE -> Beregningsgrunnlag.InntektsKilde.VEDTAK_ANNEN_YTELSE;
+        };
+    }
+
+    private static AktivitetStatus mapAktivitetstatus(FpSak.Beregningsgrunnlag.AktivitetStatus aktivitetStatus) {
+        return switch (aktivitetStatus) {
+            case ARBEIDSAVKLARINGSPENGER -> AktivitetStatus.ARBEIDSAVKLARINGSPENGER;
+            case ARBEIDSTAKER -> AktivitetStatus.ARBEIDSTAKER;
+            case DAGPENGER -> AktivitetStatus.DAGPENGER;
+            case FRILANSER -> AktivitetStatus.FRILANSER;
+            case MILITÆR_ELLER_SIVIL -> AktivitetStatus.MILITÆR_ELLER_SIVIL;
+            case SELVSTENDIG_NÆRINGSDRIVENDE -> AktivitetStatus.SELVSTENDIG_NÆRINGSDRIVENDE;
+            case KOMBINERT_AT_FL -> AktivitetStatus.KOMBINERT_AT_FL;
+            case KOMBINERT_AT_SN -> AktivitetStatus.KOMBINERT_AT_SN;
+            case KOMBINERT_FL_SN -> AktivitetStatus.KOMBINERT_FL_SN;
+            case KOMBINERT_AT_FL_SN -> AktivitetStatus.KOMBINERT_AT_FL_SN;
+            case BRUKERS_ANDEL -> AktivitetStatus.BRUKERS_ANDEL;
+            case KUN_YTELSE -> AktivitetStatus.KUN_YTELSE;
+        };
+    }
+
 
     private static List<UttakPeriodeAnnenpartEøs> tilUttaksperiodeAnnenpartEøs(List<FpSak.UttaksperiodeAnnenpartEøs> uttaksperiodeAnnenpartEøs) {
         if (uttaksperiodeAnnenpartEøs == null) {
