@@ -4,8 +4,8 @@
     "environment": "prod",
     "kafkaPool": "nav-prod",
     "db": {
-        "dbVersion": "POSTGRES_14",
-        "dbName": "fpoversikt",
+        "dbVersion": "POSTGRES_17",
+        "dbName": "fpoversikt2",
         "dbTier": "db-custom-1-3840",
         "dbDiskAutoresize": "true",
         "dbHighAvailability": "false",
