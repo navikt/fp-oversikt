@@ -71,12 +71,12 @@ public record FpSak(String saksnummer,
         }
     }
 
-    record Beregningsgrunnlag(LocalDate skjæringstidspunkt, List<BeregningsAndel> beregningsAndeler, List<BeregningAktivitetStatus> beregningAktivitetStatuser) {
+    record Beregningsgrunnlag(LocalDate skjæringstidspunkt, List<BeregningsAndel> beregningsAndeler, List<BeregningAktivitetStatus> beregningAktivitetStatuser, BigDecimal grunnbeløp) {
 
         record BeregningsAndel(AktivitetStatus aktivitetStatus, BigDecimal fastsattPrÅr, InntektsKilde inntektsKilde,
                                Arbeidsforhold arbeidsforhold, BigDecimal dagsatsArbeidsgiver, BigDecimal dagsatsSøker) {}
 
-        record Arbeidsforhold(String arbeidsgiverIdent, BigDecimal refusjonPrMnd) {}
+        record Arbeidsforhold(String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal refusjonPrMnd) {}
 
         // Lar hjemmel være string til vi vet om vi skal ha det med
         record BeregningAktivitetStatus(AktivitetStatus aktivitetStatus, String hjemmel) {}

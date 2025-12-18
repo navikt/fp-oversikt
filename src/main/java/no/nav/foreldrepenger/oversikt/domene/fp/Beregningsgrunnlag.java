@@ -7,13 +7,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsAndel> beregningsAndeler,
-                                 List<BeregningAktivitetStatus> beregningAktivitetStatuser) {
+                                 List<BeregningAktivitetStatus> beregningAktivitetStatuser, BigDecimal grunnbeløp) {
 
     public record BeregningsAndel(AktivitetStatus aktivitetStatus, BigDecimal fastsattPrÅr, InntektsKilde inntektsKilde,
                                   Arbeidsforhold arbeidsforhold, BigDecimal dagsatsArbeidsgiver, BigDecimal dagsatsSøker) {
     }
 
-    public record Arbeidsforhold(String arbeidsgiverIdent, BigDecimal refusjonPrMnd) {
+    public record Arbeidsforhold(String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal refusjonPrMnd) {
     }
 
     public record BeregningAktivitetStatus(AktivitetStatus aktivitetStatus, String hjemmel) {
@@ -32,7 +32,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
             beregningsAndeler == null ? List.of() : beregningsAndeler.stream().map(this::mapAndel).toList();
         List<no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningAktivitetStatus> statuser =
             beregningAktivitetStatuser == null ? List.of() : beregningAktivitetStatuser.stream().map(this::mapStatusMedHjemmel).toList();
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag(skjæringsTidspunkt, andeler, statuser);
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag(skjæringsTidspunkt, andeler, statuser, grunnbeløp);
     }
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(BeregningAktivitetStatus status) {
@@ -49,7 +49,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
         if (arbeidsforhold == null) {
             return null;
         }
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.Arbeidsforhold(arbeidsforhold.arbeidsgiverIdent,
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.Arbeidsforhold(arbeidsforhold.arbeidsgiverIdent, arbeidsforhold.arbeidsgivernavn,
             arbeidsforhold.refusjonPrMnd);
     }
 
