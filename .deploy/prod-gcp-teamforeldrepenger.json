@@ -9,7 +9,7 @@
         "dbTier": "db-custom-1-3840",
         "dbDiskAutoresize": "true",
         "dbHighAvailability": "false",
-        "dbPointInTimeRecovery": "false",
+        "dbPointInTimeRecovery": "true",
         "dbRetainedBackups": "14"
     },
     "minReplicas": "2",
