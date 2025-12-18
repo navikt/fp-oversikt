@@ -395,7 +395,7 @@ public class HentSakTask implements ProsessTaskHandler {
         }
         List<Beregningsgrunnlag.BeregningsAndel> andeler = beregningsgrunnlag.beregningsAndeler() == null ? List.of() : beregningsgrunnlag.beregningsAndeler().stream().map(HentSakTask::mapAndel).toList();
         List<Beregningsgrunnlag.BeregningAktivitetStatus> statuser = beregningsgrunnlag.beregningAktivitetStatuser() == null ? List.of() : beregningsgrunnlag.beregningAktivitetStatuser().stream().map(HentSakTask::mapStatusMedHjemmel).toList();
-        return new Beregningsgrunnlag(beregningsgrunnlag.skjæringstidspunkt(), andeler, statuser);
+        return new Beregningsgrunnlag(beregningsgrunnlag.skjæringstidspunkt(), andeler, statuser, beregningsgrunnlag.grunnbeløp());
     }
 
     private static Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(FpSak.Beregningsgrunnlag.BeregningAktivitetStatus statusMedHjemmelDto) {
@@ -411,7 +411,7 @@ public class HentSakTask implements ProsessTaskHandler {
         if (arbeidsforholdDto == null) {
             return null;
         }
-        return new Beregningsgrunnlag.Arbeidsforhold(arbeidsforholdDto.arbeidsgiverIdent(), arbeidsforholdDto.refusjonPrMnd());
+        return new Beregningsgrunnlag.Arbeidsforhold(arbeidsforholdDto.arbeidsgiverIdent(), arbeidsforholdDto.arbeidsgivernavn(), arbeidsforholdDto.refusjonPrMnd());
     }
 
     private static Beregningsgrunnlag.InntektsKilde mapInntektkilde(FpSak.Beregningsgrunnlag.InntektsKilde inntektsKilde) {

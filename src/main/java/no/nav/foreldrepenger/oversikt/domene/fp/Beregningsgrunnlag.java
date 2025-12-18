@@ -7,13 +7,13 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsAndel> beregningsAndeler,
-                                 List<BeregningAktivitetStatus> beregningAktivitetStatuser) {
+                                 List<BeregningAktivitetStatus> beregningAktivitetStatuser, BigDecimal grunnbeløp) {
 
     public record BeregningsAndel(AktivitetStatus aktivitetStatus, BigDecimal fastsattPrÅr, InntektsKilde inntektsKilde,
                                   Arbeidsforhold arbeidsforhold, BigDecimal dagsatsArbeidsgiver, BigDecimal dagsatsSøker) {
     }
 
-    public record Arbeidsforhold(String arbeidsgiverIdent, BigDecimal refusjonPrMnd) {
+    public record Arbeidsforhold(String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal refusjonPrMnd) {
     }
 
     public record BeregningAktivitetStatus(AktivitetStatus aktivitetStatus, String hjemmel) {
