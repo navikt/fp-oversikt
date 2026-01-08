@@ -19,7 +19,7 @@
         <sonar.projectKey>navikt_fp-oversikt</sonar.projectKey>
 
         <openapi-spec-utils.version>2.1.0</openapi-spec-utils.version>
-        <io.confluent.version>8.1.0</io.confluent.version>
+        <io.confluent.version>8.1.1</io.confluent.version>
 
         <felles.version>7.6.12</felles.version>
         <prosesstask.version>5.2.2</prosesstask.version>
