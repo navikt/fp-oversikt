@@ -28,6 +28,7 @@ import no.nav.pdl.ForelderBarnRelasjon;
 import no.nav.pdl.ForelderBarnRelasjonResponseProjection;
 import no.nav.pdl.ForelderBarnRelasjonRolle;
 import no.nav.pdl.HentPersonBolkQueryRequest;
+import no.nav.pdl.HentPersonBolkResult;
 import no.nav.pdl.HentPersonBolkResultResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
 import no.nav.pdl.KjoennResponseProjection;
@@ -106,11 +107,15 @@ public class PdlOppslagTjeneste {
                         .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsIdent().relatertPersonsRolle().minRolleForPerson())
                 );
         return pdlKlientSystem.hentPersonBolk(requestBarn, projeksjonBolk).stream()
-                // Feiler nå hardt hvis person er null (finnes ikke, ugyldig ident)
-                // identen kommer fra opprinnelig fra PDL så her antar vi noe er veldig feil hivs dette intreffer
-                .filter(b -> !harAdressebeskyttelse(b.getPerson()))
-                .map(p -> new PersonMedIdent(p.getIdent(), p.getPerson()))
-                .toList();
+            //filtrerer ut duplikate identer
+            .collect(Collectors.toMap(HentPersonBolkResult::getIdent, person -> person, (existing, _) -> existing))
+            .values()
+            .stream()
+            // Feiler nå hardt hvis person er null (finnes ikke, ugyldig ident)
+            // identen kommer fra opprinnelig fra PDL så her antar vi noe er veldig feil hivs dette intreffer
+            .filter(b -> !harAdressebeskyttelse(b.getPerson()))
+            .map(p -> new PersonMedIdent(p.getIdent(), p.getPerson()))
+            .toList();
     }
 
     private static Person dødfødtBarn(DoedfoedtBarn df) {
@@ -146,7 +151,7 @@ public class PdlOppslagTjeneste {
                         .doedsfall(new DoedsfallResponseProjection().doedsdato())
                         .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering()));
 
-        var annnepartOppslag = pdlKlientSystem.hentPersonBolk(request, projeksjonAnnenpart).stream()
+        var annepartOppslag = pdlKlientSystem.hentPersonBolk(request, projeksjonAnnenpart).stream()
                 // Feiler nå hardt hvis person er null (finnes ikke, ugyldig ident)
                 // identen kommer fra opprinnelig fra PDL så her antar vi noe er veldig feil hivs dette intreffer
                 .filter(result -> !harAdressebeskyttelse(result.getPerson()))
@@ -154,13 +159,13 @@ public class PdlOppslagTjeneste {
                 .map(result -> new PersonMedIdent(result.getIdent(), result.getPerson()))
                 .collect(Collectors.toMap(PersonMedIdent::ident, person -> person));
 
-        if (annnepartOppslag.isEmpty()) {
+        if (annepartOppslag.isEmpty()) {
             return Map.of();
         }
 
         return barnTilAnnenpartMapping.entrySet().stream()
-                .filter(entry -> annnepartOppslag.containsKey(entry.getValue()))
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> annnepartOppslag.get(entry.getValue())));
+                .filter(entry -> annepartOppslag.containsKey(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> annepartOppslag.get(entry.getValue())));
     }
 
     private static boolean harDødsdato(Person person) {
