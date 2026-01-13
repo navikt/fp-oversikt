@@ -3,7 +3,6 @@
     <logger name="no.nav.vedtak.sikkerhet" level="TRACE" />
     <logger name="no.nav.vedtak.felles.integrasjon.rest" level="INFO" />
     <logger name="secureLogger" level="INFO" additivity="false">
-        <appender-ref ref="secureLogger"/>
         <appender-ref ref="teamLogger"/>
     </logger>
 </included>
