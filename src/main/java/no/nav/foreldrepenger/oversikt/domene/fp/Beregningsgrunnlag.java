@@ -10,7 +10,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
                                  List<BeregningAktivitetStatus> beregningAktivitetStatuser, BigDecimal grunnbeløp) {
 
     public record BeregningsAndel(AktivitetStatus aktivitetStatus, BigDecimal fastsattPrÅr, InntektsKilde inntektsKilde,
-                                  Arbeidsforhold arbeidsforhold, BigDecimal dagsatsArbeidsgiver, BigDecimal dagsatsSøker) {
+                                  Arbeidsforhold arbeidsforhold) {
     }
 
     public record Arbeidsforhold(String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal refusjonPrMnd) {
@@ -36,21 +36,21 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
     }
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(BeregningAktivitetStatus status) {
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningAktivitetStatus(mapAktivitetstatus(status.aktivitetStatus), status.hjemmel);
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningAktivitetStatus(mapAktivitetstatus(status.aktivitetStatus),
+            status.hjemmel);
     }
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel mapAndel(BeregningsAndel andel) {
         return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel(mapAktivitetstatus(andel.aktivitetStatus),
-            andel.fastsattPrÅr, mapInntektskilde(andel.inntektsKilde), mapArbeidsforhold(andel.arbeidsforhold), andel.dagsatsArbeidsgiver,
-            andel.dagsatsSøker);
+            andel.fastsattPrÅr, mapInntektskilde(andel.inntektsKilde), mapArbeidsforhold(andel.arbeidsforhold));
     }
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.Arbeidsforhold mapArbeidsforhold(Arbeidsforhold arbeidsforhold) {
         if (arbeidsforhold == null) {
             return null;
         }
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.Arbeidsforhold(arbeidsforhold.arbeidsgiverIdent, arbeidsforhold.arbeidsgivernavn,
-            arbeidsforhold.refusjonPrMnd);
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.Arbeidsforhold(arbeidsforhold.arbeidsgiverIdent,
+            arbeidsforhold.arbeidsgivernavn, arbeidsforhold.refusjonPrMnd);
     }
 
     private Inntektskilde mapInntektskilde(InntektsKilde inntektsKilde) {

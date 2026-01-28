@@ -75,7 +75,7 @@ class AnnenPartSakTjenesteTest {
         var omsorgsovertakelse = LocalDate.now().plusWeeks(1);
         var dekningsgrad = Dekningsgrad.HUNDRE;
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(), dekningsgrad, false);
-        var annenPartsSak = new SakFP0(Saksnummer.dummy(), aktørIdAnnenPart, true, Set.of(new FpVedtak(now(), List.of(), dekningsgrad, null, null)), aktørIdSøker,
+        var annenPartsSak = new SakFP0(Saksnummer.dummy(), aktørIdAnnenPart, true, Set.of(new FpVedtak(now(), List.of(), dekningsgrad, null, null, null)), aktørIdSøker,
             new FamilieHendelse(fødselsdato, null, 1, omsorgsovertakelse), Set.of(), Set.of(søknad), BrukerRolle.MOR,
             Set.of(), new Rettigheter(false, false, false), false, now());
         repository.lagre(annenPartsSak);
@@ -251,7 +251,7 @@ class AnnenPartSakTjenesteTest {
                                        LocalDate termindato,
                                        boolean aleneomsorg) {
         var dekningsgrad = Dekningsgrad.HUNDRE;
-        var vedtak = new FpVedtak(vedtakstidspunkt, List.of(), dekningsgrad, null, null);
+        var vedtak = new FpVedtak(vedtakstidspunkt, List.of(), dekningsgrad, null, null, null);
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(), dekningsgrad, false);
         return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(vedtak), annenPartAktørId,
             new FamilieHendelse(fødselsdato, termindato, 1, null), Set.of(), Set.of(søknad), BrukerRolle.MOR,

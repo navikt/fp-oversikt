@@ -49,7 +49,7 @@ class DBSakRepositoryTest {
         var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2), UtsettelseÅrsak.NAV_TILTAK, null,
             null, Prosent.ZERO, false, MorsAktivitet.IKKE_OPPGITT,
             new Resultat(Resultat.Type.INNVILGET, Resultat.Årsak.ANNET, Set.of(uttaksperiodeAktivitet(new Trekkdager(20))), false)));
-        var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null);
+        var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, null);
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now(), Konto.FELLESPERIODE,
             UtsettelseÅrsak.SØKER_SYKDOM, null, null, new Gradering(new Prosent(3), new UttakAktivitet(UttakAktivitet.Type.FRILANS,
             Arbeidsgiver.dummy(), null)), new Prosent(44), true, MorsAktivitet.ARBEID)), Dekningsgrad.HUNDRE, true);
@@ -89,7 +89,7 @@ class DBSakRepositoryTest {
         var aktørId = AktørId.dummy();
         var uttaksperioder = List.of(new Uttaksperiode(LocalDate.now(), LocalDate.now().plusMonths(2), null, null, null, Prosent.ZERO,
             false, null, new Resultat(Resultat.Type.AVSLÅTT, Resultat.Årsak.ANNET, Set.of(uttaksperiodeAktivitet(Trekkdager.ZERO)), false)));
-        var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null);
+        var vedtak = new FpVedtak(now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, null);
         var saksnummer = Saksnummer.dummy();
         var annenPartAktørId = AktørId.dummy();
         var barn = of(AktørId.dummy());

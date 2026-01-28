@@ -6,23 +6,15 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
+import no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelsePeriode;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
 
 
-public record FpSak(String saksnummer,
-                    String aktørId,
-                    FamilieHendelse familieHendelse,
-                    boolean avsluttet,
-                    Set<Vedtak> vedtak,
-                    String oppgittAnnenPart,
-                    Set<Aksjonspunkt> aksjonspunkt,
-                    Set<Søknad> søknader,
-                    BrukerRolle brukerRolle,
-                    Set<String> fødteBarn,
-                    Rettigheter rettigheter,
-                    boolean ønskerJustertUttakVedFødsel) implements Sak {
+public record FpSak(String saksnummer, String aktørId, FamilieHendelse familieHendelse, boolean avsluttet, Set<Vedtak> vedtak,
+                    String oppgittAnnenPart, Set<Aksjonspunkt> aksjonspunkt, Set<Søknad> søknader, BrukerRolle brukerRolle, Set<String> fødteBarn,
+                    Rettigheter rettigheter, boolean ønskerJustertUttakVedFødsel) implements Sak {
 
     public enum Dekningsgrad {
         ÅTTI,
@@ -30,15 +22,15 @@ public record FpSak(String saksnummer,
     }
 
     public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, Dekningsgrad dekningsgrad,
-                         List<UttaksperiodeAnnenpartEøs> annenpartEøsUttaksperioder, Beregningsgrunnlag beregningsgrunnlag) {
+                         List<UttaksperiodeAnnenpartEøs> annenpartEøsUttaksperioder, Beregningsgrunnlag beregningsgrunnlag, List<TilkjentYtelsePeriode> tilkjentYtelse) {
     }
 
     public record UttaksperiodeAnnenpartEøs(LocalDate fom, LocalDate tom, Konto konto, BigDecimal trekkdager) {
     }
 
     public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utsettelseÅrsak, OppholdÅrsak oppholdÅrsak,
-                                OverføringÅrsak overføringÅrsak, Prosent samtidigUttak, Boolean flerbarnsdager,
-                                MorsAktivitet morsAktivitet, Resultat resultat) {
+                                OverføringÅrsak overføringÅrsak, Prosent samtidigUttak, Boolean flerbarnsdager, MorsAktivitet morsAktivitet,
+                                Resultat resultat) {
 
         public record Resultat(Type type, Årsak årsak, Set<UttaksperiodeAktivitet> aktiviteter, boolean trekkerMinsterett) {
 
@@ -62,6 +54,7 @@ public record FpSak(String saksnummer,
         }
 
     }
+
     public record UttakAktivitet(UttakAktivitet.Type type, Arbeidsgiver arbeidsgiver, String arbeidsforholdId) {
         public enum Type {
             ORDINÆRT_ARBEID,
@@ -71,15 +64,20 @@ public record FpSak(String saksnummer,
         }
     }
 
-    record Beregningsgrunnlag(LocalDate skjæringstidspunkt, List<BeregningsAndel> beregningsAndeler, List<BeregningAktivitetStatus> beregningAktivitetStatuser, BigDecimal grunnbeløp) {
+    record Beregningsgrunnlag(LocalDate skjæringstidspunkt, List<BeregningsAndel> beregningsAndeler,
+                              List<BeregningAktivitetStatus> beregningAktivitetStatuser, BigDecimal grunnbeløp) {
 
-        record BeregningsAndel(AktivitetStatus aktivitetStatus, BigDecimal fastsattPrÅr, InntektsKilde inntektsKilde,
-                               Arbeidsforhold arbeidsforhold, BigDecimal dagsatsArbeidsgiver, BigDecimal dagsatsSøker) {}
+        record BeregningsAndel(AktivitetStatus aktivitetStatus, BigDecimal fastsattPrÅr, InntektsKilde inntektsKilde, Arbeidsforhold arbeidsforhold,
+                               BigDecimal dagsatsArbeidsgiver, BigDecimal dagsatsSøker) {
+        }
 
-        record Arbeidsforhold(String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal refusjonPrMnd) {}
+        record Arbeidsforhold(String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal refusjonPrMnd) {
+        }
 
         // Lar hjemmel være string til vi vet om vi skal ha det med
-        record BeregningAktivitetStatus(AktivitetStatus aktivitetStatus, String hjemmel) {}
+        record BeregningAktivitetStatus(AktivitetStatus aktivitetStatus, String hjemmel) {
+        }
+
 
         enum InntektsKilde {
             INNTEKTSMELDING,
@@ -116,7 +114,10 @@ public record FpSak(String saksnummer,
     }
 
     public enum BrukerRolle {
-        MOR, FAR, MEDMOR, UKJENT
+        MOR,
+        FAR,
+        MEDMOR,
+        UKJENT
     }
 
     public record Rettigheter(boolean aleneomsorg, boolean morUføretrygd, boolean annenForelderTilsvarendeRettEØS) {
@@ -125,8 +126,8 @@ public record FpSak(String saksnummer,
     @Override
     public String toString() {
         return "FpSak{" + "saksnummer='" + saksnummer + '\'' + ", familieHendelse=" + familieHendelse + ", avsluttet=" + avsluttet + ", vedtak="
-            + vedtak + ", aksjonspunkt=" + aksjonspunkt + ", søknader=" + søknader + ", brukerRolle=" + brukerRolle + ", rettigheter="
-            + rettigheter + '}';
+            + vedtak + ", aksjonspunkt=" + aksjonspunkt + ", søknader=" + søknader + ", brukerRolle=" + brukerRolle + ", rettigheter=" + rettigheter
+            + '}';
     }
 
     public record Gradering(Prosent prosent, UttakAktivitet uttakAktivitet) {
