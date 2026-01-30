@@ -381,7 +381,7 @@ public class HentSakTask implements ProsessTaskHandler {
             return null;
         }
         return new FpVedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()), tilDekningsgrad(vedtakDto.dekningsgrad()),
-            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()), tilBeregningsgrunnlag(vedtakDto.beregningsgrunnlag()),
+            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()), tilBeregningsgrunnlag(vedtakDto.beregningsgrunnlag()), List.of(),
             vedtakDto.tilkjentYtelse());
     }
 

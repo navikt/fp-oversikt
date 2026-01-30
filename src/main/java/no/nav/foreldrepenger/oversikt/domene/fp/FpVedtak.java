@@ -19,6 +19,7 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
                        @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad,
                        @JsonProperty("annenpartEøsUttaksperioder") List<UttakPeriodeAnnenpartEøs> annenpartEøsUttaksperioder,
                        @JsonProperty("beregningsgrunnlag") Beregningsgrunnlag beregningsgrunnlag,
+                       @JsonProperty("feriepenger") List<FeriepengeAndel> feriepenger,
                        @JsonProperty("tilkjentYtelse") List<TilkjentYtelsePeriode> tilkjentYtelse) {
 
     public no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak tilDto(BrukerRolleSak brukerRolle) {
