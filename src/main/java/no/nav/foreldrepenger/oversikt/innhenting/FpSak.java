@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelsePeriode;
+import no.nav.foreldrepenger.kontrakter.felles.kodeverk.AktivitetStatus;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
@@ -22,7 +22,8 @@ public record FpSak(String saksnummer, String aktørId, FamilieHendelse familieH
     }
 
     public record Vedtak(LocalDateTime vedtakstidspunkt, List<Uttaksperiode> uttaksperioder, Dekningsgrad dekningsgrad,
-                         List<UttaksperiodeAnnenpartEøs> annenpartEøsUttaksperioder, Beregningsgrunnlag beregningsgrunnlag, List<TilkjentYtelsePeriode> tilkjentYtelse) {
+                         List<UttaksperiodeAnnenpartEøs> annenpartEøsUttaksperioder, Beregningsgrunnlag beregningsgrunnlag,
+                         TilkjentYtelse tilkjentYtelse) {
     }
 
     public record UttaksperiodeAnnenpartEøs(LocalDate fom, LocalDate tom, Konto konto, BigDecimal trekkdager) {
@@ -63,6 +64,19 @@ public record FpSak(String saksnummer, String aktørId, FamilieHendelse familieH
             ANNET
         }
     }
+
+    record TilkjentYtelse(List<TilkjentYtelsePeriode> utbetalingsPerioder, List<FeriepengeAndel> feriepenger) {
+
+        record TilkjentYtelsePeriode(LocalDate fom, LocalDate tom, List<Andel> andeler) {
+            record Andel(AktivitetStatus aktivitetStatus, String arbeidsgiverIdent, String arbeidsgivernavn, Integer dagsats, boolean tilBruker,
+                         Double utbetalingsgrad) {
+            }
+        }
+
+        record FeriepengeAndel(LocalDate opptjeningsår, Integer årsbeløp, String arbeidsgiverIdent, boolean tilBruker) {
+        }
+    }
+
 
     record Beregningsgrunnlag(LocalDate skjæringstidspunkt, List<BeregningsAndel> beregningsAndeler,
                               List<BeregningAktivitetStatus> beregningAktivitetStatuser, BigDecimal grunnbeløp) {

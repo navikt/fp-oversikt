@@ -11,7 +11,6 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelsePeriode;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 
 public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
@@ -19,8 +18,7 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
                        @JsonProperty("dekningsgrad") Dekningsgrad dekningsgrad,
                        @JsonProperty("annenpartEøsUttaksperioder") List<UttakPeriodeAnnenpartEøs> annenpartEøsUttaksperioder,
                        @JsonProperty("beregningsgrunnlag") Beregningsgrunnlag beregningsgrunnlag,
-                       @JsonProperty("feriepenger") List<FeriepengeAndel> feriepenger,
-                       @JsonProperty("tilkjentYtelse") List<TilkjentYtelsePeriode> tilkjentYtelse) {
+                       @JsonProperty("tilkjentYtelse") TilkjentYtelse tilkjentYtelse) {
 
     public no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak tilDto(BrukerRolleSak brukerRolle) {
         var sortertUttaksperioder = Stream.ofNullable(perioder)
@@ -34,7 +32,9 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
             .sorted(Comparator.comparing(no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs::fom))
             .toList();
         var bgDto = beregningsgrunnlag == null ? null : beregningsgrunnlag.tilDto();
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak(compress(sortertUttaksperioder), sortertUttaksperioderAnnenpartEøs, bgDto, tilkjentYtelse);
+        var tilkjentYtelseDto = tilkjentYtelse == null ? null : tilkjentYtelse.tilDto();
+
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak(compress(sortertUttaksperioder), sortertUttaksperioderAnnenpartEøs, bgDto, tilkjentYtelseDto);
     }
 
     public boolean innvilget() {

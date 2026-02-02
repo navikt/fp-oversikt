@@ -10,7 +10,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
                                  List<BeregningAktivitetStatus> beregningAktivitetStatuser, BigDecimal grunnbeløp) {
 
     public record BeregningsAndel(AktivitetStatus aktivitetStatus, BigDecimal fastsattPrÅr, InntektsKilde inntektsKilde,
-                                  Arbeidsforhold arbeidsforhold) {
+                                  Arbeidsforhold arbeidsforhold, BigDecimal dagsatsArbeidsgiver, BigDecimal dagsatsSøker) {
     }
 
     public record Arbeidsforhold(String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal refusjonPrMnd) {
@@ -42,7 +42,8 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel mapAndel(BeregningsAndel andel) {
         return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel(mapAktivitetstatus(andel.aktivitetStatus),
-            andel.fastsattPrÅr, mapInntektskilde(andel.inntektsKilde), mapArbeidsforhold(andel.arbeidsforhold));
+            andel.fastsattPrÅr, mapInntektskilde(andel.inntektsKilde), mapArbeidsforhold(andel.arbeidsforhold), andel.dagsatsArbeidsgiver,
+            andel.dagsatsSøker);
     }
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.Arbeidsforhold mapArbeidsforhold(Arbeidsforhold arbeidsforhold) {

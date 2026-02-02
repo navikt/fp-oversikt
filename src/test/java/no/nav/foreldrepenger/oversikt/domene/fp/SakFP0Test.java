@@ -41,9 +41,9 @@ class SakFP0Test {
     @Test
     void verifiser_at_gjeldende_vedtak_er_det_med_senest_vedtakstidspunkt() {
         var uttaksperioderGjeldendeVedtak = List.of(uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO)));
-        var gjeldendeVedtak = new FpVedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI, null, null, List.of(), null);
+        var gjeldendeVedtak = new FpVedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI, null, null, null);
         var tidligereVedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO)),
-            uttaksperiode(now().plusMonths(1), now().plusMonths(2), innvilget(ZERO))), Dekningsgrad.HUNDRE, null, null, List.of(), null);
+            uttaksperiode(now().plusMonths(1), now().plusMonths(2), innvilget(ZERO))), Dekningsgrad.HUNDRE, null, null, null);
         var vedtakene = of(tidligereVedtak, gjeldendeVedtak);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, vedtakene, AktørId.dummy(), fh(), of(), of(), MEDMOR, of(), rettigheter(),
             false, LocalDateTime.now());
@@ -92,7 +92,7 @@ class SakFP0Test {
         var uttaksperioder = List.of(
             uttaksperiode(LocalDate.of(2024, 10, 10), LocalDate.of(2024, 10, 10).plusMonths(1).minusDays(5), innvilget(ZERO)),
             uttaksperiode(LocalDate.of(2024, 10, 10).plusMonths(1), LocalDate.of(2024, 10, 10).plusMonths(2), innvilget(ZERO)));
-        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, List.of(), null);
+        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, null);
 
         var vedtakDto = vedtak.tilDto(no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak.MOR);
 
@@ -102,7 +102,7 @@ class SakFP0Test {
 
     @Test
     void sjekk_at_mapping_av_vedtak_til_dto_ikke_kaster_exception_når_uttak_er_null() {
-        var vedtak = new FpVedtak(LocalDateTime.now(), null, Dekningsgrad.HUNDRE, null, null, List.of(), null);
+        var vedtak = new FpVedtak(LocalDateTime.now(), null, Dekningsgrad.HUNDRE, null, null, null);
 
         var vedtakDto = vedtak.tilDto(FAR_MEDMOR);
 
@@ -112,7 +112,7 @@ class SakFP0Test {
     @Test
     void kan_søke_om_endring_hvis_periode_innvilget() {
         var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(uttaksperiode(now(), now().plusMonths(1).minusDays(1), innvilget(ZERO)),
-            uttaksperiode(now().plusMonths(1), now().plusMonths(2), avslått())), Dekningsgrad.HUNDRE, null, null, List.of(), null);
+            uttaksperiode(now().plusMonths(1), now().plusMonths(2), avslått())), Dekningsgrad.HUNDRE, null, null, null);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(vedtak), null, fh(), of(), of(), MOR, of(), rettigheter(), false,
             LocalDateTime.now());
 
@@ -132,7 +132,7 @@ class SakFP0Test {
     @Test
     void kan_ikke_søke_om_endring_hvis_alle_periodene_avslått() {
         var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(uttaksperiode(now(), now().plusMonths(1).minusDays(1), avslått()),
-            uttaksperiode(now().plusMonths(1), now().plusMonths(2), avslått())), Dekningsgrad.HUNDRE, null, null, List.of(), null);
+            uttaksperiode(now().plusMonths(1), now().plusMonths(2), avslått())), Dekningsgrad.HUNDRE, null, null, null);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(vedtak), null, fh(), of(), of(), MOR, of(), rettigheter(), false,
             LocalDateTime.now());
 
@@ -214,7 +214,7 @@ class SakFP0Test {
     @Test
     void skal_mappe_rettigheter_begge_rett() {
         var uttaksperioder = List.of(uttaksperiode(now(), now(), innvilget(new Trekkdager(20))));
-        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, List.of(), null);
+        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, null);
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(false, false, false), false, LocalDateTime.now());
 
@@ -228,7 +228,7 @@ class SakFP0Test {
     void skal_mappe_rettigheter_aleneomsorg() {
         var uttaksperioder = List.of(uttaksperiode(now(), now(),
             new Uttaksperiode.Resultat(INNVILGET, ANNET, uttaksperiodeAktivitet(new Trekkdager(20), FORELDREPENGER), false)));
-        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, List.of(), null);
+        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, null);
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(true, false, false), false, LocalDateTime.now());
 
@@ -242,7 +242,7 @@ class SakFP0Test {
     void skal_mappe_rettigheter_enerett() {
         var uttaksperioder = List.of(uttaksperiode(now(), now(),
             new Uttaksperiode.Resultat(INNVILGET, ANNET, uttaksperiodeAktivitet(new Trekkdager(20), FORELDREPENGER), false)));
-        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, List.of(), null);
+        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, null);
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(false, true, true), false, LocalDateTime.now());
 
@@ -266,7 +266,7 @@ class SakFP0Test {
         var uttaksperioder = List.of(
             uttaksperiode(now(), now(), new Uttaksperiode.Resultat(INNVILGET, ANNET, uttaksperiodeAktivitet(new Trekkdager(20), MØDREKVOTE), false)));
 
-        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, List.of(), null);
+        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, null);
         var sak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, Set.of(vedtak), null, fh(), of(), of(), MOR, of(),
             new Rettigheter(true, false, false), false, LocalDateTime.now());
 

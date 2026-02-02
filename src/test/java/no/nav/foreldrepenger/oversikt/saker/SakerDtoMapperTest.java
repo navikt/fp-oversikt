@@ -130,7 +130,7 @@ class SakerDtoMapperTest {
 
     static SakFP0 fpSak(AktørId aktørId) {
         var dekningsgrad = Dekningsgrad.HUNDRE;
-        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(), dekningsgrad, null, null, List.of(), null);
+        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(), dekningsgrad, null, null, null);
         return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(vedtak), AktørId.dummy(), fh(), Set.of(), Set.of(
             new FpSøknad(SøknadStatus.MOTTATT, now(),
                 Set.of(new FpSøknadsperiode(LocalDate.now(), LocalDate.now(), Konto.MØDREKVOTE, null, null, null, null, null, false, null)),

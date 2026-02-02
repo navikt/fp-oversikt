@@ -38,6 +38,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.OppholdÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.OverføringÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
+import no.nav.foreldrepenger.oversikt.domene.fp.TilkjentYtelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
@@ -381,8 +382,8 @@ public class HentSakTask implements ProsessTaskHandler {
             return null;
         }
         return new FpVedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()), tilDekningsgrad(vedtakDto.dekningsgrad()),
-            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()), tilBeregningsgrunnlag(vedtakDto.beregningsgrunnlag()), List.of(),
-            vedtakDto.tilkjentYtelse());
+            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()), tilBeregningsgrunnlag(vedtakDto.beregningsgrunnlag()),
+            tilTilkjentYtelse(vedtakDto.tilkjentYtelse()));
     }
 
     private static Beregningsgrunnlag tilBeregningsgrunnlag(FpSak.Beregningsgrunnlag beregningsgrunnlag) {
@@ -402,6 +403,39 @@ public class HentSakTask implements ProsessTaskHandler {
         return new Beregningsgrunnlag(beregningsgrunnlag.skjæringstidspunkt(), andeler, statuser, beregningsgrunnlag.grunnbeløp());
     }
 
+    private static TilkjentYtelse tilTilkjentYtelse(FpSak.TilkjentYtelse tilkjentYtelse) {
+        if (tilkjentYtelse == null) {
+            return null;
+        }
+        var utbetalingsPerioder =
+            tilkjentYtelse.utbetalingsPerioder() == null ? List.<TilkjentYtelse.TilkjentYtelsePeriode>of() : tilkjentYtelse.utbetalingsPerioder()
+                .stream()
+                .map(HentSakTask::tilTilkjentYtelsePeriode)
+                .toList();
+        var feriepenger = tilkjentYtelse.feriepenger() == null ? List.<TilkjentYtelse.FeriepengeAndel>of() : tilkjentYtelse.feriepenger()
+            .stream()
+            .map(HentSakTask::tilFeriepengeAndel)
+            .toList();
+        return new TilkjentYtelse(utbetalingsPerioder, feriepenger);
+    }
+
+    private static TilkjentYtelse.TilkjentYtelsePeriode tilTilkjentYtelsePeriode(FpSak.TilkjentYtelse.TilkjentYtelsePeriode periode) {
+        var andeler = periode.andeler() == null ? List.<TilkjentYtelse.TilkjentYtelsePeriode.Andel>of() : periode.andeler()
+            .stream()
+            .map(HentSakTask::tilTilkjentYtelseAndel)
+            .toList();
+        return new TilkjentYtelse.TilkjentYtelsePeriode(periode.fom(), periode.tom(), andeler);
+    }
+
+    private static TilkjentYtelse.TilkjentYtelsePeriode.Andel tilTilkjentYtelseAndel(FpSak.TilkjentYtelse.TilkjentYtelsePeriode.Andel andel) {
+        return new TilkjentYtelse.TilkjentYtelsePeriode.Andel(andel.aktivitetStatus(), andel.arbeidsgiverIdent(), andel.arbeidsgivernavn(),
+            andel.dagsats(), andel.tilBruker(), andel.utbetalingsgrad());
+    }
+
+    private static TilkjentYtelse.FeriepengeAndel tilFeriepengeAndel(FpSak.TilkjentYtelse.FeriepengeAndel andel) {
+        return new TilkjentYtelse.FeriepengeAndel(andel.opptjeningsår(), andel.årsbeløp(), andel.arbeidsgiverIdent(), andel.tilBruker());
+    }
+
     private static Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(FpSak.Beregningsgrunnlag.BeregningAktivitetStatus statusMedHjemmelDto) {
         return new Beregningsgrunnlag.BeregningAktivitetStatus(mapAktivitetstatus(statusMedHjemmelDto.aktivitetStatus()),
             statusMedHjemmelDto.hjemmel());
@@ -409,7 +443,8 @@ public class HentSakTask implements ProsessTaskHandler {
 
     private static Beregningsgrunnlag.BeregningsAndel mapAndel(FpSak.Beregningsgrunnlag.BeregningsAndel andelDto) {
         return new Beregningsgrunnlag.BeregningsAndel(mapAktivitetstatus(andelDto.aktivitetStatus()), andelDto.fastsattPrÅr(),
-            mapInntektkilde(andelDto.inntektsKilde()), mapArbeidsforhold(andelDto.arbeidsforhold()));
+            mapInntektkilde(andelDto.inntektsKilde()), mapArbeidsforhold(andelDto.arbeidsforhold()), andelDto.dagsatsArbeidsgiver(),
+            andelDto.dagsatsSøker());
     }
 
     private static Beregningsgrunnlag.Arbeidsforhold mapArbeidsforhold(FpSak.Beregningsgrunnlag.Arbeidsforhold arbeidsforholdDto) {
