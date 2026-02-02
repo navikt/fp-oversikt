@@ -21,10 +21,10 @@
         <openapi-spec-utils.version>2.1.0</openapi-spec-utils.version>
         <io.confluent.version>8.1.1</io.confluent.version>
 
-        <felles.version>7.6.12</felles.version>
+        <felles.version>7.6.14</felles.version>
         <prosesstask.version>5.2.2</prosesstask.version>
-        <fp-kontrakter.version>9.4.23</fp-kontrakter.version>
-        <fp-tidsserie.version>2.7.3</fp-tidsserie.version>
+        <fp-kontrakter.version>9.4.25</fp-kontrakter.version>
+        <fp-tidsserie.version>2.7.4</fp-tidsserie.version>
         <mittnav-varsler.version>2.1.1</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>1.1.6</teamdokumenthandtering-avro-schemas.version>
     </properties>
