@@ -155,6 +155,10 @@
             <groupId>org.eclipse.jetty.ee11</groupId>
             <artifactId>jetty-ee11-cdi</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.eclipse.jetty.ee11</groupId>
+            <artifactId>jetty-ee11-plus</artifactId>
+        </dependency>
 
         <!-- Kafka -->
         <dependency>
