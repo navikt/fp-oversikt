@@ -2,24 +2,27 @@ package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import no.nav.foreldrepenger.kontrakter.felles.kodeverk.AktivitetStatus;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
-public record TilkjentYtelse(List<TilkjentYtelsePeriode> utbetalingsPerioder, List<FeriepengeAndel> feriepenger) {
+public record TilkjentYtelse(List<TilkjentYtelsePeriode> utbetalingsperioder, List<FeriepengeAndel> feriepenger) {
 
     public record TilkjentYtelsePeriode(LocalDate fom, LocalDate tom, List<Andel> andeler) {
-        public record Andel(AktivitetStatus aktivitetStatus, String arbeidsgiverIdent, String arbeidsgivernavn, Integer dagsats, boolean tilBruker,
-                     Double utbetalingsgrad) {
+        public record Andel(AktivitetStatus aktivitetStatus, String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal dagsats, boolean tilBruker,
+                            BigDecimal utbetalingsgrad) {
         }
     }
 
-    public record FeriepengeAndel(LocalDate opptjeningsår, Integer årsbeløp, String arbeidsgiverIdent, boolean tilBruker) {
+    public record FeriepengeAndel(LocalDate opptjeningsår, BigDecimal årsbeløp, String arbeidsgiverIdent, boolean tilBruker) {
     }
 
     public no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse tilDto() {
-        var utbetalingsperioderMappet = utbetalingsPerioder == null ? List.<no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.TilkjentYtelsePeriode>of()
-            : utbetalingsPerioder.stream().map(this::mapPeriode).toList();
-        var feriepengerMappet = feriepenger == null ? List.<no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.FeriepengeAndel>of()
+        List<no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.TilkjentYtelsePeriode> utbetalingsperioderMappet = utbetalingsperioder == null
+            ? List.of()
+            : utbetalingsperioder.stream().map(this::mapPeriode).toList();
+        var feriepengerMappet = feriepenger == null
+            ? List.<no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.FeriepengeAndel>of()
             : feriepenger.stream().map(this::mapFeriepengeAndel).toList();
 
         return new no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse(utbetalingsperioderMappet, feriepengerMappet);
