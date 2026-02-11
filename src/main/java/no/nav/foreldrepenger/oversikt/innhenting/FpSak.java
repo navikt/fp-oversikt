@@ -68,12 +68,12 @@ public record FpSak(String saksnummer, String aktørId, FamilieHendelse familieH
     record TilkjentYtelse(List<TilkjentYtelsePeriode> utbetalingsPerioder, List<FeriepengeAndel> feriepenger) {
 
         record TilkjentYtelsePeriode(LocalDate fom, LocalDate tom, List<Andel> andeler) {
-            record Andel(AktivitetStatus aktivitetStatus, String arbeidsgiverIdent, String arbeidsgivernavn, Integer dagsats, boolean tilBruker,
-                         Double utbetalingsgrad) {
+            record Andel(AktivitetStatus aktivitetStatus, String arbeidsgiverIdent, String arbeidsgivernavn, BigDecimal dagsats, boolean tilBruker,
+                         BigDecimal utbetalingsgrad) {
             }
         }
 
-        record FeriepengeAndel(LocalDate opptjeningsår, Integer årsbeløp, String arbeidsgiverIdent, boolean tilBruker) {
+        record FeriepengeAndel(LocalDate opptjeningsår, BigDecimal årsbeløp, String arbeidsgiverIdent, boolean tilBruker) {
         }
     }
 
