@@ -52,7 +52,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel mapAndel(BeregningsAndel andel) {
         return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel(andel.aktivitetStatus.tilDto(),
-            andel.fastsattPrÅr, andel.inntektsKilde != null ? andel.inntektsKilde.tilDto() : null, mapArbeidsforhold(andel.arbeidsforhold), andel.dagsatsArbeidsgiver,
+            andel.fastsattPrÅr, andel.inntektsKilde.tilDto(), mapArbeidsforhold(andel.arbeidsforhold), andel.dagsatsArbeidsgiver,
             andel.dagsatsSøker);
     }
 
