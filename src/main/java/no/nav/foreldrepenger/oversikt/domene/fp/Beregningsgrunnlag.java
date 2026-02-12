@@ -24,7 +24,17 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
         A_INNTEKT,
         VEDTAK_ANNEN_YTELSE,
         SKJØNNSFASTSATT,
-        PENSJONSGIVENDE_INNTEKT,
+        PENSJONSGIVENDE_INNTEKT;
+
+        public Inntektskilde tilDto() {
+            return switch (this) {
+                case INNTEKTSMELDING -> Inntektskilde.INNTEKTSMELDING;
+                case A_INNTEKT -> Inntektskilde.A_INNTEKT;
+                case VEDTAK_ANNEN_YTELSE -> Inntektskilde.VEDTAK_ANNEN_YTELSE;
+                case SKJØNNSFASTSATT -> Inntektskilde.SKJØNNSFASTSATT;
+                case PENSJONSGIVENDE_INNTEKT -> Inntektskilde.PGI;
+            };
+        }
     }
 
     public no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag tilDto() {
@@ -42,7 +52,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel mapAndel(BeregningsAndel andel) {
         return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel(andel.aktivitetStatus.tilDto(),
-            andel.fastsattPrÅr, mapInntektskilde(andel.inntektsKilde), mapArbeidsforhold(andel.arbeidsforhold), andel.dagsatsArbeidsgiver,
+            andel.fastsattPrÅr, andel.inntektsKilde != null ? andel.inntektsKilde.tilDto() : null, mapArbeidsforhold(andel.arbeidsforhold), andel.dagsatsArbeidsgiver,
             andel.dagsatsSøker);
     }
 
@@ -54,15 +64,6 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
             arbeidsforhold.arbeidsgivernavn, arbeidsforhold.refusjonPrMnd);
     }
 
-    private Inntektskilde mapInntektskilde(InntektsKilde inntektsKilde) {
-        return switch (inntektsKilde) {
-            case INNTEKTSMELDING -> Inntektskilde.INNTEKTSMELDING;
-            case A_INNTEKT -> Inntektskilde.A_INNTEKT;
-            case VEDTAK_ANNEN_YTELSE -> Inntektskilde.VEDTAK_ANNEN_YTELSE;
-            case SKJØNNSFASTSATT -> Inntektskilde.SKJØNNSFASTSATT;
-            case PENSJONSGIVENDE_INNTEKT -> Inntektskilde.PGI;
-        };
-    }
 
 }
 
