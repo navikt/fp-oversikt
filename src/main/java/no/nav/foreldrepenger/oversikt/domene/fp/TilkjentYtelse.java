@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
-import no.nav.foreldrepenger.kontrakter.felles.kodeverk.AktivitetStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -36,7 +35,7 @@ public record TilkjentYtelse(List<TilkjentYtelsePeriode> utbetalingsperioder, Li
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.TilkjentYtelsePeriode.Andel mapAndel(TilkjentYtelsePeriode.Andel andel) {
         return new no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.TilkjentYtelsePeriode.Andel(
-            andel.aktivitetStatus(), andel.arbeidsgiverIdent(), andel.arbeidsgivernavn(), andel.dagsats(), andel.tilBruker(), andel.utbetalingsgrad());
+            andel.aktivitetStatus().tilDto(), andel.arbeidsgiverIdent(), andel.arbeidsgivernavn(), andel.dagsats(), andel.tilBruker(), andel.utbetalingsgrad());
     }
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.FeriepengeAndel mapFeriepengeAndel(FeriepengeAndel andel) {

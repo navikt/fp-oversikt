@@ -58,6 +58,7 @@ import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
 
+
 @ApplicationScoped
 @ProsessTask(value = "hent.sak", prioritet = 2)
 public class HentSakTask implements ProsessTaskHandler {
@@ -428,7 +429,7 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static TilkjentYtelse.TilkjentYtelsePeriode.Andel tilTilkjentYtelseAndel(FpSak.TilkjentYtelse.TilkjentYtelsePeriode.Andel andel) {
-        return new TilkjentYtelse.TilkjentYtelsePeriode.Andel(andel.aktivitetStatus(), andel.arbeidsgiverIdent(), andel.arbeidsgivernavn(),
+        return new TilkjentYtelse.TilkjentYtelsePeriode.Andel(mapAktivitetstatus(andel.aktivitetStatus()), andel.arbeidsgiverIdent(), andel.arbeidsgivernavn(),
             andel.dagsats(), andel.tilBruker(), andel.utbetalingsgrad());
     }
 
@@ -465,7 +466,7 @@ public class HentSakTask implements ProsessTaskHandler {
         };
     }
 
-    private static AktivitetStatus mapAktivitetstatus(FpSak.Beregningsgrunnlag.AktivitetStatus aktivitetStatus) {
+    private static AktivitetStatus mapAktivitetstatus(no.nav.foreldrepenger.oversikt.innhenting.AktivitetStatus aktivitetStatus) {
         return switch (aktivitetStatus) {
             case ARBEIDSAVKLARINGSPENGER -> AktivitetStatus.ARBEIDSAVKLARINGSPENGER;
             case ARBEIDSTAKER -> AktivitetStatus.ARBEIDSTAKER;

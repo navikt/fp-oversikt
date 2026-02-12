@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 
-import no.nav.foreldrepenger.kontrakter.felles.kodeverk.AktivitetStatus;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
@@ -101,20 +100,6 @@ public record FpSak(String saksnummer, String aktørId, FamilieHendelse familieH
             PENSJONSGIVENDE_INNTEKT,
         }
 
-        enum AktivitetStatus {
-            ARBEIDSAVKLARINGSPENGER,
-            ARBEIDSTAKER,
-            DAGPENGER,
-            FRILANSER,
-            MILITÆR_ELLER_SIVIL,
-            SELVSTENDIG_NÆRINGSDRIVENDE,
-            KOMBINERT_AT_FL,
-            KOMBINERT_AT_SN,
-            KOMBINERT_FL_SN,
-            KOMBINERT_AT_FL_SN,
-            BRUKERS_ANDEL,
-            KUN_YTELSE,
-        }
     }
 
     public record Søknad(SøknadStatus status, LocalDateTime mottattTidspunkt, Set<Periode> perioder, Dekningsgrad dekningsgrad,
