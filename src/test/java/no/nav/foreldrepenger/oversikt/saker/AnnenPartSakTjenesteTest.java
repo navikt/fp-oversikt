@@ -75,9 +75,10 @@ class AnnenPartSakTjenesteTest {
         var omsorgsovertakelse = LocalDate.now().plusWeeks(1);
         var dekningsgrad = Dekningsgrad.HUNDRE;
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(), dekningsgrad, false);
-        var annenPartsSak = new SakFP0(Saksnummer.dummy(), aktørIdAnnenPart, true, Set.of(new FpVedtak(now(), List.of(), dekningsgrad, null, null)), aktørIdSøker,
-            new FamilieHendelse(fødselsdato, null, 1, omsorgsovertakelse), Set.of(), Set.of(søknad), BrukerRolle.MOR,
-            Set.of(), new Rettigheter(false, false, false), false, now());
+        var annenPartsSak = new SakFP0(Saksnummer.dummy(), aktørIdAnnenPart, true,
+            Set.of(new FpVedtak(now(), List.of(), dekningsgrad, null, null, null)), aktørIdSøker,
+            new FamilieHendelse(fødselsdato, null, 1, omsorgsovertakelse), Set.of(), Set.of(søknad), BrukerRolle.MOR, Set.of(),
+            new Rettigheter(false, false, false), false, now());
         repository.lagre(annenPartsSak);
         var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
         var annenPartSak = tjeneste.hentFor(aktørIdSøker, aktørIdAnnenPart, null, omsorgsovertakelse);
@@ -251,11 +252,11 @@ class AnnenPartSakTjenesteTest {
                                        LocalDate termindato,
                                        boolean aleneomsorg) {
         var dekningsgrad = Dekningsgrad.HUNDRE;
-        var vedtak = new FpVedtak(vedtakstidspunkt, List.of(), dekningsgrad, null, null);
+        var vedtak = new FpVedtak(vedtakstidspunkt, List.of(), dekningsgrad, null, null, null);
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), Set.of(), dekningsgrad, false);
-        return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(vedtak), annenPartAktørId,
-            new FamilieHendelse(fødselsdato, termindato, 1, null), Set.of(), Set.of(søknad), BrukerRolle.MOR,
-            aktørIdBarn == null ? Set.of() : Set.of(aktørIdBarn), new Rettigheter(aleneomsorg, false, false), false, now());
+        return new SakFP0(Saksnummer.dummy(), aktørId, true, Set.of(vedtak), annenPartAktørId, new FamilieHendelse(fødselsdato, termindato, 1, null),
+            Set.of(), Set.of(søknad), BrukerRolle.MOR, aktørIdBarn == null ? Set.of() : Set.of(aktørIdBarn),
+            new Rettigheter(aleneomsorg, false, false), false, now());
     }
 
     private static SakFP0 sakUtenVedtak(AktørId aktørId,
@@ -265,8 +266,8 @@ class AnnenPartSakTjenesteTest {
                                         int antallBarn,
                                         Set<FpSøknadsperiode> perioder) {
         var søknad = new FpSøknad(SøknadStatus.BEHANDLET, now(), perioder, dekningsgrad, false);
-        return new SakFP0(Saksnummer.dummy(), aktørId, false, Set.of(), annenPartAktørId,
-            new FamilieHendelse(null, termindato, antallBarn, null), Set.of(), Set.of(søknad), BrukerRolle.MOR, Set.of(), new Rettigheter(false, false, false), false, now());
+        return new SakFP0(Saksnummer.dummy(), aktørId, false, Set.of(), annenPartAktørId, new FamilieHendelse(null, termindato, antallBarn, null),
+            Set.of(), Set.of(søknad), BrukerRolle.MOR, Set.of(), new Rettigheter(false, false, false), false, now());
     }
 
 }

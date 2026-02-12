@@ -38,6 +38,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.OppholdÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.OverføringÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
+import no.nav.foreldrepenger.oversikt.domene.fp.TilkjentYtelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
@@ -56,6 +57,7 @@ import no.nav.foreldrepenger.oversikt.domene.svp.TilretteleggingType;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTask;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskHandler;
+
 
 @ApplicationScoped
 @ProsessTask(value = "hent.sak", prioritet = 2)
@@ -98,16 +100,18 @@ public class HentSakTask implements ProsessTaskHandler {
             var søknader = fpsak.søknader().stream().map(HentSakTask::tilFpSøknad).collect(Collectors.toSet());
             var brukerRolle = tilBrukerRolle(fpsak.brukerRolle());
             var fødteBarn = tilFødteBarn(fpsak.fødteBarn());
-            return new SakFP0(saksnummer, aktørId, sakDto.avsluttet(), tilFpVedtak(fpsak.vedtak()), annenPart, familieHendelse, aksjonspunkt, søknader,
-                brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()), fpsak.ønskerJustertUttakVedFødsel(), oppdatertTidspunkt);
+            return new SakFP0(saksnummer, aktørId, sakDto.avsluttet(), tilFpVedtak(fpsak.vedtak()), annenPart, familieHendelse, aksjonspunkt,
+                søknader, brukerRolle, fødteBarn, tilRettigheter(fpsak.rettigheter()), fpsak.ønskerJustertUttakVedFødsel(), oppdatertTidspunkt);
         }
         if (sakDto instanceof SvpSak svpSak) {
             var søknader = svpSak.søknader().stream().map(HentSakTask::tilSvpSøknad).collect(Collectors.toSet());
-            return new SakSVP0(saksnummer, aktørId, sakDto.avsluttet(), familieHendelse, aksjonspunkt, søknader, tilSvpVedtak(svpSak.vedtak()), oppdatertTidspunkt);
+            return new SakSVP0(saksnummer, aktørId, sakDto.avsluttet(), familieHendelse, aksjonspunkt, søknader, tilSvpVedtak(svpSak.vedtak()),
+                oppdatertTidspunkt);
         }
         if (sakDto instanceof EsSak esSak) {
             var søknader = esSak.søknader().stream().map(HentSakTask::tilEsSøknad).collect(Collectors.toSet());
-            return new SakES0(saksnummer, aktørId, sakDto.avsluttet(), familieHendelse, aksjonspunkt, søknader,tilEsVedtak(esSak.vedtak()), oppdatertTidspunkt);
+            return new SakES0(saksnummer, aktørId, sakDto.avsluttet(), familieHendelse, aksjonspunkt, søknader, tilEsVedtak(esSak.vedtak()),
+                oppdatertTidspunkt);
         }
 
         throw new IllegalStateException("Hentet sak er null og kan ikke bli mappet!");
@@ -159,10 +163,7 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<EsVedtak> tilEsVedtak(Set<EsSak.Vedtak> vedtak) {
-        return Stream.ofNullable(vedtak)
-            .flatMap(Collection::stream)
-            .map(v -> new EsVedtak(v.vedtakstidspunkt()))
-            .collect(Collectors.toSet());
+        return Stream.ofNullable(vedtak).flatMap(Collection::stream).map(v -> new EsVedtak(v.vedtakstidspunkt())).collect(Collectors.toSet());
     }
 
     private static Rettigheter tilRettigheter(FpSak.Rettigheter rettigheter) {
@@ -194,23 +195,22 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<Tilrettelegging> tilTilrettelegginger(Set<SvpSak.Søknad.Tilrettelegging> tilrettelegginger) {
-        return tilrettelegginger.stream().map(t -> new Tilrettelegging(tilAktivitet(t.aktivitet()), t.behovFom(), t.risikoFaktorer(), t.tiltak(),
-            t.perioder().stream().map(HentSakTask::tilTilrettleggingPeriode).collect(Collectors.toSet()),
-            t.oppholdsperioder().stream().map(HentSakTask::tilOppholdPeriode).collect(Collectors.toSet())))
+        return tilrettelegginger.stream()
+            .map(t -> new Tilrettelegging(tilAktivitet(t.aktivitet()), t.behovFom(), t.risikoFaktorer(), t.tiltak(),
+                t.perioder().stream().map(HentSakTask::tilTilrettleggingPeriode).collect(Collectors.toSet()),
+                t.oppholdsperioder().stream().map(HentSakTask::tilOppholdPeriode).collect(Collectors.toSet())))
             .collect(Collectors.toSet());
     }
 
     private static OppholdPeriode tilOppholdPeriode(SvpSak.OppholdPeriode oppholdPeriode) {
-        return new OppholdPeriode(oppholdPeriode.fom(), oppholdPeriode.tom(),
-            switch (oppholdPeriode.årsak()) {
+        return new OppholdPeriode(oppholdPeriode.fom(), oppholdPeriode.tom(), switch (oppholdPeriode.årsak()) {
             case FERIE -> OppholdPeriode.Årsak.FERIE;
             case SYKEPENGER -> OppholdPeriode.Årsak.SYKEPENGER;
-            },
-            switch (oppholdPeriode.kilde()) {
+        }, switch (oppholdPeriode.kilde()) {
             case SAKSBEHANDLER -> OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
             case INNTEKTSMELDING -> OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
             case SØKNAD -> OppholdPeriode.OppholdKilde.SØKNAD;
-            });
+        });
     }
 
     private static TilretteleggingPeriode tilTilrettleggingPeriode(SvpSak.Søknad.Tilrettelegging.Periode periode) {
@@ -317,7 +317,9 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Konto tilKonto(no.nav.foreldrepenger.oversikt.innhenting.Konto konto) {
-        if (konto == null) return null;
+        if (konto == null) {
+            return null;
+        }
         return switch (konto) {
             case FORELDREPENGER -> Konto.FORELDREPENGER;
             case MØDREKVOTE -> Konto.MØDREKVOTE;
@@ -328,9 +330,7 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<Aksjonspunkt> tilAksjonspunkt(Set<Sak.Aksjonspunkt> aksjonspunkt) {
-        return Stream.ofNullable(aksjonspunkt)
-            .flatMap(Collection::stream)
-            .map(a -> {
+        return Stream.ofNullable(aksjonspunkt).flatMap(Collection::stream).map(a -> {
             var venteårsak = a.venteårsak() == null ? null : switch (a.venteårsak()) {
                 case ANKE_VENTER_PÅ_MERKNADER_FRA_BRUKER -> Aksjonspunkt.Venteårsak.ANKE_VENTER_PÅ_MERKNADER_FRA_BRUKER;
                 case AVVENT_DOKUMTANSJON -> Aksjonspunkt.Venteårsak.AVVENT_DOKUMTANSJON;
@@ -375,10 +375,7 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static Set<FpVedtak> tilFpVedtak(Set<FpSak.Vedtak> vedtakene) {
-        return Stream.ofNullable(vedtakene)
-            .flatMap(Collection::stream)
-            .map(HentSakTask::tilFpVedtak)
-            .collect(Collectors.toSet());
+        return Stream.ofNullable(vedtakene).flatMap(Collection::stream).map(HentSakTask::tilFpVedtak).collect(Collectors.toSet());
     }
 
     private static FpVedtak tilFpVedtak(FpSak.Vedtak vedtakDto) {
@@ -386,32 +383,77 @@ public class HentSakTask implements ProsessTaskHandler {
             return null;
         }
         return new FpVedtak(vedtakDto.vedtakstidspunkt(), tilUttaksperiode(vedtakDto.uttaksperioder()), tilDekningsgrad(vedtakDto.dekningsgrad()),
-            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()), tilBeregningsgrunnlag(vedtakDto.beregningsgrunnlag()));
+            tilUttaksperiodeAnnenpartEøs(vedtakDto.annenpartEøsUttaksperioder()), tilBeregningsgrunnlag(vedtakDto.beregningsgrunnlag()),
+            tilTilkjentYtelse(vedtakDto.tilkjentYtelse()));
     }
 
     private static Beregningsgrunnlag tilBeregningsgrunnlag(FpSak.Beregningsgrunnlag beregningsgrunnlag) {
         if (beregningsgrunnlag == null) {
             return null;
         }
-        List<Beregningsgrunnlag.BeregningsAndel> andeler = beregningsgrunnlag.beregningsAndeler() == null ? List.of() : beregningsgrunnlag.beregningsAndeler().stream().map(HentSakTask::mapAndel).toList();
-        List<Beregningsgrunnlag.BeregningAktivitetStatus> statuser = beregningsgrunnlag.beregningAktivitetStatuser() == null ? List.of() : beregningsgrunnlag.beregningAktivitetStatuser().stream().map(HentSakTask::mapStatusMedHjemmel).toList();
+        List<Beregningsgrunnlag.BeregningsAndel> andeler =
+            beregningsgrunnlag.beregningsAndeler() == null ? List.of() : beregningsgrunnlag.beregningsAndeler()
+                .stream()
+                .map(HentSakTask::mapAndel)
+                .toList();
+        List<Beregningsgrunnlag.BeregningAktivitetStatus> statuser =
+            beregningsgrunnlag.beregningAktivitetStatuser() == null ? List.of() : beregningsgrunnlag.beregningAktivitetStatuser()
+                .stream()
+                .map(HentSakTask::mapStatusMedHjemmel)
+                .toList();
         return new Beregningsgrunnlag(beregningsgrunnlag.skjæringstidspunkt(), andeler, statuser, beregningsgrunnlag.grunnbeløp());
     }
 
+    private static TilkjentYtelse tilTilkjentYtelse(FpSak.TilkjentYtelse tilkjentYtelse) {
+        if (tilkjentYtelse == null) {
+            return null;
+        }
+        var utbetalingsPerioder =
+            tilkjentYtelse.utbetalingsPerioder() == null ? List.<TilkjentYtelse.TilkjentYtelsePeriode>of() : tilkjentYtelse.utbetalingsPerioder()
+                .stream()
+                .map(HentSakTask::tilTilkjentYtelsePeriode)
+                .toList();
+        var feriepenger = tilkjentYtelse.feriepenger() == null ? List.<TilkjentYtelse.FeriepengeAndel>of() : tilkjentYtelse.feriepenger()
+            .stream()
+            .map(HentSakTask::tilFeriepengeAndel)
+            .toList();
+        return new TilkjentYtelse(utbetalingsPerioder, feriepenger);
+    }
+
+    private static TilkjentYtelse.TilkjentYtelsePeriode tilTilkjentYtelsePeriode(FpSak.TilkjentYtelse.TilkjentYtelsePeriode periode) {
+        var andeler = periode.andeler() == null ? List.<TilkjentYtelse.TilkjentYtelsePeriode.Andel>of() : periode.andeler()
+            .stream()
+            .map(HentSakTask::tilTilkjentYtelseAndel)
+            .toList();
+        return new TilkjentYtelse.TilkjentYtelsePeriode(periode.fom(), periode.tom(), andeler);
+    }
+
+    private static TilkjentYtelse.TilkjentYtelsePeriode.Andel tilTilkjentYtelseAndel(FpSak.TilkjentYtelse.TilkjentYtelsePeriode.Andel andel) {
+        return new TilkjentYtelse.TilkjentYtelsePeriode.Andel(mapAktivitetstatus(andel.aktivitetStatus()), andel.arbeidsgiverIdent(), andel.arbeidsgivernavn(),
+            andel.dagsats(), andel.tilBruker(), andel.utbetalingsgrad());
+    }
+
+    private static TilkjentYtelse.FeriepengeAndel tilFeriepengeAndel(FpSak.TilkjentYtelse.FeriepengeAndel andel) {
+        return new TilkjentYtelse.FeriepengeAndel(andel.opptjeningsår(), andel.årsbeløp(), andel.arbeidsgiverIdent(), andel.tilBruker());
+    }
+
     private static Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(FpSak.Beregningsgrunnlag.BeregningAktivitetStatus statusMedHjemmelDto) {
-        return new Beregningsgrunnlag.BeregningAktivitetStatus(mapAktivitetstatus(statusMedHjemmelDto.aktivitetStatus()), statusMedHjemmelDto.hjemmel());
+        return new Beregningsgrunnlag.BeregningAktivitetStatus(mapAktivitetstatus(statusMedHjemmelDto.aktivitetStatus()),
+            statusMedHjemmelDto.hjemmel());
     }
 
     private static Beregningsgrunnlag.BeregningsAndel mapAndel(FpSak.Beregningsgrunnlag.BeregningsAndel andelDto) {
-        return new Beregningsgrunnlag.BeregningsAndel(mapAktivitetstatus(andelDto.aktivitetStatus()), andelDto.fastsattPrÅr(), mapInntektkilde(andelDto.inntektsKilde()),
-            mapArbeidsforhold(andelDto.arbeidsforhold()), andelDto.dagsatsArbeidsgiver(), andelDto.dagsatsSøker());
+        return new Beregningsgrunnlag.BeregningsAndel(mapAktivitetstatus(andelDto.aktivitetStatus()), andelDto.fastsattPrÅr(),
+            mapInntektkilde(andelDto.inntektsKilde()), mapArbeidsforhold(andelDto.arbeidsforhold()), andelDto.dagsatsArbeidsgiver(),
+            andelDto.dagsatsSøker());
     }
 
     private static Beregningsgrunnlag.Arbeidsforhold mapArbeidsforhold(FpSak.Beregningsgrunnlag.Arbeidsforhold arbeidsforholdDto) {
         if (arbeidsforholdDto == null) {
             return null;
         }
-        return new Beregningsgrunnlag.Arbeidsforhold(arbeidsforholdDto.arbeidsgiverIdent(), arbeidsforholdDto.arbeidsgivernavn(), arbeidsforholdDto.refusjonPrMnd());
+        return new Beregningsgrunnlag.Arbeidsforhold(arbeidsforholdDto.arbeidsgiverIdent(), arbeidsforholdDto.arbeidsgivernavn(),
+            arbeidsforholdDto.refusjonPrMnd());
     }
 
     private static Beregningsgrunnlag.InntektsKilde mapInntektkilde(FpSak.Beregningsgrunnlag.InntektsKilde inntektsKilde) {
@@ -424,7 +466,7 @@ public class HentSakTask implements ProsessTaskHandler {
         };
     }
 
-    private static AktivitetStatus mapAktivitetstatus(FpSak.Beregningsgrunnlag.AktivitetStatus aktivitetStatus) {
+    private static AktivitetStatus mapAktivitetstatus(no.nav.foreldrepenger.oversikt.innhenting.AktivitetStatus aktivitetStatus) {
         return switch (aktivitetStatus) {
             case ARBEIDSAVKLARINGSPENGER -> AktivitetStatus.ARBEIDSAVKLARINGSPENGER;
             case ARBEIDSTAKER -> AktivitetStatus.ARBEIDSTAKER;
@@ -452,10 +494,7 @@ public class HentSakTask implements ProsessTaskHandler {
     }
 
     private static List<Uttaksperiode> tilUttaksperiode(List<FpSak.Uttaksperiode> perioder) {
-        return Stream.ofNullable(perioder)
-            .flatMap(Collection::stream)
-            .map(HentSakTask::tilUttaksperiode)
-            .toList();
+        return Stream.ofNullable(perioder).flatMap(Collection::stream).map(HentSakTask::tilUttaksperiode).toList();
     }
 
     private static Uttaksperiode tilUttaksperiode(FpSak.Uttaksperiode uttaksperiodeDto) {
