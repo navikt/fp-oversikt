@@ -1,17 +1,21 @@
 package no.nav.foreldrepenger.oversikt.konfig;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AnnotatedParameterizedType;
+import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,20 +25,20 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeSet;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import com.fasterxml.jackson.annotation.JsonAlias;
-
-import jakarta.ws.rs.PathParam;
 
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import jakarta.persistence.Entity;
@@ -51,6 +55,7 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.FormParam;
+import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.QueryParam;
 
 class RestApiOppdragInputValideringDtoTest extends RestApiTester {
@@ -68,35 +73,24 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
     }
 
     private static final Set<Class<? extends Object>> ALLOWED_ENUM_ANNOTATIONS = Set.of(JsonProperty.class,
-        JsonValue.class, JsonIgnore.class, Valid.class, Null.class, NotNull.class, DefaultValue.class, FormParam.class, QueryParam.class, JsonAlias.class, PathParam.class);
+        JsonValue.class, JsonIgnore.class, JsonAlias.class, Valid.class, Null.class, NotNull.class, DefaultValue.class, FormParam.class, QueryParam.class,
+        PathParam.class);
 
     @SuppressWarnings("rawtypes")
-    private static final Map<Class, List<List<Class<? extends Annotation>>>> UNNTATT_FRA_VALIDERING = new HashMap<>() {
-        {
-            put(boolean.class, singletonList(emptyList()));
-            put(Boolean.class, singletonList(emptyList()));
-
-            // LocalDate og LocalDateTime har egne deserializers
-            put(LocalDate.class, singletonList(emptyList()));
-            put(LocalDateTime.class, singletonList(emptyList()));
-
-            // Enforces av UUID selv
-            put(UUID.class, singletonList(emptyList()));
-        }
-    };
+    private static final Set<Class> UNNTATT_FRA_VALIDERING = Set.of(boolean.class, Boolean.class, UUID.class,
+        LocalDate.class, LocalDateTime.class);
 
     @SuppressWarnings("rawtypes")
     private static final Map<Class, List<List<Class<? extends Annotation>>>> VALIDERINGSALTERNATIVER = new HashMap<>() {
         {
-            put(String.class, asList(asList(Pattern.class, Size.class), List.of(Pattern.class), singletonList(Digits.class)));
+            put(String.class, asList(asList(Pattern.class, Size.class), List.of(Pattern.class), List.of(Digits.class)));
             put(Long.class, asList(asList(Min.class, Max.class), List.of(Digits.class)));
             put(long.class, asList(asList(Min.class, Max.class), List.of(Digits.class)));
             put(Integer.class, singletonList(asList(Min.class, Max.class)));
             put(int.class, singletonList(asList(Min.class, Max.class)));
-            put(BigDecimal.class, asList(asList(Min.class, Max.class, Digits.class),
-                asList(DecimalMin.class, DecimalMax.class, Digits.class)));
+            put(BigDecimal.class, asList(asList(Min.class, Max.class), asList(DecimalMin.class, DecimalMax.class), List.of(Digits.class)));
 
-            putAll(UNNTATT_FRA_VALIDERING);
+            UNNTATT_FRA_VALIDERING.forEach(k -> put(k, List.of(List.of())));
         }
     };
 
@@ -105,15 +99,8 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
         if (field.getType().isEnum()) {
             return Collections.singletonList(Collections.singletonList(Valid.class));
         }
-        if (Collection.class.isAssignableFrom(type) || Map.class.isAssignableFrom(type)) {
-            if (brukerGenerics(field)) {
-                var args = ((ParameterizedType) field.getGenericType()).getActualTypeArguments();
-                if (Arrays.stream(args).allMatch(UNNTATT_FRA_VALIDERING::containsKey)) {
-                    return Collections.singletonList(List.of(Size.class));
-                }
-            }
-            return singletonList(List.of(Valid.class, Size.class));
-
+        if (Properties.class.isAssignableFrom(type) ) {
+            return List.of(List.of(Size.class));
         }
         return VALIDERINGSALTERNATIVER.get(type);
     }
@@ -143,7 +130,7 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
 
     private static void validerRekursivt(Set<Class<?>> besøkteKlasser,
                                          Class<?> klasse,
-                                         Class<?> forrigeKlasse) {
+                                         Class<?> forrigeKlasse) throws URISyntaxException {
         if (besøkteKlasser.contains(klasse)) {
             return;
         }
@@ -163,6 +150,10 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
             .withFailMessage("Klassen " + klasse + " er en entitet, kan ikke brukes som DTO. Brukes i " + forrigeKlasse)
             .isNull();
 
+        var klasseLocation = codeSource.getLocation();
+        for (var subklasse : finnAlleJsonSubTypeClasses(klasse)) {
+            validerRekursivt(besøkteKlasser, subklasse, forrigeKlasse);
+        }
         for (var field : getRelevantFields(klasse)) {
             if (field.getAnnotation(JsonIgnore.class) != null) {
                 continue; // feltet blir hverken serialisert elle deserialisert, unntas fra sjekk
@@ -170,8 +161,9 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
             if (field.getType().isEnum()) {
                 validerEnum(field);
                 continue; // enum er OK
-            }
-            if (getVurderingsalternativer(field) != null) {
+            } else if (isCollectionOrMapNotProperties(field)) { // Containers håndteres av brukergenerics
+                validerCollectionOrMap(field);
+            } else if (getVurderingsalternativer(field) != null) {
                 validerRiktigAnnotert(field); // har konfigurert opp spesifikk validering
             } else if (field.getType().getName().startsWith("java")) {
                 throw new AssertionError(
@@ -180,9 +172,9 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
                 validerHarValidAnnotering(field);
                 validerRekursivt(besøkteKlasser, field.getType(), forrigeKlasse);
             }
-            if (brukerGenerics(field)) {
+            if (field.getGenericType() instanceof ParameterizedType parameterizedType) {
                 validerRekursivt(besøkteKlasser, field.getType(), forrigeKlasse);
-                for (var klazz : genericTypes(field)) {
+                for (var klazz : genericTypes(parameterizedType)) {
                     validerRekursivt(besøkteKlasser, klazz, forrigeKlasse);
                 }
             }
@@ -190,6 +182,7 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
     }
 
     private static void validerEnum(Field field) {
+        validerRiktigAnnotert(field);
         var illegal = Stream.of(field.getAnnotations()).filter(a -> !ALLOWED_ENUM_ANNOTATIONS.contains(a.annotationType())).toList();
         if (!illegal.isEmpty()) {
             throw new AssertionError("Ugyldige annotasjoner funnet på [" + field + "]: " + illegal);
@@ -203,18 +196,39 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
         }
     }
 
-    private static Set<Class<?>> genericTypes(Field field) {
-        Set<Class<?>> klasser = new HashSet<>();
-        var type = (ParameterizedType) field.getGenericType();
-        for (var t : type.getActualTypeArguments()) {
-            klasser.add((Class<?>) t);
-        }
-        return klasser;
+    private static Set<Class<?>> genericTypes(ParameterizedType parameterizedType) {
+        return Arrays.stream(parameterizedType.getActualTypeArguments()).map(a -> (Class<?>) a).collect(Collectors.toSet());
     }
 
-    private static boolean brukerGenerics(Field field) {
-        return field.getGenericType() instanceof ParameterizedType;
+    private static void validerCollectionOrMap(Field field) {
+        // Ikke Valid før Collection/Map - men inne i generics-delen
+        if (field.getAnnotatedType().getAnnotation(Valid.class) != null) {
+            throw new AssertionError("Flytt annotering @Valid inn i List/Set/Collection/Map for feltet " + field + ".");
+        }
+        // Har Validering inne i generics-delen
+        if (field.getAnnotatedType() instanceof AnnotatedParameterizedType annotatedParameterizedType) {
+            var annotert = annotatedParameterizedType.getAnnotatedActualTypeArguments();
+            for (var ann : annotert) {
+                var kreverAnnoteringer = utledKrav(ann.getType());
+                validerRiktigAnnotert(ann, kreverAnnoteringer);
+            }
+            return;
+        }
+        throw new IllegalArgumentException("Feltet " + field + " har ikke påkrevde annoteringer.");
     }
+
+    private static List<List<Class<? extends Annotation>>> utledKrav(Type type) {
+        var kreverAnnoteringer = new ArrayList<List<Class<? extends Annotation>>>();
+        if (isCollectionOrMap(type)) {
+            kreverAnnoteringer.add(List.of(Size.class));
+        } else if (VALIDERINGSALTERNATIVER.keySet().contains(type)) {
+            kreverAnnoteringer.addAll(VALIDERINGSALTERNATIVER.get(type));
+        } else {
+            kreverAnnoteringer.add(List.of(Valid.class));
+        }
+        return kreverAnnoteringer;
+    }
+
 
     private static Set<Field> getRelevantFields(Class<?> klasse) {
         Set<Field> fields = new LinkedHashSet<>();
@@ -232,16 +246,39 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
     private static void validerRiktigAnnotert(Field field) {
         var alternativer = getVurderingsalternativer(field);
         for (var alternativ : alternativer) {
-            var harAlleAnnoteringerForAlternativet = true;
-            for (var annotering : alternativ) {
-                if (field.getAnnotation(annotering) == null) {
-                    harAlleAnnoteringerForAlternativet = false;
-                }
-            }
-            if (harAlleAnnoteringerForAlternativet) {
+            if (alternativ.isEmpty() || alternativ.stream().allMatch(field::isAnnotationPresent)) {
                 return;
             }
         }
         throw new IllegalArgumentException("Feltet " + field + " har ikke påkrevde annoteringer: " + alternativer);
     }
+
+    private static void validerRiktigAnnotert(AnnotatedType ann, List<List<Class<? extends Annotation>>> alternativer) {
+        for (var alternativ : alternativer) {
+            if (alternativ.isEmpty() || alternativ.stream().allMatch(ann::isAnnotationPresent)) {
+                return;
+            }
+        }
+        throw new IllegalArgumentException("Type " + ann + " har ikke påkrevde annoteringer: " + alternativer);
+    }
+
+    private static boolean isCollectionOrMapNotProperties(Field field) {
+        return Collection.class.isAssignableFrom(field.getType()) || Map.class.isAssignableFrom(field.getType()) && !Properties.class.isAssignableFrom(field.getType());
+    }
+
+    private static boolean isCollectionOrMap(Type type) {
+        return Collection.class.isAssignableFrom(type.getClass()) || Map.class.isAssignableFrom(type.getClass());
+    }
+
+    static Collection<Class<?>> finnAlleJsonSubTypeClasses(Class<?> klasse) {
+        var resultat = new ArrayList<Class<?>>();
+        if (klasse.isAnnotationPresent(JsonSubTypes.class)) {
+            var jsonSubTypes = klasse.getAnnotation(JsonSubTypes.class);
+            for (var subtype : jsonSubTypes.value()) {
+                resultat.add(subtype.value());
+            }
+        }
+        return resultat;
+    }
+
 }
