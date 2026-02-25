@@ -20,7 +20,7 @@ jobs:
       packages: write
       id-token: write
       pull-requests: read
-    uses: navikt/fp-gha-workflows/.github/workflows/build-app-no-db.yml@main
+    uses: navikt/fp-gha-workflows/.github/workflows/build-app-no-db.yml@chore/setup-maven
     with:
       build-image: ${{ github.ref_name == 'master' }} # default: true
       push-image: ${{ github.ref_name == 'master' }} # default: false
