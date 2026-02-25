@@ -346,7 +346,7 @@
         </repository>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/navikt/*</url>
+            <url>https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas</url>
         </repository>
         <!--Ditt nav brukernotifikasjoner-->
         <repository>
