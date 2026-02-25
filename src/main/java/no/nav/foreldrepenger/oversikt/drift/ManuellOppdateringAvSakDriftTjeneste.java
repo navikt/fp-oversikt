@@ -56,7 +56,7 @@ public class ManuellOppdateringAvSakDriftTjeneste {
         @ApiResponse(responseCode = "200", description = "HentSakTask opprettet for alle saknsummre"),
         @ApiResponse(responseCode = "500", description = "Feilet pga ukjent feil eller tekniske/funksjonelle feil")
     })
-    public Response opprettHentSakTaskForSaksnummre(@Parameter(description = "Liste med saksnummre som skal oppdateres") @Valid @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
+    public Response opprettHentSakTaskForSaksnummre(@Parameter(description = "Liste med saksnummre som skal oppdateres") @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
         for (var saksnummer : saksnummre) {
             LOG.info("Lager task for å oppdatere følgende sak {}", saksnummer.value());
             lagreHentSakTask(saksnummer);
@@ -70,7 +70,7 @@ public class ManuellOppdateringAvSakDriftTjeneste {
     @Operation(description = "Utleder og oppretter oppgaver på sak", tags = "saker", responses = {
         @ApiResponse(responseCode = "200", description = "Task for å oppdatere oppgaver er opprettet per sak")
     })
-    public Response oppdaterOppgaver(@Parameter(description = "Liste med saksnummre som skal oppdateres") @Valid @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
+    public Response oppdaterOppgaver(@Parameter(description = "Liste med saksnummre som skal oppdateres") @NotNull List<@Valid @NotNull Saksnummer> saksnummre) {
         for (var saksnummer : saksnummre) {
             LOG.info("Lager task for å oppdatere oppgaver {}", saksnummer.value());
             lagreOpprettOppgaveTask(saksnummer);
