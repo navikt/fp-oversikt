@@ -91,7 +91,7 @@ public class ArbeidRest {
     }
 
     public record MorArbeidRequest(@Valid @NotNull Fødselsnummer annenPartFødselsnummer, @Valid Fødselsnummer barnFødselsnummer,
-                                   LocalDate familiehendelse, @Valid @Size(min = 1) List<@Valid PeriodeRequest> perioder) {
+                                   LocalDate familiehendelse, @Size(min = 1) List<@Valid PeriodeRequest> perioder) {
     }
 
     public record PeriodeRequest(@Valid @NotNull LocalDate fom, @Valid @NotNull LocalDate tom, @Valid PeriodeMedAktivitetskravType periodeType) {}
