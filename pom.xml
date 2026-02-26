@@ -346,7 +346,7 @@
         </repository>
         <repository>
             <id>github</id>
-            <url>https://maven.pkg.github.com/navikt/teamdokumenthandtering-avro-schemas</url>
+            <url>https://maven.pkg.github.com/navikt/fp-felles</url> <!-- Samme url som brukes i dependabot.yml -->
         </repository>
         <!--Ditt nav brukernotifikasjoner-->
         <repository>
