@@ -25,7 +25,7 @@
         <prosesstask.version>5.2.4</prosesstask.version>
         <fp-kontrakter.version>9.4.29</fp-kontrakter.version>
         <fp-tidsserie.version>2.7.4</fp-tidsserie.version>
-        <mittnav-varsler.version>2.1.1</mittnav-varsler.version>
+        <mittnav-varsler.version>2.2.0</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>1.1.6</teamdokumenthandtering-avro-schemas.version>
     </properties>
 
