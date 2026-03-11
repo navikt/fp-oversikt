@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 import java.time.LocalDate;
 import java.util.Collection;

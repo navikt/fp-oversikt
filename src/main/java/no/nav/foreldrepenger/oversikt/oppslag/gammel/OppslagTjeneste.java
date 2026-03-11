@@ -1,8 +1,10 @@
-package no.nav.foreldrepenger.oversikt.oppslag;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,9 +16,6 @@ import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientBorger;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonDto;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonMedArbeidsforholdDto;
-import no.nav.foreldrepenger.oversikt.oppslag.mapper.PersonDtoMapper;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.vedtak.util.LRUCache;
 

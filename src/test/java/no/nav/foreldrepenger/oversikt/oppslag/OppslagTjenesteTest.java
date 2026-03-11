@@ -17,6 +17,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.oversikt.oppslag.gammel.OppslagTjeneste;
+
+import no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlOppslagTjeneste;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,9 +32,9 @@ import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
 import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientBorger;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.Kjønn;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.Målform;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.Sivilstand;
+import no.nav.foreldrepenger.oversikt.oppslag.felles.Kjønn;
+import no.nav.foreldrepenger.oversikt.oppslag.gammel.Målform;
+import no.nav.foreldrepenger.oversikt.oppslag.gammel.Sivilstand;
 import no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.ForelderBarnRelasjonRolle;

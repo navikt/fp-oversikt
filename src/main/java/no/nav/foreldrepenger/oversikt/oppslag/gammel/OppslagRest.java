@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -7,8 +7,6 @@ import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonDto;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonMedArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 @Path("/person")

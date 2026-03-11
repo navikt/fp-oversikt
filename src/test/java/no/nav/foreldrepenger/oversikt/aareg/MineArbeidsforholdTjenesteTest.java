@@ -23,7 +23,7 @@ import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.AaregRestKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidsforholdRS;
 import no.nav.foreldrepenger.oversikt.integrasjoner.ereg.VirksomhetTjeneste;
-import no.nav.foreldrepenger.oversikt.oppslag.MineArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 @ExtendWith(MockitoExtension.class)

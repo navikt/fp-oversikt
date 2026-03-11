@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag.dto;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag.mapper;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 import static java.util.Comparator.comparing;
 
@@ -13,12 +13,7 @@ import java.util.stream.Stream;
 import no.nav.foreldrepenger.kontrakter.felles.typer.AktørId;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
-import no.nav.foreldrepenger.oversikt.oppslag.PdlOppslagTjeneste;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.Bankkonto;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.Kjønn;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.Målform;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.PersonDto;
-import no.nav.foreldrepenger.oversikt.oppslag.dto.Sivilstand;
+import no.nav.foreldrepenger.oversikt.oppslag.felles.Kjønn;
 import no.nav.pdl.KjoennType;
 import no.nav.pdl.Navn;
 import no.nav.pdl.Person;
@@ -151,7 +146,7 @@ public class PersonDtoMapper {
     }
 
 
-    private static no.nav.foreldrepenger.oversikt.oppslag.dto.Navn navnFor(PdlOppslagTjeneste.PersonMedIdent person) {
+    private static no.nav.foreldrepenger.oversikt.oppslag.felles.Navn navnFor(PdlOppslagTjeneste.PersonMedIdent person) {
         return Optional.ofNullable(person.falskIdentitet()).map(PersonDtoMapper::navn)
             .or(() -> Stream.ofNullable(person.person().getNavn())
                 .flatMap(Collection::stream)
@@ -161,16 +156,16 @@ public class PersonDtoMapper {
             .orElse(null);
     }
 
-    private static no.nav.foreldrepenger.oversikt.oppslag.dto.Navn navn(Navn navn) {
-        return new no.nav.foreldrepenger.oversikt.oppslag.dto.Navn(
+    private static no.nav.foreldrepenger.oversikt.oppslag.felles.Navn navn(Navn navn) {
+        return new no.nav.foreldrepenger.oversikt.oppslag.felles.Navn(
                 PersonMappers.titlecaseNavn(navn.getFornavn()),
                 PersonMappers.titlecaseNavn(navn.getMellomnavn()),
                 PersonMappers.titlecaseNavn(navn.getEtternavn())
         );
     }
 
-    private static no.nav.foreldrepenger.oversikt.oppslag.dto.Navn navn(FalskIdentitet.Informasjon falskId) {
-        return new no.nav.foreldrepenger.oversikt.oppslag.dto.Navn(
+    private static no.nav.foreldrepenger.oversikt.oppslag.felles.Navn navn(FalskIdentitet.Informasjon falskId) {
+        return new no.nav.foreldrepenger.oversikt.oppslag.felles.Navn(
             falskId.fornavn(),
             falskId.mellomnavn(),
             falskId.etternavn()
