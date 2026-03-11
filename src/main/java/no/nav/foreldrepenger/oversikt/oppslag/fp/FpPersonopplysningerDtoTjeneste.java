@@ -179,21 +179,21 @@ class FpPersonopplysningerDtoTjeneste {
                 .doedsfall(new DoedsfallResponseProjection().doedsdato())
                 .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering()));
 
-        var annepartOppslag = pdlKlientSystem.hentPersonBolk(request, projeksjonAnnenpart)
+        var annenpartOppslag = pdlKlientSystem.hentPersonBolk(request, projeksjonAnnenpart)
             .stream()
             .filter(result -> !harAdressebeskyttelse(result.getPerson()))
             .filter(result -> !harDødsdato(result.getPerson()))
             .map(result -> new PersonMedIdent(result.getIdent(), result.getPerson()))
             .collect(Collectors.toMap(PersonMedIdent::ident, person -> person));
 
-        if (annepartOppslag.isEmpty()) {
+        if (annenpartOppslag.isEmpty()) {
             return Map.of();
         }
 
         return barnTilAnnenpartMapping.entrySet()
             .stream()
-            .filter(entry -> annepartOppslag.containsKey(entry.getValue()))
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> annepartOppslag.get(entry.getValue())));
+            .filter(entry -> annenpartOppslag.containsKey(entry.getValue()))
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> annenpartOppslag.get(entry.getValue())));
     }
 
     private static boolean harDødsdato(Person person) {
