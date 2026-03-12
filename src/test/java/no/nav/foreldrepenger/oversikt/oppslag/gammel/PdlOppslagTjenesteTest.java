@@ -1,10 +1,10 @@
-package no.nav.foreldrepenger.oversikt.oppslag;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.adressebeskyttelse;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.forelderBarnRelasjon;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.fødselsdato;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.lagBarn;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.tilStreng;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.adressebeskyttelse;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.forelderBarnRelasjon;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.fødselsdato;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.lagBarn;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.tilStreng;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.when;
@@ -12,7 +12,6 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlOppslagTjeneste;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -79,11 +78,11 @@ class PdlOppslagTjenesteTest {
                 forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
                 forelderBarnRelasjon(null, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)
         ));
-        var barnEldreEnn40Mnd = lagBarn(LocalDate.now().minusMonths(41), AdressebeskyttelseGradering.UGRADERT,
+        var barnEldreEnn40Mnd = PdlTestUtil.lagBarn(LocalDate.now().minusMonths(41), AdressebeskyttelseGradering.UGRADERT,
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN));
 
-        var barnYngreEnn40Mnd = lagBarn(LocalDate.now().minusMonths(14), AdressebeskyttelseGradering.UGRADERT,
+        var barnYngreEnn40Mnd = PdlTestUtil.lagBarn(LocalDate.now().minusMonths(14), AdressebeskyttelseGradering.UGRADERT,
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN));
 
@@ -102,8 +101,8 @@ class PdlOppslagTjenesteTest {
 
     @Test
     void barn_som_har_adressebeskyttelse_skal_ikke_returneres() {
-        var barnAdressebeskyttelse = lagBarn(LocalDate.now().minusMonths(14), AdressebeskyttelseGradering.STRENGT_FORTROLIG);
-        var barnUgradert = lagBarn(LocalDate.now().minusMonths(14), AdressebeskyttelseGradering.UGRADERT);
+        var barnAdressebeskyttelse = PdlTestUtil.lagBarn(LocalDate.now().minusMonths(14), AdressebeskyttelseGradering.STRENGT_FORTROLIG);
+        var barnUgradert = PdlTestUtil.lagBarn(LocalDate.now().minusMonths(14), AdressebeskyttelseGradering.UGRADERT);
         var søker = new Person();
         søker.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
@@ -130,7 +129,7 @@ class PdlOppslagTjenesteTest {
                 forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR),
                 forelderBarnRelasjon(null, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)
         ));
-        var barn1 = lagBarn(LocalDate.now().minusWeeks(32), AdressebeskyttelseGradering.UGRADERT,
+        var barn1 = PdlTestUtil.lagBarn(LocalDate.now().minusWeeks(32), AdressebeskyttelseGradering.UGRADERT,
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN));
 
@@ -144,7 +143,7 @@ class PdlOppslagTjenesteTest {
 
     @Test
     void dødfødte_barn_skal_også_returneres_så_lenge_det_er_dødfødt_for_mindre_enn_40_uker_siden() {
-        var barnUgradert = lagBarn(LocalDate.now().minusMonths(10), AdressebeskyttelseGradering.UGRADERT);
+        var barnUgradert = PdlTestUtil.lagBarn(LocalDate.now().minusMonths(10), AdressebeskyttelseGradering.UGRADERT);
         var søker = new Person();
         søker.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MOR)));
         var dødfødtDatoMindreEnn40UkerSiden = LocalDate.now().minusWeeks(2);
@@ -189,7 +188,7 @@ class PdlOppslagTjenesteTest {
         var annenpart = new Person();
         annenpart.setFoedselsdato(fødselsdato(LocalDate.now().minusYears(30)));
         annenpart.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.FAR)));
-        var barn =  lagBarn(
+        var barn =  PdlTestUtil.lagBarn(
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         );
@@ -209,7 +208,7 @@ class PdlOppslagTjenesteTest {
         var annenpart = new Person();
         annenpart.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.FAR)));
         annenpart.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.FORTROLIG));
-        var barn = lagBarn();
+        var barn = PdlTestUtil.lagBarn();
         barn.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
@@ -231,12 +230,12 @@ class PdlOppslagTjenesteTest {
                 forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MEDMOR)
         ));
 
-        var barn1 = lagBarn();
+        var barn1 = PdlTestUtil.lagBarn();
         barn1.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         ));
-        var barn2 = lagBarn();
+        var barn2 = PdlTestUtil.lagBarn();
         barn2.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
@@ -265,12 +264,12 @@ class PdlOppslagTjenesteTest {
         annenpartUgradert.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_2_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MEDMOR)));
         annenpartUgradert.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT));
 
-        var barnGradertAnnenforelder = lagBarn();
+        var barnGradertAnnenforelder = PdlTestUtil.lagBarn();
         barnGradertAnnenforelder.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
         ));
-        var barnUgradertAnnenforelder = lagBarn();
+        var barnUgradertAnnenforelder = PdlTestUtil.lagBarn();
         barnUgradertAnnenforelder.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_2_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
@@ -295,7 +294,7 @@ class PdlOppslagTjenesteTest {
         annenpart.setForelderBarnRelasjon(List.of(forelderBarnRelasjon(BARN_1_IDENT, ForelderBarnRelasjonRolle.BARN, ForelderBarnRelasjonRolle.MEDMOR)));
         annenpart.setAdressebeskyttelse(adressebeskyttelse(AdressebeskyttelseGradering.UGRADERT));
         annenpart.setDoedsfall(List.of(new Doedsfall(tilStreng(LocalDate.now().minusMonths(1)), null, null)));
-        var barn = lagBarn();
+        var barn = PdlTestUtil.lagBarn();
         barn.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(ANNENPART_IDENT, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)
@@ -326,7 +325,7 @@ class PdlOppslagTjenesteTest {
 
     @Test
     void barnet_kan_være_relatert_til_en_annenforelder_som_ikke_har_ident_og_skal_forsette_uten_annenforelder_i_disse_tilfellene() {
-        var barn = lagBarn();
+        var barn = PdlTestUtil.lagBarn();
         barn.setForelderBarnRelasjon(List.of(
                 forelderBarnRelasjon(SØKER_IDENT, ForelderBarnRelasjonRolle.MOR, ForelderBarnRelasjonRolle.BARN),
                 forelderBarnRelasjon(null, ForelderBarnRelasjonRolle.FAR, ForelderBarnRelasjonRolle.BARN)

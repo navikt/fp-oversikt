@@ -1,12 +1,12 @@
-package no.nav.foreldrepenger.oversikt.oppslag;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.adressebeskyttelse;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.forelderBarnRelasjon;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.fødselsdato;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.kjønn;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.navn;
-import static no.nav.foreldrepenger.oversikt.oppslag.PdlTestUtil.siviltilstand;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.adressebeskyttelse;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.forelderBarnRelasjon;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.fødselsdato;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.kjønn;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.navn;
+import static no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlTestUtil.siviltilstand;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -18,9 +18,6 @@ import java.util.Map;
 import java.util.UUID;
 
 import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
-import no.nav.foreldrepenger.oversikt.oppslag.gammel.OppslagTjeneste;
-
-import no.nav.foreldrepenger.oversikt.oppslag.gammel.PdlOppslagTjeneste;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,8 +30,6 @@ import no.nav.foreldrepenger.oversikt.integrasjoner.digdir.KrrSpråkKlientBorger
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.Kjønn;
-import no.nav.foreldrepenger.oversikt.oppslag.gammel.Målform;
-import no.nav.foreldrepenger.oversikt.oppslag.gammel.Sivilstand;
 import no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker;
 import no.nav.pdl.AdressebeskyttelseGradering;
 import no.nav.pdl.ForelderBarnRelasjonRolle;
