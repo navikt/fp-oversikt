@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag;
+package no.nav.foreldrepenger.oversikt.oppslag.felles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

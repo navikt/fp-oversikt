@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag.dto;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.List;
 import jakarta.validation.constraints.NotNull;
 import no.nav.foreldrepenger.kontrakter.felles.typer.AktørId;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.oppslag.felles.*;
 
 public record PersonDto(AktørId aktørid,
                         @NotNull Fødselsnummer fnr,

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag.dto;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 
 public record Bankkonto(String kontonummer, String banknavn) {

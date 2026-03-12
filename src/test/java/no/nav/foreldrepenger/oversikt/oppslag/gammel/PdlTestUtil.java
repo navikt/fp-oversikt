@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 import no.nav.pdl.Adressebeskyttelse;
 import no.nav.pdl.AdressebeskyttelseGradering;

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag.dto;
+package no.nav.foreldrepenger.oversikt.oppslag.gammel;
 
 import jakarta.validation.constraints.NotNull;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
