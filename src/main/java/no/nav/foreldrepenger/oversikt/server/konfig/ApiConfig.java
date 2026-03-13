@@ -14,9 +14,10 @@ import no.nav.foreldrepenger.oversikt.arbeid.ArbeidRest;
 import no.nav.foreldrepenger.oversikt.arkiv.DokumentRest;
 import no.nav.foreldrepenger.oversikt.innhenting.inntektsmelding.InntektsmeldingRest;
 import no.nav.foreldrepenger.oversikt.oppgave.OppgaveRest;
-import no.nav.foreldrepenger.oversikt.oppslag.gammel.OppslagRest;
 import no.nav.foreldrepenger.oversikt.oppslag.es.EsPersonopplysningerRest;
 import no.nav.foreldrepenger.oversikt.oppslag.fp.FpPersonopplysningerRest;
+import no.nav.foreldrepenger.oversikt.oppslag.gammel.OppslagRest;
+import no.nav.foreldrepenger.oversikt.oppslag.oversikt.OversiktPersonopplysningerRest;
 import no.nav.foreldrepenger.oversikt.oppslag.svp.SvpPersonopplysningerRest;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
@@ -50,6 +51,7 @@ public class ApiConfig extends ResourceConfig {
             EsPersonopplysningerRest.class,
             FpPersonopplysningerRest.class,
             SvpPersonopplysningerRest.class,
+            OversiktPersonopplysningerRest.class,
             InntektsmeldingRest.class,
             OppgaveRest.class,
             SakerRest.class,

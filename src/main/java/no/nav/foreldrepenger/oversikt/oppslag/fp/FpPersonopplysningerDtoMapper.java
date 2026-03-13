@@ -44,21 +44,21 @@ class FpPersonopplysningerDtoMapper {
             .orElse(false);
     }
 
-    private static List<FpPersonopplysningerDto.BarnDto> tilBarn(List<PersonMedIdent> barn,
-                                                                 Map<String, PersonMedIdent> annenpart) {
+    private static List<FpPersonopplysningerDto.FpBarnDto> tilBarn(List<PersonMedIdent> barn,
+                                                                   Map<String, PersonMedIdent> annenpart) {
         return Stream.ofNullable(barn)
             .flatMap(Collection::stream)
             .map(barnet -> tilBarn(barnet, annenpart))
-            .sorted(comparing(FpPersonopplysningerDto.BarnDto::fødselsdato))
+            .sorted(comparing(FpPersonopplysningerDto.FpBarnDto::fødselsdato))
             .toList();
     }
 
-    private static FpPersonopplysningerDto.BarnDto tilBarn(PersonMedIdent barnet, Map<String, PersonMedIdent> annenpart) {
+    private static FpPersonopplysningerDto.FpBarnDto tilBarn(PersonMedIdent barnet, Map<String, PersonMedIdent> annenpart) {
         if (barnet.ident() == null) { // Dødfødt barn
-            return new FpPersonopplysningerDto.BarnDto(null, fødselsdatoFor(barnet), dødsdatoFor(barnet), null, null, null);
+            return new FpPersonopplysningerDto.FpBarnDto(null, fødselsdatoFor(barnet), dødsdatoFor(barnet), null, null, null);
         }
 
-        return new FpPersonopplysningerDto.BarnDto(new Fødselsnummer(barnet.ident()), fødselsdatoFor(barnet), dødsdatoFor(barnet), navnFor(barnet),
+        return new FpPersonopplysningerDto.FpBarnDto(new Fødselsnummer(barnet.ident()), fødselsdatoFor(barnet), dødsdatoFor(barnet), navnFor(barnet),
             kjønnFor(barnet), annenpart.containsKey(barnet.ident()) ? tilAnnenpart(annenpart.get(barnet.ident())) : null);
     }
 

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.oppslag.fp;
+package no.nav.foreldrepenger.oversikt.oppslag.oversikt;
 
 import static no.nav.foreldrepenger.oversikt.oppslag.felles.BarnOgAnnenpartUtil.annenForelderRegisterertPåBarnet;
 import static no.nav.foreldrepenger.oversikt.oppslag.felles.BarnOgAnnenpartUtil.barnErYngreEnn40Mnd;
@@ -21,9 +21,11 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
+import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
+import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
-import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.PersonMedIdent;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.pdl.AdressebeskyttelseResponseProjection;
@@ -36,54 +38,55 @@ import no.nav.pdl.HentPersonBolkQueryRequest;
 import no.nav.pdl.HentPersonBolkResult;
 import no.nav.pdl.HentPersonBolkResultResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
-import no.nav.pdl.KjoennResponseProjection;
 import no.nav.pdl.NavnResponseProjection;
 import no.nav.pdl.PersonResponseProjection;
-import no.nav.pdl.SivilstandResponseProjection;
 import no.nav.vedtak.felles.integrasjon.person.FalskIdentitet;
 import no.nav.vedtak.felles.integrasjon.person.PersonMappers;
 import no.nav.vedtak.util.LRUCache;
 
 @ApplicationScoped
-class FpPersonopplysningerDtoTjeneste {
-
-    private static final Logger LOG = LoggerFactory.getLogger(FpPersonopplysningerDtoTjeneste.class);
+class OversiktPersonopplysningerDtoTjeneste {
+    private static final Logger LOG = LoggerFactory.getLogger(OversiktPersonopplysningerDtoTjeneste.class);
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
-    private static final LRUCache<String, FpPersonopplysningerDto> PERSONINFO_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
+    private static final LRUCache<String, OversiktPersonopplysningerDto> PERSONINFO_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
 
     private PdlKlient pdlKlient;
     private PdlKlientSystem pdlKlientSystem;
-    private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
+    private KontaktInformasjonKlient kontaktInformasjonKlient;
+    private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
     private InnloggetBruker innloggetBruker;
 
-    FpPersonopplysningerDtoTjeneste() {
+    OversiktPersonopplysningerDtoTjeneste() {
         // CDI
     }
 
     @Inject
-    FpPersonopplysningerDtoTjeneste(PdlKlient pdlKlient,
-                                    PdlKlientSystem pdlKlientSystem,
-                                    MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste,
-                                    InnloggetBruker innloggetBruker) {
-        this.pdlKlient = pdlKlient;
+    public OversiktPersonopplysningerDtoTjeneste(PdlKlientSystem pdlKlientSystem,
+                                                 PdlKlient pdlKlient,
+                                                 KontaktInformasjonKlient kontaktInformasjonKlient,
+                                                 ArbeidsforholdTjeneste arbeidsforholdTjeneste,
+                                                 InnloggetBruker innloggetBruker) {
         this.pdlKlientSystem = pdlKlientSystem;
-        this.mineArbeidsforholdTjeneste = mineArbeidsforholdTjeneste;
+        this.pdlKlient = pdlKlient;
+        this.kontaktInformasjonKlient = kontaktInformasjonKlient;
+        this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
         this.innloggetBruker = innloggetBruker;
     }
 
-    public FpPersonopplysningerDto forInnloggetPerson() {
-        LOG.info("Henter foreldrepenger personinfo for søker");
+    public OversiktPersonopplysningerDto forInnloggetPerson() {
+        LOG.info("Henter oversikt personinfo for søker");
         var søkersFnr = innloggetBruker.fødselsnummer();
-        return Optional.ofNullable(PERSONINFO_CACHE.get(søkersFnr.value()))
-            .orElseGet(() -> hentOgCachePersoninfo(søkersFnr));
+        return Optional.ofNullable(PERSONINFO_CACHE.get(søkersFnr.value())).orElseGet(() -> hentOgCachePersoninfo(søkersFnr));
     }
 
-    private FpPersonopplysningerDto hentOgCachePersoninfo(Fødselsnummer søkersFnr) {
+    private OversiktPersonopplysningerDto hentOgCachePersoninfo(Fødselsnummer søkersFnr) {
         var søker = hentSøker(søkersFnr.value());
         var barn = hentBarnTilSøker(søker);
         var annenpart = hentAnnenpartRelatertTilBarn(barn, søkersFnr);
-        var arbeidsforhold = mineArbeidsforholdTjeneste.brukersArbeidsforhold(søkersFnr);
-        var personinfoDto = FpPersonopplysningerDtoMapper.tilDto(søker, barn, annenpart, arbeidsforhold);
+        var kontonummer = kontaktInformasjonKlient.hentRegistertKontonummerMedFallback();
+        var harArbeidsforhold = arbeidsforholdTjeneste.harArbeidsforhold(søkersFnr);
+        var personinfoDto = OversiktPersonopplysningerDtoMapper.tilDto(søker, barn, annenpart,
+            kontonummer.equals(KontonummerDto.UKJENT) ? null : kontonummer.kontonummer(), harArbeidsforhold);
         PERSONINFO_CACHE.put(søkersFnr.value(), personinfoDto);
         return personinfoDto;
     }
@@ -94,10 +97,8 @@ class FpPersonopplysningerDtoTjeneste {
         var projection = new PersonResponseProjection().folkeregisteridentifikator(
                 new FolkeregisteridentifikatorResponseProjection().identifikasjonsnummer().status())
             .navn(new NavnResponseProjection().fornavn().mellomnavn().etternavn())
-            .kjoenn(new KjoennResponseProjection().kjoenn())
             .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
             .doedfoedtBarn(new DoedfoedtBarnResponseProjection().dato())
-            .sivilstand(new SivilstandResponseProjection().type())
             .forelderBarnRelasjon(new ForelderBarnRelasjonResponseProjection().relatertPersonsIdent().relatertPersonsRolle().minRolleForPerson());
         var person = pdlKlient.hentPerson(request, projection);
         if (PersonMappers.manglerIdentifikator(person)) {
@@ -114,9 +115,7 @@ class FpPersonopplysningerDtoTjeneste {
             .filter(d -> d.getDato() != null)
             .map(df -> new PersonMedIdent(null, dødfødtBarn(df)))
             .toList();
-        return Stream.concat(relaterteBarn.stream(), dødfødteBarn.stream())
-            .filter(b -> barnErYngreEnn40Mnd(b))
-            .toList();
+        return Stream.concat(relaterteBarn.stream(), dødfødteBarn.stream()).filter(b -> barnErYngreEnn40Mnd(b)).toList();
     }
 
     private List<PersonMedIdent> relaterteBarn(PersonMedIdent søker) {
@@ -129,7 +128,6 @@ class FpPersonopplysningerDtoTjeneste {
         requestBarn.setIdenter(barnIdenter);
         var projeksjonBolk = new HentPersonBolkResultResponseProjection().ident()
             .person(new PersonResponseProjection().navn(new NavnResponseProjection().fornavn().mellomnavn().etternavn())
-                .kjoenn(new KjoennResponseProjection().kjoenn())
                 .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
                 .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering())
                 .doedsfall(new DoedsfallResponseProjection().doedsdato())
@@ -165,7 +163,6 @@ class FpPersonopplysningerDtoTjeneste {
         request.setIdenter(annenpartIDenter);
         var projeksjonAnnenpart = new HentPersonBolkResultResponseProjection().ident()
             .person(new PersonResponseProjection().navn(new NavnResponseProjection().fornavn().mellomnavn().etternavn())
-                .foedselsdato(new FoedselsdatoResponseProjection().foedselsdato())
                 .doedsfall(new DoedsfallResponseProjection().doedsdato())
                 .adressebeskyttelse(new AdressebeskyttelseResponseProjection().gradering()));
 
