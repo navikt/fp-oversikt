@@ -52,6 +52,10 @@ public class ArbeidsforholdTjeneste {
             .toList();
     }
 
+    public boolean harArbeidsforhold(Fødselsnummer ident) {
+        return !finnAktiveArbeidsforholdForIdent(ident).isEmpty();
+    }
+
     public List<Arbeidsforhold> finnFrilansForIdent(Fødselsnummer ident) {
         var spørFra = LocalDate.now().minus(TID_TILBAKE_FRILANS);
         var innhentingsIntervall = new LocalDateInterval(spørFra, LocalDate.MAX);
