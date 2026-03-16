@@ -7,6 +7,7 @@ import static org.mockito.Mockito.when;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -14,8 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
-import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
-import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
+import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontoregisterKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
 import no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker;
@@ -45,13 +45,13 @@ class OversiktPersonopplysningerDtoTjenesteTest {
     private PdlKlientSystem pdlKlientSystem;
 
     @Mock
-    private KontaktInformasjonKlient kontaktInformasjonKlient;
+    private KontoregisterKlient kontoregisterKlient;
 
     @Mock
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
 
     private OversiktPersonopplysningerDtoTjeneste tjeneste(DummyInnloggetTestbruker innloggetBruker) {
-        return new OversiktPersonopplysningerDtoTjeneste(pdlKlientSystem, pdlKlient, kontaktInformasjonKlient, arbeidsforholdTjeneste, innloggetBruker);
+        return new OversiktPersonopplysningerDtoTjeneste(pdlKlientSystem, pdlKlient, kontoregisterKlient, arbeidsforholdTjeneste, innloggetBruker);
     }
 
     @Test
@@ -66,7 +66,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
             List.of(new Folkeregisteridentifikator(innloggetBruker.fødselsnummer().value(), "I_BRUK", "FNR", null, null)));
 
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(new KontonummerDto("12345678903", null));
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.of("12345678903"));
         when(arbeidsforholdTjeneste.harArbeidsforhold(any())).thenReturn(true);
 
         var dto = tjeneste.forInnloggetPerson();
@@ -93,7 +93,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
             List.of(new Folkeregisteridentifikator(innloggetBruker.fødselsnummer().value(), "I_BRUK", "FNR", null, null)));
 
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
 
         var dto = tjeneste.forInnloggetPerson();
 
@@ -112,7 +112,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
             List.of(new Folkeregisteridentifikator(innloggetBruker.fødselsnummer().value(), "I_BRUK", "FNR", null, null)));
 
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
         when(arbeidsforholdTjeneste.harArbeidsforhold(any())).thenReturn(false);
 
         var dto = tjeneste.forInnloggetPerson();
@@ -143,7 +143,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
         when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(BARN_1_IDENT, barnPdl, null)))
             .thenReturn(List.of(new HentPersonBolkResult(ANNENPART_IDENT, annenpartPdl, null)));
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
 
         var dto = tjeneste.forInnloggetPerson();
 
@@ -182,7 +182,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
         when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(BARN_1_IDENT, barnEldreEnn40Mnd, null),
             new HentPersonBolkResult(BARN_2_IDENT, barnYngreEnn40Mnd, null)));
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
 
         var dto = tjeneste.forInnloggetPerson();
 
@@ -210,7 +210,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
         when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(
             List.of(new HentPersonBolkResult(BARN_1_IDENT, barnBeskyttet, null), new HentPersonBolkResult(BARN_2_IDENT, barnUgradert, null)));
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
 
         var dto = tjeneste.forInnloggetPerson();
 
@@ -233,7 +233,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
         søkerPdl.setFolkeregisteridentifikator(List.of(new Folkeregisteridentifikator(søkersIdent, "I_BRUK", "FNR", null, null)));
 
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
 
         var dto = tjeneste.forInnloggetPerson();
 
@@ -268,7 +268,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
         when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(BARN_1_IDENT, barnPdl, null)))
             .thenReturn(List.of(new HentPersonBolkResult(ANNENPART_IDENT, annenpartPdl, null)));
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
 
         var dto = tjeneste.forInnloggetPerson();
 
@@ -299,7 +299,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
         when(pdlKlient.hentPerson(any(), any())).thenReturn(søkerPdl);
         when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(List.of(new HentPersonBolkResult(BARN_1_IDENT, barnPdl, null)))
             .thenReturn(List.of(new HentPersonBolkResult(ANNENPART_IDENT, annenpartPdl, null)));
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
 
         var dto = tjeneste.forInnloggetPerson();
 
@@ -337,7 +337,7 @@ class OversiktPersonopplysningerDtoTjenesteTest {
         when(pdlKlientSystem.hentPersonBolk(any(), any())).thenReturn(
                 List.of(new HentPersonBolkResult(BARN_1_IDENT, barn1Pdl, null), new HentPersonBolkResult(BARN_2_IDENT, barn2Pdl, null)))
             .thenReturn(List.of(new HentPersonBolkResult(ANNENPART_IDENT, annenpartPdl, null)));
-        when(kontaktInformasjonKlient.hentRegistertKontonummerMedFallback()).thenReturn(KontonummerDto.UKJENT);
+        when(kontoregisterKlient.hentRegistrertKontonummer()).thenReturn(Optional.empty());
 
         var dto = tjeneste.forInnloggetPerson();
 

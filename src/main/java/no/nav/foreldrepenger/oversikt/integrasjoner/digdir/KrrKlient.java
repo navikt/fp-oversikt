@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.oversikt.integrasjoner.digdir;
 
 import java.net.URI;
 import java.time.Duration;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -10,21 +9,30 @@ import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.ws.rs.core.UriBuilder;
-import jakarta.ws.rs.core.UriBuilderException;
-import no.nav.foreldrepenger.oversikt.oppslag.gammel.Målform;
 import no.nav.vedtak.felles.integrasjon.rest.NavHeaders;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
+import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
+import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
 import no.nav.vedtak.util.LRUCache;
 
 /*
  * https://github.com/navikt/digdir-krr
  * https://digdir-krr-proxy.intern.dev.nav.no/swagger-ui/index.html#/personer-controller/postPersoner
  */
-public abstract class KrrSpråkKlient {
-    private static final Logger LOG = LoggerFactory.getLogger(KrrSpråkKlient.class);
+@ApplicationScoped
+@RestClientConfig(
+    tokenConfig = TokenFlow.AZUREAD_CC,
+    endpointProperty = "krr.rs.uri",
+    endpointDefault = "http://digdir-krr-proxy.team-rocket/rest/v1/personer",
+    scopesProperty = "krr.rs.scopes",
+    scopesDefault = "api://prod-gcp.team-rocket.digdir-krr-proxy/.default"
+)
+public class KrrKlient {
+    private static final Logger LOG = LoggerFactory.getLogger(KrrKlient.class);
     private static final long CACHE_ELEMENT_LIVE_TIME_MS = TimeUnit.MILLISECONDS.convert(60, TimeUnit.MINUTES);
     private static final LRUCache<String, Kontaktinformasjoner.Kontaktinformasjon> KONTAKTINFORMASJON_CACHE = new LRUCache<>(2000, CACHE_ELEMENT_LIVE_TIME_MS);
 
@@ -32,40 +40,12 @@ public abstract class KrrSpråkKlient {
     private final RestClient restClient;
     private final RestConfig restConfig;
 
-    KrrSpråkKlient(RestClient restClient, RestConfig restConfig) {
-        this.restClient = restClient;
-        this.restConfig = restConfig;
+    public KrrKlient() {
+        this.restClient = RestClient.client();
+        this.restConfig = RestConfig.forClient(KrrKlient.class);
         this.endpoint = UriBuilder.fromUri(restConfig.endpoint())
             .queryParam("inkluderSikkerDigitalPost", "false")
             .build();
-    }
-
-    public Målform finnSpråkkodeMedFallback(String fnr) {
-        try {
-            var personOpt = hentKontaktinformasjon(fnr);
-            if (personOpt.isEmpty()) {
-                return Målform.NB;
-            }
-            var person = personOpt.get();
-            if (!person.aktiv()) {
-                LOG.info("KrrSpråkKlient: bruker er inaktiv, returnerer default");
-                return Målform.NB;
-            }
-            if (person.spraak() == null) {
-                LOG.info("KrrSpråkKlient: bruker har ikke språk, returnerer default");
-                return Målform.NB;
-            }
-            if (Arrays.stream(Målform.values()).noneMatch(m -> m.name().equalsIgnoreCase(person.spraak()))) {
-                LOG.info("KrrSpråkKlient: bruker har språk {}, bruker NB", person.spraak());
-                return Målform.NB;
-            }
-            return Målform.valueOf(person.spraak().toUpperCase());
-        } catch (UriBuilderException | IllegalArgumentException e) {
-            throw new IllegalArgumentException("Utviklerfeil syntax-exception for KrrSpråkKlient.finnSpråkkodeForBruker", e);
-        } catch (Exception e) {
-            LOG.info("KrrSpråkKlient: kall til digdir krr feilet, returnerer default", e);
-            return Målform.NB;
-        }
     }
 
     public Optional<Kontaktinformasjoner.Kontaktinformasjon> hentKontaktinformasjon(String fnr) {
@@ -85,9 +65,9 @@ public abstract class KrrSpråkKlient {
         if (respons.feil() != null && !respons.feil().isEmpty()) {
             var feilkode = respons.feil().get(fnr);
             if (Kontaktinformasjoner.FeilKode.person_ikke_funnet.equals(feilkode)) {
-                LOG.info("KrrSpråkKlient: fant ikke bruker, returnerer default");
+                LOG.info("KrrKlient: fant ikke bruker, returnerer default");
             } else {
-                LOG.warn("KrrSpråkKlient: Uventet feil ved kall til KRR {}, returnerer default", feilkode);
+                LOG.warn("KrrKlient: Uventet feil ved kall til KRR {}, returnerer default", feilkode);
             }
             return Optional.empty();
         }

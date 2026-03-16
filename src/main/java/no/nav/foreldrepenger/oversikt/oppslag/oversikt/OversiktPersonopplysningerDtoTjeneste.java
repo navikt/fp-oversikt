@@ -22,8 +22,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.ArbeidsforholdTjeneste;
-import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontaktInformasjonKlient;
-import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontonummerDto;
+import no.nav.foreldrepenger.oversikt.integrasjoner.kontonummer.KontoregisterKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.PersonMedIdent;
@@ -52,7 +51,7 @@ class OversiktPersonopplysningerDtoTjeneste {
 
     private PdlKlient pdlKlient;
     private PdlKlientSystem pdlKlientSystem;
-    private KontaktInformasjonKlient kontaktInformasjonKlient;
+    private KontoregisterKlient kontoregisterKlient;
     private ArbeidsforholdTjeneste arbeidsforholdTjeneste;
     private InnloggetBruker innloggetBruker;
 
@@ -63,12 +62,12 @@ class OversiktPersonopplysningerDtoTjeneste {
     @Inject
     public OversiktPersonopplysningerDtoTjeneste(PdlKlientSystem pdlKlientSystem,
                                                  PdlKlient pdlKlient,
-                                                 KontaktInformasjonKlient kontaktInformasjonKlient,
+                                                 KontoregisterKlient kontoregisterKlient,
                                                  ArbeidsforholdTjeneste arbeidsforholdTjeneste,
                                                  InnloggetBruker innloggetBruker) {
         this.pdlKlientSystem = pdlKlientSystem;
         this.pdlKlient = pdlKlient;
-        this.kontaktInformasjonKlient = kontaktInformasjonKlient;
+        this.kontoregisterKlient = kontoregisterKlient;
         this.arbeidsforholdTjeneste = arbeidsforholdTjeneste;
         this.innloggetBruker = innloggetBruker;
     }
@@ -83,10 +82,10 @@ class OversiktPersonopplysningerDtoTjeneste {
         var søker = hentSøker(søkersFnr.value());
         var barn = hentBarnTilSøker(søker);
         var annenpart = hentAnnenpartRelatertTilBarn(barn, søkersFnr);
-        var kontonummer = kontaktInformasjonKlient.hentRegistertKontonummerMedFallback();
+        var kontonummer = kontoregisterKlient.hentRegistrertKontonummer();
         var harArbeidsforhold = arbeidsforholdTjeneste.harArbeidsforhold(søkersFnr);
         var personinfoDto = OversiktPersonopplysningerDtoMapper.tilDto(søker, barn, annenpart,
-            kontonummer.equals(KontonummerDto.UKJENT) ? null : kontonummer.kontonummer(), harArbeidsforhold);
+            kontonummer.orElse(null), harArbeidsforhold);
         PERSONINFO_CACHE.put(søkersFnr.value(), personinfoDto);
         return personinfoDto;
     }
