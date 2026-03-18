@@ -21,11 +21,10 @@
         }
     ],
     "limits": {
-        "cpu": "2",
-        "mem": "2048Mi"
+        "mem": "1250Mi"
     },
     "requests": {
-        "cpu": "500m",
-        "mem": "1024Mi"
+        "cpu": "200m",
+        "mem": "1000Mi"
     }
 }

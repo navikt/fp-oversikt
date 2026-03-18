@@ -21,12 +21,11 @@
         }
     ],
     "limits": {
-        "cpu": "2",
-        "mem": "2048Mi"
+        "mem": "800Mi"
     },
     "requests": {
-        "cpu": "100m",
-        "mem": "512Mi"
+        "cpu": "50m",
+        "mem": "640Mi"
     },
     "azure-token-generator": true,
     "ingress": "https://fpoversikt.intern.dev.nav.no"

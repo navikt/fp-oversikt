@@ -21,7 +21,7 @@
         <openapi-spec-utils.version>2.1.0</openapi-spec-utils.version>
         <io.confluent.version>8.2.0</io.confluent.version>
 
-        <felles.version>7.7.1</felles.version>
+        <felles.version>7.7.2</felles.version>
         <prosesstask.version>5.2.5</prosesstask.version>
         <fp-kontrakter.version>9.4.30</fp-kontrakter.version>
         <fp-tidsserie.version>2.7.4</fp-tidsserie.version>
@@ -76,6 +76,10 @@
         <dependency>
             <groupId>no.nav.foreldrepenger.felles</groupId>
             <artifactId>felles-auth-filter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.felles</groupId>
+            <artifactId>felles-openapi</artifactId>
         </dependency>
         <dependency>
             <groupId>no.nav.foreldrepenger.felles</groupId>
@@ -244,10 +248,6 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.glassfish.jersey.media</groupId>
-            <artifactId>jersey-media-json-jackson</artifactId>
         </dependency>
 
         <dependency>
