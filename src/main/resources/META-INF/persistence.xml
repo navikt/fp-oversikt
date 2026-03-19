@@ -36,7 +36,7 @@
             <!-- ikke lekk sql statements og sensitive verider til logger etc. ved feil -->
             <property name="hibernate.connection.logServerErrorDetail" value="false" />
 
-            <property name="hibernate.type.json_format_mapper" value="no.nav.foreldrepenger.oversikt.server.JacksonJsonConfig" />
+            <property name="hibernate.type.json_format_mapper" value="no.nav.foreldrepenger.oversikt.server.JacksonFormatMapper" />
 
         </properties>
     </persistence-unit>

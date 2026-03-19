@@ -20,12 +20,12 @@ import no.nav.foreldrepenger.oversikt.oppslag.oversikt.OversiktPersonopplysninge
 import no.nav.foreldrepenger.oversikt.oppslag.svp.SvpPersonopplysningerRest;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
-import no.nav.foreldrepenger.oversikt.server.JacksonJsonConfig;
 import no.nav.foreldrepenger.oversikt.server.error.GeneralRestExceptionMapper;
 import no.nav.foreldrepenger.oversikt.server.error.ValidationExceptionMapper;
 import no.nav.foreldrepenger.oversikt.server.konfig.swagger.OpenApiUtils;
-import no.nav.foreldrepenger.oversikt.server.sikkerhet.AuthenticationFilter;
 import no.nav.foreldrepenger.oversikt.tidslinje.TidslinjeRest;
+import no.nav.vedtak.server.rest.AuthenticationFilter;
+import no.nav.vedtak.server.rest.jackson.Jackson2MapperFeature;
 
 @ApplicationPath(ApiConfig.API_URI)
 public class ApiConfig extends ResourceConfig {
@@ -34,6 +34,8 @@ public class ApiConfig extends ResourceConfig {
     private static final Environment ENV = Environment.current();
 
     public ApiConfig() {
+        register(Jackson2MapperFeature.class); // Standard Jersey Jackson2 konfigurasjon
+        register(AuthenticationFilter.class); // Autentisering
         registerClasses(getFellesConfigClasses());
         if (!ENV.isProd()) {
             registerOpenApi();
@@ -60,10 +62,8 @@ public class ApiConfig extends ResourceConfig {
 
     static Set<Class<?>> getFellesConfigClasses() {
         return  Set.of(
-            AuthenticationFilter.class, // Autentisering
             GeneralRestExceptionMapper.class, // Exception handling
-            ValidationExceptionMapper.class, // Exception handling
-            JacksonJsonConfig.class // Json
+            ValidationExceptionMapper.class // Exception handling
         );
     }
 
