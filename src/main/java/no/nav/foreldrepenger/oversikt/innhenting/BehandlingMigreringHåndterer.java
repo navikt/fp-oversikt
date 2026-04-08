@@ -75,8 +75,8 @@ public class BehandlingMigreringHåndterer implements KafkaMessageHandler.KafkaS
             var hendelse = map(payload);
             hentSak(hendelse);
             hentInntektsmeldinger(hendelse);
-            hentTilbakekreving(hendelse);
-            hentManglendeVedlegg(hendelse);
+//            hentTilbakekreving(hendelse);
+//            hentManglendeVedlegg(hendelse);
             // hentOppgave(hendelse);
         } catch (Exception e) {
             LOG.warn("Feilet ved håndtering av hendelse. Ignorerer {}", key, e);
