@@ -129,7 +129,9 @@ public class HentSakTask implements ProsessTaskHandler {
                 case MANGLENDE_DOKUMENTASJON -> SvpVedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON;
                 case ANNET -> SvpVedtak.AvslagÅrsak.ANNET;
             };
-            return new SvpVedtak(v.vedtakstidspunkt(), arbeidsforhold, avslagÅrsak);
+            var beregningsgrunnlag = tilBeregningsgrunnlag(v.beregningsgrunnlag());
+            var tilkjentYtelse = tilTilkjentYtelse(v.tilkjentYtelse());
+            return new SvpVedtak(v.vedtakstidspunkt(), arbeidsforhold, avslagÅrsak, beregningsgrunnlag, tilkjentYtelse);
         }).collect(Collectors.toSet());
     }
 
@@ -387,7 +389,7 @@ public class HentSakTask implements ProsessTaskHandler {
             tilTilkjentYtelse(vedtakDto.tilkjentYtelse()));
     }
 
-    private static Beregningsgrunnlag tilBeregningsgrunnlag(FpSak.Beregningsgrunnlag beregningsgrunnlag) {
+    private static Beregningsgrunnlag tilBeregningsgrunnlag(no.nav.foreldrepenger.oversikt.innhenting.Beregningsgrunnlag beregningsgrunnlag) {
         if (beregningsgrunnlag == null) {
             return null;
         }
@@ -404,7 +406,7 @@ public class HentSakTask implements ProsessTaskHandler {
         return new Beregningsgrunnlag(beregningsgrunnlag.skjæringstidspunkt(), andeler, statuser, beregningsgrunnlag.grunnbeløp());
     }
 
-    private static TilkjentYtelse tilTilkjentYtelse(FpSak.TilkjentYtelse tilkjentYtelse) {
+    private static TilkjentYtelse tilTilkjentYtelse(no.nav.foreldrepenger.oversikt.innhenting.TilkjentYtelse tilkjentYtelse) {
         if (tilkjentYtelse == null) {
             return null;
         }
@@ -420,7 +422,7 @@ public class HentSakTask implements ProsessTaskHandler {
         return new TilkjentYtelse(utbetalingsPerioder, feriepenger);
     }
 
-    private static TilkjentYtelse.TilkjentYtelsePeriode tilTilkjentYtelsePeriode(FpSak.TilkjentYtelse.TilkjentYtelsePeriode periode) {
+    private static TilkjentYtelse.TilkjentYtelsePeriode tilTilkjentYtelsePeriode(no.nav.foreldrepenger.oversikt.innhenting.TilkjentYtelse.TilkjentYtelsePeriode periode) {
         var andeler = periode.andeler() == null ? List.<TilkjentYtelse.TilkjentYtelsePeriode.Andel>of() : periode.andeler()
             .stream()
             .map(HentSakTask::tilTilkjentYtelseAndel)
@@ -428,27 +430,27 @@ public class HentSakTask implements ProsessTaskHandler {
         return new TilkjentYtelse.TilkjentYtelsePeriode(periode.fom(), periode.tom(), andeler);
     }
 
-    private static TilkjentYtelse.TilkjentYtelsePeriode.Andel tilTilkjentYtelseAndel(FpSak.TilkjentYtelse.TilkjentYtelsePeriode.Andel andel) {
+    private static TilkjentYtelse.TilkjentYtelsePeriode.Andel tilTilkjentYtelseAndel(no.nav.foreldrepenger.oversikt.innhenting.TilkjentYtelse.TilkjentYtelsePeriode.Andel andel) {
         return new TilkjentYtelse.TilkjentYtelsePeriode.Andel(mapAktivitetstatus(andel.aktivitetStatus()), andel.arbeidsgiverIdent(), andel.arbeidsgivernavn(),
             andel.dagsats(), andel.tilBruker(), andel.utbetalingsgrad());
     }
 
-    private static TilkjentYtelse.FeriepengeAndel tilFeriepengeAndel(FpSak.TilkjentYtelse.FeriepengeAndel andel) {
+    private static TilkjentYtelse.FeriepengeAndel tilFeriepengeAndel(no.nav.foreldrepenger.oversikt.innhenting.TilkjentYtelse.FeriepengeAndel andel) {
         return new TilkjentYtelse.FeriepengeAndel(andel.opptjeningsår(), andel.årsbeløp(), andel.arbeidsgiverIdent(), andel.tilBruker());
     }
 
-    private static Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(FpSak.Beregningsgrunnlag.BeregningAktivitetStatus statusMedHjemmelDto) {
+    private static Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(no.nav.foreldrepenger.oversikt.innhenting.Beregningsgrunnlag.BeregningAktivitetStatus statusMedHjemmelDto) {
         return new Beregningsgrunnlag.BeregningAktivitetStatus(mapAktivitetstatus(statusMedHjemmelDto.aktivitetStatus()),
             statusMedHjemmelDto.hjemmel());
     }
 
-    private static Beregningsgrunnlag.BeregningsAndel mapAndel(FpSak.Beregningsgrunnlag.BeregningsAndel andelDto) {
+    private static Beregningsgrunnlag.BeregningsAndel mapAndel(no.nav.foreldrepenger.oversikt.innhenting.Beregningsgrunnlag.BeregningsAndel andelDto) {
         return new Beregningsgrunnlag.BeregningsAndel(mapAktivitetstatus(andelDto.aktivitetStatus()), andelDto.fastsattPrÅr(),
             mapInntektkilde(andelDto.inntektsKilde()), mapArbeidsforhold(andelDto.arbeidsforhold()), andelDto.dagsatsArbeidsgiver(),
             andelDto.dagsatsSøker());
     }
 
-    private static Beregningsgrunnlag.Arbeidsforhold mapArbeidsforhold(FpSak.Beregningsgrunnlag.Arbeidsforhold arbeidsforholdDto) {
+    private static Beregningsgrunnlag.Arbeidsforhold mapArbeidsforhold(no.nav.foreldrepenger.oversikt.innhenting.Beregningsgrunnlag.Arbeidsforhold arbeidsforholdDto) {
         if (arbeidsforholdDto == null) {
             return null;
         }
@@ -456,7 +458,7 @@ public class HentSakTask implements ProsessTaskHandler {
             arbeidsforholdDto.refusjonPrMnd());
     }
 
-    private static Beregningsgrunnlag.InntektsKilde mapInntektkilde(FpSak.Beregningsgrunnlag.InntektsKilde inntektsKilde) {
+    private static Beregningsgrunnlag.InntektsKilde mapInntektkilde(no.nav.foreldrepenger.oversikt.innhenting.Beregningsgrunnlag.InntektsKilde inntektsKilde) {
         return switch (inntektsKilde) {
             case INNTEKTSMELDING -> Beregningsgrunnlag.InntektsKilde.INNTEKTSMELDING;
             case A_INNTEKT -> Beregningsgrunnlag.InntektsKilde.A_INNTEKT;

@@ -155,7 +155,7 @@ class SakerRestTest {
             new SvpSak.Vedtak.ArbeidsforholdUttak.SvpPeriode(now(), now(), SvpSak.TilretteleggingType.DELVIS, new Prosent(50), new Prosent(50),
                 SvpSak.Vedtak.ArbeidsforholdUttak.SvpPeriode.ResultatÅrsak.INNVILGET)), oppholdsperioder, null);
         var sakFraFpsak = new SvpSak(Saksnummer.dummy().value(), innloggetBruker.aktørId().value(), familieHendelse,
-            true, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now(), Set.of(arbeidsforholdUttak), SvpSak.Vedtak.AvslagÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE)));
+            true, ventTidligSøknadAp(), Set.of(søknad), Set.of(new SvpSak.Vedtak(LocalDateTime.now(), Set.of(arbeidsforholdUttak), SvpSak.Vedtak.AvslagÅrsak.ARBEIDSGIVER_KAN_TILRETTELEGGE, null, null)));
         sendBehandlingHendelse(sakFraFpsak, repository);
 
         var sakerFraDBtilDto = tjeneste.hent().svangerskapspenger().stream().toList();

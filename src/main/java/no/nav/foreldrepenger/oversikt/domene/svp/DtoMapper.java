@@ -62,7 +62,9 @@ final class DtoMapper {
             case MANGLENDE_DOKUMENTASJON -> Vedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON;
             case ANNET -> Vedtak.AvslagÅrsak.ANNET;
         };
-        return new Vedtak(a, avslagÅrsak);
+        var bgDto = vedtak.beregningsgrunnlag() == null ? null : vedtak.beregningsgrunnlag().tilDto();
+        var tilkjentYtelseDto = vedtak.tilkjentYtelse() == null ? null : vedtak.tilkjentYtelse().tilDto();
+        return new Vedtak(a, avslagÅrsak, bgDto, tilkjentYtelseDto);
     }
 
 
