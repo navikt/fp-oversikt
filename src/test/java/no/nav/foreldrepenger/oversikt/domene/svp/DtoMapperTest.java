@@ -40,7 +40,7 @@ class DtoMapperTest {
         var arbeidsforholdVedtak = new ArbeidsforholdUttak(aktivitet, now(), "ris", "til",
             Set.of(svpPeriode),
             Set.of(oppholdPeriode), null);
-        var vedtak = new SvpVedtak(LocalDateTime.now(), Set.of(arbeidsforholdVedtak), SvpVedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON);
+        var vedtak = new SvpVedtak(LocalDateTime.now(), Set.of(arbeidsforholdVedtak), SvpVedtak.AvslagÅrsak.MANGLENDE_DOKUMENTASJON, null, null);
         var sakSVP0 = new SakSVP0(Saksnummer.dummy(), AktørId.dummy(), false, new FamilieHendelse(null, termindato, antallBarn, null),
             Set.of(new Aksjonspunkt(Aksjonspunkt.Type.ANNET, null, null)), Set.of(new SvpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now(),
             Set.of(tilrettelegging))), Set.of(vedtak), LocalDateTime.now());

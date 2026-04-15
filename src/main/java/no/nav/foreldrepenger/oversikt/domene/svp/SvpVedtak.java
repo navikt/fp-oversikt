@@ -7,9 +7,14 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import no.nav.foreldrepenger.oversikt.domene.fp.Beregningsgrunnlag;
+import no.nav.foreldrepenger.oversikt.domene.fp.TilkjentYtelse;
+
 public record SvpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtakstidspunkt,
                         @JsonProperty("arbeidsforhold") Set<ArbeidsforholdUttak> arbeidsforhold,
-                        @JsonProperty("avslagÅrsak") AvslagÅrsak avslagÅrsak) {
+                        @JsonProperty("avslagÅrsak") AvslagÅrsak avslagÅrsak,
+                        @JsonProperty("beregningsgrunnlag") Beregningsgrunnlag beregningsgrunnlag,
+                        @JsonProperty("tilkjentYtelse") TilkjentYtelse tilkjentYtelse) {
 
     @Override
     public Set<ArbeidsforholdUttak> arbeidsforhold() {
