@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
+import static no.nav.foreldrepenger.oversikt.domene.fp.VirkedagJusterer.justerUttakPerioder;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -106,7 +107,7 @@ public class AnnenPartSakTjeneste {
             .flatMap(Collection::stream)
             .map(p -> p.tilDto(gjeldendeSak.brukerRolle().tilDto()))
             .toList();
-        return Optional.of(new AnnenPartSak(compress(fjernArbeidsgivere(vedtaksperioder)), termindato, dekningsgrad, antallBarn));
+        return Optional.of(new AnnenPartSak(compress(justerUttakPerioder(fjernArbeidsgivere(vedtaksperioder))), termindato, dekningsgrad, antallBarn));
     }
 
     private static List<UttakPeriode> finnUttaksperioder(ForeldrepengerSak gjeldendeSak) {
@@ -117,12 +118,12 @@ public class AnnenPartSakTjeneste {
                 .flatMap(Collection::stream)
                 .map(p -> p.tilDto(brukerRolle))
                 .toList();
-            return compress(perioder);
+            return compress(justerUttakPerioder(perioder));
         }).orElseGet(() -> {
             LOG.info("Annen parts gjeldende sak har ingen gjeldende vedtak. Saksnummer {}", gjeldendeSak.saksnummer());
             return gjeldendeSak.sisteSøknad().map(s -> {
                 var perioder = s.perioder().stream().map(fpSøknadsperiode -> fpSøknadsperiode.tilDto(brukerRolle)).toList();
-                return compress(perioder);
+                return compress(justerUttakPerioder(perioder));
             }).orElse(List.of());
         });
     }
