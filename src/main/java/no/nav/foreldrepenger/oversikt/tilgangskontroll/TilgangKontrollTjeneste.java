@@ -32,7 +32,7 @@ public class TilgangKontrollTjeneste {
 
     public void tilgangssjekkMyndighetsalder() {
         if (!innloggetBruker.erMyndig()) {
-            throw new ManglerTilgangException(FeilKode.IKKE_TILGANG_UMYNDIG);
+            throw new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG_UMYNDIG);
         }
     }
 
@@ -41,7 +41,7 @@ public class TilgangKontrollTjeneste {
         if (!sakRepository.erSakKobletTilAktør(saksnummer, aktørId)) {
             var alleSaksnummer = sakRepository.hentFor(aktørId).stream().map(s -> s.saksnummer().value()).toList();
             LOG.info("Saksnummer {} ikke koblet til bruker. Brukers saksnummer {}", saksnummer.value(), alleSaksnummer);
-            throw new ManglerTilgangException(FeilKode.IKKE_TILGANG);
+            throw new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG);
         }
     }
 
@@ -50,7 +50,7 @@ public class TilgangKontrollTjeneste {
         if (erBorger(kontekst)) {
             return;
         }
-        throw new ManglerTilgangException(FeilKode.IKKE_TILGANG_IKKE_EKSTERN);
+        throw new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG_IKKE_EKSTERN);
     }
 
     private boolean erBorger(Kontekst kontekst) {

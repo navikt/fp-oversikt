@@ -15,8 +15,8 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.LokalFeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException;
 import no.nav.safselvbetjening.Datotype;
 import no.nav.safselvbetjening.DokumentInfo;
 import no.nav.safselvbetjening.DokumentInfoResponseProjection;
@@ -55,7 +55,7 @@ public class SafSelvbetjeningTjeneste {
         try {
             return safSelvbetjening.hentDokument(new HentDokumentQuery(journalpostId.verdi(), dokumentId.verdi()));
         } catch (no.nav.vedtak.exception.ManglerTilgangException manglerTilgangException) {
-            throw new ManglerTilgangException(FeilKode.IKKE_TILGANG_TIL_DOKUMENT, manglerTilgangException);
+            throw new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG_TIL_DOKUMENT, manglerTilgangException);
         }
     }
 

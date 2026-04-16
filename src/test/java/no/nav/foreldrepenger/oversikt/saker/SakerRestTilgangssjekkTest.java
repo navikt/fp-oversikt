@@ -1,11 +1,5 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
-import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
-import org.junit.jupiter.api.Test;
-
 import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
 import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetSaksbehandlerUtenDrift;
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
@@ -14,9 +8,16 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
 
+import org.junit.jupiter.api.Test;
+
+import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.LokalFeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
+
 class SakerRestTilgangssjekkTest {
 
-    private final static Saker saker = mock(Saker.class);
+    private static final Saker saker = mock(Saker.class);
 
 
     @Test
@@ -32,7 +33,7 @@ class SakerRestTilgangssjekkTest {
         var innloggetBruker = myndigInnloggetBruker();
         var tilgangskontroll = new TilgangKontrollTjeneste(null, innloggetBruker);
         var myndigCase = new SakerRest(saker, mock(SafSelvbetjeningTjeneste.class), innloggetBruker, tilgangskontroll);
-        assertThatThrownBy(myndigCase::hent).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(myndigCase::hent).isExactlyInstanceOf(OversiktManglerTilgangException.class);
     }
 
     @Test
@@ -42,9 +43,9 @@ class SakerRestTilgangssjekkTest {
         var tilgangskontroll = new TilgangKontrollTjeneste(null, innloggetBruker);
         var umyndigCase = new SakerRest(saker, mock(SafSelvbetjeningTjeneste.class), innloggetBruker, tilgangskontroll);
         assertThatThrownBy(umyndigCase::hent)
-            .isInstanceOf(ManglerTilgangException.class)
-            .extracting("feilKode")
-            .isEqualTo(FeilKode.IKKE_TILGANG_UMYNDIG);
+            .isInstanceOf(OversiktManglerTilgangException.class)
+            .extracting(e -> ((OversiktManglerTilgangException)e).getFeilkode())
+            .isEqualTo(LokalFeilKode.IKKE_TILGANG_UMYNDIG.name());
     }
 
 }

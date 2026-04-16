@@ -2,11 +2,13 @@ package no.nav.foreldrepenger.oversikt.server;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
-import no.nav.foreldrepenger.oversikt.server.error.GeneralRestExceptionMapper;
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.LokalFeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException;
+import no.nav.vedtak.feil.FeilDto;
+import no.nav.vedtak.feil.Feilkode;
+import no.nav.vedtak.server.rest.GeneralRestExceptionMapper;
 
 
 class GeneralRestExceptionMapperTest {
@@ -15,21 +17,24 @@ class GeneralRestExceptionMapperTest {
 
     @Test
     void umyndigBrukerException_gir_403_med_problem_details() {
-        var throwable = new ManglerTilgangException(FeilKode.IKKE_TILGANG_UMYNDIG);
-        var response = mapper.toResponse(throwable);
-        assertThat(response.getStatus()).isEqualTo(403);
-        assertThat(response.getEntity())
-            .isInstanceOf(ProblemDetails.class)
-            .extracting("feilKode", "status")
-            .contains(FeilKode.IKKE_TILGANG_UMYNDIG, 403);
+        var throwable = new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG_UMYNDIG);
+        try (var response = mapper.toResponse(throwable)) {
+            assertThat(response.getStatus()).isEqualTo(403);
+            assertThat(response.getEntity()).isInstanceOf(FeilDto.class)
+                .extracting(e -> ((FeilDto) e).feilkode())
+                .isEqualTo(LokalFeilKode.IKKE_TILGANG_UMYNDIG.name());
+        }
     }
 
     @Test
-    void annen_exception_gir_500_uten_problem_details() {
+    void annen_exception_gir_500_generell() {
         var throwable = new IllegalStateException("Test");
-        var response = mapper.toResponse(throwable);
-        assertThat(response.getStatus()).isEqualTo(500);
-        assertThat(response.getEntity()).isNull();
+        try (var response = mapper.toResponse(throwable)) {
+            assertThat(response.getStatus()).isEqualTo(500);
+            assertThat(response.getEntity()).isInstanceOf(FeilDto.class)
+                .extracting(e -> ((FeilDto) e).feilkode())
+                .isEqualTo(Feilkode.GENERELL.name());
+        }
     }
 
 

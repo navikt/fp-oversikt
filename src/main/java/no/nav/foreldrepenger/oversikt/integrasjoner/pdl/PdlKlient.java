@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.Dependent;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.FeilKode;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.LokalFeilKode;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException;
 import no.nav.pdl.FoedselsdatoResponseProjection;
 import no.nav.pdl.FolkeregisteridentifikatorResponseProjection;
 import no.nav.pdl.HentPersonQueryRequest;
@@ -51,7 +51,7 @@ public class PdlKlient extends AbstractPersonKlient {
             // TODO vurder ikke-tilgang for alle tilfelle der man mangler en aktiv (i_bruk) identifikator
             LOG.warn("Person uten aktiv identifikator i PDL for fnr {}", partialMask(fnr, 5));
         }
-        var fødselsdato = PersonMappers.mapFødselsdato(person).orElseThrow(() -> new ManglerTilgangException(FeilKode.IKKE_TILGANG_INAKTIV));
+        var fødselsdato = PersonMappers.mapFødselsdato(person).orElseThrow(() -> new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG_INAKTIV));
         FNR_FØDT.put(fnr, fødselsdato);
         return fødselsdato;
     }

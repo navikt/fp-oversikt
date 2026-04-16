@@ -37,7 +37,7 @@ class TilgangKontrollTjenesteTest {
         when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
         KontekstHolder.setKontekst(kontekst);
 
-        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraBorger()).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraBorger()).isExactlyInstanceOf(OversiktManglerTilgangException.class);
     }
 
 
@@ -63,7 +63,7 @@ class TilgangKontrollTjenesteTest {
         var saksnummer = Saksnummer.dummy();
         when(innloggetBruker.aktørId()).thenReturn(AktørId.dummy());
         when(sakRepository.erSakKobletTilAktør(any(), any())).thenReturn(false);
-        assertThatThrownBy(() -> tilgangkontroll.sakKobletTilAktørGuard(saksnummer)).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> tilgangkontroll.sakKobletTilAktørGuard(saksnummer)).isExactlyInstanceOf(OversiktManglerTilgangException.class);
     }
 
 
@@ -71,7 +71,7 @@ class TilgangKontrollTjenesteTest {
     void skalHiveExceptionVedUmyndig() {
         when(innloggetBruker.erMyndig()).thenReturn(false);
         assertThatThrownBy(() -> tilgangkontroll.tilgangssjekkMyndighetsalder())
-            .isExactlyInstanceOf(ManglerTilgangException.class);
+            .isExactlyInstanceOf(OversiktManglerTilgangException.class);
     }
 
     @Test

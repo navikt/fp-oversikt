@@ -19,7 +19,7 @@ public interface PersonOppslagSystem {
                 return Optional.empty();
             }
             return Optional.of(fnr);
-        } catch (BrukerIkkeFunnetIPdlException e) {
+        } catch (BrukerIkkeFunnetIPdlException _) {
             return Optional.empty();
         }
     }

@@ -20,11 +20,12 @@ import no.nav.foreldrepenger.oversikt.oppslag.oversikt.OversiktPersonopplysninge
 import no.nav.foreldrepenger.oversikt.oppslag.svp.SvpPersonopplysningerRest;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
-import no.nav.foreldrepenger.oversikt.server.error.GeneralRestExceptionMapper;
-import no.nav.foreldrepenger.oversikt.server.error.ValidationExceptionMapper;
-import no.nav.foreldrepenger.oversikt.server.konfig.swagger.OpenApiUtils;
+import no.nav.foreldrepenger.oversikt.server.error.LokalValidationExceptionMapper;
+import no.nav.foreldrepenger.oversikt.server.konfig.swagger.TypegenereringFrontendOpenApiReader;
 import no.nav.foreldrepenger.oversikt.tidslinje.TidslinjeRest;
+import no.nav.vedtak.openapi.OpenApiUtils;
 import no.nav.vedtak.server.rest.AuthenticationFilter;
+import no.nav.vedtak.server.rest.GeneralRestExceptionMapper;
 import no.nav.vedtak.server.rest.jackson.Jackson2MapperFeature;
 
 @ApplicationPath(ApiConfig.API_URI)
@@ -34,9 +35,11 @@ public class ApiConfig extends ResourceConfig {
     private static final Environment ENV = Environment.current();
 
     public ApiConfig() {
+        // Nesten standard FpRestJackson2-oppsett, men lokale tilpasninger av exceptions.
         register(Jackson2MapperFeature.class); // Standard Jersey Jackson2 konfigurasjon
-        register(AuthenticationFilter.class); // Autentisering
-        registerClasses(getFellesConfigClasses());
+        register(AuthenticationFilter.class); // Felles Autentisering
+        register(GeneralRestExceptionMapper.class); // Felles Exception handling
+        register(LokalValidationExceptionMapper.class); // Exception handling
         if (!ENV.isProd()) {
             registerOpenApi();
         }
@@ -60,13 +63,6 @@ public class ApiConfig extends ResourceConfig {
         );
     }
 
-    static Set<Class<?>> getFellesConfigClasses() {
-        return  Set.of(
-            GeneralRestExceptionMapper.class, // Exception handling
-            ValidationExceptionMapper.class // Exception handling
-        );
-    }
-
 
     static Map<String, Object> getApplicationProperties() {
         Map<String, Object> properties = new HashMap<>();
@@ -77,8 +73,9 @@ public class ApiConfig extends ResourceConfig {
     }
 
     private void registerOpenApi() {
-        OpenApiUtils.openApiConfigFor("Fpoversikt - specifikasjon for typegenerering frontend", this)
-            .readerClassTypegenereingFrontend()
+        var contextPath = ENV.getProperty("context.path", "/fpoversikt");
+        OpenApiUtils.openApiConfigFor("FPOVERSIKT Forvaltning - saksoversikt", contextPath,this)
+            .readerClass(TypegenereringFrontendOpenApiReader.class)
             .registerClasses(getApplicationClasses())
             .buildOpenApiContext();
         register(OpenApiResource.class);
