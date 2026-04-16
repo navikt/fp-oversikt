@@ -19,8 +19,4 @@ public class OversiktManglerTilgangException extends ManglerTilgangException {
     public String getFeilkode() {
         return lokalFeilKode.name();
     }
-
-    public LokalFeilKode getLokalFeilKode() {
-        return lokalFeilKode;
-    }
 }

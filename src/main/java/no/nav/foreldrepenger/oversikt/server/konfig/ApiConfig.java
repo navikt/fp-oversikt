@@ -39,7 +39,7 @@ public class ApiConfig extends ResourceConfig {
         register(Jackson2MapperFeature.class); // Standard Jersey Jackson2 konfigurasjon
         register(AuthenticationFilter.class); // Felles Autentisering
         register(GeneralRestExceptionMapper.class); // Felles Exception handling
-        register(LokalValidationExceptionMapper.class); // Exception handling
+        register(LokalValidationExceptionMapper.class); // Lokal exception handling med utvidet logging
         if (!ENV.isProd()) {
             registerOpenApi();
         }
