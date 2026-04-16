@@ -34,7 +34,8 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
         var bgDto = beregningsgrunnlag == null ? null : beregningsgrunnlag.tilDto();
         var tilkjentYtelseDto = tilkjentYtelse == null ? null : tilkjentYtelse.tilDto();
 
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak(compress(sortertUttaksperioder), sortertUttaksperioderAnnenpartEøs, bgDto, tilkjentYtelseDto);
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.FpVedtak(compress(VirkedagJusterer.justerUttakPerioder(sortertUttaksperioder)),
+            VirkedagJusterer.justerEøsPerioder(sortertUttaksperioderAnnenpartEøs), bgDto, tilkjentYtelseDto);
     }
 
     public boolean innvilget() {

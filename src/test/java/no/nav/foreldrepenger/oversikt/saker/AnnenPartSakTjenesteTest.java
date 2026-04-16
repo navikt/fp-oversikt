@@ -134,9 +134,9 @@ class AnnenPartSakTjenesteTest {
         var repository = new RepositoryStub();
         var aktørIdAnnenPart = AktørId.dummy();
         var aktørIdSøker = AktørId.dummy();
-        var termindato = LocalDate.now().plusMonths(1);
+        var termindato = LocalDate.of(2026, 5, 18); // mandag
         var antallBarn = 2;
-        var søknadsperiode = new FpSøknadsperiode(termindato, termindato.plusWeeks(10), Konto.MØDREKVOTE, null, null, null, null, null, false, null);
+        var søknadsperiode = new FpSøknadsperiode(termindato, LocalDate.of(2026, 7, 24), Konto.MØDREKVOTE, null, null, null, null, null, false, null);
         var annenPartsSak = sakUtenVedtak(aktørIdAnnenPart, aktørIdSøker, termindato, Dekningsgrad.ÅTTI, antallBarn, Set.of(søknadsperiode));
         repository.lagre(annenPartsSak);
         var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
