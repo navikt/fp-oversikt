@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.ManglerTilgangException;
+import no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 
 class AnnenPartRestAutoriseringTest {
@@ -37,7 +37,7 @@ class AnnenPartRestAutoriseringTest {
 
         var request = new AnnenPartRest.AnnenPartRequest(new Fødselsnummer("1"), null, null);
 
-        assertThatThrownBy(() -> annenPartRest.hentVedtak(request)).isExactlyInstanceOf(ManglerTilgangException.class);
+        assertThatThrownBy(() -> annenPartRest.hentVedtak(request)).isExactlyInstanceOf(OversiktManglerTilgangException.class);
     }
 
     @Test

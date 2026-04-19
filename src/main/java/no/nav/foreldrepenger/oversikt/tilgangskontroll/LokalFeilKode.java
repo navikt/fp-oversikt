@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.oversikt.tilgangskontroll;
 
-public enum FeilKode {
+public enum LokalFeilKode {
 
     IKKE_TILGANG("Ikke tilgang"),
     IKKE_TILGANG_TIL_DOKUMENT("Dokumentet tilhører ikke bruker i token og/eller ingen fullmakt finnes"),
@@ -11,7 +11,7 @@ public enum FeilKode {
 
     private final String beskrivelse;
 
-    FeilKode(String beskrivelse) {
+    LokalFeilKode(String beskrivelse) {
         this.beskrivelse = beskrivelse;
     }
 
