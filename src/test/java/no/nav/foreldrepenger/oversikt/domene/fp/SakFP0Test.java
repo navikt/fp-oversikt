@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static java.time.LocalDate.now;
+import static java.time.temporal.TemporalAdjusters.next;
 import static java.util.Set.of;
 import static no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak.FAR_MEDMOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.FAR;
@@ -15,6 +16,7 @@ import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.Resultat.Å
 import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -40,7 +42,8 @@ class SakFP0Test {
 
     @Test
     void verifiser_at_gjeldende_vedtak_er_det_med_senest_vedtakstidspunkt() {
-        var uttaksperioderGjeldendeVedtak = List.of(uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO)));
+        var uttakfom = now().getDayOfWeek().compareTo(DayOfWeek.FRIDAY) > 0 ? now().with(next(DayOfWeek.MONDAY)) : now();
+        var uttaksperioderGjeldendeVedtak = List.of(uttaksperiode(uttakfom, uttakfom.plusMonths(1), innvilget(ZERO)));
         var gjeldendeVedtak = new FpVedtak(LocalDateTime.now(), uttaksperioderGjeldendeVedtak, Dekningsgrad.ÅTTI, null, null, null);
         var tidligereVedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO)),
             uttaksperiode(now().plusMonths(1), now().plusMonths(2), innvilget(ZERO))), Dekningsgrad.HUNDRE, null, null, null);

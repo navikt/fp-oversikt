@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import static java.time.LocalDate.now;
+import static java.time.temporal.TemporalAdjusters.next;
 import static no.nav.foreldrepenger.oversikt.KontekstTestHelper.innloggetBorger;
 import static no.nav.foreldrepenger.oversikt.innhenting.BehandlingHendelseHåndterer.opprettHentSakTask;
 import static no.nav.foreldrepenger.oversikt.innhenting.FpSak.BrukerRolle.MOR;
@@ -12,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.math.BigDecimal;
+import java.time.DayOfWeek;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
@@ -70,9 +72,10 @@ class SakerRestTest {
                 mock(TilgangKontrollTjeneste.class)
         );
 
+        var uttakfom = now().getDayOfWeek().compareTo(DayOfWeek.FRIDAY) > 0 ? now().with(next(DayOfWeek.MONDAY)) : now();
         var arbeidstidsprosent = new Prosent(BigDecimal.valueOf(33.33));
         var aktivitet = new FpSak.UttakAktivitet(FpSak.UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString());
-        var uttaksperiodeDto = new Uttaksperiode(now().minusWeeks(4), now().minusWeeks(2), UtsettelseÅrsak.FRI,
+        var uttaksperiodeDto = new Uttaksperiode(uttakfom.minusWeeks(4), uttakfom.minusWeeks(2), UtsettelseÅrsak.FRI,
             OppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER, OverføringÅrsak.IKKE_RETT_ANNEN_FORELDER, null, true, MorsAktivitet.INNLAGT,
             new Resultat(Type.INNVILGET_GRADERING, Årsak.ANNET,
                 Set.of(new Uttaksperiode.UttaksperiodeAktivitet(aktivitet, Konto.FORELDREPENGER, new Trekkdager(10), arbeidstidsprosent)), false));
