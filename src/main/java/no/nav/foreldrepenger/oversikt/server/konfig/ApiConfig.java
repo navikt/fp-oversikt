@@ -6,6 +6,8 @@ import java.util.Set;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.ApplicationPath;
@@ -20,26 +22,23 @@ import no.nav.foreldrepenger.oversikt.oppslag.oversikt.OversiktPersonopplysninge
 import no.nav.foreldrepenger.oversikt.oppslag.svp.SvpPersonopplysningerRest;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
-import no.nav.foreldrepenger.oversikt.server.error.LokalValidationExceptionMapper;
 import no.nav.foreldrepenger.oversikt.server.konfig.swagger.TypegenereringFrontendOpenApiReader;
 import no.nav.foreldrepenger.oversikt.tidslinje.TidslinjeRest;
 import no.nav.vedtak.openapi.OpenApiUtils;
-import no.nav.vedtak.server.rest.AuthenticationFilter;
-import no.nav.vedtak.server.rest.GeneralRestExceptionMapper;
-import no.nav.vedtak.server.rest.jackson.Jackson2MapperFeature;
+import no.nav.vedtak.server.rest.FeilUtils;
+import no.nav.vedtak.server.rest.FpRestJackson2Feature;
 
 @ApplicationPath(ApiConfig.API_URI)
 public class ApiConfig extends ResourceConfig {
 
     public static final String API_URI = "/api";
     private static final Environment ENV = Environment.current();
+    private static final Logger SECURE_LOG = LoggerFactory.getLogger("secureLogger");
 
     public ApiConfig() {
         // Nesten standard FpRestJackson2-oppsett, men lokale tilpasninger av exceptions.
-        register(Jackson2MapperFeature.class); // Standard Jersey Jackson2 konfigurasjon
-        register(AuthenticationFilter.class); // Felles Autentisering
-        register(GeneralRestExceptionMapper.class); // Felles Exception handling
-        register(LokalValidationExceptionMapper.class); // Lokal exception handling med utvidet logging
+        register(FpRestJackson2Feature.class); // Standard Jersey Jackson2 konfigurasjon
+        FeilUtils.setSikkerlogg(SECURE_LOG); // Sørger for logging av feil (validering og annet)  til sikkerlogg
         if (!ENV.isProd()) {
             registerOpenApi();
         }
