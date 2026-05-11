@@ -4,9 +4,13 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -20,11 +24,14 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
 /**
  * Tjeneste for å vurdere om det kreves dokumentasjon for søknadsperioder med aktivitetskrav arbeid.
  * <p>
- * Krever dokumentasjon dersom det ikke finnes arbeidsforhold med stillingsprosent >= 75% for alle søknadsperiodene
- * Krever også dokumentasjon dersom det finnes permisjoner i noen av søknadsperiodene.
+ * Krever dokumentasjon dersom det ikke finnes arbeidsforhold med stillingsprosent >= 75% for uttaksperiodene (>= 1% for utsettelse).
+ * For uttak med fellesperiode (begge har rett) ses det bort fra permisjoner.
+ * For uttak med bare far har rett, og for utsettelse, kreves også dokumentasjon dersom det finnes permisjoner.
  */
 @ApplicationScoped
 public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.class);
 
     private static final Set<ArbeidType> RELEVANT_ARBEID = Set.of(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, ArbeidType.MARITIMT_ARBEIDSFORHOLD);
 
@@ -64,22 +71,26 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
             return true;
         }
 
-        var tidslinjeUttak = request.aktivitetskravPerioder().stream()
-            .filter(p -> PeriodeMedAktivitetskravType.UTTAK.equals(p.getValue()))
-            .map(p -> new LocalDateSegment<>(p.getLocalDateInterval(), BigDecimal.ZERO))
-            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
+        // Bakoverkompatibel: gammel frontend sender UTTAK/UTSETTELSE - kan fjernes etterhvert
+        var tidslinjeUttak = lagTidslinje(request, PeriodeMedAktivitetskravType.UTTAK);
+        var tidslinjeUtsettelse = lagTidslinje(request, PeriodeMedAktivitetskravType.UTSETTELSE);
+        if (!tidslinjeUttak.isEmpty() || !tidslinjeUtsettelse.isEmpty()) {
+            LOG.info("AKTIVITETSKRAV: Mottok gamle periodetyper UTTAK/UTSETTELSE - gammel frontend i bruk");
+        }
 
-        var tidslinjeUtsettelse = request.aktivitetskravPerioder().stream()
-            .filter(p -> PeriodeMedAktivitetskravType.UTSETTELSE.equals(p.getValue()))
-            .map(p -> new LocalDateSegment<>(p.getLocalDateInterval(), BigDecimal.ZERO))
-            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
+        var tidslinjeUttakBfhr = lagTidslinje(request, PeriodeMedAktivitetskravType.UTTAK_BFHR);
+        var tidslinjeUttakFellesperiode = lagTidslinje(request, PeriodeMedAktivitetskravType.UTTAK_FELLESPERIODE);
+        var tidslinjeUtsettelseBfhr = lagTidslinje(request, PeriodeMedAktivitetskravType.UTSETTELSE_BFHR);
 
-        return (!tidslinjeUttak.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttak, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet))
-            || !tidslinjeUtsettelse.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUtsettelse, KRAV_FOR_DOKUMENTASJON_UTSETTELSE, morsAktivitet);
+        return (!tidslinjeUttak.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttak, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet, true))
+            || (!tidslinjeUttakBfhr.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttakBfhr, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet, true))
+            || (!tidslinjeUttakFellesperiode.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttakFellesperiode, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet, false))
+            || (!tidslinjeUtsettelse.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUtsettelse, KRAV_FOR_DOKUMENTASJON_UTSETTELSE, morsAktivitet, true))
+            || (!tidslinjeUtsettelseBfhr.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUtsettelseBfhr, KRAV_FOR_DOKUMENTASJON_UTSETTELSE, morsAktivitet, true));
     }
 
     private boolean finnesBehovForDokumentasjon(LocalDateTimeline<BigDecimal> requestTidslinje, BigDecimal minsteStillingsprosent,
-                                                Map<ArbeidsforholdIdentifikator, List<Arbeidsforhold>> morsAktivitet) {
+                                                Map<ArbeidsforholdIdentifikator, List<Arbeidsforhold>> morsAktivitet, boolean sjekkPermisjoner) {
         List<LocalDateTimeline<BigDecimal>> tidslinjerPrArbeidsforhold = new ArrayList<>();
 
         var requestSpanTidslinje = new LocalDateTimeline<>(requestTidslinje.getMinLocalDate(), requestTidslinje.getMaxLocalDate(), BigDecimal.ZERO);
@@ -88,12 +99,14 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
         // Med litt raffinering av logikk kan det hende vi skal se på å aggregere opp til arbeidsgiver også. Kommer an på regelutformingen.
         for (var entry : morsAktivitet.entrySet()) {
             var arbeidsforholdMedSammeId = entry.getValue();
-            // Sjekker om det finnes permisjoner i noen av de søkte periodene. Denne vil ha behov for tuning etterhvert (fx stilling 0% med permisjon).
-            var permisjonProsentTidslinje = permisjonTidslinje(arbeidsforholdMedSammeId, requestTidslinje);
-            var harPermisjonForRequestPerioder = permisjonProsentTidslinje.intersection(requestTidslinje).stream()
-                .anyMatch(s -> s.getValue().compareTo(BigDecimal.ZERO) > 0);
-            if (harPermisjonForRequestPerioder) {
-                return true;
+            // Sjekker om det finnes permisjoner i noen av de søkte periodene.
+            if (sjekkPermisjoner) {
+                var permisjonProsentTidslinje = permisjonTidslinje(arbeidsforholdMedSammeId, requestTidslinje);
+                var harPermisjonForRequestPerioder = permisjonProsentTidslinje.intersection(requestTidslinje).stream()
+                    .anyMatch(s -> s.getValue().compareTo(BigDecimal.ZERO) > 0);
+                if (harPermisjonForRequestPerioder) {
+                    return true;
+                }
             }
             // Lager tidslinje med stillingsprosent fra Aa-register, fyller på med 0% for perioder uten arbeid og beskjærer mot request.
             var stillingsprosentTidslinje = stillingsprosentTidslinje(arbeidsforholdMedSammeId);
@@ -107,6 +120,13 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
 
         // Krever dokumentasjon dersom en av request-periodene har arbeid under 75%.
         return summertStillingsprosent.stream().anyMatch(s -> s.getValue().compareTo(minsteStillingsprosent) < 0);
+    }
+
+    private static LocalDateTimeline<BigDecimal> lagTidslinje(PerioderMedAktivitetskravArbeid request, PeriodeMedAktivitetskravType type) {
+        return request.aktivitetskravPerioder().stream()
+            .filter(p -> Objects.equals(p.getValue(), type))
+            .map(p -> new LocalDateSegment<>(p.getLocalDateInterval(), BigDecimal.ZERO))
+            .collect(Collectors.collectingAndThen(Collectors.toList(), l -> new LocalDateTimeline<>(l, bigDesimalSum())));
     }
 
     private static LocalDateTimeline<BigDecimal> summerStillingsprosentTidslinje(LocalDateTimeline<BigDecimal> requestTidslinje,

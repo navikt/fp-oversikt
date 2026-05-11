@@ -135,7 +135,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     private static ArbeidRest.MorArbeidRequest dummyKombinertRequestUttak() {
         return new ArbeidRest.MorArbeidRequest(DUMMY_FNR_ANNENPART, DUMMY_FNR_BARN, LocalDate.now(),
             List.of(new ArbeidRest.PeriodeRequest(LocalDate.now().minusWeeks(3), LocalDate.now(), PeriodeMedAktivitetskravType.UTTAK),
-                new ArbeidRest.PeriodeRequest(LocalDate.now().plusDays(1), LocalDate.now().plusWeeks(4), PeriodeMedAktivitetskravType.UTSETTELSE),
+                new ArbeidRest.PeriodeRequest(LocalDate.now().plusDays(1), LocalDate.now().plusWeeks(4), PeriodeMedAktivitetskravType.UTSETTELSE_BFHR),
                 new ArbeidRest.PeriodeRequest(LocalDate.now().plusWeeks(4).plusDays(1), LocalDate.now().plusWeeks(6), PeriodeMedAktivitetskravType.UTTAK)
             ));
     }
