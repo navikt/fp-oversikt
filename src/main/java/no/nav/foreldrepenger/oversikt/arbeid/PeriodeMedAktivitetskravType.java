@@ -4,5 +4,8 @@ import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 public enum PeriodeMedAktivitetskravType {
     @JsonEnumDefaultValue UTTAK,
-    UTSETTELSE
+    UTTAK_FELLESPERIODE,
+    UTTAK_BFHR,
+    UTSETTELSE,
+    UTSETTELSE_BFHR
 }

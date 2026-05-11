@@ -78,7 +78,7 @@ class MorsAktivitetTest {
     }
 
     @Test
-    void happy_case_ett_arbeidsforhold_permisjon_som_matcher_søknad_trenger_dokumentasjon() {
+    void happy_case_ett_arbeidsforhold_permisjon_uttak_fellesperiode_trenger_ikke_dokumentasjon() {
         var alltid = new ArbeidsforholdRS.PeriodeRS(LocalDate.MIN, LocalDate.MAX);
         var perm = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1));
         var response = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
@@ -88,7 +88,60 @@ class MorsAktivitetTest {
             List.of(new ArbeidsforholdRS.PermisjonPermitteringRS(perm, FEMTI_PROSENT, PermType.ANNEN_PERMISJON_IKKE_LOVFESTET)),
             ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
 
-        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(uttakSegment(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(uttakFellesperiodeSegment(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var resultat = kallTjeneste(søknad, List.of(response));
+        assertThat(resultat).isFalse();
+    }
+
+    @Test
+    void ett_arbeidsforhold_permisjon_uttak_bfhr_trenger_dokumentasjon() {
+        var alltid = new ArbeidsforholdRS.PeriodeRS(LocalDate.MIN, LocalDate.MAX);
+        var perm = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1));
+        var response = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(alltid),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, alltid)),
+            List.of(new ArbeidsforholdRS.PermisjonPermitteringRS(perm, FEMTI_PROSENT, PermType.ANNEN_PERMISJON_IKKE_LOVFESTET)),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(uttakBfhrSegment(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var resultat = kallTjeneste(søknad, List.of(response));
+        assertThat(resultat).isTrue();
+    }
+
+    @Test
+    void to_arbeidsforhold_permisjon_uttak_fellesperiode_trenger_ikke_dokumentasjon() {
+        var alltid = new ArbeidsforholdRS.PeriodeRS(LocalDate.MIN, LocalDate.MAX);
+        var perm = new ArbeidsforholdRS.PeriodeRS(LocalDate.now().minusMonths(1), LocalDate.now().plusMonths(1));
+        var response1 = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(alltid),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(HUNDRE_PROSENT, alltid)),
+            List.of(new ArbeidsforholdRS.PermisjonPermitteringRS(perm, HUNDRE_PROSENT, PermType.PERMISJON_MED_FORELDREPENGER)),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+        var response2 = new ArbeidsforholdRS(ARBFORHOLD2, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(alltid),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(NULL_PROSENT, alltid)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(uttakFellesperiodeSegment(LocalDate.now(), LocalDate.now().plusDays(1))));
+        var resultat = kallTjeneste(søknad, List.of(response1, response2));
+        assertThat(resultat).isFalse();
+    }
+
+    @Test
+    void uttak_fellesperiode_under_75_prosent_trenger_dokumentasjon() {
+        var alltid = new ArbeidsforholdRS.PeriodeRS(LocalDate.MIN, LocalDate.MAX);
+        var response = new ArbeidsforholdRS(ARBFORHOLD1, 123L,
+            new ArbeidsforholdRS.OpplysningspliktigArbeidsgiverRS(ArbeidsforholdRS.OpplysningspliktigType.ORGANISASJON, ARBGIVER1, null, null),
+            new ArbeidsforholdRS.AnsettelsesperiodeRS(alltid),
+            List.of(new ArbeidsforholdRS.ArbeidsavtaleRS(FEMTI_PROSENT, alltid)),
+            List.of(),
+            ArbeidType.ORDINÆRT_ARBEIDSFORHOLD);
+
+        var søknad = new PerioderMedAktivitetskravArbeid(FNR, List.of(uttakFellesperiodeSegment(LocalDate.now(), LocalDate.now().plusDays(1))));
         var resultat = kallTjeneste(søknad, List.of(response));
         assertThat(resultat).isTrue();
     }
@@ -321,8 +374,16 @@ class MorsAktivitetTest {
         return new LocalDateSegment<>(fom, tom, PeriodeMedAktivitetskravType.UTTAK);
     }
 
+    private static LocalDateSegment<PeriodeMedAktivitetskravType> uttakFellesperiodeSegment(LocalDate fom, LocalDate tom) {
+        return new LocalDateSegment<>(fom, tom, PeriodeMedAktivitetskravType.UTTAK_FELLESPERIODE);
+    }
+
+    private static LocalDateSegment<PeriodeMedAktivitetskravType> uttakBfhrSegment(LocalDate fom, LocalDate tom) {
+        return new LocalDateSegment<>(fom, tom, PeriodeMedAktivitetskravType.UTTAK_BFHR);
+    }
+
     private static LocalDateSegment<PeriodeMedAktivitetskravType> utsettelseSegment(LocalDate fom, LocalDate tom) {
-        return new LocalDateSegment<>(fom, tom, PeriodeMedAktivitetskravType.UTSETTELSE);
+        return new LocalDateSegment<>(fom, tom, PeriodeMedAktivitetskravType.UTSETTELSE_BFHR);
     }
 
 }
