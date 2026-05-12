@@ -9,9 +9,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.integrasjoner.aareg.ArbeidType;
@@ -30,8 +27,6 @@ import no.nav.fpsak.tidsserie.StandardCombinators;
  */
 @ApplicationScoped
 public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
-
-    private static final Logger LOG = LoggerFactory.getLogger(AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.class);
 
     private static final Set<ArbeidType> RELEVANT_ARBEID = Set.of(ArbeidType.ORDINÆRT_ARBEIDSFORHOLD, ArbeidType.MARITIMT_ARBEIDSFORHOLD);
 
@@ -71,21 +66,12 @@ public class AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste {
             return true;
         }
 
-        // Bakoverkompatibel: gammel frontend sender UTTAK/UTSETTELSE - kan fjernes etterhvert
-        var tidslinjeUttak = lagTidslinje(request, PeriodeMedAktivitetskravType.UTTAK);
-        var tidslinjeUtsettelse = lagTidslinje(request, PeriodeMedAktivitetskravType.UTSETTELSE);
-        if (!tidslinjeUttak.isEmpty() || !tidslinjeUtsettelse.isEmpty()) {
-            LOG.info("AKTIVITETSKRAV: Mottok gamle periodetyper UTTAK/UTSETTELSE - gammel frontend i bruk");
-        }
-
         var tidslinjeUttakBfhr = lagTidslinje(request, PeriodeMedAktivitetskravType.UTTAK_BFHR);
         var tidslinjeUttakFellesperiode = lagTidslinje(request, PeriodeMedAktivitetskravType.UTTAK_FELLESPERIODE);
         var tidslinjeUtsettelseBfhr = lagTidslinje(request, PeriodeMedAktivitetskravType.UTSETTELSE_BFHR);
 
-        return (!tidslinjeUttak.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttak, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet, true))
-            || (!tidslinjeUttakBfhr.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttakBfhr, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet, true))
+        return (!tidslinjeUttakBfhr.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttakBfhr, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet, true))
             || (!tidslinjeUttakFellesperiode.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUttakFellesperiode, KRAV_FOR_DOKUMENTASJON_UTTAK, morsAktivitet, false))
-            || (!tidslinjeUtsettelse.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUtsettelse, KRAV_FOR_DOKUMENTASJON_UTSETTELSE, morsAktivitet, true))
             || (!tidslinjeUtsettelseBfhr.isEmpty() && finnesBehovForDokumentasjon(tidslinjeUtsettelseBfhr, KRAV_FOR_DOKUMENTASJON_UTSETTELSE, morsAktivitet, true));
     }
 

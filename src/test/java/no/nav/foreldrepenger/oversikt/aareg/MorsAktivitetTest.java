@@ -371,7 +371,7 @@ class MorsAktivitetTest {
     }
 
     private static LocalDateSegment<PeriodeMedAktivitetskravType> uttakSegment(LocalDate fom, LocalDate tom) {
-        return new LocalDateSegment<>(fom, tom, PeriodeMedAktivitetskravType.UTTAK);
+        return new LocalDateSegment<>(fom, tom, PeriodeMedAktivitetskravType.UTTAK_BFHR);
     }
 
     private static LocalDateSegment<PeriodeMedAktivitetskravType> uttakFellesperiodeSegment(LocalDate fom, LocalDate tom) {
