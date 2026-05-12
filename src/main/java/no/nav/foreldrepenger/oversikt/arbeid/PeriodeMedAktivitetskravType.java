@@ -3,9 +3,7 @@ package no.nav.foreldrepenger.oversikt.arbeid;
 import com.fasterxml.jackson.annotation.JsonEnumDefaultValue;
 
 public enum PeriodeMedAktivitetskravType {
-    @JsonEnumDefaultValue UTTAK,
     UTTAK_FELLESPERIODE,
-    UTTAK_BFHR,
-    UTSETTELSE,
+    @JsonEnumDefaultValue UTTAK_BFHR, //Frontend skal egentlig ikke sende inn verdi her, men setter default til bfhr siden den er strengest
     UTSETTELSE_BFHR
 }

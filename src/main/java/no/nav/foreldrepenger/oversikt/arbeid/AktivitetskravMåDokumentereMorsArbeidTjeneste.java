@@ -74,7 +74,7 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
 
     private static LocalDateSegment<PeriodeMedAktivitetskravType> mapPeriode(ArbeidRest.PeriodeRequest periode) {
         return new LocalDateSegment<>(periode.fom(), periode.tom(),
-            periode.periodeType() != null ? periode.periodeType() : PeriodeMedAktivitetskravType.UTTAK);
+            periode.periodeType() != null ? periode.periodeType() : PeriodeMedAktivitetskravType.UTTAK_BFHR);
     }
 
     private boolean annenpartHarIkkeSakMedOppgittBarnOgSøker(AktørId innloggetBrukerAktørid, ArbeidRest.MorArbeidRequest request) {
