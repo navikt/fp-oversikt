@@ -6,8 +6,6 @@ import java.util.Set;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.server.ServerProperties;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.ApplicationPath;
@@ -25,20 +23,19 @@ import no.nav.foreldrepenger.oversikt.saker.SakerRest;
 import no.nav.foreldrepenger.oversikt.server.konfig.swagger.TypegenereringFrontendOpenApiReader;
 import no.nav.foreldrepenger.oversikt.tidslinje.TidslinjeRest;
 import no.nav.vedtak.openapi.OpenApiUtils;
-import no.nav.vedtak.server.rest.FeilUtils;
 import no.nav.vedtak.server.rest.FpRestJackson2Feature;
+import no.nav.vedtak.server.rest.RestSecureLogFeature;
 
 @ApplicationPath(ApiConfig.API_URI)
 public class ApiConfig extends ResourceConfig {
 
     public static final String API_URI = "/api";
     private static final Environment ENV = Environment.current();
-    private static final Logger SECURE_LOG = LoggerFactory.getLogger("secureLogger");
 
     public ApiConfig() {
         // Nesten standard FpRestJackson2-oppsett, men lokale tilpasninger av exceptions.
         register(FpRestJackson2Feature.class); // Standard Jersey Jackson2 konfigurasjon
-        FeilUtils.setSikkerlogg(SECURE_LOG); // Sørger for logging av feil (validering og annet)  til sikkerlogg
+        register(RestSecureLogFeature.class); // Logg feil i secure log
         if (!ENV.isProd()) {
             registerOpenApi();
         }
