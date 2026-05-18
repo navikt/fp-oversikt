@@ -137,8 +137,9 @@ class OversiktPersonopplysningerDtoTjeneste {
             .collect(Collectors.toMap(HentPersonBolkResult::getIdent, person -> person, (existing, _) -> existing))
             .values()
             .stream()
-            .filter(b -> !harAdressebeskyttelse(b.getPerson()))
-            .map(p -> new PersonMedIdent(p.getIdent(), p.getPerson()))
+            .filter(barn -> barn.getPerson() != null)
+            .filter(barn -> !harAdressebeskyttelse(barn.getPerson()))
+            .map(barn -> new PersonMedIdent(barn.getIdent(), barn.getPerson()))
             .toList();
     }
 
