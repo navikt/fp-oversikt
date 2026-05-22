@@ -20,12 +20,10 @@ public class BrregRollerMapper {
     static BrregSelvstendigNæring mapSelvstendigNæring(BrregRolleutskriftDto.EnhetDto enhet, BrregEnhetDto enhetsdata) {
         var relevanteRoller = rollerForSelvstendigNæringsdrivende(enhet);
         var enhetsinfo = Optional.ofNullable(enhetsdata);
-        var virksomhetType = enhetsinfo.map(BrregRollerMapper::utledVirksomhetType).orElse(VirksomhetType.ANNEN);
-        var enhetsNavn = enhetsinfo.map(BrregEnhetDto::navn).orElse("Ukjent navn");
-        var orgformKode = enhetsinfo.map(BrregEnhetDto::organisasjonsform).map(BrregEnhetDto.EnhetKodeDto::kode).orElse("Ukjent");
-        var orgformBeskrivelse = enhetsinfo.map(BrregEnhetDto::organisasjonsform).map(BrregEnhetDto.EnhetKodeDto::kode).orElse("Ukjent");
-        return new BrregSelvstendigNæring(enhet.organisasjonsnummer(), enhetsNavn,
-            orgformKode, orgformBeskrivelse, virksomhetType,
+        return new BrregSelvstendigNæring(enhet.organisasjonsnummer(), enhetsinfo.map(BrregEnhetDto::navn).orElse(null),
+            enhetsinfo.map(BrregEnhetDto::organisasjonsform).map(BrregEnhetDto.EnhetKodeDto::kode).orElse(null),
+            enhetsinfo.map(BrregEnhetDto::organisasjonsform).map(BrregEnhetDto.EnhetKodeDto::kode).orElse(null),
+            enhetsinfo.map(BrregRollerMapper::utledVirksomhetType).orElse(VirksomhetType.ANNEN),
             enhetsinfo.map(BrregEnhetDto::underAvvikling).orElse(false),
             enhetsinfo.map(BrregEnhetDto::stiftelsesdato).orElse(null),
             enhetsinfo.map(BrregEnhetDto::registreringsdatoEnhetsregisteret).orElse(null),
