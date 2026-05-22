@@ -80,6 +80,11 @@ spec:
           {{#each groups as |group|}}
              - id: "{{group.uuid}}"
          {{/each}}
+  maskinporten:
+    enabled: true
+    scopes:
+      consumes:
+        - name: "brreg:data:enhetsregisteret:roller:person:oppslag:fnr"
   observability:
     autoInstrumentation:
       enabled: true
@@ -124,3 +129,4 @@ spec:
         - host: fptilbake.{{environment}}-fss-pub.nais.io
         - host: saf.{{environment}}-fss-pub.nais.io
         - host: safselvbetjening.{{environment}}-fss-pub.nais.io
+        - host: data.brreg.no
