@@ -23,6 +23,7 @@ import no.nav.foreldrepenger.oversikt.saker.SakerRest;
 import no.nav.foreldrepenger.oversikt.server.konfig.swagger.TypegenereringFrontendOpenApiReader;
 import no.nav.foreldrepenger.oversikt.tidslinje.TidslinjeRest;
 import no.nav.vedtak.openapi.OpenApiUtils;
+import no.nav.vedtak.server.rest.AuthenticationFilter;
 import no.nav.vedtak.server.rest.FpRestJackson2Feature;
 import no.nav.vedtak.server.rest.RestSecureLogFeature;
 
@@ -34,6 +35,7 @@ public class ApiConfig extends ResourceConfig {
 
     public ApiConfig() {
         // Nesten standard FpRestJackson2-oppsett, men lokale tilpasninger av exceptions.
+        register(AuthenticationFilter.class);
         register(FpRestJackson2Feature.class); // Standard Jersey Jackson2 konfigurasjon
         register(RestSecureLogFeature.class); // Logg feil i secure log
         if (!ENV.isProd()) {

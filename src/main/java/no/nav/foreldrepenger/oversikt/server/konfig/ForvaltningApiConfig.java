@@ -13,6 +13,7 @@ import no.nav.foreldrepenger.oversikt.drift.ManuellOppdateringAvSakDriftTjeneste
 import no.nav.vedtak.felles.prosesstask.rest.ProsessTaskRestTjeneste;
 import no.nav.vedtak.openapi.OpenApiUtils;
 import no.nav.vedtak.server.rest.ForvaltningAuthorizationFilter;
+import no.nav.vedtak.server.rest.AuthenticationFilter;
 import no.nav.vedtak.server.rest.FpRestJackson2Feature;
 
 @ApplicationPath(ForvaltningApiConfig.API_URI)
@@ -22,6 +23,7 @@ public class ForvaltningApiConfig extends ResourceConfig {
     private static final Environment ENV = Environment.current();
 
     public ForvaltningApiConfig() {
+        register(AuthenticationFilter.class);
         register(FpRestJackson2Feature.class); // Standard Jersey Jackson2 konfigurasjon
         register(ForvaltningAuthorizationFilter.class); // Autorisering - drift
         registerOpenApi();
