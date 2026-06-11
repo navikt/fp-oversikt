@@ -1,6 +1,5 @@
 package no.nav.foreldrepenger.oversikt.domene;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
@@ -10,32 +9,26 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand;
 
 public final class BehandlingTilstandUtleder {
 
     private static final Logger LOG = LoggerFactory.getLogger(BehandlingTilstandUtleder.class);
-    private static final int SEKUNDER_VENTETID_PÅ_PROSESSERING_AV_SØKNAD = 15;
-    private static final Environment ENV = Environment.current();
 
     private BehandlingTilstandUtleder() {
     }
 
-    public static BehandlingTilstand utled(Set<Aksjonspunkt> ap, LocalDateTime søknadMottattTidspunkt) {
+    public static BehandlingTilstand utled(Set<Aksjonspunkt> ap) {
 
         var aksjonspunkt = Stream.ofNullable(ap)
             .flatMap(Collection::stream)
             .collect(Collectors.toSet());
-        var tilstand = utledGittOpprettetAksjonspunkt(aksjonspunkt, søknadMottattTidspunkt);
-        LOG.info("Utledet behandlingtilstand {} for aksjonspunkter {} søknad mottatt {}", tilstand, aksjonspunkt, søknadMottattTidspunkt);
-        if (tilstand == BehandlingTilstand.PROSESSERER && ENV.isProd()) {
-            return BehandlingTilstand.UNDER_BEHANDLING; // TODO TFP-5621 Til frontend er over på ny status
-        }
+        var tilstand = utledGittOpprettetAksjonspunkt(aksjonspunkt);
+        LOG.info("Utledet behandlingtilstand {} for aksjonspunkter {}", tilstand, aksjonspunkt);
         return tilstand;
     }
 
-    private static BehandlingTilstand utledGittOpprettetAksjonspunkt(Set<Aksjonspunkt> opprettetAksjonspunkt, LocalDateTime søknadMottattTidspunkt) {
+    private static BehandlingTilstand utledGittOpprettetAksjonspunkt(Set<Aksjonspunkt> opprettetAksjonspunkt) {
         if (contains(opprettetAksjonspunkt, Aksjonspunkt.Type.VENT_TIDLIG_SØKNAD)) {
             return BehandlingTilstand.VENT_TIDLIG_SØKNAD;
         }
@@ -49,13 +42,6 @@ public final class BehandlingTilstandUtleder {
             return BehandlingTilstand.VENT_INNTEKTSMELDING;
         }
         // TODO utvid med tilstand VENT_UTLAND_TRYGD basert på venteårsak UTLAND_TRYGD
-        if (opprettetAksjonspunkt.isEmpty()) {
-            if (søknadMottattTidspunkt.plusSeconds(SEKUNDER_VENTETID_PÅ_PROSESSERING_AV_SØKNAD).isAfter(LocalDateTime.now())) {
-                return BehandlingTilstand.PROSESSERER;
-            }
-            LOG.info("Ingen aksjonspunkt og søknad mottatt for over {} sekunder siden, returnerer {}", SEKUNDER_VENTETID_PÅ_PROSESSERING_AV_SØKNAD,
-                BehandlingTilstand.UNDER_BEHANDLING);
-        }
         return BehandlingTilstand.UNDER_BEHANDLING;
     }
 
