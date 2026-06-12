@@ -179,6 +179,9 @@ public class AnnenPartSakTjeneste {
 
     private static boolean gjelderSammeBarn(LocalDate dato, FamilieHendelse fh) {
         var gjeldende = Optional.ofNullable(fh.omsorgsovertakelse()).orElse(Optional.ofNullable(fh.fødselsdato()).orElse(fh.termindato()));
+        if (gjeldende == null) {
+            return false; //Sett i prod at dette har oppstått
+        }
         var interval = new LocalDateInterval(gjeldende.minusWeeks(5), gjeldende.plusWeeks(5));
         return interval.contains(dato);
     }
