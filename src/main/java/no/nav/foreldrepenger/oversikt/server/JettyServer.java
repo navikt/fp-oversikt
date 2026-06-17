@@ -2,11 +2,6 @@ package no.nav.foreldrepenger.oversikt.server;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
-import java.util.concurrent.TimeUnit;
-
-import javax.naming.NamingException;
-import javax.sql.DataSource;
 
 import org.eclipse.jetty.ee11.cdi.CdiDecoratingListener;
 import org.eclipse.jetty.ee11.cdi.CdiServletContainerInitializer;
@@ -15,25 +10,23 @@ import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.ee11.servlet.security.ConstraintMapping;
 import org.eclipse.jetty.ee11.servlet.security.ConstraintSecurityHandler;
-import org.eclipse.jetty.plus.jndi.EnvEntry;
 import org.eclipse.jetty.security.Constraint;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.ServerConnector;
 import org.eclipse.jetty.server.handler.ContextHandler;
-import org.flywaydb.core.Flyway;
-import org.flywaydb.core.api.configuration.FluentConfiguration;
 import org.glassfish.jersey.servlet.ServletContainer;
-
-import com.zaxxer.hikari.HikariConfig;
-import com.zaxxer.hikari.HikariDataSource;
+import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig;
 import no.nav.foreldrepenger.oversikt.server.konfig.ForvaltningApiConfig;
 import no.nav.foreldrepenger.oversikt.server.konfig.InternalApiConfig;
-
-import org.slf4j.bridge.SLF4JBridgeHandler;
+import no.nav.vedtak.felles.jpa.NamingStandard;
+import no.nav.vedtak.felles.jpa.flyway.FlywayUtil;
+import no.nav.vedtak.felles.jpa.jdbc.DataSourceHolder;
+import no.nav.vedtak.felles.jpa.jdbc.DatasourceUtil;
+import no.nav.vedtak.log.metrics.MetricsUtil;
 
 public class JettyServer {
 
@@ -94,43 +87,10 @@ public class JettyServer {
     void bootStrap() throws Exception {
         System.setProperty("task.manager.runner.threads", "4");
         konfigurerLogging();
-        var dataSource = setupDataSource();
-        migrer(dataSource);
+        var ds = DatasourceUtil.postgresDataSource(ENV.getRequiredProperty("DB_JDBC_URL"), null, null, 16);
+        DataSourceHolder.initialize(ds);
+        FlywayUtil.migrate(ds, NamingStandard.DEFAULT_DS_MIGRATION_CLASSPATH);
         start();
-    }
-
-    private static void migrer(DataSource dataSource) {
-        var flyway = flywayConfig(dataSource);
-        flyway.load().migrate();
-    }
-
-    public static FluentConfiguration flywayConfig(DataSource dataSource) {
-        return Flyway.configure().dataSource(dataSource).locations("classpath:/db/migration/defaultDS").baselineOnMigrate(true);
-    }
-
-    public static DataSource setupDataSource() throws NamingException {
-        var dataSource = dataSource();
-        new EnvEntry("jdbc/defaultDS", dataSource);
-        return dataSource;
-    }
-
-    public static DataSource dataSource() {
-        var config = new HikariConfig();
-        config.setJdbcUrl(ENV.getRequiredProperty("DB_JDBC_URL"));
-        config.setConnectionTimeout(TimeUnit.SECONDS.toMillis(1));
-        config.setMinimumIdle(1);
-        config.setMaximumPoolSize(6);
-        config.setConnectionTestQuery("select 1");
-        config.setDriverClassName("org.postgresql.Driver");
-        config.setAutoCommit(false);
-
-        // optimaliserer inserts for postgres
-        var dsProperties = new Properties();
-        dsProperties.setProperty("reWriteBatchedInserts", "true");
-        dsProperties.setProperty("logServerErrorDetail", "false"); // skrur av batch exceptions som lekker statements i åpen logg
-        config.setDataSourceProperties(dsProperties);
-
-        return new HikariDataSource(config);
     }
 
     /**
@@ -140,6 +100,7 @@ public class JettyServer {
     private void konfigurerLogging() {
         SLF4JBridgeHandler.removeHandlersForRootLogger();
         SLF4JBridgeHandler.install();
+        MetricsUtil.scrape(); // TODO: Erstatt med kommende init-metode pga bruk i DS og EM
     }
 
     private void start() throws Exception {

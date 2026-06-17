@@ -6,7 +6,7 @@
     <parent>
         <groupId>no.nav.foreldrepenger.felles</groupId>
         <artifactId>fp-parent-app</artifactId>
-        <version>5.3.4</version>
+        <version>5.3.5</version>
     </parent>
 
     <groupId>no.nav.foreldrepenger</groupId>
@@ -21,7 +21,7 @@
         <openapi-spec-utils.version>2.1.0</openapi-spec-utils.version>
         <io.confluent.version>8.2.1</io.confluent.version>
 
-        <felles.version>7.8.3</felles.version>
+        <felles.version>7.8.4</felles.version>
         <prosesstask.version>5.2.7</prosesstask.version>
         <fp-kontrakter.version>9.4.37</fp-kontrakter.version>
         <fp-tidsserie.version>2.7.4</fp-tidsserie.version>
@@ -162,10 +162,6 @@
         <dependency>
             <groupId>org.eclipse.jetty.ee11</groupId>
             <artifactId>jetty-ee11-cdi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty.ee11</groupId>
-            <artifactId>jetty-ee11-plus</artifactId>
         </dependency>
 
         <!-- Kafka -->
