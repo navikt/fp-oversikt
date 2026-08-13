@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.integrasjoner.brreg;
 
 import java.net.URI;
 import java.net.http.HttpRequest;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -14,7 +15,6 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
-import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.vedtak.exception.IntegrasjonException;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
@@ -29,7 +29,6 @@ import no.nav.vedtak.util.LRUCache;
 @RestClientConfig(tokenConfig = TokenFlow.NO_AUTH_NEEDED, endpointProperty = "brreg.direct.url", endpointDefault = "https://data.brreg.no/enhetsregisteret")
 public class BrregRollerTjeneste {
 
-    private static final Environment ENV = Environment.current();
     private static final Logger LOG = LoggerFactory.getLogger(BrregRollerTjeneste.class);
 
     private static final String AUTORISERT_API = "/autorisert-api";
@@ -62,6 +61,8 @@ public class BrregRollerTjeneste {
     public List<BrregSelvstendigNæring> finnSelvstendigNæring(Fødselsnummer fødselsnummer) {
         return hentRollerForPerson(fødselsnummer).stream()
             .map(this::finnSelvstendigNæring)
+            .sorted(Comparator.comparing(BrregSelvstendigNæring::navn, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
+                .thenComparing(BrregSelvstendigNæring::organisasjonsnummer, Comparator.nullsLast(String::compareTo)))
             .toList();
     }
 
@@ -76,11 +77,9 @@ public class BrregRollerTjeneste {
     }
 
     public Optional<BrregEnhetDto> finnEnhetsinfoFraLink(String orgnummer, URI target) {
-        if (!ENV.isProd()) {
-            return Optional.empty();
-        }
-        if (orgnummer != null && CACHE_ENHET.get(orgnummer) != null) {
-            return Optional.ofNullable(CACHE_ENHET.get(orgnummer));
+        var cachetEnhet = orgnummer == null ? null : CACHE_ENHET.get(orgnummer);
+        if (cachetEnhet != null) {
+            return Optional.of(cachetEnhet);
         }
         try {
             var request = RestRequest.newGET(target, restConfig);
@@ -94,14 +93,12 @@ public class BrregRollerTjeneste {
     }
 
     public List<BrregRolleutskriftDto.EnhetDto> hentRollerForPerson(Fødselsnummer fødselsnummer) {
-        if (!ENV.isProd() || fødselsnummer.value() == null) {
+        if (fødselsnummer.value() == null) {
             return List.of();
         }
-        if (CACHE_ROLLEUTSKRIFT.get(fødselsnummer.value()) != null) {
-            return CACHE_ROLLEUTSKRIFT.get(fødselsnummer.value());
-        }
-        if (tokenKlient == null) {
-            tokenKlient = MaskinportenTokenKlient.instance();
+        var cachetRolleutskrift = CACHE_ROLLEUTSKRIFT.get(fødselsnummer.value());
+        if (cachetRolleutskrift != null) {
+            return cachetRolleutskrift;
         }
         var respons = gjørPersonKallTilBrreg(fødselsnummer);
         var resultat = respons.map(BrregRolleutskriftDto::enheter).orElse(List.of()).stream()
@@ -117,19 +114,26 @@ public class BrregRollerTjeneste {
             var method = new RestRequest.Method(RestRequest.WebMethod.POST, HttpRequest.BodyPublishers.ofString(fødselsnummer.value()));
             var request = RestRequest.newRequest(method, rolleutskriftEndpoint, restConfig)
                 .setAndReplaceHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
-                .otherAuthorizationSupplier(() -> tokenKlient.hentMaskinportenToken(ROLLEUTSKRIFT_SCOPE, maskinportenResource).token());
+                .otherAuthorizationSupplier(() -> tokenKlient().hentMaskinportenToken(ROLLEUTSKRIFT_SCOPE, maskinportenResource).token());
             return sender.sendReturnOptional(request, BrregRolleutskriftDto.class);
         } catch (Exception e) {
             if (e instanceof IntegrasjonException ie && Response.Status.NOT_FOUND.getStatusCode() == ie.getStatusCode()) {
                 return Optional.empty();
-            } else {
-                var ie = e.getMessage();
-                var vasketFeil = ie.replace(fødselsnummer.value(), fødselsnummer.toString());
-                LOG.info("Kall mot brreg direkte rolleutskrift feilet. Fikk feilmelding: {}", vasketFeil);
-                return Optional.empty();
             }
+            LOG.warn("Kall mot brreg direkte rolleutskrift feilet for innlogget bruker. Feiltype: {}",
+                e.getClass().getSimpleName());
+            if (e instanceof RuntimeException runtimeException) {
+                throw runtimeException;
+            }
+            throw new IllegalStateException("Kall mot Brreg rolleutskrift feilet.", e);
         }
     }
 
+    private MaskinportenTokenKlient tokenKlient() {
+        if (tokenKlient == null) {
+            tokenKlient = MaskinportenTokenKlient.instance();
+        }
+        return tokenKlient;
+    }
 
 }
