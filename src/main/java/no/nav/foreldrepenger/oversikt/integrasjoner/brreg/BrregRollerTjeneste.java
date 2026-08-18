@@ -87,7 +87,7 @@ public class BrregRollerTjeneste {
             respons.ifPresent(r -> CACHE_ENHET.put(r.organisasjonsnummer(), r));
             return respons;
         } catch (Exception e) {
-            LOG.warn("FPRISK Uvanlig feil ved kall mot brreg direkte enhetslink for {}. Fikk feilmelding: ", target, e);
+            LOG.warn("FPOVERSIKT Uvanlig feil ved kall mot brreg direkte enhetslink for {}. Fikk feilmelding: ", target, e);
             return Optional.empty();
         }
     }
@@ -104,7 +104,7 @@ public class BrregRollerTjeneste {
         var resultat = respons.map(BrregRolleutskriftDto::enheter).orElse(List.of()).stream()
             .filter(BrregRollerMapper::erSelvstendigNæringsdrivende)
             .toList();
-        LOG.info("FPRISK vellykket kall mot brreg direkte rolleutskrift. Fikk {}", resultat.size());
+        LOG.info("FPOVERSIKT vellykket kall mot brreg direkte rolleutskrift. Fikk {}", resultat.size());
         CACHE_ROLLEUTSKRIFT.put(fødselsnummer.value(), resultat);
         return resultat;
     }
