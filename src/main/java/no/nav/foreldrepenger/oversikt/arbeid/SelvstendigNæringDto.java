@@ -5,19 +5,13 @@ import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.BrregSelvstendigNærin
 
 public record SelvstendigNæringDto(@NotNull String organisasjonsnummer,
                                    String navn,
-                                   @NotNull Virksomhetstype næringstype,
-                                   String organisasjonsformKode,
-                                   String organisasjonsformBeskrivelse,
-                                   boolean underAvvikling) {
+                                   @NotNull Virksomhetstype næringstype) {
 
     static SelvstendigNæringDto fra(BrregSelvstendigNæring næring) {
         return new SelvstendigNæringDto(
             næring.organisasjonsnummer(),
             næring.navn(),
-            mapVirksomhetstype(næring.næringstype()),
-            næring.organisasjonsformKode(),
-            næring.organisasjonsformBeskrivelse(),
-            Boolean.TRUE.equals(næring.underAvvikling())
+            mapVirksomhetstype(næring.næringstype())
         );
     }
 

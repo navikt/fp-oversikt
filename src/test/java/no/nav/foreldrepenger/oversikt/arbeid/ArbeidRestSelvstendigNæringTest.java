@@ -55,10 +55,7 @@ class ArbeidRestSelvstendigNæringTest {
         assertThat(resultat).containsExactly(new SelvstendigNæringDto(
             "987654321",
             "Mitt foretak",
-            Virksomhetstype.FISKE,
-            "ENK",
-            "Enkeltpersonforetak",
-            false
+            Virksomhetstype.FISKE
         ));
         verify(tilgangskontroll).sjekkAtKallErFraBorger();
         verify(tilgangskontroll).tilgangssjekkMyndighetsalder();
