@@ -3,13 +3,13 @@ package no.nav.foreldrepenger.oversikt.server;
 import org.hibernate.type.descriptor.WrapperOptions;
 import org.hibernate.type.descriptor.java.JavaType;
 import org.hibernate.type.format.FormatMapper;
-import org.hibernate.type.format.jackson.JacksonJsonFormatMapper;
+import org.hibernate.type.format.jackson.Jackson3JsonFormatMapper;
 
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 
 public class JacksonFormatMapper implements FormatMapper {
 
-    private static final FormatMapper FORMAT_MAPPER = new JacksonJsonFormatMapper(DefaultJsonMapper.getJsonMapper());
+    private static final FormatMapper FORMAT_MAPPER = new Jackson3JsonFormatMapper(DefaultJsonMapper.getJsonMapper());
 
     public JacksonFormatMapper() {
         // CDI

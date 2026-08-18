@@ -17,7 +17,7 @@ import no.nav.openapi.spec.utils.openapi.EnumVarnamesConverter;
 import no.nav.openapi.spec.utils.openapi.JsonSubTypesModelConverter;
 import no.nav.openapi.spec.utils.openapi.NoJsonSubTypesAnnotationIntrospector;
 import no.nav.openapi.spec.utils.openapi.RefToClassLookup;
-import no.nav.vedtak.mapper.json.DefaultJsonMapper;
+import no.nav.vedtak.mapper.json.DefaultJson2Mapper;
 
 /**
  * Custom Reader for api som går ut mot typegenereing. Utenom vanlig reader så gjør denne:
@@ -50,7 +50,7 @@ public class TypegenereringFrontendOpenApiReader extends Reader {
     }
 
     private static JsonMapper lagObjectMapperUtenJsonSubTypeAnnotasjoner() {
-        return DefaultJsonMapper.getJsonMapper().rebuild()
+        return DefaultJson2Mapper.getJsonMapper().rebuild()
             // OpenApi-spec som blir generert er ikke alltid konsekvent på rekkefølgen til properties.
             // Ved å skru på disse flaggene blir output deterministic og det blir enklere å se hva som faktisk er diff fra forrige typegenerering
             .enable(SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS)
