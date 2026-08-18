@@ -44,7 +44,6 @@ public class BrregRollerTjeneste {
     private final RestConfig restConfig;
     private final String maskinportenResource;
     private final URI rolleutskriftEndpoint;
-    private MaskinportenTokenKlient tokenKlient;
 
     public BrregRollerTjeneste() {
         this(RestClient.client(), RestConfig.forClient(BrregRollerTjeneste.class));
@@ -55,7 +54,6 @@ public class BrregRollerTjeneste {
         this.sender = sender;
         this.maskinportenResource = restConfig.endpoint().toString() + AUTORISERT_API; // annen ressurs for bruk i preprod
         this.rolleutskriftEndpoint = UriBuilder.fromUri(restConfig.endpoint()).path(ROLLEUTSKRIFT_URL).build();
-        this.tokenKlient = null;
     }
 
     public List<BrregSelvstendigNæring> finnSelvstendigNæring(Fødselsnummer fødselsnummer) {
@@ -114,7 +112,9 @@ public class BrregRollerTjeneste {
             var method = new RestRequest.Method(RestRequest.WebMethod.POST, HttpRequest.BodyPublishers.ofString(fødselsnummer.value()));
             var request = RestRequest.newRequest(method, rolleutskriftEndpoint, restConfig)
                 .setAndReplaceHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN)
-                .otherAuthorizationSupplier(() -> tokenKlient().hentMaskinportenToken(ROLLEUTSKRIFT_SCOPE, maskinportenResource).token());
+                .otherAuthorizationSupplier(() -> MaskinportenTokenKlient.instance()
+                    .hentMaskinportenToken(ROLLEUTSKRIFT_SCOPE, maskinportenResource)
+                    .token());
             return sender.sendReturnOptional(request, BrregRolleutskriftDto.class);
         } catch (Exception e) {
             if (e instanceof IntegrasjonException ie && Response.Status.NOT_FOUND.getStatusCode() == ie.getStatusCode()) {
@@ -127,13 +127,6 @@ public class BrregRollerTjeneste {
             }
             throw new IllegalStateException("Kall mot Brreg rolleutskrift feilet.", e);
         }
-    }
-
-    private MaskinportenTokenKlient tokenKlient() {
-        if (tokenKlient == null) {
-            tokenKlient = MaskinportenTokenKlient.instance();
-        }
-        return tokenKlient;
     }
 
 }
