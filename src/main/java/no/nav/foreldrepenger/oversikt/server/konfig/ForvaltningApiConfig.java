@@ -14,7 +14,7 @@ import no.nav.vedtak.felles.prosesstask.rest.ProsessTaskRestTjeneste;
 import no.nav.vedtak.openapi.OpenApiUtils;
 import no.nav.vedtak.server.rest.ForvaltningAuthorizationFilter;
 import no.nav.vedtak.server.rest.AuthenticationFilter;
-import no.nav.vedtak.server.rest.FpRestJackson2Feature;
+import no.nav.vedtak.server.rest.FpRestJacksonFeature;
 
 @ApplicationPath(ForvaltningApiConfig.API_URI)
 public class ForvaltningApiConfig extends ResourceConfig {
@@ -24,7 +24,7 @@ public class ForvaltningApiConfig extends ResourceConfig {
 
     public ForvaltningApiConfig() {
         register(AuthenticationFilter.class);
-        register(FpRestJackson2Feature.class); // Standard Jersey Jackson2 konfigurasjon
+        register(FpRestJacksonFeature.class); // Standard Jersey Jackson konfigurasjon
         register(ForvaltningAuthorizationFilter.class); // Autorisering - drift
         registerOpenApi();
         registerClasses(getForvaltningKlasser());
