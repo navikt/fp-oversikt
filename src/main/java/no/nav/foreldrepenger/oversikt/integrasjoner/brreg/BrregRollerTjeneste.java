@@ -15,6 +15,7 @@ import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriBuilder;
+import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.vedtak.exception.IntegrasjonException;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
@@ -29,6 +30,7 @@ import no.nav.vedtak.util.LRUCache;
 @RestClientConfig(tokenConfig = TokenFlow.NO_AUTH_NEEDED, endpointProperty = "brreg.direct.url", endpointDefault = "https://data.brreg.no/enhetsregisteret")
 public class BrregRollerTjeneste {
 
+    private static final Environment ENV = Environment.current();
     private static final Logger LOG = LoggerFactory.getLogger(BrregRollerTjeneste.class);
 
     private static final String AUTORISERT_API = "/autorisert-api";
@@ -75,6 +77,9 @@ public class BrregRollerTjeneste {
     }
 
     public Optional<BrregEnhetDto> finnEnhetsinfoFraLink(String orgnummer, URI target) {
+        if (ENV.isProd()) {
+            return Optional.empty();
+        }
         var cachetEnhet = orgnummer == null ? null : CACHE_ENHET.get(orgnummer);
         if (cachetEnhet != null) {
             return Optional.of(cachetEnhet);
@@ -91,6 +96,10 @@ public class BrregRollerTjeneste {
     }
 
     public List<BrregRolleutskriftDto.EnhetDto> hentRollerForPerson(Fødselsnummer fødselsnummer) {
+        if (ENV.isProd()) {
+            LOG.warn("Kall mot Brreg rolleutskrift er deaktivert i produksjon.");
+            return List.of();
+        }
         if (fødselsnummer.value() == null) {
             return List.of();
         }

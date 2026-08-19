@@ -68,4 +68,5 @@ class BrregRollerTjenesteTest {
             null
         );
     }
+
 }
