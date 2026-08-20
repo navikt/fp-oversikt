@@ -21,6 +21,13 @@ import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
 class BrregRollerTjenesteTest {
 
     @Test
+    void skalMaskereOrganisasjonsnummerSomFpRisk() {
+        assertThat(BrregRollerTjeneste.maskerOrgnr("974760673")).isEqualTo("******673");
+        assertThat(BrregRollerTjeneste.maskerOrgnr("1234")).isEqualTo("****");
+        assertThat(BrregRollerTjeneste.maskerOrgnr(null)).isEmpty();
+    }
+
+    @Test
     void skalHenteFiltrereOgSortereRegistrerteNæringerUtenforProduksjon() {
         var restClient = mock(RestClient.class);
         var tjeneste = new BrregRollerTjeneste(restClient, RestConfig.forClient(BrregRollerTjeneste.class));

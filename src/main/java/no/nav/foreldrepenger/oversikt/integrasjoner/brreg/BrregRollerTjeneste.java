@@ -90,7 +90,8 @@ public class BrregRollerTjeneste {
             respons.ifPresent(r -> CACHE_ENHET.put(r.organisasjonsnummer(), r));
             return respons;
         } catch (Exception e) {
-            LOG.warn("FPOVERSIKT Uvanlig feil ved kall mot brreg direkte enhetslink for {}. Fikk feilmelding: ", target, e);
+            var maskertPath = target.getPath().replace(orgnummer, maskerOrgnr(orgnummer));
+            LOG.warn("Uvanlig feil ved kall mot Brreg enhetsoppslag {}", maskertPath);
             return Optional.empty();
         }
     }
@@ -98,9 +99,6 @@ public class BrregRollerTjeneste {
     public List<BrregRolleutskriftDto.EnhetDto> hentRollerForPerson(Fødselsnummer fødselsnummer) {
         if (ENV.isProd()) {
             LOG.warn("Kall mot Brreg rolleutskrift er deaktivert i produksjon.");
-            return List.of();
-        }
-        if (fødselsnummer.value() == null) {
             return List.of();
         }
         var cachetRolleutskrift = CACHE_ROLLEUTSKRIFT.get(fødselsnummer.value());
@@ -136,6 +134,17 @@ public class BrregRollerTjeneste {
             }
             throw new IllegalStateException("Kall mot Brreg rolleutskrift feilet.", e);
         }
+    }
+
+    static String maskerOrgnr(String orgnummer) {
+        if (orgnummer == null) {
+            return "";
+        }
+        var length = orgnummer.length();
+        if (length <= 4) {
+            return "*".repeat(length);
+        }
+        return "*".repeat(length - 3) + orgnummer.substring(length - 3);
     }
 
 }
