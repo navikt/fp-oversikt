@@ -89,7 +89,7 @@ public class BrregRollerTjeneste {
             var respons = sender.sendReturnOptional(request, BrregEnhetDto.class);
             respons.ifPresent(r -> CACHE_ENHET.put(r.organisasjonsnummer(), r));
             return respons;
-        } catch (Exception e) {
+        } catch (Exception _) {
             var maskertPath = target.getPath().replace(orgnummer, maskerOrgnr(orgnummer));
             LOG.warn("Uvanlig feil ved kall mot Brreg enhetsoppslag {}", maskertPath);
             return Optional.empty();

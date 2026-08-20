@@ -50,8 +50,9 @@ class BrregRollerTjenesteTest {
         var tjeneste = new BrregRollerTjeneste(restClient, RestConfig.forClient(BrregRollerTjeneste.class));
         when(restClient.sendReturnOptional(any(RestRequest.class), eq(BrregRolleutskriftDto.class)))
             .thenThrow(new IllegalStateException("Brreg er utilgjengelig"));
+        var fødselsnummer = unikFødselsnummer();
 
-        assertThatThrownBy(() -> tjeneste.finnSelvstendigNæring(unikFødselsnummer()))
+        assertThatThrownBy(() -> tjeneste.finnSelvstendigNæring(fødselsnummer))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Brreg er utilgjengelig");
     }
