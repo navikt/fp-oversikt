@@ -18,6 +18,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.SelvstendigNæring;
 import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.BrregRollerTjeneste;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
@@ -78,12 +79,12 @@ public class ArbeidRest {
     @Path("/selvstendigNaering")
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public List<SelvstendigNæringDto> hentSelvstendigNæring() {
+    public List<SelvstendigNæring> hentSelvstendigNæring() {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
 
         return brregRollerTjeneste.finnSelvstendigNæring(innloggetBruker.fødselsnummer()).stream()
-            .map(SelvstendigNæringDto::fra)
+            .map(SelvstendigNæringMapper::fra)
             .toList();
     }
 

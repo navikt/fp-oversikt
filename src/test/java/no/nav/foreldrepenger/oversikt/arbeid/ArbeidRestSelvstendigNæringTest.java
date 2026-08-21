@@ -11,6 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.SelvstendigNæring;
 import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.BrregRollerTjeneste;
 import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.BrregSelvstendigNæring;
 import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.SNRolleType;
@@ -52,10 +53,10 @@ class ArbeidRestSelvstendigNæringTest {
 
         var resultat = rest.hentSelvstendigNæring();
 
-        assertThat(resultat).containsExactly(new SelvstendigNæringDto(
+        assertThat(resultat).containsExactly(new SelvstendigNæring(
             "987654321",
             "Mitt foretak",
-            Virksomhetstype.FISKE
+            SelvstendigNæring.Virksomhetstype.FISKE
         ));
         verify(tilgangskontroll).sjekkAtKallErFraBorger();
         verify(tilgangskontroll).tilgangssjekkMyndighetsalder();
