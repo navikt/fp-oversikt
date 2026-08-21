@@ -5,14 +5,17 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.vedtak.felles.integrasjon.rest.RestClient;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
@@ -25,6 +28,30 @@ class BrregRollerTjenesteTest {
         assertThat(BrregRollerTjeneste.maskerOrgnr("974760673")).isEqualTo("******673");
         assertThat(BrregRollerTjeneste.maskerOrgnr("1234")).isEqualTo("****");
         assertThat(BrregRollerTjeneste.maskerOrgnr(null)).isEmpty();
+    }
+
+    @Test
+    void skalIkkeKalleBrregIDev() {
+        var restClient = mock(RestClient.class);
+        var environment = mock(Environment.class);
+        when(environment.isDev()).thenReturn(true);
+        var tjeneste = new BrregRollerTjeneste(restClient, RestConfig.forClient(BrregRollerTjeneste.class), environment);
+
+        assertThat(tjeneste.finnSelvstendigNæring(unikFødselsnummer())).isEmpty();
+        assertThat(tjeneste.finnEnhetsinfoFraLink("999999999", URI.create("https://data.brreg.no/enheter/999999999"))).isEmpty();
+        verifyNoInteractions(restClient);
+    }
+
+    @Test
+    void skalFortsattIkkeKalleBrregIProduksjon() {
+        var restClient = mock(RestClient.class);
+        var environment = mock(Environment.class);
+        when(environment.isProd()).thenReturn(true);
+        var tjeneste = new BrregRollerTjeneste(restClient, RestConfig.forClient(BrregRollerTjeneste.class), environment);
+
+        assertThat(tjeneste.finnSelvstendigNæring(unikFødselsnummer())).isEmpty();
+        assertThat(tjeneste.finnEnhetsinfoFraLink("999999999", URI.create("https://data.brreg.no/enheter/999999999"))).isEmpty();
+        verifyNoInteractions(restClient);
     }
 
     @Test

@@ -46,16 +46,22 @@ public class BrregRollerTjeneste {
     private final RestConfig restConfig;
     private final String maskinportenResource;
     private final URI rolleutskriftEndpoint;
+    private final Environment environment;
 
     public BrregRollerTjeneste() {
-        this(RestClient.client(), RestConfig.forClient(BrregRollerTjeneste.class));
+        this(RestClient.client(), RestConfig.forClient(BrregRollerTjeneste.class), ENV);
     }
 
     public BrregRollerTjeneste(RestClient sender, RestConfig config) {
+        this(sender, config, ENV);
+    }
+
+    BrregRollerTjeneste(RestClient sender, RestConfig config, Environment environment) {
         this.restConfig = config;
         this.sender = sender;
         this.maskinportenResource = restConfig.endpoint().toString() + AUTORISERT_API; // annen ressurs for bruk i preprod
         this.rolleutskriftEndpoint = UriBuilder.fromUri(restConfig.endpoint()).path(ROLLEUTSKRIFT_URL).build();
+        this.environment = environment;
     }
 
     public List<BrregSelvstendigNæring> finnSelvstendigNæring(Fødselsnummer fødselsnummer) {
@@ -77,7 +83,7 @@ public class BrregRollerTjeneste {
     }
 
     public Optional<BrregEnhetDto> finnEnhetsinfoFraLink(String orgnummer, URI target) {
-        if (ENV.isProd()) {
+        if (environment.isProd() || environment.isDev()) {
             return Optional.empty();
         }
         var cachetEnhet = orgnummer == null ? null : CACHE_ENHET.get(orgnummer);
@@ -97,8 +103,7 @@ public class BrregRollerTjeneste {
     }
 
     public List<BrregRolleutskriftDto.EnhetDto> hentRollerForPerson(Fødselsnummer fødselsnummer) {
-        if (ENV.isProd()) {
-            LOG.warn("Kall mot Brreg rolleutskrift er deaktivert i produksjon.");
+        if (environment.isProd() || environment.isDev()) {
             return List.of();
         }
         var cachetRolleutskrift = CACHE_ROLLEUTSKRIFT.get(fødselsnummer.value());
