@@ -16,14 +16,13 @@ public class BrregRollerMapper {
     private BrregRollerMapper() {
     }
 
-
     static BrregSelvstendigNæring mapSelvstendigNæring(BrregRolleutskriftDto.EnhetDto enhet, BrregEnhetDto enhetsdata) {
         var relevanteRoller = rollerForSelvstendigNæringsdrivende(enhet);
         var enhetsinfo = Optional.ofNullable(enhetsdata);
-        return new BrregSelvstendigNæring(enhet.organisasjonsnummer(), enhetsinfo.map(BrregEnhetDto::navn).orElse(null),
+        return new BrregSelvstendigNæring(enhet.organisasjonsnummer(), enhetsinfo.map(BrregEnhetDto::navn).orElse(enhet.navn()),
             enhetsinfo.map(BrregEnhetDto::organisasjonsform).map(BrregEnhetDto.EnhetKodeDto::kode).orElse(null),
-            enhetsinfo.map(BrregEnhetDto::organisasjonsform).map(BrregEnhetDto.EnhetKodeDto::kode).orElse(null),
-            enhetsinfo.map(BrregRollerMapper::utledVirksomhetType).orElse(VirksomhetType.ANNEN),
+            enhetsinfo.map(BrregEnhetDto::organisasjonsform).map(BrregEnhetDto.EnhetKodeDto::beskrivelse).orElse(null),
+            enhetsinfo.map(BrregRollerMapper::utledVirksomhetstype).orElse(Virksomhetstype.ANNEN),
             enhetsinfo.map(BrregEnhetDto::underAvvikling).orElse(false),
             enhetsinfo.map(BrregEnhetDto::stiftelsesdato).orElse(null),
             enhetsinfo.map(BrregEnhetDto::registreringsdatoEnhetsregisteret).orElse(null),
@@ -35,7 +34,8 @@ public class BrregRollerMapper {
     }
 
     private static List<SNRolleType> rollerForSelvstendigNæringsdrivende(BrregRolleutskriftDto.EnhetDto enhet) {
-        return enhet.roller().stream()
+        return Optional.ofNullable(enhet.roller()).orElse(List.of()).stream()
+            .filter(rolle -> !Boolean.TRUE.equals(rolle.fratraadt()) && !Boolean.TRUE.equals(rolle.avregistrert()))
             .map(BrregRolleutskriftDto.RolleDto::type)
             .filter(Objects::nonNull)
             .map(BrregRolleutskriftDto.RolleKodeDto::kode)
@@ -45,25 +45,22 @@ public class BrregRollerMapper {
             .toList();
     }
 
-    private static VirksomhetType utledVirksomhetType(BrregEnhetDto enhet) {
+    private static Virksomhetstype utledVirksomhetstype(BrregEnhetDto enhet) {
         if (enhet.naeringskode1() == null || enhet.naeringskode1().kode() == null) {
-            return VirksomhetType.ANNEN;
+            return Virksomhetstype.ANNEN;
         }
         var næringskode = enhet.naeringskode1().kode();
         if (næringskode.startsWith("01")) {
             return næringskode.startsWith("01.6") || næringskode.startsWith("01.7") ?
-                VirksomhetType.ANNEN : VirksomhetType.JORDBRUK_SKOGBRUK;
+                Virksomhetstype.ANNEN : Virksomhetstype.JORDBRUK_SKOGBRUK;
         } else if (næringskode.startsWith("02.1")) {
-            return VirksomhetType.JORDBRUK_SKOGBRUK;
+            return Virksomhetstype.JORDBRUK_SKOGBRUK;
         } else if (næringskode.startsWith("03.1")) {
-            return VirksomhetType.FISKE_FANGST;
+            return Virksomhetstype.FISKE;
         } else if (næringskode.startsWith("88.91")) {
-            return VirksomhetType.DAGMAMMA;
+            return Virksomhetstype.DAGMAMMA;
         } else {
-            return VirksomhetType.ANNEN;
+            return Virksomhetstype.ANNEN;
         }
     }
-
-
-
 }
