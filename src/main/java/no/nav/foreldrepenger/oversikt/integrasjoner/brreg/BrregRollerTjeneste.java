@@ -77,7 +77,7 @@ public class BrregRollerTjeneste {
     }
 
     public Optional<BrregEnhetDto> finnEnhetsinfoFraLink(String orgnummer, URI target) {
-        if (ENV.isProd()) {
+        if (ENV.isProd() || ENV.isDev()) {
             return Optional.empty();
         }
         var cachetEnhet = orgnummer == null ? null : CACHE_ENHET.get(orgnummer);
@@ -97,8 +97,7 @@ public class BrregRollerTjeneste {
     }
 
     public List<BrregRolleutskriftDto.EnhetDto> hentRollerForPerson(Fødselsnummer fødselsnummer) {
-        if (ENV.isProd()) {
-            LOG.warn("Kall mot Brreg rolleutskrift er deaktivert i produksjon.");
+        if (ENV.isProd() || ENV.isDev()) {
             return List.of();
         }
         var cachetRolleutskrift = CACHE_ROLLEUTSKRIFT.get(fødselsnummer.value());
