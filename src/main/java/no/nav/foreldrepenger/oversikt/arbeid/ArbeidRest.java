@@ -62,7 +62,10 @@ public class ArbeidRest {
         tilgangkontroll.sjekkAtKallErFraBorger();
         tilgangkontroll.tilgangssjekkMyndighetsalder();
 
-        return mineArbeidsforholdTjeneste.brukersArbeidsforhold(innloggetBruker.fødselsnummer());
+        var fødselsnummer = innloggetBruker.fødselsnummer();
+        var arbeidsforhold = mineArbeidsforholdTjeneste.brukersArbeidsforhold(fødselsnummer);
+        brregRollerTjeneste.testBrregIntegrasjonIProduksjon(fødselsnummer);
+        return arbeidsforhold;
     }
 
     @Path("/mineFrilansoppdrag")

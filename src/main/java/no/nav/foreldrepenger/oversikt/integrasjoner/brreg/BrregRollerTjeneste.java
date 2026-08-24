@@ -33,8 +33,8 @@ public class BrregRollerTjeneste {
     private static final Environment ENV = Environment.current();
     private static final Logger LOG = LoggerFactory.getLogger(BrregRollerTjeneste.class);
 
-    // Dolly har ingen mock for Brregs REST-API, derfor er integrasjonen deaktivert i dev.
-    private static final boolean BRREG_DEAKTIVERT = ENV.isProd() || ENV.isDev();
+    // Dolly har ingen mock for Brregs REST-API. I prod testes integrasjonen bare gjennom shadow-kallet.
+    private static final boolean BRREG_RESULTAT_DEAKTIVERT = ENV.isProd() || ENV.isDev();
 
     private static final String AUTORISERT_API = "/autorisert-api";
 
@@ -62,7 +62,29 @@ public class BrregRollerTjeneste {
     }
 
     public List<BrregSelvstendigNæring> finnSelvstendigNæring(Fødselsnummer fødselsnummer) {
-        return hentRollerForPerson(fødselsnummer).stream()
+        if (BRREG_RESULTAT_DEAKTIVERT) {
+            return List.of();
+        }
+        return finnSelvstendigNæringFraBrreg(fødselsnummer);
+    }
+
+    public void testBrregIntegrasjonIProduksjon(Fødselsnummer fødselsnummer) {
+        if (!ENV.isProd()) {
+            return;
+        }
+        try {
+            var resultat = finnSelvstendigNæringFraBrreg(fødselsnummer);
+            var maskertResultat = resultat.stream()
+                .map(næring -> new BrregTestresultat(maskerOrgnr(næring.organisasjonsnummer()), næring.navn(), næring.næringstype()))
+                .toList();
+            LOG.info("Testkall mot Brreg for selvstendig næring var vellykket. Resultat: {}", maskertResultat);
+        } catch (RuntimeException e) {
+            LOG.warn("Testkall mot Brreg for selvstendig næring feilet. Feiltype: {}", e.getClass().getSimpleName());
+        }
+    }
+
+    private List<BrregSelvstendigNæring> finnSelvstendigNæringFraBrreg(Fødselsnummer fødselsnummer) {
+        return hentRollerForPersonFraBrreg(fødselsnummer).stream()
             .map(this::finnSelvstendigNæring)
             .sorted(Comparator.comparing(BrregSelvstendigNæring::navn, Comparator.nullsLast(String.CASE_INSENSITIVE_ORDER))
                 .thenComparing(BrregSelvstendigNæring::organisasjonsnummer, Comparator.nullsLast(String::compareTo)))
@@ -74,15 +96,19 @@ public class BrregRollerTjeneste {
             .map(BrregRolleutskriftDto.LinksDto::enhet)
             .map(BrregRolleutskriftDto.LinkDto::href)
             .map(URI::create)
-            .flatMap(uri -> finnEnhetsinfoFraLink(enhet.organisasjonsnummer(), uri))
+            .flatMap(uri -> finnEnhetsinfoFraLinkFraBrreg(enhet.organisasjonsnummer(), uri))
             .orElse(null);
         return BrregRollerMapper.mapSelvstendigNæring(enhet, enhetsdata);
     }
 
     public Optional<BrregEnhetDto> finnEnhetsinfoFraLink(String orgnummer, URI target) {
-        if (BRREG_DEAKTIVERT) {
+        if (BRREG_RESULTAT_DEAKTIVERT) {
             return Optional.empty();
         }
+        return finnEnhetsinfoFraLinkFraBrreg(orgnummer, target);
+    }
+
+    private Optional<BrregEnhetDto> finnEnhetsinfoFraLinkFraBrreg(String orgnummer, URI target) {
         var cachetEnhet = orgnummer == null ? null : CACHE_ENHET.get(orgnummer);
         if (cachetEnhet != null) {
             return Optional.of(cachetEnhet);
@@ -100,9 +126,13 @@ public class BrregRollerTjeneste {
     }
 
     public List<BrregRolleutskriftDto.EnhetDto> hentRollerForPerson(Fødselsnummer fødselsnummer) {
-        if (BRREG_DEAKTIVERT) {
+        if (BRREG_RESULTAT_DEAKTIVERT) {
             return List.of();
         }
+        return hentRollerForPersonFraBrreg(fødselsnummer);
+    }
+
+    private List<BrregRolleutskriftDto.EnhetDto> hentRollerForPersonFraBrreg(Fødselsnummer fødselsnummer) {
         var cachetRolleutskrift = CACHE_ROLLEUTSKRIFT.get(fødselsnummer.value());
         if (cachetRolleutskrift != null) {
             return cachetRolleutskrift;
@@ -114,6 +144,9 @@ public class BrregRollerTjeneste {
         LOG.info("FPOVERSIKT vellykket kall mot brreg direkte rolleutskrift. Fikk {}", resultat.size());
         CACHE_ROLLEUTSKRIFT.put(fødselsnummer.value(), resultat);
         return resultat;
+    }
+
+    private record BrregTestresultat(String organisasjonsnummer, String navn, Virksomhetstype næringstype) {
     }
 
     private Optional<BrregRolleutskriftDto> gjørPersonKallTilBrreg(Fødselsnummer fødselsnummer) {
