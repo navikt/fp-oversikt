@@ -33,6 +33,9 @@ public class BrregRollerTjeneste {
     private static final Environment ENV = Environment.current();
     private static final Logger LOG = LoggerFactory.getLogger(BrregRollerTjeneste.class);
 
+    // Dolly har ingen mock for Brregs REST-API, derfor er integrasjonen deaktivert i dev.
+    private static final boolean BRREG_DEAKTIVERT = ENV.isProd() || ENV.isDev();
+
     private static final String AUTORISERT_API = "/autorisert-api";
 
     private static final String ROLLEUTSKRIFT_SCOPE = "brreg:data:enhetsregisteret:roller:person:oppslag:fnr";
@@ -77,7 +80,7 @@ public class BrregRollerTjeneste {
     }
 
     public Optional<BrregEnhetDto> finnEnhetsinfoFraLink(String orgnummer, URI target) {
-        if (ENV.isProd() || ENV.isDev()) {
+        if (BRREG_DEAKTIVERT) {
             return Optional.empty();
         }
         var cachetEnhet = orgnummer == null ? null : CACHE_ENHET.get(orgnummer);
@@ -97,7 +100,7 @@ public class BrregRollerTjeneste {
     }
 
     public List<BrregRolleutskriftDto.EnhetDto> hentRollerForPerson(Fødselsnummer fødselsnummer) {
-        if (ENV.isProd() || ENV.isDev()) {
+        if (BRREG_DEAKTIVERT) {
             return List.of();
         }
         var cachetRolleutskrift = CACHE_ROLLEUTSKRIFT.get(fødselsnummer.value());
