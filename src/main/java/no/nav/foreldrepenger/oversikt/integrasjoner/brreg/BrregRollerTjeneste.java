@@ -23,6 +23,7 @@ import no.nav.vedtak.felles.integrasjon.rest.RestClientConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestConfig;
 import no.nav.vedtak.felles.integrasjon.rest.RestRequest;
 import no.nav.vedtak.felles.integrasjon.rest.TokenFlow;
+import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 import no.nav.vedtak.sikkerhet.oidc.token.impl.MaskinportenTokenKlient;
 import no.nav.vedtak.util.LRUCache;
 
@@ -32,6 +33,7 @@ public class BrregRollerTjeneste {
 
     private static final Environment ENV = Environment.current();
     private static final Logger LOG = LoggerFactory.getLogger(BrregRollerTjeneste.class);
+    private static final Logger SECURE_LOG = LoggerFactory.getLogger("secureLogger");
 
     // Dolly har ingen mock for Brregs REST-API. I prod testes integrasjonen bare gjennom shadow-kallet.
     private static final boolean BRREG_RESULTAT_DEAKTIVERT = ENV.isProd() || ENV.isDev();
@@ -74,12 +76,11 @@ public class BrregRollerTjeneste {
         }
         try {
             var resultat = finnSelvstendigNæringFraBrreg(fødselsnummer);
-            var maskertResultat = resultat.stream()
-                .map(næring -> new BrregTestresultat(maskerOrgnr(næring.organisasjonsnummer()), næring.næringstype()))
-                .toList();
-            LOG.info("Testkall mot Brreg for selvstendig næring var vellykket. Resultat: {}", maskertResultat);
+            LOG.info("Testkall mot Brreg for selvstendig næring var vellykket. Antall resultater: {}", resultat.size());
+            SECURE_LOG.info("Testkall mot Brreg for selvstendig næring. Resultat: {}", DefaultJsonMapper.toJson(resultat));
         } catch (RuntimeException e) {
             LOG.warn("Testkall mot Brreg for selvstendig næring feilet. Feiltype: {}", e.getClass().getSimpleName());
+            SECURE_LOG.warn("Testkall mot Brreg for selvstendig næring feilet for fødselsnummer {}.", fødselsnummer.value(), e);
         }
     }
 
@@ -144,9 +145,6 @@ public class BrregRollerTjeneste {
         LOG.info("FPOVERSIKT vellykket kall mot brreg direkte rolleutskrift. Fikk {}", resultat.size());
         CACHE_ROLLEUTSKRIFT.put(fødselsnummer.value(), resultat);
         return resultat;
-    }
-
-    private record BrregTestresultat(String organisasjonsnummer, Virksomhetstype næringstype) {
     }
 
     private Optional<BrregRolleutskriftDto> gjørPersonKallTilBrreg(Fødselsnummer fødselsnummer) {
