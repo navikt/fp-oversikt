@@ -75,7 +75,7 @@ public class BrregRollerTjeneste {
         try {
             var resultat = finnSelvstendigNæringFraBrreg(fødselsnummer);
             var maskertResultat = resultat.stream()
-                .map(næring -> new BrregTestresultat(maskerOrgnr(næring.organisasjonsnummer()), næring.navn(), næring.næringstype()))
+                .map(næring -> new BrregTestresultat(maskerOrgnr(næring.organisasjonsnummer()), næring.næringstype()))
                 .toList();
             LOG.info("Testkall mot Brreg for selvstendig næring var vellykket. Resultat: {}", maskertResultat);
         } catch (RuntimeException e) {
@@ -146,7 +146,7 @@ public class BrregRollerTjeneste {
         return resultat;
     }
 
-    private record BrregTestresultat(String organisasjonsnummer, String navn, Virksomhetstype næringstype) {
+    private record BrregTestresultat(String organisasjonsnummer, Virksomhetstype næringstype) {
     }
 
     private Optional<BrregRolleutskriftDto> gjørPersonKallTilBrreg(Fødselsnummer fødselsnummer) {
