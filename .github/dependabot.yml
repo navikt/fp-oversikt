@@ -29,10 +29,6 @@ updates:
     open-pull-requests-limit: 10
     allow:
       - dependency-type: "all"
-    ignore:
-      - dependency-name: "no.nav.teamdokumenthandtering:teamdokumenthandtering-avro-schemas"
-      - dependency-name: "com.github.navikt:brukernotifikasjon-schemas"
-        versions: ["3.0.0"]
     groups:
       prod-deps:
         dependency-type: "production"
