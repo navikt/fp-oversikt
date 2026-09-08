@@ -37,6 +37,8 @@ public class JettyServer {
     void bootStrap() throws Exception {
         MetricsUtil.init();
         System.setProperty("task.manager.runner.threads", "4");
+        // Må gjøres for å fungere med Avro 1.12.2 og senere - alternativt bruke ClassSecurityValidator
+        System.setProperty("org.apache.avro.SERIALIZABLE_PACKAGES", "no.nav.joarkjournalfoeringhendelser");
         konfigurerLogging();
         var ds = DatasourceUtil.postgresDataSource(ENV.getRequiredProperty("DB_JDBC_URL"), null, null, 16);
         DataSourceHolder.initialize(ds);
