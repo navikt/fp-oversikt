@@ -7,7 +7,7 @@ public record SelvstendigNæringDto(@NotNull String organisasjonsnummer,
                                    String navn,
                                    @NotNull Virksomhetstype næringstype) {
 
-    static SelvstendigNæringDto fra(BrregSelvstendigNæring næring) {
+    public static SelvstendigNæringDto fra(BrregSelvstendigNæring næring) {
         return new SelvstendigNæringDto(
             næring.organisasjonsnummer(),
             næring.navn(),

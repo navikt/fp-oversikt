@@ -10,6 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
 import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
+import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.BrregRollerTjeneste;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.Kjønn;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker;
@@ -36,8 +38,17 @@ class SvpPersonopplysningerDtoTjenesteTest {
     @Mock
     private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
 
+    @Mock
+    private BrregRollerTjeneste brregRollerTjeneste;
+
     private SvpPersonopplysningerDtoTjeneste tjeneste(DummyInnloggetTestbruker innloggetBruker) {
-        return new SvpPersonopplysningerDtoTjeneste(pdlKlient, mineArbeidsforholdTjeneste, innloggetBruker);
+        return new SvpPersonopplysningerDtoTjeneste(pdlKlient, mineArbeidsforholdTjeneste, brregRollerTjeneste, innloggetBruker);
+    }
+
+    @BeforeEach
+    void defaultAktiviteter() {
+        when(mineArbeidsforholdTjeneste.brukersFrilansoppdragSisteSeksMåneder(any())).thenReturn(List.of());
+        when(brregRollerTjeneste.finnSelvstendigNæring(any())).thenReturn(List.of());
     }
 
     @Test
@@ -79,4 +90,3 @@ class SvpPersonopplysningerDtoTjenesteTest {
         return person;
     }
 }
-

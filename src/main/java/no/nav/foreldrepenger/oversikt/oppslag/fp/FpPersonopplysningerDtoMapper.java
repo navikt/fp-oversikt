@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
+import no.nav.foreldrepenger.oversikt.arbeid.SelvstendigNæringDto;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.PersonMedIdent;
 import no.nav.pdl.Person;
 import no.nav.pdl.Sivilstand;
@@ -28,10 +29,12 @@ class FpPersonopplysningerDtoMapper {
     static FpPersonopplysningerDto tilDto(PersonMedIdent søker,
                                           List<PersonMedIdent> barn,
                                           Map<String, PersonMedIdent> annenpart,
-                                          List<EksternArbeidsforholdDto> arbeidsforhold) {
+                                          List<EksternArbeidsforholdDto> arbeidsforhold,
+                                          List<EksternArbeidsforholdDto> frilansoppdrag,
+                                          List<SelvstendigNæringDto> selvstendigNæring) {
         var søkerPerson = søker.person();
         return new FpPersonopplysningerDto(new Fødselsnummer(søker.ident()), fødselsdatoFor(søker), kjønnFor(søker), navnFor(søker), erGift(søkerPerson),
-            tilBarn(barn, annenpart), arbeidsforhold);
+            tilBarn(barn, annenpart), arbeidsforhold, frilansoppdrag, selvstendigNæring);
     }
 
     private static boolean erGift(Person søkerPerson) {

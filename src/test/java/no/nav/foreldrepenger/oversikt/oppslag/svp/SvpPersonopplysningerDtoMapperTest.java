@@ -9,7 +9,9 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
+import no.nav.foreldrepenger.oversikt.arbeid.SelvstendigNæringDto;
 import no.nav.foreldrepenger.oversikt.arbeid.Stillingsprosent;
+import no.nav.foreldrepenger.oversikt.arbeid.Virksomhetstype;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.Kjønn;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.PersonMedIdent;
 import no.nav.pdl.Foedselsdato;
@@ -33,7 +35,13 @@ class SvpPersonopplysningerDtoMapperTest {
             new EksternArbeidsforholdDto("123456789", "ORG", "Arbeidsgiver AS", new Stillingsprosent(BigDecimal.valueOf(100)), LocalDate.of(2020, 1, 1), null)
         );
 
-        var dto = SvpPersonopplysningerDtoMapper.tilDto(personMedIdent, arbeidsforhold);
+        var frilansoppdrag = List.of(
+            new EksternArbeidsforholdDto("987654321", "FL", "Oppdragsgiver AS", new Stillingsprosent(BigDecimal.valueOf(50)),
+                LocalDate.of(2022, 1, 1), null)
+        );
+        var selvstendigNæring = List.of(new SelvstendigNæringDto("123456789", "Mitt foretak", Virksomhetstype.FISKE));
+
+        var dto = SvpPersonopplysningerDtoMapper.tilDto(personMedIdent, arbeidsforhold, frilansoppdrag, selvstendigNæring);
 
         assertThat(dto.fnr().value()).isEqualTo(IDENT);
         assertThat(dto.fødselsdato()).isEqualTo(LocalDate.of(1990, 1, 15));
@@ -43,7 +51,8 @@ class SvpPersonopplysningerDtoMapperTest {
         assertThat(dto.navn().etternavn()).isEqualTo("Nordmann");
         assertThat(dto.arbeidsforhold()).hasSize(1);
         assertThat(dto.arbeidsforhold().getFirst().arbeidsgiverNavn()).isEqualTo("Arbeidsgiver AS");
+        assertThat(dto.frilansoppdrag()).containsExactlyElementsOf(frilansoppdrag);
+        assertThat(dto.selvstendigNæring()).containsExactlyElementsOf(selvstendigNæring);
     }
 
 }
-

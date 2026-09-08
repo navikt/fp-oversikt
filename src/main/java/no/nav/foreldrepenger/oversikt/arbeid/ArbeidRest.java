@@ -18,7 +18,6 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
-import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.BrregRollerTjeneste;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
@@ -37,19 +36,16 @@ public class ArbeidRest {
     private PersonOppslagSystem personOppslagSystem;
     private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
     private AktivitetskravMåDokumentereMorsArbeidTjeneste aktivitetskravMåDokumentereMorsArbeidTjeneste;
-    private BrregRollerTjeneste brregRollerTjeneste;
 
     @Inject
     public ArbeidRest(TilgangKontrollTjeneste tilgangkontroll, InnloggetBruker innloggetBruker,
                       PersonOppslagSystem personOppslagSystem, MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste,
-                      AktivitetskravMåDokumentereMorsArbeidTjeneste aktivitetskravMåDokumentereMorsArbeidTjeneste,
-                      BrregRollerTjeneste brregRollerTjeneste) {
+                      AktivitetskravMåDokumentereMorsArbeidTjeneste aktivitetskravMåDokumentereMorsArbeidTjeneste) {
         this.tilgangkontroll = tilgangkontroll;
         this.innloggetBruker = innloggetBruker;
         this.personOppslagSystem = personOppslagSystem;
         this.mineArbeidsforholdTjeneste = mineArbeidsforholdTjeneste;
         this.aktivitetskravMåDokumentereMorsArbeidTjeneste = aktivitetskravMåDokumentereMorsArbeidTjeneste;
-        this.brregRollerTjeneste = brregRollerTjeneste;
     }
 
     ArbeidRest() {
@@ -63,28 +59,6 @@ public class ArbeidRest {
         tilgangkontroll.tilgangssjekkMyndighetsalder();
 
         return mineArbeidsforholdTjeneste.brukersArbeidsforhold(innloggetBruker.fødselsnummer());
-    }
-
-    @Path("/mineFrilansoppdrag")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<EksternArbeidsforholdDto> hentMineFrilansoppdrag() {
-        tilgangkontroll.sjekkAtKallErFraBorger();
-        tilgangkontroll.tilgangssjekkMyndighetsalder();
-
-        return mineArbeidsforholdTjeneste.brukersFrilansoppdragSisteSeksMåneder(innloggetBruker.fødselsnummer());
-    }
-
-    @Path("/selvstendigNaering")
-    @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    public List<SelvstendigNæringDto> hentSelvstendigNæring() {
-        tilgangkontroll.sjekkAtKallErFraBorger();
-        tilgangkontroll.tilgangssjekkMyndighetsalder();
-
-        return brregRollerTjeneste.finnSelvstendigNæring(innloggetBruker.fødselsnummer()).stream()
-            .map(SelvstendigNæringDto::fra)
-            .toList();
     }
 
     @Path("/morDokumentasjon")
