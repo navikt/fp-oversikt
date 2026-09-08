@@ -8,6 +8,7 @@ import java.util.List;
 
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.arbeid.EksternArbeidsforholdDto;
+import no.nav.foreldrepenger.oversikt.arbeid.SelvstendigNæringDto;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.PersonMedIdent;
 
 class SvpPersonopplysningerDtoMapper {
@@ -16,14 +17,16 @@ class SvpPersonopplysningerDtoMapper {
         // hide public constructor
     }
 
-    static SvpPersonopplysningerDto tilDto(PersonMedIdent søker, List<EksternArbeidsforholdDto> arbeidsforhold) {
+    static SvpPersonopplysningerDto tilDto(PersonMedIdent søker, List<EksternArbeidsforholdDto> arbeidsforhold,
+                                           List<EksternArbeidsforholdDto> frilansoppdrag, List<SelvstendigNæringDto> selvstendigNæring) {
         return new SvpPersonopplysningerDto(
                 new Fødselsnummer(søker.ident()),
                 fødselsdatoFor(søker),
                 kjønnFor(søker),
                 navnFor(søker),
-                arbeidsforhold
+                arbeidsforhold,
+                frilansoppdrag,
+                selvstendigNæring
         );
     }
 }
-

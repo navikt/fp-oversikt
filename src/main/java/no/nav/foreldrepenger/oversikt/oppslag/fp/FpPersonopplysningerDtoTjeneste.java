@@ -21,6 +21,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.arbeid.SelvstendigNæringDto;
+import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.BrregRollerTjeneste;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlientSystem;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
@@ -54,6 +56,7 @@ class FpPersonopplysningerDtoTjeneste {
     private PdlKlient pdlKlient;
     private PdlKlientSystem pdlKlientSystem;
     private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
+    private BrregRollerTjeneste brregRollerTjeneste;
     private InnloggetBruker innloggetBruker;
 
     FpPersonopplysningerDtoTjeneste() {
@@ -64,10 +67,12 @@ class FpPersonopplysningerDtoTjeneste {
     FpPersonopplysningerDtoTjeneste(PdlKlient pdlKlient,
                                     PdlKlientSystem pdlKlientSystem,
                                     MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste,
+                                    BrregRollerTjeneste brregRollerTjeneste,
                                     InnloggetBruker innloggetBruker) {
         this.pdlKlient = pdlKlient;
         this.pdlKlientSystem = pdlKlientSystem;
         this.mineArbeidsforholdTjeneste = mineArbeidsforholdTjeneste;
+        this.brregRollerTjeneste = brregRollerTjeneste;
         this.innloggetBruker = innloggetBruker;
     }
 
@@ -83,7 +88,11 @@ class FpPersonopplysningerDtoTjeneste {
         var barn = hentBarnTilSøker(søker);
         var annenpart = hentAnnenpartRelatertTilBarn(barn, søkersFnr);
         var arbeidsforhold = mineArbeidsforholdTjeneste.brukersArbeidsforhold(søkersFnr);
-        var personinfoDto = FpPersonopplysningerDtoMapper.tilDto(søker, barn, annenpart, arbeidsforhold);
+        var frilansoppdrag = mineArbeidsforholdTjeneste.brukersFrilansoppdragSisteSeksMåneder(søkersFnr);
+        var selvstendigNæring = brregRollerTjeneste.finnSelvstendigNæring(søkersFnr).stream()
+            .map(SelvstendigNæringDto::fra)
+            .toList();
+        var personinfoDto = FpPersonopplysningerDtoMapper.tilDto(søker, barn, annenpart, arbeidsforhold, frilansoppdrag, selvstendigNæring);
         PERSONINFO_CACHE.put(søkersFnr.value(), personinfoDto);
         return personinfoDto;
     }

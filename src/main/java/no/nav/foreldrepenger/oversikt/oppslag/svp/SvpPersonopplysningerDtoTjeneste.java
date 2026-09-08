@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.oversikt.arbeid.SelvstendigNæringDto;
+import no.nav.foreldrepenger.oversikt.integrasjoner.brreg.BrregRollerTjeneste;
 import no.nav.foreldrepenger.oversikt.integrasjoner.pdl.PdlKlient;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.MineArbeidsforholdTjeneste;
 import no.nav.foreldrepenger.oversikt.oppslag.felles.PersonMedIdent;
@@ -32,6 +34,7 @@ class SvpPersonopplysningerDtoTjeneste {
 
     private PdlKlient pdlKlient;
     private MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste;
+    private BrregRollerTjeneste brregRollerTjeneste;
     private InnloggetBruker innloggetBruker;
 
     SvpPersonopplysningerDtoTjeneste() {
@@ -39,9 +42,11 @@ class SvpPersonopplysningerDtoTjeneste {
     }
 
     @Inject
-    SvpPersonopplysningerDtoTjeneste(PdlKlient pdlKlient, MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste, InnloggetBruker innloggetBruker) {
+    SvpPersonopplysningerDtoTjeneste(PdlKlient pdlKlient, MineArbeidsforholdTjeneste mineArbeidsforholdTjeneste,
+                                     BrregRollerTjeneste brregRollerTjeneste, InnloggetBruker innloggetBruker) {
         this.pdlKlient = pdlKlient;
         this.mineArbeidsforholdTjeneste = mineArbeidsforholdTjeneste;
+        this.brregRollerTjeneste = brregRollerTjeneste;
         this.innloggetBruker = innloggetBruker;
     }
 
@@ -55,7 +60,11 @@ class SvpPersonopplysningerDtoTjeneste {
     private SvpPersonopplysningerDto hentOgCachePersoninfo(Fødselsnummer søkersFnr) {
         var søker = hentSøker(søkersFnr.value());
         var arbeidsforhold = mineArbeidsforholdTjeneste.brukersArbeidsforhold(søkersFnr);
-        var personinfoDto = SvpPersonopplysningerDtoMapper.tilDto(søker, arbeidsforhold);
+        var frilansoppdrag = mineArbeidsforholdTjeneste.brukersFrilansoppdragSisteSeksMåneder(søkersFnr);
+        var selvstendigNæring = brregRollerTjeneste.finnSelvstendigNæring(søkersFnr).stream()
+            .map(SelvstendigNæringDto::fra)
+            .toList();
+        var personinfoDto = SvpPersonopplysningerDtoMapper.tilDto(søker, arbeidsforhold, frilansoppdrag, selvstendigNæring);
         PERSONINFO_CACHE.put(søkersFnr.value(), personinfoDto);
         return personinfoDto;
     }
@@ -76,4 +85,3 @@ class SvpPersonopplysningerDtoTjeneste {
         return new PersonMedIdent(fnr, person);
     }
 }
-
