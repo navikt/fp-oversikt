@@ -91,6 +91,7 @@ class DBSakRepositoryTest {
         var annenAktørsSak = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), true, null, AktørId.dummy(), fh(), aksjonspunkt(), of(), MOR,
             of(AktørId.dummy()), beggeRett(), false, LocalDateTime.now());
         repository.lagre(annenAktørsSak);
+        entityManager.clear();
 
         var saker = repository.hentFor(aktørId);
 
@@ -131,6 +132,7 @@ class DBSakRepositoryTest {
         var oppdatertSak = new SakFP0(saksnummer, aktørId, false, null, annenPartAktørId, fh(), aksjonspunkt(),
             of(new FpSøknad(SøknadStatus.MOTTATT, now(), null, Dekningsgrad.HUNDRE, true)), FAR, barn, beggeRett(), false, LocalDateTime.now());
         repository.lagre(oppdatertSak);
+        entityManager.clear();
 
         var saker = repository.hentFor(aktørId);
 
