@@ -34,7 +34,7 @@ public class Saker {
         return tilDto(saker, fødselsnummerOppslag);
     }
 
-    List<Sak> hentSaker(AktørId aktørId) {
+    public List<Sak> hentSaker(AktørId aktørId) {
         return sakRepository.hentFor(aktørId).stream()
             .filter(Sak::harSøknad)
             .filter(not(Sak::erKomplettForVisning))
