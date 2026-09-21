@@ -35,8 +35,8 @@ public class BrregRollerTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(BrregRollerTjeneste.class);
     private static final Logger SECURE_LOG = LoggerFactory.getLogger("secureLogger");
 
-    // Dolly har ingen mock for Brregs REST-API. I prod testes integrasjonen bare gjennom shadow-kallet.
-    private static final boolean BRREG_RESULTAT_DEAKTIVERT = ENV.isProd() || ENV.isDev();
+    // Dolly har ingen mock for Brregs REST-API i dev.
+    private static final boolean BRREG_RESULTAT_DEAKTIVERT =  ENV.isDev();
 
     private static final String AUTORISERT_API = "/autorisert-api";
 
@@ -68,20 +68,6 @@ public class BrregRollerTjeneste {
             return List.of();
         }
         return finnSelvstendigNæringFraBrreg(fødselsnummer);
-    }
-
-    public void testBrregIntegrasjonIProduksjon(Fødselsnummer fødselsnummer) {
-        if (!ENV.isProd()) {
-            return;
-        }
-        try {
-            var resultat = finnSelvstendigNæringFraBrreg(fødselsnummer);
-            LOG.info("Testkall mot Brreg for selvstendig næring var vellykket. Antall resultater: {}", resultat.size());
-            SECURE_LOG.info("Testkall mot Brreg for selvstendig næring. Resultat: {}", DefaultJsonMapper.toJson(resultat));
-        } catch (RuntimeException e) {
-            LOG.warn("Testkall mot Brreg for selvstendig næring feilet. Feiltype: {}", e.getClass().getSimpleName());
-            SECURE_LOG.warn("Testkall mot Brreg for selvstendig næring feilet for fødselsnummer {}.", fødselsnummer.value(), e);
-        }
     }
 
     private List<BrregSelvstendigNæring> finnSelvstendigNæringFraBrreg(Fødselsnummer fødselsnummer) {
