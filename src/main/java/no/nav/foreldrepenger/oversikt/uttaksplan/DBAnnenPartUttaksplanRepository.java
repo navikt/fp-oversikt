@@ -30,7 +30,7 @@ public class DBAnnenPartUttaksplanRepository implements AnnenPartUttaksplanRepos
         var eksisterende = hentEntitetForOppdatering(saksnummer);
         if (eksisterende.isEmpty()) {
             entityManager.persist(new AnnenPartUttaksplanEntitet(saksnummer, uttaksplan));
-        } else if (uttaksplan.mottattTidspunkt().isAfter(eksisterende.get().map().mottattTidspunkt())) {
+        } else if (!eksisterende.get().map().mottattTidspunkt().isAfter(uttaksplan.mottattTidspunkt())) {
             eksisterende.get().setJson(uttaksplan);
             entityManager.merge(eksisterende.get());
         }

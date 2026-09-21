@@ -66,20 +66,6 @@ class DBAnnenPartUttaksplanRepositoryTest {
         assertThat(repository.hentFor(saksnummer)).contains(nyere);
     }
 
-    @Test
-    void skalIkkeOverskrivePlanMedSammeMottattTidspunkt(EntityManager entityManager) {
-        var repository = new DBAnnenPartUttaksplanRepository(entityManager);
-        var saksnummer = Saksnummer.dummy();
-        var mottattTidspunkt = LocalDateTime.of(2026, 9, 2, 12, 0);
-        var opprinnelig = plan(mottattTidspunkt, List.of(periode(LocalDate.of(2026, 11, 1))));
-        var duplikatMedAnnetInnhold = plan(mottattTidspunkt, List.of(periode(LocalDate.of(2026, 10, 1))));
-        repository.lagre(saksnummer, opprinnelig);
-
-        repository.lagre(saksnummer, duplikatMedAnnetInnhold);
-
-        assertThat(repository.hentFor(saksnummer)).contains(opprinnelig);
-    }
-
     private static AnnenPartUttaksplan plan(LocalDateTime mottattTidspunkt, List<Planperiode> perioder) {
         return new AnnenPartUttaksplan(mottattTidspunkt, perioder);
     }

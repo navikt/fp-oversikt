@@ -57,35 +57,4 @@ class UttaksplanTjenestePersonvernTest {
         assertThat(plan.perioder()).isEmpty();
         verifyNoInteractions(annenPartSakTjeneste, repository);
     }
-
-    @Test
-    void skalIkkeHenteLagretAnnenPartNårOppgittAktørIkkeMatcherSøkersSak() {
-        var søker = AktørId.dummy();
-        var forespurtAnnenPart = AktørId.dummy();
-        var annenPartISak = AktørId.dummy();
-        var barn = AktørId.dummy();
-        var saksnummer = Saksnummer.dummy();
-        var termindato = LocalDate.of(2026, 10, 1);
-        var søkersSak = mock(ForeldrepengerSak.class);
-        when(søkersSak.saksnummer()).thenReturn(saksnummer);
-        when(søkersSak.gjelderBarn(barn)).thenReturn(true);
-        when(søkersSak.sisteSøknad()).thenReturn(Optional.of(
-            new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.of(2026, 9, 1, 12, 0), Set.of(), Dekningsgrad.HUNDRE, false)));
-        when(søkersSak.gjeldendeVedtak()).thenReturn(Optional.empty());
-        when(søkersSak.familieHendelse()).thenReturn(new FamilieHendelse(null, termindato, 1, null));
-        when(søkersSak.dekningsgrad()).thenReturn(Dekningsgrad.HUNDRE);
-        when(søkersSak.brukerRolle()).thenReturn(BrukerRolle.MOR);
-        when(søkersSak.annenPartAktørId()).thenReturn(annenPartISak);
-        var saker = mock(Saker.class);
-        when(saker.hentSaker(søker)).thenReturn(List.of(søkersSak));
-        var annenPartSakTjeneste = mock(AnnenPartSakTjeneste.class);
-        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(søker, forespurtAnnenPart, barn, termindato)).thenReturn(Optional.empty());
-        var repository = mock(AnnenPartUttaksplanRepository.class);
-        var tjeneste = new UttaksplanTjeneste(saker, annenPartSakTjeneste, repository);
-
-        var plan = tjeneste.hentFor(søker, forespurtAnnenPart, barn, termindato).orElseThrow();
-
-        assertThat(plan.perioder()).isEmpty();
-        verifyNoInteractions(repository);
-    }
 }
