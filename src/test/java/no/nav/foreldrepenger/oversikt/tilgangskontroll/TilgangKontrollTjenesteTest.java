@@ -74,7 +74,6 @@ class TilgangKontrollTjenesteTest {
 
     @Test
     void skalAvviseAnnenSystemressurs() {
-        KontekstHolder.fjernKontekst();
         var kontekst = mock(Kontekst.class);
         when(kontekst.getIdentType()).thenReturn(IdentType.Systemressurs);
         when(kontekst.getUid()).thenReturn("dev-gcp:teamforeldrepenger:foreldrepengesoknad");
