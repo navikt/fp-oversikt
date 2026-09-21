@@ -35,8 +35,8 @@ public class BrregRollerTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(BrregRollerTjeneste.class);
     private static final Logger SECURE_LOG = LoggerFactory.getLogger("secureLogger");
 
-    // Dolly har ingen mock for Brregs REST-API. I prod testes integrasjonen bare gjennom shadow-kallet.
-    private static final boolean BRREG_RESULTAT_DEAKTIVERT = ENV.isProd() || ENV.isDev();
+    // Dolly har ingen mock for Brregs REST-API, derfor er integrasjonen fortsatt deaktivert i dev.
+    private static final boolean BRREG_RESULTAT_DEAKTIVERT = ENV.isDev();
 
     private static final String AUTORISERT_API = "/autorisert-api";
 
