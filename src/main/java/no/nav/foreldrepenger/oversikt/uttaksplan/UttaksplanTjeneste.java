@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -36,15 +35,11 @@ public class UttaksplanTjeneste {
 
     private Saker saker;
     private AnnenPartSakTjeneste annenPartSakTjeneste;
-    private AnnenPartUttaksplanRepository annenPartUttaksplanRepository;
 
     @Inject
-    public UttaksplanTjeneste(Saker saker,
-                             AnnenPartSakTjeneste annenPartSakTjeneste,
-                             AnnenPartUttaksplanRepository annenPartUttaksplanRepository) {
+    public UttaksplanTjeneste(Saker saker, AnnenPartSakTjeneste annenPartSakTjeneste) {
         this.saker = saker;
         this.annenPartSakTjeneste = annenPartSakTjeneste;
-        this.annenPartUttaksplanRepository = annenPartUttaksplanRepository;
     }
 
     UttaksplanTjeneste() {
@@ -72,7 +67,7 @@ public class UttaksplanTjeneste {
         var dekningsgrad = metadataSak.dekningsgrad();
 
         var søkerUttak = søkersSak.map(UttaksplanTjeneste::søkerensUttak).orElseGet(List::of);
-        var annenPartsUttak = annenPartsUttak(annenPart, søkersSak, annenPartsSak);
+        var annenPartsUttak = annenPartsSak.map(UttaksplanTjeneste::annenPartsUttak).orElseGet(List::of);
         var eøsPerioder = søkersSak.map(UttaksplanTjeneste::eøsPerioder).orElseGet(List::of);
 
         var tidslinje = UttaksplanTidslinje.normaliser(søkerUttak, annenPartsUttak, eøsPerioder);
@@ -153,21 +148,6 @@ public class UttaksplanTjeneste {
             .map(vedtak -> UttaksplanMapper.mapVedtaksperioder(vedtak.perioder(), sak.brukerRolle()))
             .map(AnnenPartGraderingFilter::fjernArbeidsgivere)
             .orElseGet(List::of);
-    }
-
-    private List<Planperiode> annenPartsUttak(AktørId annenPart,
-                                             Optional<ForeldrepengerSak> søkersSak,
-                                             Optional<ForeldrepengerSak> annenPartsSak) {
-        if (annenPart == null) {
-            return List.of();
-        }
-        var lagretPlan = søkersSak
-            .filter(sak -> Objects.equals(sak.annenPartAktørId(), annenPart))
-            .flatMap(sak -> annenPartUttaksplanRepository.hentFor(sak.saksnummer()));
-        if (lagretPlan.isPresent() && annenPartsSak.map(sak -> lagretPlan.get().mottattTidspunkt().isAfter(sak.oppdatertTidspunkt())).orElse(true)) {
-            return lagretPlan.get().perioder();
-        }
-        return annenPartsSak.map(UttaksplanTjeneste::annenPartsUttak).orElseGet(List::of);
     }
 
     private static List<UttakPeriodeAnnenpartEøs> eøsPerioder(ForeldrepengerSak sak) {

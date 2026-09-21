@@ -98,7 +98,6 @@ spec:
         - application: engangsstonad
         - application: foreldrepengeoversikt
         - application: foreldrepengesoknad
-        - application: fpsoknad
         - application: svangerskapspengesoknad
         - application: planlegger
         - application: veiviser-fp-eller-es
