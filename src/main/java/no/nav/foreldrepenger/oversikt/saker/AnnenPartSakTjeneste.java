@@ -21,9 +21,8 @@ import no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.Gradering;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
-import no.nav.fpsak.tidsserie.LocalDateInterval;
+import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTjeneste;
 
 @ApplicationScoped
 public class AnnenPartSakTjeneste {
@@ -159,31 +158,8 @@ public class AnnenPartSakTjeneste {
             .stream()
             .filter(sak -> !sak.oppgittAleneomsorg())
             .filter(sak -> sak.annenPartAktørId() != null && sak.annenPartAktørId().equals(søker))
-            .filter(sak -> matcher(barn, familiehendelse, sak))
+            .filter(sak -> UttaksplanTjeneste.gjelderSammeBarn(barn, familiehendelse, sak))
             .toList();
-    }
-
-    private static boolean matcher(AktørId barn, LocalDate familiehendelse, ForeldrepengerSak sak) {
-        if (barn != null) {
-            if (sak.gjelderBarn(barn)) {
-                return true;
-            }
-        }
-        if (familiehendelse != null && sak.familieHendelse() != null) {
-            if (gjelderSammeBarn(familiehendelse, sak.familieHendelse())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean gjelderSammeBarn(LocalDate dato, FamilieHendelse fh) {
-        var gjeldende = Optional.ofNullable(fh.omsorgsovertakelse()).orElse(Optional.ofNullable(fh.fødselsdato()).orElse(fh.termindato()));
-        if (gjeldende == null) {
-            return false; //Sett i prod at dette har oppstått
-        }
-        var interval = new LocalDateInterval(gjeldende.minusWeeks(5), gjeldende.plusWeeks(5));
-        return interval.contains(dato);
     }
 }
 

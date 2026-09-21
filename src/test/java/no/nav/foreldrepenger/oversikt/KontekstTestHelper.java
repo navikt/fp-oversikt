@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.oversikt;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import no.nav.vedtak.sikkerhet.kontekst.AnsattGruppe;
 import no.nav.vedtak.sikkerhet.kontekst.IdentType;
 import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
@@ -24,15 +23,6 @@ public class KontekstTestHelper {
         when(kontekst.erAutentisert()).thenReturn(true);
         when(kontekst.harKontekst()).thenReturn(true);
         when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
-        KontekstHolder.setKontekst(kontekst);
-    }
-
-    public static void innloggetSaksbehandlerMedDriftRolle() {
-        var kontekst = mock(RequestKontekst.class);
-        when(kontekst.harKontekst()).thenReturn(true);
-        when(kontekst.erAutentisert()).thenReturn(true);
-        when(kontekst.getIdentType()).thenReturn(IdentType.InternBruker);
-        when(kontekst.harGruppe(AnsattGruppe.DRIFT)).thenReturn(true);
         KontekstHolder.setKontekst(kontekst);
     }
 }

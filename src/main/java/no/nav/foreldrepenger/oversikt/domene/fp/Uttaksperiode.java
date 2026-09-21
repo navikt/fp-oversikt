@@ -41,7 +41,7 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
         //frontend vil ikke ha detaljer om gradering ved samtidigUttak
         var gradering = sa == null ? utledGradering().orElse(null) : null;
 
-        var konto = utledKontoType(resultat());
+        var konto = utledKontoType();
         var res = new UttakPeriodeResultat(resultat().innvilget(), resultat().trekkerMinsterett(), trekkerDager, resultat().årsak().tilDto());
         return new UttakPeriode(fom, tom, konto.map(Konto::tilDto).orElse(null), res, utsettelse, opphold, overføring, gradering,
             ma, sa, flerbarnsdager() != null && flerbarnsdager(), brukerRolle);
@@ -69,15 +69,15 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
             new Aktivitet(a.aktivitet().type().tilDto(), a.aktivitet().arbeidsgiver() == null ? null : a.aktivitet().arbeidsgiver().tilDto(), null)));
     }
 
-    private Optional<Konto> utledKontoType(Resultat resultat) {
-        var gradertAktivitet = finnGradertAktivitet(resultat);
-        if (gradertAktivitet.isPresent()) {
-            return Optional.of(gradertAktivitet.get().konto());
+    public Optional<Konto> utledKontoType() {
+        if (resultat() == null) {
+            return Optional.empty();
         }
-        return Stream.ofNullable(resultat().aktiviteter())
-            .flatMap(Collection::stream)
-            .max(Comparator.comparing(UttaksperiodeAktivitet::trekkdager))
-            .map(UttaksperiodeAktivitet::konto);
+        return finnGradertAktivitet(resultat()).map(UttaksperiodeAktivitet::konto)
+            .or(() -> Stream.ofNullable(resultat().aktiviteter())
+                .flatMap(Collection::stream)
+                .max(Comparator.comparing(UttaksperiodeAktivitet::trekkdager))
+                .map(UttaksperiodeAktivitet::konto));
     }
 
     private Optional<UttaksperiodeAktivitet> finnGradertAktivitet(Resultat resultat) {
