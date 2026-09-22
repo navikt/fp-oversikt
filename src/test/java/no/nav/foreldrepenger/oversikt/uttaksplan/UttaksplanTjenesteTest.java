@@ -160,9 +160,16 @@ class UttaksplanTjenesteTest {
     void skalByggePlanUtenAnnenPartNårAnnenForelderMangler(EntityManager entityManager) {
         var søker = AktørId.dummy();
         var barn = AktørId.dummy();
+        var saksnummer = Saksnummer.dummy();
         var termindato = LocalDate.of(2026, 10, 1);
         var søkersPeriode = søknadsperiode(termindato.minusWeeks(3), termindato.minusDays(1), Konto.FORELDREPENGER_FØR_FØDSEL);
-        lagre(entityManager, sakUtenVedtak(søker, null, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR, søkersPeriode));
+        var søknad = new FpSøknad(SøknadStatus.MOTTATT, termindato.atStartOfDay(), Set.of(søkersPeriode), Dekningsgrad.HUNDRE, false);
+        lagre(entityManager, sak(saksnummer, søker, null, barn, termindato, BrukerRolle.MOR, Set.of(), Set.of(søknad),
+            LocalDateTime.of(2026, 9, 1, 12, 0)));
+        var lagretPeriode = new UttaksplanTidslinje.Planperiode(termindato.plusWeeks(8), termindato.plusWeeks(9),
+            new FellesUttaksplanDto.UttakDto(FellesUttaksplanDto.Rolle.FAR_MEDMOR, null, null, null, null, null, null, false, null));
+        new DBAnnenPartUttaksplanRepository(entityManager).lagre(saksnummer,
+            new AnnenPartUttaksplan(LocalDateTime.of(2026, 9, 2, 12, 0), List.of(lagretPeriode)));
 
         var plan = tjeneste(entityManager, søker).hentFor(søker, null, barn, termindato).orElseThrow();
 
@@ -173,9 +180,99 @@ class UttaksplanTjenesteTest {
         });
     }
 
+    @Test
+    void skalBrukeLagretAnnenPartNårDenErNyereEnnAnnenPartsSak(EntityManager entityManager) {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var saksnummer = Saksnummer.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        var annenPartsPeriode = uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(7), Konto.FEDREKVOTE);
+        lagre(entityManager,
+            sak(saksnummer, søker, annenPart, barn, termindato, BrukerRolle.MOR, Set.of(), Set.of(søknad(termindato)), LocalDateTime.of(2026, 8, 1, 12, 0)),
+            sak(Saksnummer.dummy(), annenPart, søker, barn, termindato, BrukerRolle.FAR,
+                Set.of(vedtak(annenPartsPeriode)), Set.of(søknad(termindato)), LocalDateTime.of(2026, 9, 1, 12, 0)));
+        var lagretPeriode = new UttaksplanTidslinje.Planperiode(termindato.plusWeeks(8), termindato.plusWeeks(9),
+            new FellesUttaksplanDto.UttakDto(FellesUttaksplanDto.Rolle.FAR_MEDMOR, null, null, null, null, null, null, false, null));
+        new DBAnnenPartUttaksplanRepository(entityManager).lagre(saksnummer,
+            new AnnenPartUttaksplan(LocalDateTime.of(2026, 9, 2, 12, 0), List.of(lagretPeriode)));
+
+        var plan = tjeneste(entityManager, søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+
+        assertThat(plan.perioder()).singleElement().satisfies(periode -> {
+            assertThat(periode.fom()).isEqualTo(lagretPeriode.fom());
+            assertThat(periode.annenPart()).isEqualTo(lagretPeriode.uttak());
+        });
+    }
+
+    @Test
+    void skalBrukeAnnenPartsSakNårDenErNyereEnnLagretPlan(EntityManager entityManager) {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var saksnummer = Saksnummer.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        var faktiskPeriode = uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(7), Konto.FEDREKVOTE);
+        lagre(entityManager,
+            sak(saksnummer, søker, annenPart, barn, termindato, BrukerRolle.MOR, Set.of(), Set.of(søknad(termindato)), LocalDateTime.of(2026, 8, 1, 12, 0)),
+            sak(Saksnummer.dummy(), annenPart, søker, barn, termindato, BrukerRolle.FAR,
+                Set.of(vedtak(faktiskPeriode)), Set.of(søknad(termindato)), LocalDateTime.of(2026, 9, 2, 12, 0)));
+        var lagretPeriode = new UttaksplanTidslinje.Planperiode(termindato.plusWeeks(8), termindato.plusWeeks(9),
+            new FellesUttaksplanDto.UttakDto(FellesUttaksplanDto.Rolle.FAR_MEDMOR, null, null, null, null, null, null, false, null));
+        new DBAnnenPartUttaksplanRepository(entityManager).lagre(saksnummer,
+            new AnnenPartUttaksplan(LocalDateTime.of(2026, 9, 1, 12, 0), List.of(lagretPeriode)));
+
+        var plan = tjeneste(entityManager, søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+
+        assertThat(plan.perioder()).singleElement().satisfies(periode -> {
+            assertThat(periode.fom()).isEqualTo(faktiskPeriode.fom());
+            assertThat(periode.annenPart()).isNotEqualTo(lagretPeriode.uttak());
+        });
+    }
+
+    @Test
+    void skalBrukeAnnenPartsSakNårIngenLagretPlanFinnes(EntityManager entityManager) {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        var faktiskPeriode = uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(7), Konto.FEDREKVOTE);
+        lagre(entityManager,
+            sak(Saksnummer.dummy(), søker, annenPart, barn, termindato, BrukerRolle.MOR, Set.of(), Set.of(søknad(termindato)), LocalDateTime.now()),
+            sak(Saksnummer.dummy(), annenPart, søker, barn, termindato, BrukerRolle.FAR,
+                Set.of(vedtak(faktiskPeriode)), Set.of(søknad(termindato)), LocalDateTime.now()));
+
+        var plan = tjeneste(entityManager, søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+
+        assertThat(plan.perioder()).singleElement().satisfies(periode -> {
+            assertThat(periode.fom()).isEqualTo(faktiskPeriode.fom());
+            assertThat(periode.annenPart()).isNotNull();
+        });
+    }
+
+    @Test
+    void skalBehandleNyereTomLagretPlanSomBevisstTømming(EntityManager entityManager) {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var saksnummer = Saksnummer.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(entityManager,
+            sak(saksnummer, søker, annenPart, barn, termindato, BrukerRolle.MOR, Set.of(), Set.of(søknad(termindato)), LocalDateTime.of(2026, 8, 1, 12, 0)),
+            sak(Saksnummer.dummy(), annenPart, søker, barn, termindato, BrukerRolle.FAR,
+                Set.of(vedtak(uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(7), Konto.FEDREKVOTE))), Set.of(søknad(termindato)),
+                LocalDateTime.of(2026, 9, 1, 12, 0)));
+        new DBAnnenPartUttaksplanRepository(entityManager).lagre(saksnummer,
+            new AnnenPartUttaksplan(LocalDateTime.of(2026, 9, 2, 12, 0), List.of()));
+
+        var plan = tjeneste(entityManager, søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+
+        assertThat(plan.perioder()).isEmpty();
+    }
+
     private static UttaksplanTjeneste tjeneste(EntityManager entityManager, AktørId søker) {
         var saker = new Saker(new DBSakRepository(entityManager), myndigInnloggetBruker(søker), annenpartUbeskyttetAdresse());
-        return new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker));
+        return new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), new DBAnnenPartUttaksplanRepository(entityManager));
     }
 
     private static void lagre(EntityManager entityManager, SakFP0... saker) {
@@ -220,6 +317,27 @@ class UttaksplanTjenesteTest {
                               Set<FpSøknad> søknader) {
         return new SakFP0(Saksnummer.dummy(), aktørId, false, vedtak, annenPart, new FamilieHendelse(null, termindato, antallBarn, null), Set.of(),
             søknader, rolle, Set.of(barn), new Rettigheter(false, false, false), false, LocalDateTime.now());
+    }
+
+    private static SakFP0 sak(Saksnummer saksnummer,
+                              AktørId aktørId,
+                              AktørId annenPart,
+                              AktørId barn,
+                              LocalDate termindato,
+                              BrukerRolle rolle,
+                              Set<FpVedtak> vedtak,
+                              Set<FpSøknad> søknader,
+                              LocalDateTime oppdatertTidspunkt) {
+        return new SakFP0(saksnummer, aktørId, false, vedtak, annenPart, new FamilieHendelse(null, termindato, 1, null), Set.of(),
+            søknader, rolle, Set.of(barn), new Rettigheter(false, false, false), false, oppdatertTidspunkt);
+    }
+
+    private static FpSøknad søknad(LocalDate termindato) {
+        return new FpSøknad(SøknadStatus.BEHANDLET, termindato.atStartOfDay(), Set.of(), Dekningsgrad.HUNDRE, false);
+    }
+
+    private static FpVedtak vedtak(Uttaksperiode periode) {
+        return new FpVedtak(LocalDateTime.now(), List.of(periode), Dekningsgrad.HUNDRE, null, null, null);
     }
 
     private static FpSøknadsperiode søknadsperiode(LocalDate fom, LocalDate tom, Konto konto) {

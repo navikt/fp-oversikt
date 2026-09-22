@@ -6,8 +6,11 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
@@ -17,6 +20,7 @@ import no.nav.vedtak.sikkerhet.kontekst.IdentType;
 import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
+@Execution(ExecutionMode.SAME_THREAD)
 class TilgangKontrollTjenesteTest {
 
     private SakRepository sakRepository;
@@ -25,9 +29,15 @@ class TilgangKontrollTjenesteTest {
 
     @BeforeEach
     void setUp() {
+        KontekstHolder.fjernKontekst();
         sakRepository = mock(SakRepository.class);
         innloggetBruker = mock(InnloggetBruker.class);
         tilgangkontroll = new TilgangKontrollTjeneste(sakRepository, innloggetBruker);
+    }
+
+    @AfterEach
+    void tearDown() {
+        KontekstHolder.fjernKontekst();
     }
 
     @Test
@@ -49,6 +59,39 @@ class TilgangKontrollTjenesteTest {
         KontekstHolder.setKontekst(kontekst);
 
         assertThatCode(() -> tilgangkontroll.sjekkAtKallErFraBorger()).doesNotThrowAnyException();
+    }
+
+    @Test
+    void skalGiTilgangTilSystemressurs() {
+        var kontekst = mock(Kontekst.class);
+        when(kontekst.harKontekst()).thenReturn(true);
+        when(kontekst.getIdentType()).thenReturn(IdentType.Systemressurs);
+        when(kontekst.getUid()).thenReturn("dev-gcp:teamforeldrepenger:fpsoknad");
+        KontekstHolder.setKontekst(kontekst);
+
+        assertThatCode(() -> tilgangkontroll.sjekkAtKallErFraSystemressurs("fpsoknad")).doesNotThrowAnyException();
+    }
+
+    @Test
+    void skalAvviseAnnenSystemressurs() {
+        var kontekst = mock(Kontekst.class);
+        when(kontekst.getIdentType()).thenReturn(IdentType.Systemressurs);
+        when(kontekst.getUid()).thenReturn("dev-gcp:teamforeldrepenger:foreldrepengesoknad");
+        KontekstHolder.setKontekst(kontekst);
+
+        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystemressurs("fpsoknad"))
+            .isExactlyInstanceOf(OversiktManglerTilgangException.class);
+    }
+
+    @Test
+    void borgerBlirAvvistAvSystemressurssjekk() {
+        var kontekst = mock(Kontekst.class);
+        when(kontekst.harKontekst()).thenReturn(true);
+        when(kontekst.getIdentType()).thenReturn(IdentType.EksternBruker);
+        KontekstHolder.setKontekst(kontekst);
+
+        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystemressurs("fpsoknad"))
+            .isExactlyInstanceOf(OversiktManglerTilgangException.class);
     }
 
     @Test

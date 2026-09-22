@@ -53,6 +53,20 @@ public class TilgangKontrollTjeneste {
         throw new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG_IKKE_EKSTERN);
     }
 
+    public void sjekkAtKallErFraSystemressurs(String applikasjon) {
+        var kontekst = KontekstHolder.getKontekst();
+        if (kontekst != null
+            && IdentType.Systemressurs.equals(kontekst.getIdentType())
+            && erApplikasjon(kontekst.getUid(), applikasjon)) {
+            return;
+        }
+        throw new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG);
+    }
+
+    private static boolean erApplikasjon(String uid, String applikasjon) {
+        return uid != null && (uid.equals(applikasjon) || uid.endsWith(":" + applikasjon));
+    }
+
     private boolean erBorger(Kontekst kontekst) {
         if (kontekst == null) {
             return false;
