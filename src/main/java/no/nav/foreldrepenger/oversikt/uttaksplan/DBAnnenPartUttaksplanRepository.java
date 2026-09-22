@@ -26,7 +26,6 @@ public class DBAnnenPartUttaksplanRepository implements AnnenPartUttaksplanRepos
 
     @Override
     public void lagre(Saksnummer saksnummer, AnnenPartUttaksplan uttaksplan) {
-        låsSaksnummer(saksnummer);
         var eksisterende = hentEntitetForOppdatering(saksnummer);
         if (eksisterende.isEmpty()) {
             entityManager.persist(new AnnenPartUttaksplanEntitet(saksnummer, uttaksplan));
@@ -35,12 +34,6 @@ public class DBAnnenPartUttaksplanRepository implements AnnenPartUttaksplanRepos
             entityManager.merge(eksisterende.get());
         }
         entityManager.flush();
-    }
-
-    private void låsSaksnummer(Saksnummer saksnummer) {
-        entityManager.createNativeQuery("select pg_advisory_xact_lock(hashtext(cast(?1 as text)))")
-            .setParameter(1, saksnummer.value())
-            .getSingleResult();
     }
 
     @Override
