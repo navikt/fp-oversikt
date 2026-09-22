@@ -62,41 +62,6 @@ class TilgangKontrollTjenesteTest {
     }
 
     @Test
-    void skalGiTilgangTilSystemressurs() {
-        var kontekst = mock(Kontekst.class);
-        when(kontekst.harKontekst()).thenReturn(true);
-        when(kontekst.getIdentType()).thenReturn(IdentType.Systemressurs);
-        when(kontekst.getUid()).thenReturn("dev-gcp:teamforeldrepenger:fpsoknad");
-        KontekstHolder.setKontekst(kontekst);
-
-        assertThatCode(() -> tilgangkontroll.sjekkAtKallErFraSystemressurs("fpsoknad")).doesNotThrowAnyException();
-    }
-
-    @Test
-    void skalAvviseAnnenSystemressurs() {
-        KontekstHolder.fjernKontekst();
-        var kontekst = mock(Kontekst.class);
-        when(kontekst.harKontekst()).thenReturn(true);
-        when(kontekst.getIdentType()).thenReturn(IdentType.Systemressurs);
-        when(kontekst.getUid()).thenReturn("dev-gcp:teamforeldrepenger:foreldrepengesoknad");
-        KontekstHolder.setKontekst(kontekst);
-
-        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystemressurs("fpsoknad"))
-            .isExactlyInstanceOf(OversiktManglerTilgangException.class);
-    }
-
-    @Test
-    void borgerBlirAvvistAvSystemressurssjekk() {
-        var kontekst = mock(Kontekst.class);
-        when(kontekst.harKontekst()).thenReturn(true);
-        when(kontekst.getIdentType()).thenReturn(IdentType.EksternBruker);
-        KontekstHolder.setKontekst(kontekst);
-
-        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystemressurs("fpsoknad"))
-            .isExactlyInstanceOf(OversiktManglerTilgangException.class);
-    }
-
-    @Test
     void tilgangTilSakHvisSakErKoblet() {
         when(innloggetBruker.aktørId()).thenReturn(AktørId.dummy());
         when(sakRepository.erSakKobletTilAktør(any(), any())).thenReturn(true);

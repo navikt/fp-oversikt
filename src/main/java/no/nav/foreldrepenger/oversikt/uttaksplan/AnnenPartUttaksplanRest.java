@@ -18,22 +18,20 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
+import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
+import no.nav.vedtak.sikkerhet.abac.beskyttet.ActionType;
+import no.nav.vedtak.sikkerhet.abac.beskyttet.ResourceType;
 
 @Path("/uttaksplan/annen-part")
 @ApplicationScoped
 @Transactional
 public class AnnenPartUttaksplanRest {
 
-    private static final String FPSOKNAD = "fpsoknad";
-
-    private TilgangKontrollTjeneste tilgangkontroll;
     private AnnenPartUttaksplanRepository repository;
 
     @Inject
-    public AnnenPartUttaksplanRest(TilgangKontrollTjeneste tilgangkontroll, AnnenPartUttaksplanRepository repository) {
-        this.tilgangkontroll = tilgangkontroll;
+    public AnnenPartUttaksplanRest(AnnenPartUttaksplanRepository repository) {
         this.repository = repository;
     }
 
@@ -42,8 +40,8 @@ public class AnnenPartUttaksplanRest {
     }
 
     @POST
+    @BeskyttetRessurs(actionType = ActionType.CREATE, resourceType = ResourceType.APPLIKASJON, sporingslogg = true)
     public void lagre(@Valid @NotNull AnnenPartUttaksplanRequest request) {
-        tilgangkontroll.sjekkAtKallErFraSystemressurs(FPSOKNAD);
         var saksnummer = new no.nav.foreldrepenger.oversikt.domene.Saksnummer(request.saksnummer().value());
         var perioder = AnnenPartGraderingFilter.fjernResultatOgArbeidsgivere(request.perioder()
             .stream()

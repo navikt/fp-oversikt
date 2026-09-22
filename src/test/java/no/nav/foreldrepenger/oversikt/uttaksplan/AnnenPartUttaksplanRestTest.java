@@ -6,8 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -15,35 +13,20 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.mockito.ArgumentCaptor;
 
 import jakarta.validation.Validation;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
-import no.nav.vedtak.sikkerhet.kontekst.IdentType;
-import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
-import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 
-@Execution(ExecutionMode.SAME_THREAD)
 class AnnenPartUttaksplanRestTest {
 
-    @AfterEach
-    void tearDown() {
-        KontekstHolder.fjernKontekst();
-    }
-
     @Test
-    void systemressursSkalKunneLagre() {
-        settKontekst(IdentType.Systemressurs);
+    void skalKunneLagre() {
         var repository = mock(AnnenPartUttaksplanRepository.class);
-        var rest = new AnnenPartUttaksplanRest(new TilgangKontrollTjeneste(null, null), repository);
+        var rest = new AnnenPartUttaksplanRest(repository);
         var request = request(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 10));
 
         assertThatCode(() -> rest.lagre(request)).doesNotThrowAnyException();
@@ -56,9 +39,8 @@ class AnnenPartUttaksplanRestTest {
 
     @Test
     void skalFjerneResultatOgAktivitetsdetaljerFørLagring() {
-        settKontekst(IdentType.Systemressurs);
         var repository = mock(AnnenPartUttaksplanRepository.class);
-        var rest = new AnnenPartUttaksplanRest(new TilgangKontrollTjeneste(null, null), repository);
+        var rest = new AnnenPartUttaksplanRest(repository);
         var arbeidstid = new FellesUttaksplanDto.Arbeidstidprosent(BigDecimal.valueOf(60));
         var arbeidsgiver = new FellesUttaksplanDto.Arbeidsgiver("999999999", FellesUttaksplanDto.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON);
         var aktivitet = new FellesUttaksplanDto.Aktivitet(FellesUttaksplanDto.Aktivitet.AktivitetType.ORDINÆRT_ARBEID, arbeidsgiver, "Arbeidsgiver");
@@ -80,17 +62,6 @@ class AnnenPartUttaksplanRestTest {
             assertThat(periode.uttak().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.FAR_MEDMOR);
             assertThat(periode.uttak().flerbarnsdager()).isTrue();
         });
-    }
-
-    @Test
-    void borgerSkalIkkeKunneLagre() {
-        settKontekst(IdentType.EksternBruker);
-        var repository = mock(AnnenPartUttaksplanRepository.class);
-        var rest = new AnnenPartUttaksplanRest(new TilgangKontrollTjeneste(null, null), repository);
-
-        assertThatThrownBy(() -> rest.lagre(request(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 10))))
-            .isExactlyInstanceOf(OversiktManglerTilgangException.class);
-        verifyNoInteractions(repository);
     }
 
     @Test
@@ -143,14 +114,4 @@ class AnnenPartUttaksplanRestTest {
             List.of(new AnnenPartUttaksplanRest.PeriodeRequest(fom, tom, uttak)));
     }
 
-    private static void settKontekst(IdentType identType) {
-        KontekstHolder.fjernKontekst();
-        var kontekst = mock(Kontekst.class);
-        when(kontekst.harKontekst()).thenReturn(true);
-        when(kontekst.getIdentType()).thenReturn(identType);
-        if (IdentType.Systemressurs.equals(identType)) {
-            when(kontekst.getUid()).thenReturn("dev-gcp:teamforeldrepenger:fpsoknad");
-        }
-        KontekstHolder.setKontekst(kontekst);
-    }
 }
