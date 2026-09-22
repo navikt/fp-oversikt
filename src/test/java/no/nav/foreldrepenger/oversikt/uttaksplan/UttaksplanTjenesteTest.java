@@ -251,6 +251,27 @@ class UttaksplanTjenesteTest {
     }
 
     @Test
+    void skalIkkeBrukeLagretPlanNårOppgittAnnenPartIkkeMatcherSaken(EntityManager entityManager) {
+        var søker = AktørId.dummy();
+        var faktiskAnnenPart = AktørId.dummy();
+        var oppgittAnnenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var saksnummer = Saksnummer.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(entityManager,
+            sak(saksnummer, søker, faktiskAnnenPart, barn, termindato, BrukerRolle.MOR, Set.of(), Set.of(søknad(termindato)),
+                LocalDateTime.of(2026, 8, 1, 12, 0)));
+        var lagretPeriode = new UttaksplanTidslinje.Planperiode(termindato.plusWeeks(8), termindato.plusWeeks(9),
+            new FellesUttaksplanDto.UttakDto(FellesUttaksplanDto.Rolle.FAR_MEDMOR, null, null, null, null, null, null, false, null));
+        new DBAnnenPartUttaksplanRepository(entityManager).lagre(saksnummer,
+            new AnnenPartUttaksplan(LocalDateTime.of(2026, 9, 1, 12, 0), List.of(lagretPeriode)));
+
+        var plan = tjeneste(entityManager, søker).hentFor(søker, oppgittAnnenPart, barn, termindato).orElseThrow();
+
+        assertThat(plan.perioder()).isEmpty();
+    }
+
+    @Test
     void skalBehandleNyereTomLagretPlanSomBevisstTømming(EntityManager entityManager) {
         var søker = AktørId.dummy();
         var annenPart = AktørId.dummy();
