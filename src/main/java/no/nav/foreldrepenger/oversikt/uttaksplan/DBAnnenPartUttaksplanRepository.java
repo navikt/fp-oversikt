@@ -38,7 +38,7 @@ public class DBAnnenPartUttaksplanRepository implements AnnenPartUttaksplanRepos
     }
 
     private void låsSaksnummer(Saksnummer saksnummer) {
-        entityManager.createNativeQuery("select pg_advisory_xact_lock(hashtext(cast(?1 as text)))", Void.class)
+        entityManager.createNativeQuery("select pg_advisory_xact_lock(hashtext(cast(?1 as text)))")
             .setParameter(1, saksnummer.value())
             .getSingleResult();
     }
