@@ -181,7 +181,7 @@ class UttaksplanTjenesteTest {
     }
 
     @Test
-    void skalBrukeLagretAnnenPartNårDenErNyereEnnAnnenPartsSak(EntityManager entityManager) {
+    void skalBrukeAnnenPartsEgneDataSelvNårLagretPlanErNyere(EntityManager entityManager) {
         var søker = AktørId.dummy();
         var annenPart = AktørId.dummy();
         var barn = AktørId.dummy();
@@ -200,13 +200,13 @@ class UttaksplanTjenesteTest {
         var plan = tjeneste(entityManager, søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
-            assertThat(periode.fom()).isEqualTo(lagretPeriode.fom());
-            assertThat(periode.annenPart()).isEqualTo(lagretPeriode.uttak());
+            assertThat(periode.fom()).isEqualTo(annenPartsPeriode.fom());
+            assertThat(periode.annenPart()).isNotEqualTo(lagretPeriode.uttak());
         });
     }
 
     @Test
-    void skalBrukeAnnenPartsSakNårDenErNyereEnnLagretPlan(EntityManager entityManager) {
+    void skalBrukeAnnenPartsEgneDataOgsåNårLagretPlanErEldre(EntityManager entityManager) {
         var søker = AktørId.dummy();
         var annenPart = AktørId.dummy();
         var barn = AktørId.dummy();
@@ -281,8 +281,7 @@ class UttaksplanTjenesteTest {
         lagre(entityManager,
             sak(saksnummer, søker, annenPart, barn, termindato, BrukerRolle.MOR, Set.of(), Set.of(søknad(termindato)), LocalDateTime.of(2026, 8, 1, 12, 0)),
             sak(Saksnummer.dummy(), annenPart, søker, barn, termindato, BrukerRolle.FAR,
-                Set.of(vedtak(uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(7), Konto.FEDREKVOTE))), Set.of(søknad(termindato)),
-                LocalDateTime.of(2026, 9, 1, 12, 0)));
+                Set.of(), Set.of(søknad(termindato)), LocalDateTime.of(2026, 9, 1, 12, 0)));
         new DBAnnenPartUttaksplanRepository(entityManager).lagre(saksnummer,
             new AnnenPartUttaksplan(LocalDateTime.of(2026, 9, 2, 12, 0), List.of()));
 
