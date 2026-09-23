@@ -6,7 +6,7 @@
     <parent>
         <groupId>no.nav.foreldrepenger.felles</groupId>
         <artifactId>fp-parent-app</artifactId>
-        <version>5.3.6</version>
+        <version>5.3.7</version>
     </parent>
 
     <groupId>no.nav.foreldrepenger</groupId>
@@ -21,8 +21,8 @@
         <openapi-spec-utils.version>2.1.0</openapi-spec-utils.version>
         <io.confluent.version>8.3.1</io.confluent.version>
 
-        <felles.version>7.9.0</felles.version>
-        <prosesstask.version>5.2.7</prosesstask.version>
+        <felles.version>7.9.1</felles.version>
+        <prosesstask.version>5.2.8</prosesstask.version>
         <fp-kontrakter.version>9.4.39</fp-kontrakter.version>
         <fp-tidsserie.version>2.8.0</fp-tidsserie.version>
         <mittnav-varsler.version>2.2.0</mittnav-varsler.version>
