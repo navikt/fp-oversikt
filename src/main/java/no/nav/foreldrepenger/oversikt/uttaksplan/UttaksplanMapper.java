@@ -1,13 +1,13 @@
 package no.nav.foreldrepenger.oversikt.uttaksplan;
 
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Aktivitet;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Arbeidstidprosent;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.EøsUttakDto;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Gradering;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Rolle;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.SamtidigUttak;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.UttakDto;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.VedtattResultat;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Aktivitet;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Arbeidstidprosent;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.EøsUttakDto;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Gradering;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Rolle;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.SamtidigUttak;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakDto;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.VedtattResultat;
 import static no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
 
 import java.time.LocalDate;
@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;

@@ -2,7 +2,7 @@ package no.nav.foreldrepenger.oversikt.uttaksplan;
 
 import java.math.BigDecimal;
 
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 
 final class SamtidigUttakNormalisering {
 

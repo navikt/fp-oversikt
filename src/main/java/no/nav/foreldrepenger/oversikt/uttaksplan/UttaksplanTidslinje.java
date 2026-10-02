@@ -1,8 +1,8 @@
 package no.nav.foreldrepenger.oversikt.uttaksplan;
 
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.EøsUttakDto;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.UttakDto;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.UttakPeriodeDto;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.EøsUttakDto;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakDto;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakPeriodeDto;
 
 import java.time.LocalDate;
 import java.util.List;

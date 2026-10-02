@@ -8,12 +8,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Aktivitet;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Arbeidsgiver;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Arbeidstidprosent;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Gradering;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.Rolle;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto.UttakDto;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Aktivitet;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Arbeidsgiver;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Arbeidstidprosent;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Gradering;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Rolle;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakDto;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
 
 class AnnenPartGraderingFilterTest {
