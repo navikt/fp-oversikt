@@ -24,6 +24,7 @@
         <felles.version>7.9.0</felles.version>
         <prosesstask.version>5.2.7</prosesstask.version>
         <fp-kontrakter.version>1.0-SNAPSHOT</fp-kontrakter.version>
+        <fpsoknad-kontrakt.version>2.3.5-SNAPSHOT</fpsoknad-kontrakt.version>
         <fp-tidsserie.version>2.8.0</fp-tidsserie.version>
         <mittnav-varsler.version>2.2.0</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>2.0.0</teamdokumenthandtering-avro-schemas.version>
@@ -113,6 +114,11 @@
             <groupId>no.nav.foreldrepenger.kontrakter</groupId>
             <artifactId>fp-oversikt</artifactId>
             <version>${fp-kontrakter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.soknad</groupId>
+            <artifactId>kontrakter</artifactId>
+            <version>${fpsoknad-kontrakt.version}</version>
         </dependency>
 
         <!-- CDI -->

@@ -17,7 +17,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.beskyttet.ActionType;

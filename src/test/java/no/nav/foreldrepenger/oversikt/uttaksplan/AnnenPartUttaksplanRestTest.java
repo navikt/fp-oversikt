@@ -18,7 +18,7 @@ import org.mockito.ArgumentCaptor;
 
 import jakarta.validation.Validation;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 
 class AnnenPartUttaksplanRestTest {

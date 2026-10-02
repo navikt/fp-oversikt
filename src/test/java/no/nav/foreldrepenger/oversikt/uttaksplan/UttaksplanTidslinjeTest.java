@@ -12,7 +12,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.FellesUttaksplanDto;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
