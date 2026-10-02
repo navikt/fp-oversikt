@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
+import no.nav.foreldrepenger.oversikt.domene.fp.VirkedagJusterer;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -44,9 +45,20 @@ public final class UttaksplanTidslinje {
                 var normalisert = SamtidigUttakNormalisering.normaliser(søkerUttak, annenPartUttak);
                 return nyttSegment(intervall, normalisert.søker(), normalisert.annenPart(), null);
             })
+            .map(UttaksplanTidslinje::justerForHelg)
             .compress(LocalDateInterval::abutsWorkdays, UttaksplanTidslinje::harLikUttaksinformasjon,
                 (intervall, venstre, _) -> nyttSegment(intervall, venstre.getValue().søker(), venstre.getValue().annenPart(),
                     venstre.getValue().annenPartEøs()));
+    }
+
+    private static List<LocalDateSegment<UttakPeriodeDto>> justerForHelg(LocalDateSegment<UttakPeriodeDto> segment) {
+        var fom = VirkedagJusterer.justerFom(segment.getFom());
+        var tom = VirkedagJusterer.justerTom(segment.getTom());
+        if (fom.isAfter(tom)) {
+            return List.of();
+        }
+        var uttak = segment.getValue();
+        return List.of(nyttSegment(new LocalDateInterval(fom, tom), uttak.søker(), uttak.annenPart(), uttak.annenPartEøs()));
     }
 
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartEøs(List<UttakPeriodeAnnenpartEøs> annenPartsEøsPerioder,

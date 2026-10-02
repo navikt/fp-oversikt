@@ -164,6 +164,65 @@ class UttaksplanTidslinjeTest {
     }
 
     @Test
+    void skalStarteMorsSegmentPåMandagEtterAtOverlappSlutterFredagNårMorErSøker() {
+        var fredag = MANDAG.plusDays(4);
+        var nesteMandag = MANDAG.plusWeeks(1);
+        var mor = uttak(BrukerRolle.MOR, periode(MANDAG, nesteMandag.plusDays(4), Konto.MØDREKVOTE));
+        var far = uttak(BrukerRolle.FAR, periode(MANDAG, fredag, Konto.FEDREKVOTE));
+
+        var plan = UttaksplanTidslinje.normaliser(mor, far, List.of());
+
+        assertThat(perioder(plan)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, fredag,
+                mor.getFirst().uttak(), far.getFirst().uttak(), null),
+            new FellesUttaksplanDto.UttakPeriodeDto(nesteMandag, nesteMandag.plusDays(4),
+                mor.getFirst().uttak(), null, null));
+        assertThat(plan.stream()).allSatisfy(segment -> {
+            assertThat(segment.getValue().fom()).isEqualTo(segment.getFom());
+            assertThat(segment.getValue().tom()).isEqualTo(segment.getTom());
+        });
+    }
+
+    @Test
+    void skalStarteMorsSegmentPåMandagEtterAtOverlappSlutterFredagNårFarErSøker() {
+        var fredag = MANDAG.plusDays(4);
+        var nesteMandag = MANDAG.plusWeeks(1);
+        var mor = uttak(BrukerRolle.MOR, periode(MANDAG, nesteMandag.plusDays(4), Konto.MØDREKVOTE));
+        var far = uttak(BrukerRolle.FAR, periode(MANDAG, fredag, Konto.FEDREKVOTE));
+
+        var plan = UttaksplanTidslinje.normaliser(far, mor, List.of());
+
+        assertThat(perioder(plan)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, fredag,
+                far.getFirst().uttak(), mor.getFirst().uttak(), null),
+            new FellesUttaksplanDto.UttakPeriodeDto(nesteMandag, nesteMandag.plusDays(4),
+                null, mor.getFirst().uttak(), null));
+        assertThat(plan.stream()).allSatisfy(segment -> {
+            assertThat(segment.getValue().fom()).isEqualTo(segment.getFom());
+            assertThat(segment.getValue().tom()).isEqualTo(segment.getTom());
+        });
+    }
+
+    @Test
+    void skalFjerneHelgefragmentFraUnionOgKomprimereUtenTapAvVirkedagerEllerUttak() {
+        var fredag = MANDAG.plusDays(4);
+        var nesteMandag = MANDAG.plusWeeks(1);
+        var nesteFredag = nesteMandag.plusDays(4);
+        var mor = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, nesteFredag, Konto.MØDREKVOTE, 50));
+        var far = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, fredag, Konto.FEDREKVOTE, 50),
+            periodeMedSamtidigUttak(nesteMandag, nesteFredag, Konto.FEDREKVOTE, 50));
+
+        var plan = UttaksplanTidslinje.normaliser(mor, far, List.of());
+
+        assertThat(plan.stream()).singleElement().satisfies(segment -> {
+            assertThat(segment.getFom()).isEqualTo(MANDAG);
+            assertThat(segment.getTom()).isEqualTo(nesteFredag);
+            assertThat(segment.getValue()).isEqualTo(new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, nesteFredag,
+                mor.getFirst().uttak(), far.getFirst().uttak(), null));
+        });
+    }
+
+    @Test
     void skalSetteHundreProsentPåUgradertPartNårBareMotpartenHarSamtidigUttak() {
         var søker = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(4), Konto.MØDREKVOTE, 100));
         var annenPart = uttak(BrukerRolle.FAR, periode(MANDAG, MANDAG.plusDays(4), Konto.FEDREKVOTE));
@@ -237,6 +296,22 @@ class UttaksplanTidslinjeTest {
     }
 
     @Test
+    void skalBeholdeEøsPeriodeSomBareLiggerIHelg() {
+        var lørdag = MANDAG.plusDays(5);
+        var søndag = MANDAG.plusDays(6);
+        var eøs = eøsPeriode(lørdag, søndag, Konto.FEDREKVOTE, 2);
+
+        var plan = UttaksplanTidslinje.normaliser(List.of(), List.of(), List.of(eøs));
+
+        assertThat(plan.stream()).singleElement().satisfies(segment -> {
+            assertThat(segment.getFom()).isEqualTo(lørdag);
+            assertThat(segment.getTom()).isEqualTo(søndag);
+            assertThat(segment.getValue()).isEqualTo(new FellesUttaksplanDto.UttakPeriodeDto(lørdag, søndag, null, null,
+                UttaksplanMapper.mapEøsUttak(eøs)));
+        });
+    }
+
+    @Test
     void skalKomprimereLikeEøsSegmenterSomHengerSammenOverHelg() {
         var fredag = MANDAG.plusDays(4);
         var nesteMandag = MANDAG.plusWeeks(1);
@@ -274,6 +349,11 @@ class UttaksplanTidslinjeTest {
         assertThat(perioder(plan)).hasSize(1);
         assertThat(perioder(plan).getFirst().fom()).isEqualTo(MANDAG);
         assertThat(perioder(plan).getFirst().tom()).isEqualTo(MANDAG.plusDays(11));
+        assertThat(perioder(plan).getFirst().søker()).isEqualTo(søker.getFirst().uttak());
+        assertThat(plan.stream()).singleElement().satisfies(segment -> {
+            assertThat(segment.getValue().fom()).isEqualTo(segment.getFom());
+            assertThat(segment.getValue().tom()).isEqualTo(segment.getTom());
+        });
     }
 
     @Test
