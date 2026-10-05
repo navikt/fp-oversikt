@@ -25,7 +25,7 @@ public final class VirkedagJusterer {
             .toList();
     }
 
-    static LocalDate justerFom(LocalDate dato) {
+    public static LocalDate justerFom(LocalDate dato) {
         return switch (dato.getDayOfWeek()) {
             case SATURDAY -> dato.plusDays(2);
             case SUNDAY -> dato.plusDays(1);
@@ -33,7 +33,7 @@ public final class VirkedagJusterer {
         };
     }
 
-    static LocalDate justerTom(LocalDate dato) {
+    public static LocalDate justerTom(LocalDate dato) {
         return switch (dato.getDayOfWeek()) {
             case SATURDAY -> dato.minusDays(1);
             case SUNDAY -> dato.minusDays(2);

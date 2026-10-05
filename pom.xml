@@ -27,6 +27,7 @@
         <fp-tidsserie.version>2.8.0</fp-tidsserie.version>
         <mittnav-varsler.version>2.2.0</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>2.0.0</teamdokumenthandtering-avro-schemas.version>
+        <fpsoknad-kontrakt.version>1.0.12</fpsoknad-kontrakt.version>
     </properties>
 
     <dependencyManagement>
@@ -109,6 +110,11 @@
             <groupId>no.nav.foreldrepenger.kontrakter</groupId>
             <artifactId>fp-oversikt</artifactId>
             <version>${fp-kontrakter.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>no.nav.foreldrepenger.soknad</groupId>
+            <artifactId>kontrakter</artifactId>
+            <version>${fpsoknad-kontrakt.version}</version>
         </dependency>
 
         <!-- CDI -->
