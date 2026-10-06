@@ -42,7 +42,9 @@ public final class UttaksplanTidslinje {
         return søkerTimeline.union(annenPartTimeline, (intervall, søkerSegment, annenPartSegment) -> {
                 var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
                 var annenPartUttak = annenPartSegment == null ? null : annenPartSegment.getValue();
-                var normalisert = SamtidigUttakNormalisering.normaliser(søkerUttak, annenPartUttak);
+                var utenOverlappendeUtsettelse = UtsettelseOverlappNormalisering.normaliser(søkerUttak, annenPartUttak, null);
+                var normalisert = SamtidigUttakNormalisering.normaliser(utenOverlappendeUtsettelse.søker(),
+                    utenOverlappendeUtsettelse.annenPart());
                 return nyttSegment(intervall, normalisert.søker(), normalisert.annenPart(), null);
             })
             .map(UttaksplanTidslinje::justerForHelg)
@@ -66,8 +68,10 @@ public final class UttaksplanTidslinje {
         var eøsTimeline = tilEøsTimeline(annenPartsEøsPerioder);
         return søkerTimeline.union(eøsTimeline, (intervall, søkerSegment, eøsSegment) -> {
             var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
-            var eøsUttak = søkerSegment == null && eøsSegment != null ? eøsSegment.getValue() : null;
-            return nyttSegment(intervall, søkerUttak, null, eøsUttak);
+            var eøsUttak = eøsSegment == null ? null : eøsSegment.getValue();
+            var normalisert = UtsettelseOverlappNormalisering.normaliser(søkerUttak, null, eøsUttak);
+            return nyttSegment(intervall, normalisert.søker(), null,
+                normalisert.søker() == null ? normalisert.annenPartEøs() : null);
         }).compress(LocalDateInterval::abutsWorkdays, UttaksplanTidslinje::harLikEøsUttaksinformasjon, UttaksplanTidslinje::slåSammenEøsSegmenter);
     }
 

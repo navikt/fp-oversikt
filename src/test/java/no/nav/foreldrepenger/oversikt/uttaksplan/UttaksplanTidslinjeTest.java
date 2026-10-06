@@ -22,6 +22,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
+import no.nav.foreldrepenger.oversikt.domene.fp.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -232,6 +233,40 @@ class UttaksplanTidslinjeTest {
         var overlapp = perioder(plan).getFirst();
         assertThat(overlapp.søker().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(overlapp.annenPart().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
+    }
+
+    @Test
+    void skalPrioritereNorskUttakOverUtsettelseOgSøkerNårBeggeHarUtsettelse() {
+        var søker = uttak(BrukerRolle.MOR, utsettelse(MANDAG, MANDAG.plusDays(4)));
+        var annenPart = uttak(BrukerRolle.FAR, periode(MANDAG.plusDays(2), MANDAG.plusDays(3), Konto.FEDREKVOTE));
+
+        var plan = UttaksplanTidslinje.normaliser(søker, annenPart, List.of());
+
+        assertThat(perioder(plan)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(1), søker.getFirst().uttak(), null, null),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(2), MANDAG.plusDays(3), null, annenPart.getFirst().uttak(), null),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(4), MANDAG.plusDays(4), søker.getFirst().uttak(), null, null));
+
+        var søkersUttak = uttak(BrukerRolle.MOR, periode(MANDAG, MANDAG.plusDays(4), Konto.MØDREKVOTE));
+        var annenPartsUtsettelse = uttak(BrukerRolle.FAR, utsettelse(MANDAG.plusDays(2), MANDAG.plusDays(3)));
+
+        assertThat(perioder(UttaksplanTidslinje.normaliser(søkersUttak, annenPartsUtsettelse, List.of()))).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(4), søkersUttak.getFirst().uttak(), null, null));
+        assertThat(perioder(UttaksplanTidslinje.normaliser(søker, annenPartsUtsettelse, List.of()))).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(4), søker.getFirst().uttak(), null, null));
+    }
+
+    @Test
+    void skalPrioritereEøsUttakOverSøkersUtsettelse() {
+        var søker = uttak(BrukerRolle.MOR, utsettelse(MANDAG, MANDAG.plusDays(4)));
+        var eøs = eøsPeriode(MANDAG.plusDays(2), MANDAG.plusDays(3), Konto.FEDREKVOTE, 2);
+
+        var plan = UttaksplanTidslinje.normaliser(søker, List.of(), List.of(eøs));
+
+        assertThat(perioder(plan)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(1), søker.getFirst().uttak(), null, null),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(2), MANDAG.plusDays(3), null, null, UttaksplanMapper.mapEøsUttak(eøs)),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(4), MANDAG.plusDays(4), søker.getFirst().uttak(), null, null));
     }
 
     @Test
@@ -540,6 +575,12 @@ class UttaksplanTidslinjeTest {
         var resultat = new Uttaksperiode.Resultat(Uttaksperiode.Resultat.Type.INNVILGET, Uttaksperiode.Resultat.Årsak.ANNET,
             Set.of(aktiviteter), false);
         return new Uttaksperiode(fom, tom, null, null, null, Prosent.ZERO, false, null, resultat);
+    }
+
+    private static Uttaksperiode utsettelse(LocalDate fom, LocalDate tom) {
+        var resultat = new Uttaksperiode.Resultat(Uttaksperiode.Resultat.Type.INNVILGET, Uttaksperiode.Resultat.Årsak.ANNET,
+            Set.of(), false);
+        return new Uttaksperiode(fom, tom, UtsettelseÅrsak.ARBEID, null, null, Prosent.ZERO, null, null, resultat);
     }
 
     private static Uttaksperiode periodeMedSamtidigUttak(LocalDate fom, LocalDate tom, Konto konto, int samtidigUttak) {
