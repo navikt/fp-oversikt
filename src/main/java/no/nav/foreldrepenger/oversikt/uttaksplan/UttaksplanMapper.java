@@ -66,8 +66,7 @@ final class UttaksplanMapper {
     static List<Planperiode> mapVedtaksperioder(Collection<Uttaksperiode> perioder, BrukerRolle brukerRolle) {
         return Stream.ofNullable(perioder)
             .flatMap(Collection::stream)
-            .filter(periode -> skalMedIPlan(periode.oppholdÅrsak(), periode.utsettelseÅrsak(), periode.morsAktivitet()))
-            .filter(UttaksplanMapper::harBetydningForPlanen)
+            .filter(UttaksplanMapper::skalMedIPlan)
             .map(periode -> justerPlanperiode(periode.fom(), periode.tom(), mapUttak(periode, brukerRolle)))
             .flatMap(Optional::stream)
             .toList();
@@ -76,20 +75,31 @@ final class UttaksplanMapper {
     static List<Planperiode> mapSøknadsperioder(Collection<FpSøknadsperiode> perioder, BrukerRolle brukerRolle) {
         return Stream.ofNullable(perioder)
             .flatMap(Collection::stream)
-            .filter(periode -> skalMedIPlan(periode.oppholdÅrsak(), periode.utsettelseÅrsak(), periode.morsAktivitet()))
+            .filter(UttaksplanMapper::skalMedIPlan)
             .map(periode -> justerPlanperiode(periode.fom(), periode.tom(), mapUttak(periode, brukerRolle)))
             .flatMap(Optional::stream)
             .toList();
     }
 
-    private static boolean skalMedIPlan(OppholdÅrsak oppholdÅrsak, UtsettelseÅrsak utsettelseÅrsak, MorsAktivitet morsAktivitet) {
+    private static boolean skalMedIPlan(Uttaksperiode periode) {
+        return skalBeholdePeriodeUtFraOppholdOgUtsettelse(periode.oppholdÅrsak(), periode.utsettelseÅrsak(), periode.morsAktivitet())
+            && skalBeholdePeriodeUtFraResultat(periode);
+    }
+
+    private static boolean skalMedIPlan(FpSøknadsperiode periode) {
+        return skalBeholdePeriodeUtFraOppholdOgUtsettelse(periode.oppholdÅrsak(), periode.utsettelseÅrsak(), periode.morsAktivitet());
+    }
+
+    private static boolean skalBeholdePeriodeUtFraOppholdOgUtsettelse(OppholdÅrsak oppholdÅrsak,
+                                                                      UtsettelseÅrsak utsettelseÅrsak,
+                                                                      MorsAktivitet morsAktivitet) {
         if (utsettelseÅrsak != null) {
-            return erBfhrUtsettelse(utsettelseÅrsak, morsAktivitet); //Bfhr
+            return skalBeholdeUtsettelse(utsettelseÅrsak, morsAktivitet);
         }
         return oppholdÅrsak == null;
     }
 
-    private static boolean erBfhrUtsettelse(UtsettelseÅrsak utsettelseÅrsak, MorsAktivitet morsAktivitet) {
+    private static boolean skalBeholdeUtsettelse(UtsettelseÅrsak utsettelseÅrsak, MorsAktivitet morsAktivitet) {
         return utsettelseÅrsak != UtsettelseÅrsak.FRI || morsAktivitet != null;
     }
 
@@ -212,7 +222,7 @@ final class UttaksplanMapper {
         return periode.resultat() == null ? Stream.empty() : Stream.ofNullable(periode.resultat().aktiviteter()).flatMap(Collection::stream);
     }
 
-    private static boolean harBetydningForPlanen(Uttaksperiode periode) {
+    private static boolean skalBeholdePeriodeUtFraResultat(Uttaksperiode periode) {
         if (periode.resultat() == null || periode.resultat().innvilget()) {
             return true;
         }
