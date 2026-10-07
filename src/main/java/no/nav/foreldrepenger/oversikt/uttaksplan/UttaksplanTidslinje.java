@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Objects;
 
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
+import no.nav.foreldrepenger.oversikt.domene.fp.VirkedagJusterer;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
@@ -41,12 +42,25 @@ public final class UttaksplanTidslinje {
         return søkerTimeline.union(annenPartTimeline, (intervall, søkerSegment, annenPartSegment) -> {
                 var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
                 var annenPartUttak = annenPartSegment == null ? null : annenPartSegment.getValue();
-                var normalisert = SamtidigUttakNormalisering.normaliser(søkerUttak, annenPartUttak);
+                var utenOverlappendeUtsettelse = UtsettelseOverlappNormalisering.normaliser(søkerUttak, annenPartUttak, null);
+                var normalisert = SamtidigUttakNormalisering.normaliser(utenOverlappendeUtsettelse.søker(),
+                    utenOverlappendeUtsettelse.annenPart());
                 return nyttSegment(intervall, normalisert.søker(), normalisert.annenPart(), null);
             })
+            .map(UttaksplanTidslinje::justerForHelg)
             .compress(LocalDateInterval::abutsWorkdays, UttaksplanTidslinje::harLikUttaksinformasjon,
                 (intervall, venstre, _) -> nyttSegment(intervall, venstre.getValue().søker(), venstre.getValue().annenPart(),
                     venstre.getValue().annenPartEøs()));
+    }
+
+    private static List<LocalDateSegment<UttakPeriodeDto>> justerForHelg(LocalDateSegment<UttakPeriodeDto> segment) {
+        var fom = VirkedagJusterer.justerFom(segment.getFom());
+        var tom = VirkedagJusterer.justerTom(segment.getTom());
+        if (fom.isAfter(tom)) {
+            return List.of();
+        }
+        var uttak = segment.getValue();
+        return List.of(nyttSegment(new LocalDateInterval(fom, tom), uttak.søker(), uttak.annenPart(), uttak.annenPartEøs()));
     }
 
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartEøs(List<UttakPeriodeAnnenpartEøs> annenPartsEøsPerioder,
@@ -54,8 +68,10 @@ public final class UttaksplanTidslinje {
         var eøsTimeline = tilEøsTimeline(annenPartsEøsPerioder);
         return søkerTimeline.union(eøsTimeline, (intervall, søkerSegment, eøsSegment) -> {
             var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
-            var eøsUttak = søkerSegment == null && eøsSegment != null ? eøsSegment.getValue() : null;
-            return nyttSegment(intervall, søkerUttak, null, eøsUttak);
+            var eøsUttak = eøsSegment == null ? null : eøsSegment.getValue();
+            var normalisert = UtsettelseOverlappNormalisering.normaliser(søkerUttak, null, eøsUttak);
+            return nyttSegment(intervall, normalisert.søker(), null,
+                normalisert.søker() == null ? normalisert.annenPartEøs() : null);
         }).compress(LocalDateInterval::abutsWorkdays, UttaksplanTidslinje::harLikEøsUttaksinformasjon, UttaksplanTidslinje::slåSammenEøsSegmenter);
     }
 

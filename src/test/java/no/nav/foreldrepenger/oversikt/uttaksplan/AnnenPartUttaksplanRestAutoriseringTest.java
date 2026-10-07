@@ -19,6 +19,7 @@ import no.nav.vedtak.sikkerhet.abac.AbacAuditlogger;
 import no.nav.vedtak.sikkerhet.abac.BeskyttetRessurs;
 import no.nav.vedtak.sikkerhet.abac.PepImpl;
 import no.nav.vedtak.sikkerhet.abac.internal.BeskyttetRessursAttributter;
+import no.nav.vedtak.sikkerhet.abac.pdp.AppRessursData;
 import no.nav.vedtak.sikkerhet.oidc.config.AzureProperty;
 import no.nav.vedtak.sikkerhet.kontekst.IdentType;
 import no.nav.vedtak.sikkerhet.tilgang.AnsattGruppeKlient;
@@ -52,7 +53,7 @@ class AnnenPartUttaksplanRestAutoriseringTest {
         var pep = new PepImpl(auditlogger, populasjonKlient, ansattGruppeKlient, new PdpRequestBuilderImpl());
         var attributter = attributter(IdentType.Systemressurs, FPSOKNAD);
 
-        assertThat(pep.vurderTilgang(attributter).fikkTilgang()).isTrue();
+        assertThat(pep.vurderTilgang(attributter, new AppRessursData()).fikkTilgang()).isTrue();
         verifyNoInteractions(populasjonKlient, ansattGruppeKlient);
     }
 
@@ -61,7 +62,7 @@ class AnnenPartUttaksplanRestAutoriseringTest {
         var pep = new PepImpl(auditlogger, populasjonKlient, ansattGruppeKlient, new PdpRequestBuilderImpl());
         var attributter = attributter(IdentType.Systemressurs, "vtp:teamforeldrepenger:ukjent-applikasjon");
 
-        assertThat(pep.vurderTilgang(attributter).fikkTilgang()).isFalse();
+        assertThat(pep.vurderTilgang(attributter, new AppRessursData()).fikkTilgang()).isFalse();
         verifyNoInteractions(populasjonKlient, ansattGruppeKlient);
     }
 
@@ -70,7 +71,7 @@ class AnnenPartUttaksplanRestAutoriseringTest {
         var pep = new PepImpl(auditlogger, populasjonKlient, ansattGruppeKlient, new PdpRequestBuilderImpl());
         var attributter = attributter(IdentType.Systemressurs, EKSTERN_APPLIKASJON);
 
-        assertThat(pep.vurderTilgang(attributter).fikkTilgang()).isFalse();
+        assertThat(pep.vurderTilgang(attributter, new AppRessursData()).fikkTilgang()).isFalse();
         verifyNoInteractions(populasjonKlient, ansattGruppeKlient);
     }
 
@@ -79,7 +80,7 @@ class AnnenPartUttaksplanRestAutoriseringTest {
         var pep = new PepImpl(auditlogger, populasjonKlient, ansattGruppeKlient, new PdpRequestBuilderImpl());
         var attributter = attributter(IdentType.EksternBruker, "12345678901");
 
-        assertThat(pep.vurderTilgang(attributter).fikkTilgang()).isFalse();
+        assertThat(pep.vurderTilgang(attributter, new AppRessursData()).fikkTilgang()).isFalse();
         verifyNoInteractions(populasjonKlient, ansattGruppeKlient);
     }
 

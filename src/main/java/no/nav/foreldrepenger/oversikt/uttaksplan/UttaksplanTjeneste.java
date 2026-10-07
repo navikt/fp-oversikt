@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -13,13 +12,13 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.Saker;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 
@@ -36,15 +35,11 @@ public class UttaksplanTjeneste {
 
     private Saker saker;
     private AnnenPartSakTjeneste annenPartSakTjeneste;
-    private AnnenPartUttaksplanRepository annenPartUttaksplanRepository;
 
     @Inject
-    public UttaksplanTjeneste(Saker saker,
-                             AnnenPartSakTjeneste annenPartSakTjeneste,
-                             AnnenPartUttaksplanRepository annenPartUttaksplanRepository) {
+    public UttaksplanTjeneste(Saker saker, AnnenPartSakTjeneste annenPartSakTjeneste) {
         this.saker = saker;
         this.annenPartSakTjeneste = annenPartSakTjeneste;
-        this.annenPartUttaksplanRepository = annenPartUttaksplanRepository;
     }
 
     UttaksplanTjeneste() {
@@ -71,8 +66,8 @@ public class UttaksplanTjeneste {
         var familieHendelse = metadataSak.familieHendelse();
         var dekningsgrad = metadataSak.dekningsgrad();
 
-        var søkerUttak = søkerensUttak(søker, søkersSak, annenPartsSak);
-        var annenPartsUttak = annenPartsUttak(annenPart, søkersSak, annenPartsSak);
+        var søkerUttak = søkersSak.map(UttaksplanTjeneste::søkerensUttak).orElseGet(List::of);
+        var annenPartsUttak = annenPartsSak.map(UttaksplanTjeneste::annenPartsUttak).orElseGet(List::of);
         var eøsPerioder = søkersSak.map(UttaksplanTjeneste::eøsPerioder).orElseGet(List::of);
 
         var tidslinje = UttaksplanTidslinje.normaliser(søkerUttak, annenPartsUttak, eøsPerioder);
@@ -136,46 +131,22 @@ public class UttaksplanTjeneste {
         return new LocalDateInterval(gjeldende.minusWeeks(5), gjeldende.plusWeeks(5)).contains(familiehendelse);
     }
 
-    private List<Planperiode> søkerensUttak(AktørId søker,
-                                            Optional<ForeldrepengerSak> søkersSak,
-                                            Optional<ForeldrepengerSak> annenPartsSak) {
-        var egneUttaksdata = søkersSak.flatMap(UttaksplanTjeneste::egneUttaksdata);
-        if (egneUttaksdata.isPresent()) {
-            return egneUttaksdata.get();
-        }
-        return annenPartsSak
-            .filter(sak -> Objects.equals(sak.annenPartAktørId(), søker))
-            .flatMap(sak -> annenPartUttaksplanRepository.hentFor(sak.saksnummer()))
-            .map(AnnenPartUttaksplan::perioder)
-            .orElseGet(List::of);
-    }
-
-    private static Optional<List<Planperiode>> egneUttaksdata(ForeldrepengerSak sak) {
+    private static List<Planperiode> søkerensUttak(ForeldrepengerSak sak) {
         var vedtaksperioder = sak.gjeldendeVedtak().map(vedtak -> UttaksplanMapper.mapVedtaksperioder(vedtak.perioder(), sak.brukerRolle()));
         if (vedtaksperioder.isPresent()) {
-            return vedtaksperioder;
+            return vedtaksperioder.get();
         }
         LOG.info("Søkers sak har ikke gjeldende vedtak, bruker perioder fra siste ubehandlede søknad. Saksnummer {}", sak.saksnummer().value());
         return sak.sisteSøknad()
             .filter(søknad -> !søknad.status().behandlet())
-            .map(søknad -> UttaksplanMapper.mapSøknadsperioder(søknad.perioder(), sak.brukerRolle()));
+            .map(søknad -> UttaksplanMapper.mapSøknadsperioder(søknad.perioder(), sak.brukerRolle()))
+            .orElseGet(List::of);
     }
 
-    private List<Planperiode> annenPartsUttak(AktørId annenPart,
-                                             Optional<ForeldrepengerSak> søkersSak,
-                                             Optional<ForeldrepengerSak> annenPartsSak) {
-        if (annenPart == null) {
-            return List.of();
-        }
-        var annenPartsEgneUttaksdata = annenPartsSak.flatMap(UttaksplanTjeneste::egneUttaksdata)
-            .map(AnnenPartGraderingFilter::fjernArbeidsgivere);
-        if (annenPartsEgneUttaksdata.isPresent()) {
-            return annenPartsEgneUttaksdata.get();
-        }
-        return søkersSak
-            .filter(sak -> Objects.equals(sak.annenPartAktørId(), annenPart))
-            .flatMap(sak -> annenPartUttaksplanRepository.hentFor(sak.saksnummer()))
-            .map(AnnenPartUttaksplan::perioder)
+    private static List<Planperiode> annenPartsUttak(ForeldrepengerSak sak) {
+        return sak.gjeldendeVedtak()
+            .map(vedtak -> UttaksplanMapper.mapVedtaksperioder(vedtak.perioder(), sak.brukerRolle()))
+            .map(AnnenPartGraderingFilter::fjernArbeidsgivere)
             .orElseGet(List::of);
     }
 

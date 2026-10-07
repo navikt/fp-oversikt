@@ -1,5 +1,6 @@
 package no.nav.foreldrepenger.oversikt.uttaksplan;
 
+import static no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Aktivitet;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Arbeidstidprosent;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.EøsUttakDto;
@@ -8,7 +9,6 @@ import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.Fe
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.SamtidigUttak;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakDto;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.VedtattResultat;
-import static no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -17,18 +17,20 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
 import no.nav.foreldrepenger.oversikt.domene.fp.Konto;
+import no.nav.foreldrepenger.oversikt.domene.fp.MorsAktivitet;
+import no.nav.foreldrepenger.oversikt.domene.fp.OppholdÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.OverføringÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UtsettelseÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
 import no.nav.foreldrepenger.oversikt.domene.fp.VirkedagJusterer;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 
 final class UttaksplanMapper {
 
@@ -64,7 +66,7 @@ final class UttaksplanMapper {
     static List<Planperiode> mapVedtaksperioder(Collection<Uttaksperiode> perioder, BrukerRolle brukerRolle) {
         return Stream.ofNullable(perioder)
             .flatMap(Collection::stream)
-            .filter(UttaksplanMapper::harBetydningForPlanen)
+            .filter(UttaksplanMapper::skalMedIPlan)
             .map(periode -> justerPlanperiode(periode.fom(), periode.tom(), mapUttak(periode, brukerRolle)))
             .flatMap(Optional::stream)
             .toList();
@@ -73,9 +75,32 @@ final class UttaksplanMapper {
     static List<Planperiode> mapSøknadsperioder(Collection<FpSøknadsperiode> perioder, BrukerRolle brukerRolle) {
         return Stream.ofNullable(perioder)
             .flatMap(Collection::stream)
+            .filter(UttaksplanMapper::skalMedIPlan)
             .map(periode -> justerPlanperiode(periode.fom(), periode.tom(), mapUttak(periode, brukerRolle)))
             .flatMap(Optional::stream)
             .toList();
+    }
+
+    private static boolean skalMedIPlan(Uttaksperiode periode) {
+        return skalBeholdePeriodeUtFraOppholdOgUtsettelse(periode.oppholdÅrsak(), periode.utsettelseÅrsak(), periode.morsAktivitet())
+            && skalBeholdePeriodeUtFraResultat(periode);
+    }
+
+    private static boolean skalMedIPlan(FpSøknadsperiode periode) {
+        return skalBeholdePeriodeUtFraOppholdOgUtsettelse(periode.oppholdÅrsak(), periode.utsettelseÅrsak(), periode.morsAktivitet());
+    }
+
+    private static boolean skalBeholdePeriodeUtFraOppholdOgUtsettelse(OppholdÅrsak oppholdÅrsak,
+                                                                      UtsettelseÅrsak utsettelseÅrsak,
+                                                                      MorsAktivitet morsAktivitet) {
+        if (utsettelseÅrsak != null) {
+            return skalBeholdeUtsettelse(utsettelseÅrsak, morsAktivitet);
+        }
+        return oppholdÅrsak == null;
+    }
+
+    private static boolean skalBeholdeUtsettelse(UtsettelseÅrsak utsettelseÅrsak, MorsAktivitet morsAktivitet) {
+        return utsettelseÅrsak != UtsettelseÅrsak.FRI || morsAktivitet != null;
     }
 
     private static Optional<Planperiode> justerPlanperiode(LocalDate fom, LocalDate tom, UttakDto uttak) {
@@ -197,7 +222,7 @@ final class UttaksplanMapper {
         return periode.resultat() == null ? Stream.empty() : Stream.ofNullable(periode.resultat().aktiviteter()).flatMap(Collection::stream);
     }
 
-    private static boolean harBetydningForPlanen(Uttaksperiode periode) {
+    private static boolean skalBeholdePeriodeUtFraResultat(Uttaksperiode periode) {
         if (periode.resultat() == null || periode.resultat().innvilget()) {
             return true;
         }

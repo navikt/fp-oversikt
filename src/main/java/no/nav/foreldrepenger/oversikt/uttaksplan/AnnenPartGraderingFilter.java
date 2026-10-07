@@ -12,11 +12,15 @@ final class AnnenPartGraderingFilter {
     }
 
     static List<Planperiode> fjernArbeidsgivere(List<Planperiode> perioder) {
-        return perioder.stream().map(periode -> filtrer(periode, false)).toList();
+        return perioder.stream().map(AnnenPartGraderingFilter::fjernArbeidsgiver).toList();
     }
 
     static List<Planperiode> fjernResultatOgArbeidsgivere(List<Planperiode> perioder) {
-        return perioder.stream().map(periode -> filtrer(periode, true)).toList();
+        return perioder.stream().map(p -> filtrer(p, true)).toList();
+    }
+
+    private static Planperiode fjernArbeidsgiver(Planperiode periode) {
+        return filtrer(periode, false);
     }
 
     private static Planperiode filtrer(Planperiode periode, boolean fjernResultat) {

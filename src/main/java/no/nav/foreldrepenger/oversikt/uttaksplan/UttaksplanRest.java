@@ -16,12 +16,12 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
-import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 
 /**
  * Felles uttaksplan for søker og annen part.
