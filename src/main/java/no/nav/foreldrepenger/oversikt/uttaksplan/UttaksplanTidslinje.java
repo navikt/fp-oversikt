@@ -115,15 +115,20 @@ public final class UttaksplanTidslinje {
     }
 
     /**
-     * Trekkdagene kopieres uendret til hvert segment perioden måtte bli delt i, slik
-     * foreldrepengesøknad gjør i dag.
+     * Trekkdagene kopieres uendret til hvert segment perioden måtte bli delt i.
+     * <p>
+     * Foreldrepengesøknad splitter ikke EØS-perioder, men sender dem uendret til kalenderen
+     * sammen med søkerens perioder. Kalenderen viser bare én periode per dag. Ved overlapp vinner
+     * den perioden som starter først. Backend splitter i stedet og prioriterer søkerens uttak,
+     * slik at utfallet ikke avhenger av startdato.
      * <p>
      * TODO: dette er feil. Splittes en EØS-periode på 5 trekkdager i to, får begge
-     *  delene 5 trekkdager, og summen blir 10. En riktig løsning må fordele trekkdagene
-     *  forholdsmessig etter virkedager og bevare totalen, noe som krever at segmentet husker
-     *  hvilken periode det kom fra. Vi lever med feilen fordi EØS-perioder i praksis ikke
-     *  overlapper med søkerens uttak, og dermed sjelden splittes. Oppstår overlapp i produksjon,
-     *  er det denne koden som må skrives om.
+     *  delene 5 trekkdager, og summen blir 10. I tillegg summerer
+     *  {@link #slåSammenEøsSegmenter} trekkdagene når to opprinnelige EØS-perioder med samme
+     *  konto grenser til hverandre. Frontend holder slike perioder atskilt. En riktig løsning må
+     *  fordele trekkdagene forholdsmessig etter virkedager og bevare totalen, noe som krever at
+     *  segmentet husker hvilken periode det kom fra. Vi lever med feilen fordi EØS-perioder i
+     *  praksis ikke overlapper med søkerens uttak, og dermed sjelden splittes.
      */
     static LocalDateTimeline<EøsUttakDto> tilEøsTimeline(List<UttakPeriodeAnnenpartEøs> perioder) {
         // TODO: Avklar om EØS-perioder skal virkedagsjusteres. Perioder som bare ligger i en helg kan være gyldige.
