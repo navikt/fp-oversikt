@@ -55,14 +55,14 @@ class SamtidigUttakNormaliseringTest {
     }
 
     @Test
-    void skalIkkeSetteSamtidigUttakNårBeggeManglerVerdi() {
+    void skalFjerneAnnenPartNårIngenAvParteneHarSamtidigUttak() {
         var søker = uttak(FellesUttaksplanDto.Rolle.MOR, null, null);
         var annenPart = uttak(FellesUttaksplanDto.Rolle.FAR_MEDMOR, null, null);
 
         var normalisert = SamtidigUttakNormalisering.normaliser(søker, annenPart);
 
         assertThat(normalisert.søker()).isSameAs(søker);
-        assertThat(normalisert.annenPart()).isSameAs(annenPart);
+        assertThat(normalisert.annenPart()).isNull();
     }
 
     @Test

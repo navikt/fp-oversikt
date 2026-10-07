@@ -9,8 +9,6 @@ final class SamtidigUttakNormalisering {
     private SamtidigUttakNormalisering() {
     }
 
-    // TODO: Verifiser at backend skal videreføre frontendregelen: Har bare én part samtidig uttak,
-    //  får den andre 100 prosent minus egen arbeidstid, eller 100 prosent uten gradering.
     static NormalisertUttak normaliser(FellesUttaksplanDto.UttakDto søker, FellesUttaksplanDto.UttakDto annenPart) {
         if (søker == null || annenPart == null) {
             return new NormalisertUttak(søker, annenPart);
@@ -20,7 +18,18 @@ final class SamtidigUttakNormalisering {
         } else if (annenPart.samtidigUttak() == null && søker.samtidigUttak() != null) {
             annenPart = medSamtidigUttak(annenPart);
         }
+        // Overlapp uten samtidig uttak hos noen av partene skjer ved berørt behandling. Søkers uttak vinner her (selv om den kanskje ikke vinner i berørt),
+        // med mindre søkers periode er avslått uten å trekke dager og dermed ikke okkuperer tiden. Logikk hentes fra frontend
+        // Utsettelser er allerede håndtert i UtsettelseOverlappNormalisering.
+        if (søker.samtidigUttak() == null && annenPart.samtidigUttak() == null && okkupererTid(søker)) {
+            annenPart = null;
+        }
         return new NormalisertUttak(søker, annenPart);
+    }
+
+    private static boolean okkupererTid(FellesUttaksplanDto.UttakDto uttak) {
+        var resultat = uttak.resultat();
+        return resultat == null || resultat.innvilget() || resultat.trekkerDager();
     }
 
     private static FellesUttaksplanDto.UttakDto medSamtidigUttak(FellesUttaksplanDto.UttakDto uttak) {
