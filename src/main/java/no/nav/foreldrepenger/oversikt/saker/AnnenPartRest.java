@@ -15,7 +15,6 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import no.nav.foreldrepenger.kontrakter.felles.typer.AktørId;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.AnnenPartSak;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
@@ -42,14 +41,6 @@ public class AnnenPartRest {
     }
 
     AnnenPartRest() {
-    }
-
-    @Path("/aktorid")
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    public AktørId aktøridForPerson(@Valid @NotNull AnnenPartRequest annenPartRequest) {
-        tilgangkontroll.sjekkAtKallErFraBorger();
-        return new AktørId(personOppslagSystem.aktørId(annenPartRequest.annenPartFødselsnummer()).value());
     }
 
     @Path("/v2")
