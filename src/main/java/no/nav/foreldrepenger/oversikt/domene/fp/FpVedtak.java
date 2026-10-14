@@ -42,6 +42,6 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
         // Vedtak som er innvilget uten trekkdager (annulleringer) gir ikke endringssøknad
         return Stream.ofNullable(perioder)
             .flatMap(Collection::stream)
-            .anyMatch(p -> p.resultat() != null && p.resultat().innvilget() && p.harTrekkdager());
+            .anyMatch(p ->  p.resultat().innvilget() && p.harTrekkdager());
     }
 }
