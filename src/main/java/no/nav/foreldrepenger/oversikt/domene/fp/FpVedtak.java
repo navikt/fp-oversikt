@@ -38,9 +38,10 @@ public record FpVedtak(@JsonProperty("vedtakstidspunkt") LocalDateTime vedtaksti
             VirkedagJusterer.justerEøsPerioder(sortertUttaksperioderAnnenpartEøs), bgDto, tilkjentYtelseDto);
     }
 
-    public boolean innvilget() {
+    public boolean kanSøkeOmEndring() {
+        // Vedtak som er innvilget uten trekkdager (annulleringer) gir ikke endringssøknad
         return Stream.ofNullable(perioder)
             .flatMap(Collection::stream)
-            .anyMatch(p -> p.resultat().innvilget());
+            .anyMatch(p ->  p.resultat().innvilget() && p.harTrekkdager());
     }
 }

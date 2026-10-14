@@ -114,7 +114,7 @@ class SakFP0Test {
 
     @Test
     void kan_søke_om_endring_hvis_periode_innvilget() {
-        var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(uttaksperiode(now(), now().plusMonths(1).minusDays(1), innvilget(ZERO)),
+        var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(uttaksperiode(now(), now().plusMonths(1).minusDays(1), innvilget(new Trekkdager(20))),
             uttaksperiode(now().plusMonths(1), now().plusMonths(2), avslått())), Dekningsgrad.HUNDRE, null, null, null);
         var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(vedtak), null, fh(), of(), of(), MOR, of(), rettigheter(), false,
             LocalDateTime.now());
@@ -122,6 +122,46 @@ class SakFP0Test {
         var fpSakDto = sakFP0.tilSakDto(annenpartUbeskyttetAdresse());
 
         assertThat(fpSakDto.kanSøkeOmEndring()).isTrue();
+    }
+
+    @Test
+    void kan_ikke_søke_om_endring_hvis_innvilget_uten_trekkdager() {
+        var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO))),
+            Dekningsgrad.HUNDRE, null, null, null);
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(vedtak), null, fh(), of(), of(), MOR, of(), rettigheter(), false,
+            LocalDateTime.now());
+
+        var fpSakDto = sakFP0.tilSakDto(annenpartUbeskyttetAdresse());
+
+        assertThat(fpSakDto.kanSøkeOmEndring()).isFalse();
+    }
+
+    @Test
+    void kan_ikke_søke_om_endring_hvis_trekkdager_kun_i_avslått_periode() {
+        var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(
+            uttaksperiode(now(), now().plusMonths(1), new Uttaksperiode.Resultat(AVSLÅTT, ANNET, uttaksperiodeAktivitet(new Trekkdager(20)), false))),
+            Dekningsgrad.HUNDRE, null, null, null);
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(vedtak), null, fh(), of(), of(), MOR, of(), rettigheter(), false,
+            LocalDateTime.now());
+
+        var fpSakDto = sakFP0.tilSakDto(annenpartUbeskyttetAdresse());
+
+        assertThat(fpSakDto.kanSøkeOmEndring()).isFalse();
+    }
+
+    @Test
+    void kan_ikke_søke_om_endring_hvis_innvilget_periode_uten_trekkdager_og_trekkdager_kun_i_avslått_periode() {
+        var vedtak = new FpVedtak(LocalDateTime.now().minusYears(1), List.of(
+            uttaksperiode(now(), now().plusMonths(1).minusDays(1), innvilget(ZERO)),
+            uttaksperiode(now().plusMonths(1), now().plusMonths(2),
+                new Uttaksperiode.Resultat(AVSLÅTT, ANNET, uttaksperiodeAktivitet(new Trekkdager(20)), false))),
+            Dekningsgrad.HUNDRE, null, null, null);
+        var sakFP0 = new SakFP0(Saksnummer.dummy(), AktørId.dummy(), false, of(vedtak), null, fh(), of(), of(), MOR, of(), rettigheter(), false,
+            LocalDateTime.now());
+
+        var fpSakDto = sakFP0.tilSakDto(annenpartUbeskyttetAdresse());
+
+        assertThat(fpSakDto.kanSøkeOmEndring()).isFalse();
     }
 
     private static Uttaksperiode.Resultat avslått() {

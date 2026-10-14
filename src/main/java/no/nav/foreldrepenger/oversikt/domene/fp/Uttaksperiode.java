@@ -90,6 +90,10 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
             .filter(a -> a.arbeidstidsprosent.merEnn0());
     }
 
+    public boolean harTrekkdager() {
+        return resultat != null && resultat.harTrekkdager();
+    }
+
     public record Resultat(Type type, Årsak årsak, Set<UttaksperiodeAktivitet> aktiviteter, boolean trekkerMinsterett) {
 
         public boolean innvilget() {
@@ -100,6 +104,10 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
             return Stream.ofNullable(aktiviteter())
                 .flatMap(Collection::stream)
                 .anyMatch(a -> a.trekkdager().merEnn0() && konto.equals(a.konto()));
+        }
+
+        public boolean harTrekkdager() {
+            return Stream.ofNullable(aktiviteter).flatMap(Collection::stream).anyMatch(a -> a.trekkdager() != null && a.trekkdager().merEnn0());
         }
 
         public enum Type {
