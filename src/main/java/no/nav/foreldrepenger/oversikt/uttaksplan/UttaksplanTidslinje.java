@@ -63,6 +63,13 @@ public final class UttaksplanTidslinje {
         return List.of(nyttSegment(new LocalDateInterval(fom, tom), uttak.søker(), uttak.annenPart(), uttak.annenPartEøs()));
     }
 
+    /**
+     * TODO: dette er feil. Splittes en EØS-periode på 5 trekkdager i to, får begge
+     *  delene 5 trekkdager, og summen blir 10. En riktig løsning må fordele trekkdagene
+     *  forholdsmessig etter virkedager og bevare totalen, noe som krever at segmentet husker
+     *  hvilken periode det kom fra. Vi lever med feilen fordi EØS-perioder i praksis ikke
+     *  overlapper med søkerens uttak, og dermed sjelden splittes.
+     */
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartEøs(List<UttakPeriodeAnnenpartEøs> annenPartsEøsPerioder,
                                                                              LocalDateTimeline<UttakDto> søkerTimeline) {
         var eøsTimeline = tilEøsTimeline(annenPartsEøsPerioder);
@@ -97,6 +104,10 @@ public final class UttaksplanTidslinje {
         return venstre.annenPartEøs().kontoType() == høyre.annenPartEøs().kontoType();
     }
 
+    /**
+     * Trekkdagene summeres når to opprinnelige EØS-perioder med samme konto
+     * grenser til hverandre.
+     */
     private static LocalDateSegment<UttakPeriodeDto> slåSammenEøsSegmenter(LocalDateInterval intervall,
                                                                            LocalDateSegment<UttakPeriodeDto> venstre,
                                                                            LocalDateSegment<UttakPeriodeDto> høyre) {
@@ -114,24 +125,7 @@ public final class UttaksplanTidslinje {
         return segmenter.isEmpty() ? LocalDateTimeline.empty() : new LocalDateTimeline<>(segmenter);
     }
 
-    /**
-     * Trekkdagene kopieres uendret til hvert segment perioden måtte bli delt i.
-     * <p>
-     * Foreldrepengesøknad splitter ikke EØS-perioder, men sender dem uendret til kalenderen
-     * sammen med søkerens perioder. Kalenderen viser bare én periode per dag. Ved overlapp vinner
-     * den perioden som starter først. Backend splitter i stedet og prioriterer søkerens uttak,
-     * slik at utfallet ikke avhenger av startdato.
-     * <p>
-     * TODO: dette er feil. Splittes en EØS-periode på 5 trekkdager i to, får begge
-     *  delene 5 trekkdager, og summen blir 10. I tillegg summerer
-     *  {@link #slåSammenEøsSegmenter} trekkdagene når to opprinnelige EØS-perioder med samme
-     *  konto grenser til hverandre. Frontend holder slike perioder atskilt. En riktig løsning må
-     *  fordele trekkdagene forholdsmessig etter virkedager og bevare totalen, noe som krever at
-     *  segmentet husker hvilken periode det kom fra. Vi lever med feilen fordi EØS-perioder i
-     *  praksis ikke overlapper med søkerens uttak, og dermed sjelden splittes.
-     */
     static LocalDateTimeline<EøsUttakDto> tilEøsTimeline(List<UttakPeriodeAnnenpartEøs> perioder) {
-        // TODO: Avklar om EØS-perioder skal virkedagsjusteres. Perioder som bare ligger i en helg kan være gyldige.
         var segmenter = perioder.stream()
             .map(periode -> new LocalDateSegment<>(periode.fom(), periode.tom(), UttaksplanMapper.mapEøsUttak(periode)))
             .toList();
