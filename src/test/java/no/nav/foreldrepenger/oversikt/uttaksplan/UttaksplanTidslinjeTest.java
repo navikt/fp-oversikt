@@ -145,8 +145,8 @@ class UttaksplanTidslinjeTest {
 
     @Test
     void skalBevareBeggeParterVedSamtidigUttak() {
-        var søker = uttak(BrukerRolle.MOR, periode(MANDAG, MANDAG.plusWeeks(4).minusDays(1), Konto.FELLESPERIODE));
-        var annenPart = uttak(BrukerRolle.FAR, periode(MANDAG.plusWeeks(2), MANDAG.plusWeeks(6).minusDays(1), Konto.FEDREKVOTE));
+        var søker = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusWeeks(4).minusDays(1), Konto.FELLESPERIODE, 50));
+        var annenPart = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG.plusWeeks(2), MANDAG.plusWeeks(6).minusDays(1), Konto.FEDREKVOTE, 50));
 
         var plan = UttaksplanTidslinje.normaliser(søker, annenPart, List.of());
 
@@ -168,8 +168,8 @@ class UttaksplanTidslinjeTest {
     void skalStarteMorsSegmentPåMandagEtterAtOverlappSlutterFredagNårMorErSøker() {
         var fredag = MANDAG.plusDays(4);
         var nesteMandag = MANDAG.plusWeeks(1);
-        var mor = uttak(BrukerRolle.MOR, periode(MANDAG, nesteMandag.plusDays(4), Konto.MØDREKVOTE));
-        var far = uttak(BrukerRolle.FAR, periode(MANDAG, fredag, Konto.FEDREKVOTE));
+        var mor = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, nesteMandag.plusDays(4), Konto.MØDREKVOTE, 50));
+        var far = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, fredag, Konto.FEDREKVOTE, 50));
 
         var plan = UttaksplanTidslinje.normaliser(mor, far, List.of());
 
@@ -188,8 +188,8 @@ class UttaksplanTidslinjeTest {
     void skalStarteMorsSegmentPåMandagEtterAtOverlappSlutterFredagNårFarErSøker() {
         var fredag = MANDAG.plusDays(4);
         var nesteMandag = MANDAG.plusWeeks(1);
-        var mor = uttak(BrukerRolle.MOR, periode(MANDAG, nesteMandag.plusDays(4), Konto.MØDREKVOTE));
-        var far = uttak(BrukerRolle.FAR, periode(MANDAG, fredag, Konto.FEDREKVOTE));
+        var mor = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, nesteMandag.plusDays(4), Konto.MØDREKVOTE, 50));
+        var far = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, fredag, Konto.FEDREKVOTE, 50));
 
         var plan = UttaksplanTidslinje.normaliser(far, mor, List.of());
 
@@ -221,6 +221,31 @@ class UttaksplanTidslinjeTest {
             assertThat(segment.getValue()).isEqualTo(new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, nesteFredag,
                 mor.getFirst().uttak(), far.getFirst().uttak(), null));
         });
+    }
+
+    @Test
+    void skalFjerneAnnenPartsOverlappendeUttakNårIngenHarSamtidigUttak() {
+        var søker = uttak(BrukerRolle.MOR, periode(MANDAG, MANDAG.plusWeeks(1).plusDays(4), Konto.MØDREKVOTE));
+        var annenPart = uttak(BrukerRolle.FAR, periode(MANDAG.plusWeeks(1), MANDAG.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE));
+
+        var plan = UttaksplanTidslinje.normaliser(søker, annenPart, List.of());
+
+        assertThat(perioder(plan)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusWeeks(1).plusDays(4), søker.getFirst().uttak(), null, null),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusWeeks(2), MANDAG.plusWeeks(2).plusDays(4), null,
+                annenPart.getFirst().uttak(), null));
+    }
+
+    @Test
+    void skalBeholdeAnnenPartsUttakNårSøkersOverlappendePeriodeErAvslåttUtenTrekkdager() {
+        var resultat = new Uttaksperiode.Resultat(Uttaksperiode.Resultat.Type.AVSLÅTT, Uttaksperiode.Resultat.Årsak.ANNET, Set.of(), false);
+        var søker = uttak(BrukerRolle.MOR, new Uttaksperiode(MANDAG, MANDAG.plusDays(4), null, null, null, Prosent.ZERO, false, null, resultat));
+        var annenPart = uttak(BrukerRolle.FAR, periode(MANDAG, MANDAG.plusDays(4), Konto.MØDREKVOTE));
+
+        var plan = UttaksplanTidslinje.normaliser(søker, annenPart, List.of());
+
+        assertThat(perioder(plan)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(4), søker.getFirst().uttak(), annenPart.getFirst().uttak(), null));
     }
 
     @Test
