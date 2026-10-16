@@ -16,18 +16,18 @@ import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTjeneste;
 
 @ApplicationScoped
-public class AnnenPartSakOppslag {
+public class AnnenPartSakTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(AnnenPartSakOppslag.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AnnenPartSakTjeneste.class);
 
     private Saker saker;
 
     @Inject
-    public AnnenPartSakOppslag(Saker saker) {
+    public AnnenPartSakTjeneste(Saker saker) {
         this.saker = saker;
     }
 
-    AnnenPartSakOppslag() {
+    AnnenPartSakTjeneste() {
         //CDI
     }
 

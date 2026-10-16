@@ -15,7 +15,7 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
-import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakOppslag;
+import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.Saker;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
@@ -34,12 +34,12 @@ public class UttaksplanTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(UttaksplanTjeneste.class);
 
     private Saker saker;
-    private AnnenPartSakOppslag annenPartSakOppslag;
+    private AnnenPartSakTjeneste annenPartSakTjeneste;
 
     @Inject
-    public UttaksplanTjeneste(Saker saker, AnnenPartSakOppslag annenPartSakOppslag) {
+    public UttaksplanTjeneste(Saker saker, AnnenPartSakTjeneste annenPartSakTjeneste) {
         this.saker = saker;
-        this.annenPartSakOppslag = annenPartSakOppslag;
+        this.annenPartSakTjeneste = annenPartSakTjeneste;
     }
 
     UttaksplanTjeneste() {
@@ -54,7 +54,7 @@ public class UttaksplanTjeneste {
         var søkersSak = søkersGjeldendeSak(søker, barn, familiehendelse);
         var annenPartsSak = annenPart == null
             ? Optional.<ForeldrepengerSak>empty()
-            : annenPartSakOppslag.annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
+            : annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
 
         if (søkersSak.isEmpty() && annenPartsSak.isEmpty()) {
             LOG.info("Fant verken sak for søker eller annen part. Returnerer tom uttaksplan");

@@ -33,7 +33,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
-import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakOppslag;
+import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.Saker;
 
 @ExtendWith(JpaExtension.class)
@@ -175,7 +175,7 @@ class UttaksplanTjenesteTest {
 
     private static UttaksplanTjeneste tjeneste(EntityManager entityManager, AktørId søker) {
         var saker = new Saker(new DBSakRepository(entityManager), myndigInnloggetBruker(søker), annenpartUbeskyttetAdresse());
-        return new UttaksplanTjeneste(saker, new AnnenPartSakOppslag(saker));
+        return new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker));
     }
 
     private static void lagre(EntityManager entityManager, SakFP0... saker) {

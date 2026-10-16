@@ -7,7 +7,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakOppslag;
+import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 
@@ -17,7 +17,7 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(AktivitetskravMåDokumentereMorsArbeidTjeneste.class);
 
     private PersonOppslagSystem personOppslagSystem;
-    private AnnenPartSakOppslag annenPartSakOppslag;
+    private AnnenPartSakTjeneste annenPartSakTjeneste;
     private KontaktInformasjonTjeneste kontaktInformasjonTjeneste;
     private AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste;
 
@@ -27,11 +27,11 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
 
     @Inject
     public AktivitetskravMåDokumentereMorsArbeidTjeneste(PersonOppslagSystem personOppslagSystem,
-                                                         AnnenPartSakOppslag annenPartSakOppslag,
+                                                         AnnenPartSakTjeneste annenPartSakTjeneste,
                                                          KontaktInformasjonTjeneste kontaktInformasjonTjeneste,
                                                          AktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste) {
         this.personOppslagSystem = personOppslagSystem;
-        this.annenPartSakOppslag = annenPartSakOppslag;
+        this.annenPartSakTjeneste = annenPartSakTjeneste;
         this.kontaktInformasjonTjeneste = kontaktInformasjonTjeneste;
         this.aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste = aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste;
     }
@@ -81,6 +81,6 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
         var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
-        return annenPartSakOppslag.annenPartGjeldendeSakOppgittSøker(innloggetBrukerAktørid, annenPartAktørId, barnAktørId, familieHendelse).isEmpty();
+        return annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(innloggetBrukerAktørid, annenPartAktørId, barnAktørId, familieHendelse).isEmpty();
     }
 }
