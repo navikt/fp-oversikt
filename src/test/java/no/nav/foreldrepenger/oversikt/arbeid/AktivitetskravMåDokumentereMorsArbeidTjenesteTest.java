@@ -24,7 +24,7 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
-import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakOppslag;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 @ExtendWith(MockitoExtension.class)
@@ -36,7 +36,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     @Mock
     private PersonOppslagSystem personOppslagSystem;
     @Mock
-    private AnnenPartSakTjeneste annenPartSakTjeneste;
+    private AnnenPartSakOppslag annenPartSakOppslag;
     @Mock
     private KontaktInformasjonTjeneste kontaktInformasjonTjeneste;
     @Mock
@@ -49,7 +49,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     void setUp() {
         aktivitetskravMåDokumentereMorsArbeidTjeneste = new AktivitetskravMåDokumentereMorsArbeidTjeneste(
                 personOppslagSystem,
-                annenPartSakTjeneste,
+                annenPartSakOppslag,
                 kontaktInformasjonTjeneste,
                 aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste
         );
@@ -59,7 +59,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     void happy_case_hvor_mor_kan_varsles_og_har_arbeid_i_intervallet() {
         // Arrange
         when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(false);
-        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
+        when(annenPartSakOppslag.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
         when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(false);
 
         // Act
@@ -73,7 +73,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     @Test
     void hvis_annenpart_har_reservert_seg_eller_kan_ikke_varsles_så_kreves_dokumentasjon_av_mors_arbeid() {
         // Arrange
-        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
+        when(annenPartSakOppslag.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
         when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(true);
         // Act
         var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
@@ -87,7 +87,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     void hvis_annenpart_ikke_har_sak_men_barn_er_knyttet_til_søker_og_annenpart_skal_vi_sjekke_arbeidsforhold() {
         // Arrange
         when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(false);
-        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.empty());
+        when(annenPartSakOppslag.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.empty());
         when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(true);
         when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(true);
         // Act
@@ -101,7 +101,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     @Test
     void hvis_annenpart_ikke_har_sak_og_barn_ikke_er_knyttet_til_begge_foreldrene_krever_vi_dokumentasjon() {
         // Arrange
-        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.empty());
+        when(annenPartSakOppslag.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.empty());
         when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
 
         // Act
@@ -116,7 +116,7 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     void happy_kombinert_case_hvor_mor_kan_varsles_og_har_arbeid_i_intervallet() {
         // Arrange
         when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(false);
-        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
+        when(annenPartSakOppslag.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
         when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(false);
 
         // Act
