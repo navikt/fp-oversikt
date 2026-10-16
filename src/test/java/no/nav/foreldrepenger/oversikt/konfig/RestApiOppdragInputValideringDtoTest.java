@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,8 +78,8 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
         PathParam.class);
 
     @SuppressWarnings("rawtypes")
-    private static final Set<Class> UNNTATT_FRA_VALIDERING = Set.of(boolean.class, Boolean.class, UUID.class,
-        LocalDate.class, LocalDateTime.class);
+    private static final Set<Class> UNNTATT_FRA_VALIDERING = Set.of(boolean.class, Boolean.class, UUID.class, LocalDate.class, LocalDateTime.class,
+        OffsetDateTime.class);
 
     @SuppressWarnings("rawtypes")
     private static final Map<Class, List<List<Class<? extends Annotation>>>> VALIDERINGSALTERNATIVER = new HashMap<>() {
