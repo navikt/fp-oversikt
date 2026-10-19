@@ -39,6 +39,7 @@ import no.nav.foreldrepenger.oversikt.søknad.Søknad;
 import no.nav.foreldrepenger.oversikt.søknad.SøknadPeriode;
 import no.nav.foreldrepenger.oversikt.søknad.SøknadRepository;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
+import no.nav.foreldrepenger.oversikt.stub.SøknadRepositoryStub;
 
 class UttaksplanTjenesteTest {
 

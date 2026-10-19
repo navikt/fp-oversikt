@@ -67,4 +67,9 @@ public class DBSakRepository implements SakRepository {
         var query = hentSakQuery(saksnummer);
         return hentEksaktResultat(query).map();
     }
+
+    @Override
+    public Optional<Sak> finnFor(Saksnummer saksnummer) {
+        return hentSak(saksnummer).map(SakEntitet::map);
+    }
 }

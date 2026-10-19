@@ -16,6 +16,7 @@ import org.mockito.ArgumentCaptor;
 import jakarta.validation.Validation;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
 import no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig;
+import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 
 class SøknadRestTest {
@@ -27,7 +28,7 @@ class SøknadRestTest {
         org.mockito.Mockito.doThrow(new no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException(
             no.nav.foreldrepenger.oversikt.tilgangskontroll.LokalFeilKode.IKKE_TILGANG)).when(tilgang).sjekkAtKallErFraSystem();
 
-        assertThatThrownBy(() -> new SøknadRest(repository, tilgang).lagre(null))
+        assertThatThrownBy(() -> new SøknadRest(new SøknadTjeneste(repository, new RepositoryStub()), tilgang).lagre(null))
             .isInstanceOf(no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException.class);
         org.mockito.Mockito.verifyNoInteractions(repository);
     }
@@ -38,7 +39,7 @@ class SøknadRestTest {
         var mottatt = OffsetDateTime.parse("2026-09-01T12:00:00+02:00");
         var request = parseRequest(validRequestJson());
 
-        new SøknadRest(repository, mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class)).lagre(request);
+        new SøknadRest(new SøknadTjeneste(repository, new RepositoryStub()), mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class)).lagre(request);
 
         var captor = ArgumentCaptor.forClass(Søknad.class);
         verify(repository).lagre(eq(new no.nav.foreldrepenger.oversikt.domene.Saksnummer("123456")), captor.capture());
@@ -74,7 +75,7 @@ class SøknadRestTest {
             """;
         var repository = mock(SøknadRepository.class);
 
-        new SøknadRest(repository, mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class)).lagre(parseRequest(json));
+        new SøknadRest(new SøknadTjeneste(repository, new RepositoryStub()), mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class)).lagre(parseRequest(json));
 
         var captor = ArgumentCaptor.forClass(Søknad.class);
         verify(repository).lagre(eq(new no.nav.foreldrepenger.oversikt.domene.Saksnummer("123456")), captor.capture());
@@ -93,7 +94,7 @@ class SøknadRestTest {
         var parsed = parseRequest(json);
         var repository = mock(SøknadRepository.class);
 
-        new SøknadRest(repository, mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class)).lagre(parsed);
+        new SøknadRest(new SøknadTjeneste(repository, new RepositoryStub()), mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class)).lagre(parsed);
 
         var captor = ArgumentCaptor.forClass(Søknad.class);
         verify(repository).lagre(eq(new no.nav.foreldrepenger.oversikt.domene.Saksnummer("123456")), captor.capture());
@@ -141,12 +142,31 @@ class SøknadRestTest {
 
         var repository = mock(SøknadRepository.class);
         var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
-        assertThatThrownBy(() -> new SøknadRest(repository, tilgang).lagre(parseRequest("""
+        assertThatThrownBy(() -> new SøknadRest(new SøknadTjeneste(repository, new RepositoryStub()), tilgang).lagre(parseRequest("""
             {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[]}
             """)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("perioder kan ikke være tom");
         org.mockito.Mockito.verifyNoInteractions(repository);
+    }
+
+    @Test
+    void avviserOverlappForSammeRolleMenTillaterSamtidigUttak() {
+        var overlappMor = """
+            {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[
+              {"fom":"2026-10-01","tom":"2026-10-10","uttak":{"forelder":"MOR","kontoType":"MØDREKVOTE"}},
+              {"fom":"2026-10-10","tom":"2026-10-12","uttak":{"forelder":"MOR","kontoType":"FELLESPERIODE"}}
+            ]}
+            """;
+        var samtidig = overlappMor.replace("""
+            {"forelder":"MOR","kontoType":"FELLESPERIODE"}""", """
+            {"forelder":"FAR_MEDMOR","kontoType":"FEDREKVOTE"}""");
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            var validator = factory.getValidator();
+            assertThat(validator.validate(parseRequest(overlappMor))).extracting("message")
+                .containsExactly("perioder kan ikke overlappe for samme rolle");
+            assertThat(validator.validate(parseRequest(samtidig))).isEmpty();
+        }
     }
 
     @Test

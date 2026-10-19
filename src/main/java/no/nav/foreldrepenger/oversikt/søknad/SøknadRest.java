@@ -24,12 +24,12 @@ import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUtt
 @Transactional
 public class SøknadRest {
 
-    private SøknadRepository repository;
+    private SøknadTjeneste søknadTjeneste;
     private TilgangKontrollTjeneste tilgangKontroll;
 
     @Inject
-    public SøknadRest(SøknadRepository repository, TilgangKontrollTjeneste tilgangKontroll) {
-        this.repository = repository;
+    public SøknadRest(SøknadTjeneste søknadTjeneste, TilgangKontrollTjeneste tilgangKontroll) {
+        this.søknadTjeneste = søknadTjeneste;
         this.tilgangKontroll = tilgangKontroll;
     }
 
@@ -42,13 +42,22 @@ public class SøknadRest {
         tilgangKontroll.sjekkAtKallErFraSystem();
         var saksnummer = new no.nav.foreldrepenger.oversikt.domene.Saksnummer(request.saksnummer().value());
         var perioder = request.perioder().stream().map(SøknadMapper::tilPeriode).toList();
-        repository.lagre(saksnummer, new Søknad(request.mottattTidspunkt().toInstant(), request.rolle(), perioder));
+        søknadTjeneste.lagre(saksnummer, new Søknad(request.mottattTidspunkt().toInstant(), request.rolle(), perioder));
     }
 
     public record SøknadRequest(@Valid @NotNull Saksnummer saksnummer,
                                @NotNull OffsetDateTime mottattTidspunkt,
                                @Valid @NotNull Søknad.Rolle rolle,
                                @NotNull @Size(min = 1) List<@Valid @NotNull PeriodeRequest> perioder) {
+        @AssertTrue(message = "perioder kan ikke overlappe for samme rolle")
+        @JsonIgnore
+        public boolean isUtenOverlappForSammeRolle() {
+            if (perioder == null || perioder.stream().anyMatch(p -> p == null || !p.erKomplett() || !p.isGyldigIntervall())) {
+                return true; // andre valideringer melder feilen
+            }
+            return !SøknadPerioder.overlapperForSammeRolle(perioder.stream().map(SøknadMapper::tilPeriode).toList());
+        }
+
         @Override
         public String toString() {
             return "SøknadRequest[skjermet]";
@@ -62,6 +71,10 @@ public class SøknadRest {
         @JsonIgnore
         public boolean isGyldigIntervall() {
             return fom == null || tom == null || !tom.isBefore(fom);
+        }
+
+        private boolean erKomplett() {
+            return fom != null && tom != null && uttak != null && uttak.forelder() != null;
         }
 
         @Override
