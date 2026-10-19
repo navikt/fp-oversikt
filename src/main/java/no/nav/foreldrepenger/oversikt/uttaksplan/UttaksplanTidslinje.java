@@ -13,6 +13,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.VirkedagJusterer;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 
 public final class UttaksplanTidslinje {
 
@@ -34,6 +35,25 @@ public final class UttaksplanTidslinje {
             return normaliserAnnenPartEøs(annenPartsEøsPerioder, søkerTimeline);
         }
         return normaliserAnnenPartNorsk(annenPart, søkerTimeline);
+    }
+
+    /**
+     * Legger søknadsutsettelser bare på dager som ikke allerede har et segment i planen.
+     * Utsettelsene legges alltid i søkers felt. Har søker ikke sendt egen søknad, arver søker annen parts utsettelser.
+     */
+    static LocalDateTimeline<UttakPeriodeDto> fyllHullMedUtsettelser(LocalDateTimeline<UttakPeriodeDto> plan,
+                                                                     List<Planperiode> utsettelser) {
+        var utsettelseTimeline = tilTimeline(utsettelser)
+            .map(segment -> List.of(nyttSegment(segment.getLocalDateInterval(), segment.getValue(), null, null)))
+            // Klipp før union, ellers deler union planens segmenter. Delte EØS-segmenter slås ikke sammen
+            // igjen, og trekkdagene ville blitt kopiert til hver del.
+            .disjoint(plan)
+            .map(UttaksplanTidslinje::justerForHelg);
+
+        return plan.union(utsettelseTimeline, StandardCombinators::coalesceLeftHandSide)
+            .compress(LocalDateInterval::abutsWorkdays, (venstre, høyre) ->
+                    venstre.annenPartEøs() == null && høyre.annenPartEøs() == null && harLikUttaksinformasjon(venstre, høyre),
+                (intervall, venstre, _) -> nyttSegment(intervall, venstre.getValue().søker(), venstre.getValue().annenPart(), null));
     }
 
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartNorsk(List<Planperiode> annenPart,
@@ -73,13 +93,23 @@ public final class UttaksplanTidslinje {
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartEøs(List<UttakPeriodeAnnenpartEøs> annenPartsEøsPerioder,
                                                                              LocalDateTimeline<UttakDto> søkerTimeline) {
         var eøsTimeline = tilEøsTimeline(annenPartsEøsPerioder);
-        return søkerTimeline.union(eøsTimeline, (intervall, søkerSegment, eøsSegment) -> {
+        var søkerMedEøsUtsettelserFjernet = fjernSøkersUtsettelseInnenforEøs(søkerTimeline, eøsTimeline);
+        return søkerMedEøsUtsettelserFjernet.union(eøsTimeline, (intervall, søkerSegment, eøsSegment) -> {
             var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
             var eøsUttak = eøsSegment == null ? null : eøsSegment.getValue();
             var normalisert = UtsettelseOverlappNormalisering.normaliser(søkerUttak, null, eøsUttak);
             return nyttSegment(intervall, normalisert.søker(), null,
                 normalisert.søker() == null ? normalisert.annenPartEøs() : null);
         }).compress(LocalDateInterval::abutsWorkdays, UttaksplanTidslinje::harLikEøsUttaksinformasjon, UttaksplanTidslinje::slåSammenEøsSegmenter);
+    }
+
+    private static LocalDateTimeline<UttakDto> fjernSøkersUtsettelseInnenforEøs(LocalDateTimeline<UttakDto> søkerTimeline,
+                                                                              LocalDateTimeline<EøsUttakDto> eøsTimeline) {
+        // EØS-uttak prioriteres over utsettelser. Fjern overlapp før unionen, ellers kan en utsettelse
+        // splitte EØS-perioden og kopiere hele trekkdagstallet til hvert segment. Søkerens uttak beholdes urørt.
+        var uttak = søkerTimeline.filterValue(verdi -> verdi.utsettelseÅrsak() == null);
+        var utsettelserUtenEøs = søkerTimeline.filterValue(verdi -> verdi.utsettelseÅrsak() != null).disjoint(eøsTimeline);
+        return uttak.union(utsettelserUtenEøs, StandardCombinators::coalesceLeftHandSide);
     }
 
     private static LocalDateSegment<UttakPeriodeDto> nyttSegment(LocalDateInterval intervall,

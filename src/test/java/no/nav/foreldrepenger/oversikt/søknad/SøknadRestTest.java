@@ -106,7 +106,7 @@ class SøknadRestTest {
     void validererPåkrevdeNestedFeltOgDatointervall() {
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             var validator = factory.getValidator();
-            var gyldigUtenPerioder = new SøknadRest.SøknadRequest(new Saksnummer("123456"),
+            var utenPerioder = new SøknadRest.SøknadRequest(new Saksnummer("123456"),
                 OffsetDateTime.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR, List.of());
             var manglendeRolle = new SøknadRest.SøknadRequest(new Saksnummer("123456"), OffsetDateTime.parse("2026-09-01T12:00:00Z"),
                 null, List.of());
@@ -114,7 +114,7 @@ class SøknadRestTest {
             var ugyldigIntervall = parseRequest(validRequestJson().replace("2026-10-01", "DATE_FOM")
                 .replace("2026-10-10", "2026-10-01").replace("DATE_FOM", "2026-10-10"));
 
-            assertThat(validator.validate(gyldigUtenPerioder)).isEmpty();
+            assertThat(validator.validate(utenPerioder)).isNotEmpty();
             assertThat(validator.validate(manglendeRolle)).isNotEmpty();
             assertThat(validator.validate(manglendeNestedRolle)).isNotEmpty();
             assertThat(validator.validate(ugyldigIntervall)).extracting("message").contains("tom kan ikke være før fom");
@@ -122,15 +122,31 @@ class SøknadRestTest {
     }
 
     @Test
-    void kreverOffsetOgTillaterTomPeriodeliste() {
+    void kreverOffsetOgAvviserTomPeriodeliste() {
         assertThatThrownBy(() -> parseRequest(validRequestJson().replace("2026-09-01T12:00:00+02:00", "2026-09-01T12:00:00")))
             .isInstanceOf(RuntimeException.class);
         var tomListe = """
             {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[]}
             """;
         try (var factory = Validation.buildDefaultValidatorFactory()) {
-            assertThat(factory.getValidator().validate(parseRequest(tomListe))).isEmpty();
+            assertThat(factory.getValidator().validate(parseRequest(tomListe))).isNotEmpty();
         }
+    }
+
+    @Test
+    void avviserTomPeriodelisteIDomenetOgLagrerIkkeTomRequest() {
+        assertThatThrownBy(() -> new Søknad(OffsetDateTime.parse("2026-09-01T12:00:00Z").toInstant(), Søknad.Rolle.MOR, List.of()))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("perioder kan ikke være tom");
+
+        var repository = mock(SøknadRepository.class);
+        var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
+        assertThatThrownBy(() -> new SøknadRest(repository, tilgang).lagre(parseRequest("""
+            {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[]}
+            """)))
+            .isInstanceOf(IllegalArgumentException.class)
+            .hasMessage("perioder kan ikke være tom");
+        org.mockito.Mockito.verifyNoInteractions(repository);
     }
 
     @Test

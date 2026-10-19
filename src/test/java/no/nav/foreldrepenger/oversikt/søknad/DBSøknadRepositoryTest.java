@@ -47,7 +47,7 @@ class DBSøknadRepositoryTest {
         var historisk = søknad(Instant.parse("2026-05-02T10:00:00Z"), List.of(periode(1, Boolean.TRUE)));
         var aktivPåAnnenSak = søknad(Instant.parse("2026-05-03T10:00:00Z"), List.of(periode(2, Boolean.FALSE)));
         var nyereFørst = søknad(Instant.parse("2026-05-10T10:00:00Z"), List.of(periode(3, null), periode(4, Boolean.TRUE)));
-        var eldreSendtSenere = søknad(Instant.parse("2026-05-01T10:00:00Z"), List.of());
+        var eldreSendtSenere = søknad(Instant.parse("2026-05-01T10:00:00Z"), List.of(periode(5, Boolean.FALSE)));
 
         repository.lagre(saksnummer, historisk);
         repository.lagre(annenSak, aktivPåAnnenSak);
@@ -62,17 +62,17 @@ class DBSøknadRepositoryTest {
         assertThat(antall(entityManager, "select count(*) from soknad where saksnummer = ? and aktiv = true", saksnummer.value())).isEqualTo(1L);
         assertThat(antall(entityManager, "select count(*) from soknad where saksnummer = ? and aktiv = false", saksnummer.value())).isEqualTo(2L);
         assertThat(antall(entityManager, "select count(*) from soknad_periode p join soknad s on s.id = p.soknad_id where s.saksnummer = ?", saksnummer.value()))
-            .isEqualTo(3L);
+            .isEqualTo(4L);
         assertThat(entityManager.createNativeQuery("select indexdef from pg_indexes where indexname = 'uidx_soknad_aktiv'")
             .getSingleResult().toString().toLowerCase()).contains("unique index", "where (aktiv = true)");
     }
 
     @Test
-    void lagrerTomPeriodelisteOgRunderInstantGjennomPostgres(EntityManager entityManager) {
+    void lagrerOgRunderInstantGjennomPostgres(EntityManager entityManager) {
         var saksnummer = Saksnummer.dummy();
         var repository = new DBSøknadRepository(entityManager);
         var dstOvergang = OffsetDateTime.of(2026, 3, 29, 3, 30, 0, 987654000, ZoneOffset.ofHours(2)).toInstant();
-        var søknad = søknad(dstOvergang, List.of());
+        var søknad = søknad(dstOvergang, List.of(periode(1, Boolean.TRUE)));
 
         repository.lagre(saksnummer, søknad);
         entityManager.clear();
@@ -80,7 +80,7 @@ class DBSøknadRepositoryTest {
         assertSøknadUtenPeriodelisteorden(repository.hentAktivFor(saksnummer), søknad);
         assertThat(repository.hentAktivFor(saksnummer).orElseThrow().mottattTidspunkt()).isEqualTo(dstOvergang);
         assertThat(antall(entityManager, "select count(*) from soknad_periode p join soknad s on s.id = p.soknad_id where s.saksnummer = ?", saksnummer.value()))
-            .isZero();
+            .isEqualTo(1L);
     }
 
     @Test
