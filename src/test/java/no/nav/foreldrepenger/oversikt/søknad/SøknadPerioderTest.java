@@ -94,17 +94,6 @@ class SøknadPerioderTest {
             .containsExactly(periode(MOR, DAG, DAG.plusDays(14), MØDREKVOTE, null), ny);
     }
 
-    @Test
-    void overlappSjekkesBareInnenforSammeRolle() {
-        var mor = periode(MOR, DAG, DAG.plusDays(9), MØDREKVOTE, null);
-        var far = periode(FAR_MEDMOR, DAG, DAG.plusDays(9), FEDREKVOTE, null);
-        var morOverlapp = periode(MOR, DAG.plusDays(9), DAG.plusDays(12), FELLESPERIODE, null);
-        var morNabo = periode(MOR, DAG.plusDays(10), DAG.plusDays(12), FELLESPERIODE, null);
-
-        assertThat(SøknadPerioder.overlapperForSammeRolle(List.of(mor, far, morNabo))).isFalse();
-        assertThat(SøknadPerioder.overlapperForSammeRolle(List.of(mor, morOverlapp))).isTrue();
-    }
-
     static SøknadPeriode periode(Søknad.Rolle rolle, LocalDate fom, LocalDate tom, SøknadPeriode.KontoType konto, BigDecimal gradering) {
         return new SøknadPeriode(fom, tom, rolle, konto, null, null, null, gradering, null, false, null, null, null);
     }

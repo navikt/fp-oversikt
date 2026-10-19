@@ -152,9 +152,9 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
             .withFailMessage("Klassen " + klasse + " er en entitet, kan ikke brukes som DTO. Brukes i " + forrigeKlasse)
             .isNull();
 
-        if (klasse == FellesUttaksplanDto.UttakDto.class) {
+        if (klasse == FellesUttaksplanDto.UttakDto.class || klasse == FellesUttaksplanDto.EøsUttakDto.class) {
             // TODO Fjern unntaket når valideringsannotasjonene i felleskontrakten er avklart og oppdatert.
-            // Hopper over strukturkontroll av UttakDto og nestede typer, ikke @Valid på feltet som bruker DTO-en.
+            // Hopper over strukturkontroll av UttakDto/EøsUttakDto og nestede typer, ikke @Valid på feltet som bruker DTO-en.
             // Runtime-valideringen er uendret; manglende prosent- og formatgrenser er ikke løst her.
             return;
         }

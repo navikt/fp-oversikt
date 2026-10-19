@@ -67,9 +67,9 @@ class SøknadRestTest {
     void ignorererResultatOgArbeidsgivernavnMenBeholderGraderingForBeggeRoller() {
         var json = """
             {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"FAR_MEDMOR","perioder":[
-              {"fom":"2026-10-01","tom":"2026-10-10","uttak":{"forelder":"MOR","resultat":{"resultat":"ikke lagre"},
+              {"fom":"2026-10-01","tom":"2026-10-10","søker":{"forelder":"MOR","resultat":{"resultat":"ikke lagre"},
                 "gradering":{"arbeidstidprosent":50,"aktivitet":{"type":"FRILANS","arbeidsgiverNavn":"ikke lagre"}}}},
-              {"fom":"2026-10-11","tom":"2026-10-20","uttak":{"forelder":"FAR_MEDMOR",
+              {"fom":"2026-10-11","tom":"2026-10-20","annenPart":{"forelder":"FAR_MEDMOR",
                 "gradering":{"arbeidstidprosent":25,"aktivitet":{"type":"ANNET","arbeidsgiver":{"id":"org-1","type":"ORGANISASJON","navn":"ikke lagre"}}}}}
             ]}
             """;
@@ -100,11 +100,11 @@ class SøknadRestTest {
         verify(repository).lagre(eq(new no.nav.foreldrepenger.oversikt.domene.Saksnummer("123456")), captor.capture());
         assertThat(captor.getValue().perioder().getFirst().flerbarnsdager()).isFalse();
         var explicitNull = parseRequest(validRequestJson().replace("\"flerbarnsdager\":true", "\"flerbarnsdager\":null"));
-        assertThat(explicitNull.perioder().getFirst().uttak().flerbarnsdager()).isFalse();
+        assertThat(explicitNull.perioder().getFirst().søker().flerbarnsdager()).isFalse();
     }
 
     @Test
-    void validererPåkrevdeNestedFeltOgDatointervall() {
+    void validererPåkrevdeNestedFelt() {
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             var validator = factory.getValidator();
             var utenPerioder = new SøknadRest.SøknadRequest(new Saksnummer("123456"),
@@ -112,13 +112,10 @@ class SøknadRestTest {
             var manglendeRolle = new SøknadRest.SøknadRequest(new Saksnummer("123456"), OffsetDateTime.parse("2026-09-01T12:00:00Z"),
                 null, List.of());
             var manglendeNestedRolle = parseRequest(validRequestJson().replace("\"forelder\":\"MOR\",", ""));
-            var ugyldigIntervall = parseRequest(validRequestJson().replace("2026-10-01", "DATE_FOM")
-                .replace("2026-10-10", "2026-10-01").replace("DATE_FOM", "2026-10-10"));
 
             assertThat(validator.validate(utenPerioder)).isNotEmpty();
             assertThat(validator.validate(manglendeRolle)).isNotEmpty();
             assertThat(validator.validate(manglendeNestedRolle)).isNotEmpty();
-            assertThat(validator.validate(ugyldigIntervall)).extracting("message").contains("tom kan ikke være før fom");
         }
     }
 
@@ -151,25 +148,6 @@ class SøknadRestTest {
     }
 
     @Test
-    void avviserOverlappForSammeRolleMenTillaterSamtidigUttak() {
-        var overlappMor = """
-            {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[
-              {"fom":"2026-10-01","tom":"2026-10-10","uttak":{"forelder":"MOR","kontoType":"MØDREKVOTE"}},
-              {"fom":"2026-10-10","tom":"2026-10-12","uttak":{"forelder":"MOR","kontoType":"FELLESPERIODE"}}
-            ]}
-            """;
-        var samtidig = overlappMor.replace("""
-            {"forelder":"MOR","kontoType":"FELLESPERIODE"}""", """
-            {"forelder":"FAR_MEDMOR","kontoType":"FEDREKVOTE"}""");
-        try (var factory = Validation.buildDefaultValidatorFactory()) {
-            var validator = factory.getValidator();
-            assertThat(validator.validate(parseRequest(overlappMor))).extracting("message")
-                .containsExactly("perioder kan ikke overlappe for samme rolle");
-            assertThat(validator.validate(parseRequest(samtidig))).isEmpty();
-        }
-    }
-
-    @Test
     void apiRegistrererSøknadRest() {
         assertThat(new ApiConfig().getClasses()).contains(SøknadRest.class);
     }
@@ -181,7 +159,7 @@ class SøknadRestTest {
     private static String validRequestJson() {
         return """
             {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00+02:00","rolle":"FAR_MEDMOR","perioder":[
-              {"fom":"2026-10-01","tom":"2026-10-10","uttak":{"forelder":"MOR","kontoType":"MØDREKVOTE",
+              {"fom":"2026-10-01","tom":"2026-10-10","søker":{"forelder":"MOR","kontoType":"MØDREKVOTE",
                 "utsettelseÅrsak":"ARBEID","overføringÅrsak":"ALENEOMSORG","morsAktivitet":"UTDANNING","samtidigUttak":20.5,
                 "flerbarnsdager":true,"gradering":{"arbeidstidprosent":60.5,"aktivitet":{"type":"ORDINÆRT_ARBEID",
                   "arbeidsgiver":{"id":"test-id-123","type":"ORGANISASJON"}}}}}

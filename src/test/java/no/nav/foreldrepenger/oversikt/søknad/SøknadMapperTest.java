@@ -21,11 +21,11 @@ class SøknadMapperTest {
     void mapperNullableDataTilInternPeriode() {
         var request = DefaultJsonMapper.fromJson("""
             {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[
-              {"fom":"2026-10-01","tom":"2026-10-10","uttak":{"forelder":"MOR"}}
+              {"fom":"2026-10-01","tom":"2026-10-10","søker":{"forelder":"MOR"}}
             ]}
             """, SøknadRest.SøknadRequest.class);
 
-        var periode = SøknadMapper.tilPeriode(request.perioder().getFirst());
+        var periode = SøknadMapper.tilPerioder(request.perioder()).getFirst();
 
         assertThat(periode).isInstanceOf(SøknadPeriode.class);
         assertThat(periode.kontoType()).isNull();
@@ -40,12 +40,28 @@ class SøknadMapperTest {
         assertThat(periode.arbeidsgiverType()).isNull();
     }
 
+    @Test
+    void pakkerUtBådeSøkerOgAnnenPartFraSammePeriode() {
+        var request = DefaultJsonMapper.fromJson("""
+            {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[
+              {"fom":"2026-10-01","tom":"2026-10-10",
+                "søker":{"forelder":"MOR","kontoType":"MØDREKVOTE"},
+                "annenPart":{"forelder":"FAR_MEDMOR","kontoType":"FEDREKVOTE"}}
+            ]}
+            """, SøknadRest.SøknadRequest.class);
+
+        var perioder = SøknadMapper.tilPerioder(request.perioder());
+
+        assertThat(perioder).extracting(SøknadPeriode::rolle)
+            .containsExactly(Søknad.Rolle.MOR, Søknad.Rolle.FAR_MEDMOR);
+    }
+
     @ParameterizedTest(name = "mapper {0} enum {1} med samme navn")
     @MethodSource("alleEnumverdier")
     void mapperAlleEnumverdier(String felt, String verdi, java.util.function.Function<SøknadPeriode, Enum<?>> uthent) {
         var json = """
             {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[
-              {"fom":"2026-10-01","tom":"2026-10-10","uttak":{"forelder":"MOR","kontoType":"__konto__",
+              {"fom":"2026-10-01","tom":"2026-10-10","søker":{"forelder":"MOR","kontoType":"__konto__",
                 "utsettelseÅrsak":"__utsettelse__","overføringÅrsak":"__overføring__","morsAktivitet":"__morsAktivitet__",
                 "gradering":{"aktivitet":{"type":"__aktivitet__","arbeidsgiver":{"id":"org-1","type":"__arbeidsgiver__"}}}}}
             ]}
@@ -76,7 +92,7 @@ class SøknadMapperTest {
         json = json.replace("\"" + feltNavn + "\":\"" + defaultVerdi + "\"", "\"" + feltNavn + "\":\"" + verdi + "\"");
         var request = DefaultJsonMapper.fromJson(json, SøknadRest.SøknadRequest.class);
 
-        var periode = SøknadMapper.tilPeriode(request.perioder().getFirst());
+        var periode = SøknadMapper.tilPerioder(request.perioder()).getFirst();
 
         assertThat(uthent.apply(periode).name()).isEqualTo(verdi);
     }

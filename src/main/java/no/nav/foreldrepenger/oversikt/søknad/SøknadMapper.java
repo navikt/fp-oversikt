@@ -1,16 +1,33 @@
 package no.nav.foreldrepenger.oversikt.søknad;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
+
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakDto;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakPeriodeDto;
+
 final class SøknadMapper {
 
     private SøknadMapper() {
     }
 
-    static SøknadPeriode tilPeriode(SøknadRest.PeriodeRequest periode) {
-        var uttak = periode.uttak();
+    static List<SøknadPeriode> tilPerioder(List<UttakPeriodeDto> perioder) {
+        return perioder.stream().flatMap(SøknadMapper::tilPerioder).toList();
+    }
+
+    static Stream<SøknadPeriode> tilPerioder(UttakPeriodeDto periode) {
+        return Stream.of(periode.søker(), periode.annenPart())
+            .filter(Objects::nonNull)
+            .map(uttak -> tilPeriode(periode.fom(), periode.tom(), uttak));
+    }
+
+    private static SøknadPeriode tilPeriode(LocalDate fom, LocalDate tom, UttakDto uttak) {
         var gradering = uttak.gradering();
         var aktivitet = gradering == null ? null : gradering.aktivitet();
         var arbeidsgiver = aktivitet == null ? null : aktivitet.arbeidsgiver();
-        return new SøknadPeriode(periode.fom(), periode.tom(), rolle(uttak.forelder()),
+        return new SøknadPeriode(fom, tom, rolle(uttak.forelder()),
             konto(uttak.kontoType()), utsettelse(uttak.utsettelseÅrsak()), overføring(uttak.overføringÅrsak()),
             morsAktivitet(uttak.morsAktivitet()),
             gradering == null || gradering.arbeidstidprosent() == null ? null : gradering.arbeidstidprosent().value(),

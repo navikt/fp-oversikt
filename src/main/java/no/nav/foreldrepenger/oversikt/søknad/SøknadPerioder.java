@@ -36,21 +36,6 @@ final class SøknadPerioder {
             .toList();
     }
 
-    static boolean overlapperForSammeRolle(List<SøknadPeriode> perioder) {
-        return Arrays.stream(Søknad.Rolle.values()).anyMatch(rolle -> {
-            var sortert = perioder.stream()
-                .filter(p -> p.rolle() == rolle)
-                .sorted(Comparator.comparing(SøknadPeriode::fom))
-                .toList();
-            for (var i = 1; i < sortert.size(); i++) {
-                if (!sortert.get(i).fom().isAfter(sortert.get(i - 1).tom())) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    }
-
     private static LocalDateTimeline<SøknadPeriode> tilTimeline(List<SøknadPeriode> perioder, Søknad.Rolle rolle) {
         return new LocalDateTimeline<>(perioder.stream()
             .filter(p -> p.rolle() == rolle)
