@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakPeriodeDto;
 
-@Path("/søknad")
+@Path("/soknad")
 @ApplicationScoped
 @Transactional
 public class SøknadRest {
