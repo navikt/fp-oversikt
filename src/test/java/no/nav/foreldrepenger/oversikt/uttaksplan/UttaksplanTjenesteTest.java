@@ -960,7 +960,7 @@ class UttaksplanTjenesteTest {
     }
 
     @Test
-    void søkerUtenSakArverAnnenPartsUtsettelserISøkersFelt() {
+    void søkerUtenSakSerAnnenPartsUtsettelserIAnnenPartsFelt() {
         var søker = AktørId.dummy();
         var annenPart = AktørId.dummy();
         var barn = AktørId.dummy();
@@ -976,9 +976,9 @@ class UttaksplanTjenesteTest {
 
         assertThat(plan.perioder()).singleElement().satisfies(p -> {
             assertThat(p.fom()).isEqualTo(mandag.plusWeeks(2));
-            assertThat(p.annenPart()).isNull();
-            assertThat(p.søker().utsettelseÅrsak()).isNotNull();
-            assertThat(p.søker().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.MOR);
+            assertThat(p.søker()).isNull();
+            assertThat(p.annenPart().utsettelseÅrsak()).isNotNull();
+            assertThat(p.annenPart().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.FAR_MEDMOR);
         });
     }
 
@@ -1003,6 +1003,30 @@ class UttaksplanTjenesteTest {
 
         assertThat(plan.perioder()).anySatisfy(p -> assertThat(p.søker()).isNotNull());
         assertThat(plan.perioder()).noneMatch(p -> p.annenPart() != null && p.annenPart().utsettelseÅrsak() != null);
+    }
+
+    @Test
+    void annenPartsUtsettelseIEgenSøknadLeggesIAnnenPartsFelt() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        var egenSak = sakUtenVedtak(søker, annenPart, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+            søknadsperiode(mandag, mandag.plusDays(4), Konto.FEDREKVOTE));
+        lagre(egenSak);
+        var repository = new SøknadRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
+            List.of(
+                nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.FEDREKVOTE, null, null, null),
+                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
+
+        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+
+        assertThat(plan.perioder()).filteredOn(p -> p.fom().equals(mandag.plusWeeks(2))).singleElement().satisfies(p -> {
+            assertThat(p.søker()).isNull();
+            assertThat(p.annenPart().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.MOR);
+            assertThat(p.annenPart().utsettelseÅrsak()).isNotNull();
+        });
     }
 
     @Test

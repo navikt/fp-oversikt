@@ -391,7 +391,7 @@ class UttaksplanTidslinjeTest {
         var plan = UttaksplanTidslinje.normaliser(uttak, List.of(), List.of());
         var utsettelse = planUtsettelse(MANDAG, MANDAG.plusDays(6));
 
-        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse));
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse), FellesUttaksplanDto.Rolle.MOR);
 
         assertThat(perioder(fylt)).containsExactly(
             new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(1), utsettelse.uttak(), null, null),
@@ -404,7 +404,8 @@ class UttaksplanTidslinjeTest {
         var utsettelse = planUtsettelse(MANDAG, MANDAG.plusDays(4));
         var nesteLikeUtsettelse = planUtsettelse(MANDAG.plusDays(7), MANDAG.plusDays(11));
 
-        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(LocalDateTimeline.empty(), List.of(utsettelse, nesteLikeUtsettelse));
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(LocalDateTimeline.empty(), List.of(utsettelse, nesteLikeUtsettelse),
+            FellesUttaksplanDto.Rolle.MOR);
 
         assertThat(perioder(fylt)).singleElement().satisfies(p -> {
             assertThat(p.fom()).isEqualTo(MANDAG);
@@ -420,7 +421,7 @@ class UttaksplanTidslinjeTest {
         var eksisterendeEøsSegment = plan.stream().findFirst().orElseThrow();
         var utsettelse = planUtsettelse(MANDAG, MANDAG.plusDays(4));
 
-        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse));
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse), FellesUttaksplanDto.Rolle.MOR);
 
         assertThat(fylt.stream().filter(s -> s.getValue().annenPartEøs() != null).toList()).containsExactly(eksisterendeEøsSegment);
         assertThat(fylt.stream().map(LocalDateSegment::getValue).filter(p -> p.søker() != null))
@@ -437,7 +438,7 @@ class UttaksplanTidslinjeTest {
         var eksisterendeEøsSegment = plan.stream().findFirst().orElseThrow();
         var utsettelse = planUtsettelse(MANDAG.plusDays(2), MANDAG.plusDays(11));
 
-        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse));
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse), FellesUttaksplanDto.Rolle.MOR);
 
         assertThat(fylt.stream().filter(s -> s.getValue().annenPartEøs() != null).toList()).containsExactly(eksisterendeEøsSegment);
         assertThat(perioder(fylt)).filteredOn(p -> p.søker() != null).singleElement().satisfies(p -> {

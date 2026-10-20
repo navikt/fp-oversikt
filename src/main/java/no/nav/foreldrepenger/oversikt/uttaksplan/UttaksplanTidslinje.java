@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.uttaksplan;
 
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.EøsUttakDto;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Rolle;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakDto;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakPeriodeDto;
 
@@ -39,12 +40,17 @@ public final class UttaksplanTidslinje {
 
     /**
      * Legger søknadsutsettelser bare på dager som ikke allerede har et segment i planen.
-     * Utsettelsene legges alltid i søkers felt. Har søker ikke sendt egen søknad, arver søker annen parts utsettelser.
+     * Utsettelsen plasseres i søkers eller annen parts felt ut fra forelderrollen.
      */
     static LocalDateTimeline<UttakPeriodeDto> fyllHullMedUtsettelser(LocalDateTimeline<UttakPeriodeDto> plan,
-                                                                     List<Planperiode> utsettelser) {
+                                                                     List<Planperiode> utsettelser,
+                                                                     Rolle søkerRolle) {
         var utsettelseTimeline = tilTimeline(utsettelser)
-            .map(segment -> List.of(nyttSegment(segment.getLocalDateInterval(), segment.getValue(), null, null)))
+            .map(segment -> {
+                var uttak = segment.getValue();
+                var erSøker = uttak.forelder() == søkerRolle;
+                return List.of(nyttSegment(segment.getLocalDateInterval(), erSøker ? uttak : null, erSøker ? null : uttak, null));
+            })
             // Klipp før union, ellers deler union planens segmenter. Delte EØS-segmenter slås ikke sammen
             // igjen, og trekkdagene ville blitt kopiert til hver del.
             .disjoint(plan)
