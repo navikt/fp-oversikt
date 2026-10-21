@@ -56,9 +56,8 @@ final class UttaksplanMapper {
     static UttakDto mapUttak(FpSøknadsperiode periode, BrukerRolle brukerRolle) {
         var samtidigUttak =
             periode.samtidigUttak() == null || !periode.samtidigUttak().merEnn0() ? null : new SamtidigUttak(periode.samtidigUttak().decimalValue());
-        var gradering =
-            samtidigUttak == null && periode.gradering() != null ? new Gradering(new Arbeidstidprosent(periode.gradering().prosent().decimalValue()),
-                mapAktivitet(periode.gradering().uttakAktivitet())) : null;
+        var gradering = periode.gradering() != null ? new Gradering(new Arbeidstidprosent(periode.gradering().prosent().decimalValue()),
+            mapAktivitet(periode.gradering().uttakAktivitet())) : null;
         return new UttakDto(mapRolle(brukerRolle), periode.konto() == null ? null : periode.konto().tilDto(),
             mapUtsettelseÅrsak(periode.utsettelseÅrsak()), mapOverføringÅrsak(periode.overføringÅrsak()), gradering,
             periode.morsAktivitet() == null ? null : periode.morsAktivitet().tilDto(), samtidigUttak,
