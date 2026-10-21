@@ -38,12 +38,13 @@ public class SøknadRest {
         tilgangKontroll.sjekkAtKallErFraSystem();
         var saksnummer = new no.nav.foreldrepenger.oversikt.domene.Saksnummer(request.saksnummer().value());
         var perioder = SøknadMapper.tilPerioder(request.perioder());
-        søknadTjeneste.lagre(saksnummer, new Søknad(request.mottattTidspunkt().toInstant(), request.rolle(), perioder));
+        søknadTjeneste.lagre(saksnummer, new Søknad(request.mottattTidspunkt().toInstant(), request.rolle(), perioder), request.søknadType());
     }
 
     public record SøknadRequest(@Valid @NotNull Saksnummer saksnummer,
                                @NotNull OffsetDateTime mottattTidspunkt,
                                @Valid @NotNull Søknad.Rolle rolle,
+                               @Valid @NotNull SøknadType søknadType,
                                @NotNull @Size(min = 1) List<@Valid @NotNull UttakPeriodeDto> perioder) {
         @Override
         public String toString() {
