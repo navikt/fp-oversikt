@@ -39,12 +39,15 @@ class FpSøknadsperiodeTest {
     }
 
     @Test
-    void samtidig_uttak_skal_sett_gradering_til_null() {
+    void samtidig_uttak_beholder_gradering() {
         var periode = periode(new Prosent(10), new Prosent(20));
 
         var dto = periode.tilDto(MOR);
 
-        assertThat(dto.gradering()).isNull();
+        assertThat(dto.gradering().arbeidstidprosent().value()).isEqualTo(periode.gradering().prosent().decimalValue());
+        assertThat(dto.gradering().aktivitet().type()).isEqualTo(Aktivitet.AktivitetType.ORDINÆRT_ARBEID);
+        assertThat(dto.gradering().aktivitet().arbeidsgiver().id())
+            .isEqualTo(periode.gradering().uttakAktivitet().arbeidsgiver().identifikator());
         assertThat(dto.samtidigUttak().value()).isEqualTo(periode.samtidigUttak().decimalValue());
     }
 

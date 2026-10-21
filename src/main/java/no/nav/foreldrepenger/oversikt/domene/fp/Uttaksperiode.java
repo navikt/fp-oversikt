@@ -38,8 +38,7 @@ public record Uttaksperiode(LocalDate fom, LocalDate tom, UtsettelseÅrsak utset
 
         var sa = samtidigUttak() == null || !samtidigUttak().merEnn0() ? null : new SamtidigUttak(samtidigUttak().decimalValue());
 
-        //frontend vil ikke ha detaljer om gradering ved samtidigUttak
-        var gradering = sa == null ? utledGradering().orElse(null) : null;
+        var gradering = utledGradering().orElse(null);
 
         var konto = utledKontoType();
         var res = new UttakPeriodeResultat(resultat().innvilget(), resultat().trekkerMinsterett(), trekkerDager, resultat().årsak().tilDto());
