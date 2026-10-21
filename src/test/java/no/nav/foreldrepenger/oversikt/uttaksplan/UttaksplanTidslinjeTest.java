@@ -17,6 +17,7 @@ import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.Prosent;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
+import no.nav.foreldrepenger.oversikt.domene.fp.Gradering;
 import no.nav.foreldrepenger.oversikt.domene.fp.Konto;
 import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
@@ -80,6 +81,19 @@ class UttaksplanTidslinjeTest {
             assertThat(p.fom()).isEqualTo(MANDAG.plusWeeks(1));
             assertThat(p.tom()).isEqualTo(MANDAG.plusDays(11));
         });
+    }
+
+    @Test
+    void skalMappeGraderingSammenMedSamtidigUttak() {
+        var aktivitet = new UttakAktivitet(UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), null);
+        var periode = new FpSøknadsperiode(MANDAG, MANDAG.plusDays(4), Konto.FELLESPERIODE, null, null, null,
+            new Gradering(new Prosent(40), aktivitet), new Prosent(20), false, null);
+
+        var uttak = UttaksplanMapper.mapUttak(periode, BrukerRolle.MOR);
+
+        assertThat(uttak.gradering().arbeidstidprosent().value()).isEqualByComparingTo(BigDecimal.valueOf(40));
+        assertThat(uttak.gradering().aktivitet().type()).isEqualTo(FellesUttaksplanDto.Aktivitet.AktivitetType.ORDINÆRT_ARBEID);
+        assertThat(uttak.samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(20));
     }
 
     @Test

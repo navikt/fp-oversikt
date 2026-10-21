@@ -17,8 +17,7 @@ public record FpSøknadsperiode(LocalDate fom, LocalDate tom, Konto konto, Utset
         var overføring = overføringÅrsak() == null ? null : overføringÅrsak().tilDto();
         var ma = morsAktivitet() == null ? null : morsAktivitet().tilDto();
         var sa = samtidigUttak() == null || !samtidigUttak().merEnn0() ? null : new SamtidigUttak(samtidigUttak().decimalValue());
-        //frontend vil ikke ha detaljer om gradering ved samtidigUttak
-        var g = gradering() != null && sa == null ? gradering().tilDto() : null;
+        var g = gradering() == null ? null : gradering().tilDto();
         return new UttakPeriode(fom(), tom(), kontoType, null, utsettelse, opphold, overføring, g, ma, sa, flerbarnsdager != null && flerbarnsdager,
             brukerRolle);
     }

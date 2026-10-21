@@ -42,12 +42,16 @@ class UttaksperiodeTest {
     }
 
     @Test
-    void samtidig_uttak_skal_sett_gradering_til_null() {
-        var periode = periode(new Prosent(10), new Prosent(20), Uttaksperiode.Resultat.Type.INNVILGET);
+    void samtidig_uttak_beholder_gradering() {
+        var periode = periode(new Prosent(10), new Prosent(20), Uttaksperiode.Resultat.Type.INNVILGET_GRADERING);
 
         var dto = periode.tilDto(FAR_MEDMOR);
 
-        assertThat(dto.gradering()).isNull();
+        assertThat(dto.gradering().arbeidstidprosent().value()).isEqualTo(new Prosent(20).decimalValue());
+        assertThat(dto.gradering().aktivitet().type()).isEqualTo(Aktivitet.AktivitetType.ORDINÆRT_ARBEID);
+        var uttaksperiodeAktivitet = periode.resultat().aktiviteter().stream().findFirst().orElseThrow();
+        assertThat(dto.gradering().aktivitet().arbeidsgiver().id())
+            .isEqualTo(uttaksperiodeAktivitet.aktivitet().arbeidsgiver().identifikator());
         assertThat(dto.samtidigUttak().value()).isEqualTo(periode.samtidigUttak().decimalValue());
     }
 
