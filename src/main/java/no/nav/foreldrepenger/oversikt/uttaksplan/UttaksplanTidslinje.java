@@ -45,7 +45,7 @@ public final class UttaksplanTidslinje {
     static LocalDateTimeline<UttakPeriodeDto> fyllHullMedUtsettelser(LocalDateTimeline<UttakPeriodeDto> plan,
                                                                      List<Planperiode> utsettelser,
                                                                      Rolle søkerRolle) {
-        var utsettelseTimeline = tilTimeline(utsettelser)
+        var utsettelserIHull = tilTimeline(utsettelser)
             .map(segment -> {
                 var uttak = segment.getValue();
                 var erSøker = uttak.forelder() == søkerRolle;
@@ -56,7 +56,7 @@ public final class UttaksplanTidslinje {
             .disjoint(plan)
             .map(UttaksplanTidslinje::justerForHelg);
 
-        return plan.union(utsettelseTimeline, StandardCombinators::coalesceLeftHandSide)
+        return plan.union(utsettelserIHull, StandardCombinators::coalesceLeftHandSide)
             .compress(LocalDateInterval::abutsWorkdays, (venstre, høyre) ->
                     venstre.annenPartEøs() == null && høyre.annenPartEøs() == null && harLikUttaksinformasjon(venstre, høyre),
                 (intervall, venstre, _) -> nyttSegment(intervall, venstre.getValue().søker(), venstre.getValue().annenPart(), null));
@@ -64,6 +64,7 @@ public final class UttaksplanTidslinje {
 
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartNorsk(List<Planperiode> annenPart,
                                                                                LocalDateTimeline<UttakDto> søkerTimeline) {
+        // Uttak prioriteres over utsettelse. Overlappende uttak håndteres deretter etter reglene for samtidig uttak.
         var annenPartTimeline = tilTimeline(annenPart);
         return søkerTimeline.union(annenPartTimeline, (intervall, søkerSegment, annenPartSegment) -> {
                 var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
@@ -98,9 +99,10 @@ public final class UttaksplanTidslinje {
      */
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartEøs(List<UttakPeriodeAnnenpartEøs> annenPartsEøsPerioder,
                                                                              LocalDateTimeline<UttakDto> søkerTimeline) {
+        // Søkerens uttak prioriteres over EØS-uttak. EØS-uttak prioriteres over søkerens utsettelser.
         var eøsTimeline = tilEøsTimeline(annenPartsEøsPerioder);
-        var søkerMedEøsUtsettelserFjernet = fjernSøkersUtsettelseInnenforEøs(søkerTimeline, eøsTimeline);
-        return søkerMedEøsUtsettelserFjernet.union(eøsTimeline, (intervall, søkerSegment, eøsSegment) -> {
+        var søkerUtenUtsettelserInnenforEøs = fjernSøkersUtsettelseInnenforEøs(søkerTimeline, eøsTimeline);
+        return søkerUtenUtsettelserInnenforEøs.union(eøsTimeline, (intervall, søkerSegment, eøsSegment) -> {
             var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
             var eøsUttak = eøsSegment == null ? null : eøsSegment.getValue();
             var normalisert = UtsettelseOverlappNormalisering.normaliser(søkerUttak, null, eøsUttak);
