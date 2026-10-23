@@ -3,7 +3,6 @@ package no.nav.foreldrepenger.oversikt.domene.fp;
 import static java.time.LocalDate.now;
 import static java.time.temporal.TemporalAdjusters.next;
 import static java.util.Set.of;
-import static no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak.FAR_MEDMOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.FAR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MEDMOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
@@ -27,6 +26,7 @@ import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.Person;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.RettighetType;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
@@ -55,8 +55,7 @@ class SakFP0Test {
         var fpSakDto = sakFP0.tilSakDto(annenpartOppslag);
 
         assertThat(fpSakDto.gjeldendeVedtak()).isNotNull();
-        assertThat(fpSakDto.gjeldendeVedtak().perioder()).hasSameSizeAs(uttaksperioderGjeldendeVedtak);
-        assertThat(fpSakDto.gjeldendeVedtak().perioder().getFirst().fom()).isEqualTo(uttaksperioderGjeldendeVedtak.getFirst().fom());
+        assertThat(fpSakDto.dekningsgrad()).isEqualTo(DekningsgradSak.ÅTTI);
         assertThat(fpSakDto.annenPart().fnr().value()).isEqualTo(sakFP0.annenPartAktørId().value());
     }
 
@@ -76,40 +75,6 @@ class SakFP0Test {
         return Set.of(
             new UttaksperiodeAktivitet(new UttakAktivitet(UttakAktivitet.Type.ORDINÆRT_ARBEID, Arbeidsgiver.dummy(), UUID.randomUUID().toString()),
                 konto, trekkdager, Prosent.ZERO));
-    }
-
-    @Test
-    void sjekk_at_mapping_av_uttaksperiode_til_dto_fungere() {
-        var uttaksperiode = uttaksperiode(now(), now().plusMonths(1), innvilget(ZERO));
-
-        var uttaksperiodeDto = uttaksperiode.tilDto(FAR_MEDMOR);
-
-        assertThat(uttaksperiodeDto.fom()).isEqualTo(uttaksperiode.fom());
-        assertThat(uttaksperiodeDto.tom()).isEqualTo(uttaksperiode.tom());
-        assertThat(uttaksperiodeDto.fom()).isBefore(uttaksperiode.tom());
-        assertThat(uttaksperiodeDto.resultat().innvilget()).isTrue();
-    }
-
-    @Test
-    void sjekk_at_mapping_av_vedtak_til_dto_fungere_happy_case() {
-        var uttaksperioder = List.of(
-            uttaksperiode(LocalDate.of(2024, 10, 10), LocalDate.of(2024, 10, 10).plusMonths(1).minusDays(5), innvilget(ZERO)),
-            uttaksperiode(LocalDate.of(2024, 10, 10).plusMonths(1), LocalDate.of(2024, 10, 10).plusMonths(2), innvilget(ZERO)));
-        var vedtak = new FpVedtak(LocalDateTime.now(), uttaksperioder, Dekningsgrad.HUNDRE, null, null, null);
-
-        var vedtakDto = vedtak.tilDto(no.nav.foreldrepenger.kontrakter.fpoversikt.BrukerRolleSak.MOR);
-
-        assertThat(vedtakDto.perioder()).hasSameSizeAs(vedtak.perioder());
-    }
-
-
-    @Test
-    void sjekk_at_mapping_av_vedtak_til_dto_ikke_kaster_exception_når_uttak_er_null() {
-        var vedtak = new FpVedtak(LocalDateTime.now(), null, Dekningsgrad.HUNDRE, null, null, null);
-
-        var vedtakDto = vedtak.tilDto(FAR_MEDMOR);
-
-        assertThat(vedtakDto.perioder()).isEmpty();
     }
 
     @Test

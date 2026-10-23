@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.oversikt.domene.fp;
 
 import static no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle.MOR;
 import static no.nav.foreldrepenger.oversikt.domene.fp.Konto.FORELDREPENGER;
-import static no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode.compress;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -19,7 +18,6 @@ import no.nav.foreldrepenger.kontrakter.fpoversikt.FpSak;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.FpÅpenBehandling;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.Person;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.RettighetType;
-import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 import no.nav.foreldrepenger.oversikt.domene.Aksjonspunkt;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.BehandlingTilstandUtleder;
@@ -58,13 +56,13 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var gjeldendeVedtak = gjeldendeVedtak();
         var dekningsgrad = dekningsgrad();
         var forelder = brukerRolle.tilDto();
-        var fpVedtak = gjeldendeVedtak.map(fpVedtak1 -> fpVedtak1.tilDto(forelder)).orElse(null);
+        var fpVedtak = gjeldendeVedtak.map(FpVedtak::tilDto).orElse(null);
 
         var annenPart = Optional.ofNullable(annenPartAktørId).flatMap(a -> mapPerson(personOppslagSystem, a));
         var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::kanSøkeOmEndring);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
 
-        var åpenBehandling = tilÅpenBehandling(kanSøkeOmEndring);
+        var åpenBehandling = søknadUnderBehandling().map(s -> new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()))).orElse(null);
         var barna = Stream.ofNullable(fødteBarn)
             .flatMap(Collection::stream)
             .flatMap(b -> mapPerson(personOppslagSystem, b).stream())
@@ -127,23 +125,6 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
             return RettighetType.BARE_SØKER_RETT;
         }
         return søknadsperioder.stream().anyMatch(sp -> FORELDREPENGER.equals(sp.konto())) ? RettighetType.BARE_SØKER_RETT : RettighetType.BEGGE_RETT;
-    }
-
-    private FpÅpenBehandling tilÅpenBehandling(boolean kanSøkeOmEndring) {
-        var søknadUnderBehandling = søknadUnderBehandling();
-        return søknadUnderBehandling.map(s -> {
-            //Innsyn-frontend har nå bare støtte for å vise søknadsperioder i førstegangssøknad. Bruker nå kanSøkeOmEndring for best effort å
-            // bare returnere perioder i førstegangsbehandlinger
-            List<UttakPeriode> perioder = kanSøkeOmEndring ? List.of() : s.perioder()
-                .stream()
-                .map(fpSøknadsperiode -> {
-                    var forelder = brukerRolle.tilDto();
-                    return fpSøknadsperiode.tilDto(forelder);
-                })
-                .sorted(Comparator.comparing(UttakPeriode::fom))
-                .toList();
-            return new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()), compress(VirkedagJusterer.justerUttakPerioder(perioder)));
-        }).orElse(null);
     }
 
     private Optional<FpSøknad> søknadUnderBehandling() {
