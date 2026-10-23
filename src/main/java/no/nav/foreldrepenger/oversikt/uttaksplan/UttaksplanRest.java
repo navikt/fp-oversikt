@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.uttaksplan;
 
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,7 +18,6 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
@@ -84,22 +84,18 @@ public class UttaksplanRest {
     }
 
     /**
-     * Returnerer null når annen part er skjermet eller ukjent. Planen bygges da uten annen part.
+     * Ukjent ident forblir uavklart. Tjenesten kontrollerer adresse og skjermer periodene.
      */
     private AktørId annenPartAktørId(FellesUttaksplanRequest request) {
         if (request.annenPartFødselsnummer() == null) {
             return null;
         }
         try {
-            var adresseBeskyttelse = personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer());
-            if (adresseBeskyttelse.harBeskyttetAdresse()) {
-                return null;
-            }
-        } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.info("Finner ikke adressebeskyttelse for annen part. Bygger uttaksplan uten annen part", e);
+            return personOppslagSystem.aktørId(request.annenPartFødselsnummer());
+        } catch (NoSuchElementException e) {
+            LOG.info("Finner ikke ident for annen part. Bygger uttaksplan uten annen part");
             return null;
         }
-        return personOppslagSystem.aktørId(request.annenPartFødselsnummer());
     }
 
     public record FellesUttaksplanRequest(@NotNull @Valid BarnIdentifikator barnIdentifikator, @Valid Fødselsnummer annenPartFødselsnummer) {

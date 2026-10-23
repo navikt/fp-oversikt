@@ -14,16 +14,14 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
+import java.util.NoSuchElementException;
 
 import org.junit.jupiter.api.Test;
 
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.LokalFeilKode;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
@@ -76,14 +74,13 @@ class UttaksplanRestAutoriseringTest {
     }
 
     @Test
-    void skalBrukeInnloggetBrukerSomSøker() throws BrukerIkkeFunnetIPdlException {
+    void skalBrukeInnloggetBrukerSomSøker() {
         innloggetBorger();
         var søker = AktørId.dummy();
         var annenPart = AktørId.dummy();
         var innloggetBruker = myndigInnloggetBruker(søker);
         var tjeneste = mock(UttaksplanTjeneste.class);
         var personOppslag = mock(PersonOppslagSystem.class);
-        when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenReturn(new AdresseBeskyttelse(Set.of()));
         when(personOppslag.aktørId(ANNEN_PART_FNR)).thenReturn(annenPart);
         var rest = rest(tjeneste, innloggetBruker, personOppslag);
 
@@ -93,38 +90,65 @@ class UttaksplanRestAutoriseringTest {
     }
 
     @Test
-    void skjermetAnnenPartSkalUtelatesMensSøkersPlanReturneres() throws BrukerIkkeFunnetIPdlException {
+    void adressekontrollSkalOverlatesTilTjenesten() throws Exception {
         innloggetBorger();
         var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
         var innloggetBruker = myndigInnloggetBruker(søker);
         var tjeneste = mock(UttaksplanTjeneste.class);
         var personOppslag = mock(PersonOppslagSystem.class);
         var forventet = tomPlan();
-        when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR))
-            .thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
-        when(tjeneste.hentFor(søker, null, null, FAMILIEHENDELSE)).thenReturn(java.util.Optional.of(forventet));
+        when(personOppslag.aktørId(ANNEN_PART_FNR)).thenReturn(annenPart);
+        when(tjeneste.hentFor(søker, annenPart, null, FAMILIEHENDELSE)).thenReturn(java.util.Optional.of(forventet));
         var rest = rest(tjeneste, innloggetBruker, personOppslag);
 
         assertThat(rest.hent(requestMedAnnenPart())).isSameAs(forventet);
-        verify(tjeneste).hentFor(søker, null, null, FAMILIEHENDELSE);
-        verify(personOppslag, never()).aktørId(ANNEN_PART_FNR);
+        verify(tjeneste).hentFor(søker, annenPart, null, FAMILIEHENDELSE);
+        verify(personOppslag, never()).adresseBeskyttelse(ANNEN_PART_FNR);
     }
 
     @Test
-    void ukjentAnnenPartSkalUtelatesMensSøkersPlanReturneres() throws BrukerIkkeFunnetIPdlException {
+    void ukjentAnnenPartSkalUtelatesMensSøkersPlanReturneres() {
         innloggetBorger();
         var søker = AktørId.dummy();
         var innloggetBruker = myndigInnloggetBruker(søker);
         var tjeneste = mock(UttaksplanTjeneste.class);
         var personOppslag = mock(PersonOppslagSystem.class);
         var forventet = tomPlan();
-        when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        when(personOppslag.aktørId(ANNEN_PART_FNR)).thenThrow(new NoSuchElementException());
         when(tjeneste.hentFor(søker, null, null, FAMILIEHENDELSE)).thenReturn(java.util.Optional.of(forventet));
         var rest = rest(tjeneste, innloggetBruker, personOppslag);
 
         assertThat(rest.hent(requestMedAnnenPart())).isSameAs(forventet);
         verify(tjeneste).hentFor(søker, null, null, FAMILIEHENDELSE);
-        verify(personOppslag, never()).aktørId(ANNEN_PART_FNR);
+        verify(personOppslag).aktørId(ANNEN_PART_FNR);
+    }
+
+    @Test
+    void tekniskIdentfeilSkalPropageresUtenTjenestekall() {
+        innloggetBorger();
+        var tjeneste = mock(UttaksplanTjeneste.class);
+        var personOppslag = mock(PersonOppslagSystem.class);
+        var feil = new IllegalStateException("PDL utilgjengelig");
+        when(personOppslag.aktørId(ANNEN_PART_FNR)).thenThrow(feil);
+        var rest = rest(tjeneste, myndigInnloggetBruker(), personOppslag);
+
+        assertThatThrownBy(() -> rest.hent(requestMedAnnenPart())).isSameAs(feil);
+        verifyNoInteractions(tjeneste);
+    }
+
+    @Test
+    void manglendeAnnenPartSkalSendesVidereSomUavklart() {
+        innloggetBorger();
+        var søker = AktørId.dummy();
+        var tjeneste = mock(UttaksplanTjeneste.class);
+        var personOppslag = mock(PersonOppslagSystem.class);
+        var rest = rest(tjeneste, myndigInnloggetBruker(søker), personOppslag);
+
+        rest.hent(new UttaksplanRest.FellesUttaksplanRequest(new UttaksplanRest.BarnIdentifikator(null, FAMILIEHENDELSE), null));
+
+        verify(tjeneste).hentFor(søker, null, null, FAMILIEHENDELSE);
+        verifyNoInteractions(personOppslag);
     }
 
     private static UttaksplanRest rest(UttaksplanTjeneste tjeneste,

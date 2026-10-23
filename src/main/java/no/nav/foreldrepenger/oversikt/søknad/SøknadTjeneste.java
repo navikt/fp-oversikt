@@ -7,7 +7,10 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
+import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTjeneste;
 
 @ApplicationScoped
 public class SøknadTjeneste {
@@ -15,10 +18,14 @@ public class SøknadTjeneste {
     private static final Logger LOG = LoggerFactory.getLogger(SøknadTjeneste.class);
 
     private SøknadRepository søknadRepository;
+    private SakRepository sakRepository;
+    private UttaksplanTjeneste uttaksplanTjeneste;
 
     @Inject
-    public SøknadTjeneste(SøknadRepository søknadRepository) {
+    public SøknadTjeneste(SøknadRepository søknadRepository, SakRepository sakRepository, UttaksplanTjeneste uttaksplanTjeneste) {
         this.søknadRepository = søknadRepository;
+        this.sakRepository = sakRepository;
+        this.uttaksplanTjeneste = uttaksplanTjeneste;
     }
 
     SøknadTjeneste() {
@@ -27,8 +34,8 @@ public class SøknadTjeneste {
 
     /**
      * Førstegangssøknad erstatter alle lagrede perioder. Endringssøknad inneholder perioder fra første endrede dag
-     * og slås sammen med aktiv søknad. Avsender oppgir søknadstypen uavhengig av sakens vedtak.
-     * Endringssøknader uten lagret søknad ignoreres.
+     * og slås sammen med felles uttaksplan. Avsender oppgir søknadstypen uavhengig av sakens vedtak.
+     * Endringssøknader uten plangrunnlag ignoreres.
      */
     public void lagre(Saksnummer saksnummer, Søknad søknad, SøknadType søknadType) {
         Objects.requireNonNull(søknadType, "søknadType må være satt");
@@ -43,13 +50,21 @@ public class SøknadTjeneste {
             return;
         }
 
-        if (aktiv.isEmpty()) {
-            // TODO: hent perioder fra gjeldende vedtak når endring kommer uten lagret søknad
-            LOG.info("Lagrer ikke endringssøknad fordi saken mangler lagret søknad");
+        var sak = sakRepository.finnFor(saksnummer).orElse(null);
+        if (!(sak instanceof ForeldrepengerSak fpSak)) {
+            LOG.info("Lagrer ikke endringssøknad fordi saken mangler plangrunnlag");
             return;
         }
 
-        var perioder = SøknadPerioder.medEksisterendeFørEndringsdato(aktiv.get().perioder(), søknad.perioder());
+        var grunnlag = uttaksplanTjeneste.hentFor(fpSak)
+            .map(plan -> SøknadMapper.tilPerioder(plan.perioder()))
+            .filter(perioder -> !perioder.isEmpty());
+        if (grunnlag.isEmpty()) {
+            LOG.info("Lagrer ikke endringssøknad fordi saken mangler plangrunnlag");
+            return;
+        }
+
+        var perioder = SøknadPerioder.medEksisterendeFørEndringsdato(grunnlag.orElseThrow(), søknad.perioder());
         søknadRepository.lagre(saksnummer, new Søknad(søknad.mottattTidspunkt(), søknad.rolle(), perioder));
     }
 }

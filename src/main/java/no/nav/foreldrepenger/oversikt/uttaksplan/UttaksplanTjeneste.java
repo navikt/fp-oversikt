@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -12,12 +13,16 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
+import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
+import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.saker.Saker;
 import no.nav.foreldrepenger.oversikt.søknad.Søknad;
 import no.nav.foreldrepenger.oversikt.søknad.SøknadRepository;
@@ -29,7 +34,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
 /**
  * Bygger en søkerrelativ felles uttaksplan for søker og annen part.
  *
- * Tjenesten eier relasjonskravet mellom søker og annen part. Kravet ligger her, ikke i
+ * Tjenesten eier relasjonskravet og adressekontrollen for annen part. Kontrollene ligger her, ikke i
  * REST-ressursen, slik at det ikke kan omgås av senere kallsteder.
  */
 @ApplicationScoped
@@ -40,12 +45,15 @@ public class UttaksplanTjeneste {
     private Saker saker;
     private AnnenPartSakTjeneste annenPartSakTjeneste;
     private SøknadRepository søknadRepository;
+    private PersonOppslagSystem personOppslagSystem;
 
     @Inject
-    public UttaksplanTjeneste(Saker saker, AnnenPartSakTjeneste annenPartSakTjeneste, SøknadRepository søknadRepository) {
+    public UttaksplanTjeneste(Saker saker, AnnenPartSakTjeneste annenPartSakTjeneste, SøknadRepository søknadRepository,
+                             PersonOppslagSystem personOppslagSystem) {
         this.saker = saker;
         this.annenPartSakTjeneste = annenPartSakTjeneste;
         this.søknadRepository = søknadRepository;
+        this.personOppslagSystem = personOppslagSystem;
     }
 
     UttaksplanTjeneste() {
@@ -58,7 +66,31 @@ public class UttaksplanTjeneste {
      */
     public Optional<FellesUttaksplanDto> hentFor(AktørId søker, AktørId annenPart, AktørId barn, LocalDate familiehendelse) {
         var søkersSak = søkersGjeldendeSak(søker, barn, familiehendelse);
-        var annenPartsSak = annenPartsGjeldendeSak(søker, annenPart, barn, familiehendelse);
+        return hentFor(søker, annenPart, barn, familiehendelse, søkersSak);
+    }
+
+    /**
+     * Brukes når søkersaken allerede er funnet via saksnummer. Barn og familiehendelse brukes
+     * bare til å finne annen parts sak, aldri til å velge en annen sak for søkeren.
+     */
+    public Optional<FellesUttaksplanDto> hentFor(ForeldrepengerSak søkersSak) {
+        var familiehendelse = Optional.ofNullable(søkersSak.familieHendelse());
+        var dato = familiehendelse.map(FamilieHendelse::omsorgsovertakelse)
+            .or(() -> familiehendelse.map(FamilieHendelse::fødselsdato))
+            .or(() -> familiehendelse.map(FamilieHendelse::termindato))
+            .orElse(null);
+        var barn = søkersSak.fødteBarn() == null ? null : søkersSak.fødteBarn().stream().findFirst().orElse(null);
+        return hentFor(søkersSak.aktørId(), søkersSak.annenPartAktørId(), barn, dato, Optional.of(søkersSak));
+    }
+
+    private Optional<FellesUttaksplanDto> hentFor(AktørId søker, AktørId annenPart, AktørId barn, LocalDate familiehendelse,
+                                                 Optional<ForeldrepengerSak> søkersSak) {
+        var visAnnenPart = annenPart != null
+            && (søkersSak.isEmpty() || annenPart.equals(søkersSak.orElseThrow().annenPartAktørId()))
+            && harUbeskyttetAdresse(annenPart);
+        var annenPartsSak = visAnnenPart
+            ? annenPartsGjeldendeSak(søker, annenPart, barn, familiehendelse, søkersSak.isEmpty())
+            : Optional.<ForeldrepengerSak>empty();
 
         if (søkersSak.isEmpty() && annenPartsSak.isEmpty()) {
             LOG.info("Fant verken sak for søker eller annen part. Returnerer tom uttaksplan");
@@ -81,14 +113,18 @@ public class UttaksplanTjeneste {
             søknadsperioder = List.of();
         }
 
+        // Skjerm også annen parts perioder som allerede er lagret på søkerens sak.
+        if (!visAnnenPart) {
+            søknadsperioder = søknadsperioder.stream().filter(p -> p.uttak().forelder() == søkerRolle).toList();
+        }
         var søknadsutsettelser = søknadsperioder.stream()
             .filter(UttaksplanTjeneste::erUtsettelse)
             .toList();
 
         var søkerPerioder = vedtakEllerSøknadsuttak(søkersSak, søknadsperioder, søkerRolle);
-        var annenPartsPerioder = AnnenPartGraderingFilter.fjernArbeidsgivere(
-            vedtakEllerSøknadsuttak(annenPartsSak, søknadsperioder, annenPartsRolle));
-        var eøsPerioder = eøsPerioder(søkersSak);
+        var annenPartsPerioder = visAnnenPart ? AnnenPartGraderingFilter.fjernArbeidsgivere(
+            vedtakEllerSøknadsuttak(annenPartsSak, søknadsperioder, annenPartsRolle)) : List.<Planperiode>of();
+        var eøsPerioder = visAnnenPart ? eøsPerioder(søkersSak) : List.<UttakPeriodeAnnenpartEøs>of();
 
         // Metadata utledes fra søkerens sak når den finnes, ellers fra annen parts sak.
         var metadataSak = søkersSak.or(() -> annenPartsSak).orElseThrow();
@@ -96,10 +132,36 @@ public class UttaksplanTjeneste {
             søknadsutsettelser));
     }
 
-    private Optional<ForeldrepengerSak> annenPartsGjeldendeSak(AktørId søker, AktørId annenPart, AktørId barn, LocalDate familiehendelse) {
-        return annenPart == null
-            ? Optional.empty()
-            : annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
+    private boolean harUbeskyttetAdresse(AktørId annenPart) {
+        Fødselsnummer fnr;
+        try {
+            fnr = personOppslagSystem.fødselsnummer(annenPart);
+        } catch (NoSuchElementException e) {
+            // Identoppslaget bruker Optional.orElseThrow() når PDL ikke finner personen.
+            return false;
+        }
+        if (fnr == null) {
+            return false;
+        }
+        try {
+            var beskyttelse = personOppslagSystem.adresseBeskyttelse(fnr);
+            return beskyttelse != null && !beskyttelse.harBeskyttetAdresse();
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            return false;
+        }
+    }
+
+    private Optional<ForeldrepengerSak> annenPartsGjeldendeSak(AktørId søker, AktørId annenPart, AktørId barn,
+                                                              LocalDate familiehendelse, boolean kreverEntydigSak) {
+        if (kreverEntydigSak) {
+            var treff = foreldrepengesaker(annenPart).stream()
+                .filter(sak -> !sak.oppgittAleneomsorg())
+                .filter(sak -> søker.equals(sak.annenPartAktørId()))
+                .filter(sak -> gjelderSammeBarn(barn, familiehendelse, sak))
+                .toList();
+            return treff.size() == 1 ? Optional.of(treff.getFirst()) : Optional.empty();
+        }
+        return annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
     }
 
     private static FellesUttaksplanDto.Rolle søkerRolle(Optional<ForeldrepengerSak> søkersSak,
