@@ -3,18 +3,10 @@ package no.nav.foreldrepenger.oversikt.domene.fp;
 import java.time.LocalDate;
 import java.util.List;
 
-import no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriode;
 
 public final class VirkedagJusterer {
 
     private VirkedagJusterer() {
-    }
-
-    public static List<UttakPeriode> justerUttakPerioder(List<UttakPeriode> perioder) {
-        return perioder.stream()
-            .map(VirkedagJusterer::justerPeriode)
-            .filter(p -> !p.fom().isAfter(p.tom()))
-            .toList();
     }
 
     public static List<no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs> justerEøsPerioder(
@@ -39,13 +31,6 @@ public final class VirkedagJusterer {
             case SUNDAY -> dato.minusDays(2);
             default -> dato;
         };
-    }
-
-    private static UttakPeriode justerPeriode(UttakPeriode p) {
-        var fom = justerFom(p.fom());
-        var tom = justerTom(p.tom());
-        return new UttakPeriode(fom, tom, p.kontoType(), p.resultat(), p.utsettelseÅrsak(), p.oppholdÅrsak(),
-            p.overføringÅrsak(), p.gradering(), p.morsAktivitet(), p.samtidigUttak(), p.flerbarnsdager(), p.forelder());
     }
 
     private static no.nav.foreldrepenger.kontrakter.fpoversikt.UttakPeriodeAnnenpartEøs justerEøsPeriode(
