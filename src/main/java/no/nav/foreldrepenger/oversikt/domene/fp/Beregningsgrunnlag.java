@@ -40,14 +40,7 @@ public record Beregningsgrunnlag(LocalDate skjæringsTidspunkt, List<BeregningsA
     public no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag tilDto() {
         List<no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel> andeler =
             beregningsAndeler == null ? List.of() : beregningsAndeler.stream().map(this::mapAndel).toList();
-        List<no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningAktivitetStatus> statuser =
-            beregningAktivitetStatuser == null ? List.of() : beregningAktivitetStatuser.stream().map(this::mapStatusMedHjemmel).toList();
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag(skjæringsTidspunkt, andeler, statuser, grunnbeløp);
-    }
-
-    private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningAktivitetStatus mapStatusMedHjemmel(BeregningAktivitetStatus status) {
-        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningAktivitetStatus(status.aktivitetStatus.tilDto(),
-            status.hjemmel);
+        return new no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag(skjæringsTidspunkt, andeler, grunnbeløp);
     }
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.Beregningsgrunnlag.BeregningsAndel mapAndel(BeregningsAndel andel) {

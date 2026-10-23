@@ -35,7 +35,7 @@ public record TilkjentYtelse(List<TilkjentYtelsePeriode> utbetalingsperioder, Li
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.TilkjentYtelsePeriode.Andel mapAndel(TilkjentYtelsePeriode.Andel andel) {
         return new no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.TilkjentYtelsePeriode.Andel(
-            andel.aktivitetStatus().tilDto(), andel.arbeidsgiverIdent(), andel.arbeidsgivernavn(), andel.dagsats(), andel.tilBruker(), andel.utbetalingsgrad());
+            andel.aktivitetStatus().tilDto(), andel.arbeidsgiverIdent(), andel.dagsats(), andel.tilBruker(), andel.utbetalingsgrad());
     }
 
     private no.nav.foreldrepenger.kontrakter.fpoversikt.TilkjentYtelse.FeriepengeAndel mapFeriepengeAndel(FeriepengeAndel andel) {

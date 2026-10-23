@@ -78,7 +78,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     }
 
     private Optional<Person> mapPerson(PersonOppslagSystem personOppslagSystem, AktørId aktørId) {
-        return personOppslagSystem.fødselsnummerSjekkBeskyttelse(aktørId).map(fnr -> new Person(fnr, null));
+        return personOppslagSystem.fødselsnummerSjekkBeskyttelse(aktørId).map(fnr -> new Person(fnr));
     }
 
     @Override

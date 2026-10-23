@@ -74,7 +74,6 @@ class DtoMapperTest {
         assertThat(tl2.arbeidstidprosent().value()).isEqualTo(arbeidstidprosent.decimalValue());
         assertThat(tl2.type()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.svp.TilretteleggingType.DELVIS);
         assertThat(arbeidsforhold.oppholdsperioder()).hasSize(1);
-        assertThat(arbeidsforhold.oppholdsperioder().stream().toList().get(0).oppholdKilde()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
 
         assertThat(dto.åpenBehandling().søknad().arbeidsforhold()).hasSize(1);
         var arbeidsforholdSøknad = dto.åpenBehandling().søknad().arbeidsforhold().stream().findFirst().orElseThrow();

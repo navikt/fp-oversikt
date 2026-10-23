@@ -358,7 +358,7 @@ class TidslinjeTjenesteTest {
 
         public static FpOversiktInntektsmeldingDto standardInntektsmelding(LocalDateTime opprettet) {
             return new FpOversiktInntektsmeldingDto(
-                    1, true, null, null, null, null, null,  null, opprettet, null, Collections.emptyList(), Collections.emptyList()
+                    1, true, null, null, null, null, null,  null, opprettet, Collections.emptyList(), Collections.emptyList()
             );
         }
     }

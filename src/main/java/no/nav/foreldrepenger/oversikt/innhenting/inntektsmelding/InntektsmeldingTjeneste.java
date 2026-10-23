@@ -45,13 +45,13 @@ public class InntektsmeldingTjeneste {
                 .toList();
             return new FpOversiktInntektsmeldingDto(2, inntektsmeldingV2.erAktiv(), inntektsmeldingV2.stillingsprosent(),
                 inntektsmeldingV2.inntektPrMnd(), inntektsmeldingV2.refusjonPrMnd(), inntektsmeldingV2.arbeidsgiverNavn(),
-                inntektsmeldingV2.arbeidsgiverIdent(), inntektsmeldingV2.journalpostId(), inntektsmeldingV2.mottattTidspunkt(), inntektsmeldingV2.startDatoPermisjon(), naturalytelser,
+                inntektsmeldingV2.arbeidsgiverIdent(), inntektsmeldingV2.journalpostId(), inntektsmeldingV2.mottattTidspunkt(), naturalytelser,
                 refusjon);
         }
         if (inntektsmelding instanceof InntektsmeldingV1 inntektsmeldingV1) {
             var mottatTidspunkt =
                 inntektsmeldingV1.mottattTidspunkt() == null ? inntektsmeldingV1.innsendingstidspunkt() : inntektsmeldingV1.mottattTidspunkt();
-            return new FpOversiktInntektsmeldingDto(1, false, null, null, null, null, null, null, mottatTidspunkt, null, Collections.emptyList(),
+            return new FpOversiktInntektsmeldingDto(1, false, null, null, null, null, null, null, mottatTidspunkt, Collections.emptyList(),
                 Collections.emptyList());
         }
 
