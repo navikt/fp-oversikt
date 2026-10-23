@@ -69,7 +69,13 @@ final class DtoMapper {
 
 
     private static no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Tilrettelegging tilDto(SvpPeriode periode) {
-        var resultat = new PeriodeResultat(new PeriodeResultat.Utbetalingsgrad(periode.utbetalingsgrad().decimalValue()));
+        var resultatType = switch (periode.resultatÅrsak()) {
+            case INNVILGET -> PeriodeResultat.ResultatType.INNVILGET;
+            case AVSLAG_SØKNADSFRIST -> PeriodeResultat.ResultatType.AVSLAG_SØKNADSFRIST;
+            case AVSLAG_ANNET -> PeriodeResultat.ResultatType.AVSLAG_ANNET;
+            default -> throw new IllegalStateException("Unexpected value: " + periode.resultatÅrsak());
+        };
+        var resultat = new PeriodeResultat(resultatType, new PeriodeResultat.Utbetalingsgrad(periode.utbetalingsgrad().decimalValue()));
         var tilretteleggingType = switch (periode.tilretteleggingType()) {
             case HEL -> TilretteleggingType.HEL;
             case DELVIS -> TilretteleggingType.DELVIS;
@@ -121,6 +127,11 @@ final class DtoMapper {
             switch (opphold.årsak()) {
             case FERIE -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdÅrsak.FERIE;
             case SYKEPENGER -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdÅrsak.SYKEPENGER;
+            },
+            switch (opphold.kilde()) {
+            case SAKSBEHANDLER -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdKilde.SAKSBEHANDLER;
+            case INNTEKTSMELDING -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdKilde.INNTEKTSMELDING;
+            case SØKNAD -> no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode.OppholdKilde.SØKNAD;
             });
     }
 

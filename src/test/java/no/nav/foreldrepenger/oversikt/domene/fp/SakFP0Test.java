@@ -215,8 +215,8 @@ class SakFP0Test {
             rettigheter(), false, LocalDateTime.now());
 
         var dto = sak.tilSakDto(annenpartUbeskyttetAdresse());
-        assertThat(dto.barn()).containsExactlyInAnyOrder(new Person(new Fødselsnummer(barn1AktørId.value())),
-            new Person(new Fødselsnummer(barn2AktørId.value())));
+        assertThat(dto.barn()).containsExactlyInAnyOrder(new Person(new Fødselsnummer(barn1AktørId.value()), null),
+            new Person(new Fødselsnummer(barn2AktørId.value()), null));
     }
 
     @Test

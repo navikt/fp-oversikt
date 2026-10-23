@@ -27,6 +27,7 @@ import no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.Person;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.RettighetType;
+import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.OppholdPeriode;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.svp.Vedtak;
 import no.nav.foreldrepenger.oversikt.arkiv.SafSelvbetjeningTjeneste;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
@@ -100,7 +101,7 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.dekningsgrad()).isEqualTo(DekningsgradSak.HUNDRE);
         assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak()).isNotNull();
         assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());
-        assertThat(sakFraDbOmgjortTilDto.barn()).containsExactly(new Person(new Fødselsnummer(aktørIdBarn.value())));
+        assertThat(sakFraDbOmgjortTilDto.barn()).containsExactly(new Person(new Fødselsnummer(aktørIdBarn.value()), null));
         assertThat(sakFraDbOmgjortTilDto.kanSøkeOmEndring()).isTrue();
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().antallBarn()).isEqualTo(familieHendelse.antallBarn());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
@@ -157,7 +158,8 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().fødselsdato()).isEqualTo(familieHendelse.fødselsdato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().termindato()).isEqualTo(familieHendelse.termindato());
         assertThat(sakFraDbOmgjortTilDto.familiehendelse().omsorgsovertakelse()).isEqualTo(familieHendelse.omsorgsovertakelse());
-        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().arbeidsforhold().stream().toList().getFirst().oppholdsperioder()).hasSize(1);
+        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak().arbeidsforhold().stream().toList().getFirst().oppholdsperioder().stream().toList().getFirst().oppholdKilde()).isEqualTo(
+            OppholdPeriode.OppholdKilde.SAKSBEHANDLER);
 
         assertThat(sakFraDbOmgjortTilDto.åpenBehandling().tilstand()).isEqualTo(BehandlingTilstand.VENT_TIDLIG_SØKNAD);
 

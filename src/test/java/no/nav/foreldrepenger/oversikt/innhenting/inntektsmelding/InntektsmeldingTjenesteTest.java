@@ -55,6 +55,7 @@ public class InntektsmeldingTjenesteTest {
         assertThat(hentetIM.arbeidsgiverIdent()).isEqualTo(fraFpsak.arbeidsgiverIdent());
         assertThat(hentetIM.journalpostId()).isEqualTo(fraFpsak.journalpostId());
         assertThat(hentetIM.mottattTidspunkt()).isEqualTo(fraFpsak.mottattTidspunkt());
+        assertThat(hentetIM.startDatoPermisjon()).isEqualTo(fraFpsak.startDatoPermisjon());
 
         assertThat(hentetIM.bortfalteNaturalytelser()).hasSize(2);
         assertThat(hentetIM.bortfalteNaturalytelser().get(0).fomDato()).isEqualTo(bortfalteNaturalytelse1.fomDato());
