@@ -124,7 +124,8 @@ public class UttaksplanTjeneste {
         var søkerPerioder = vedtakEllerSøknadsuttak(søkersSak, søknadsperioder, søkerRolle);
         var annenPartsPerioder = visAnnenPart ? AnnenPartGraderingFilter.fjernArbeidsgivere(
             vedtakEllerSøknadsuttak(annenPartsSak, søknadsperioder, annenPartsRolle)) : List.<Planperiode>of();
-        var eøsPerioder = visAnnenPart ? eøsPerioder(søkersSak) : List.<UttakPeriodeAnnenpartEøs>of();
+        // EØS-perioder kommer fra søkerens eget vedtak og skjermes ikke sammen med annen parts perioder.
+        var eøsPerioder = eøsPerioder(søkersSak);
 
         // Metadata utledes fra søkerens sak når den finnes, ellers fra annen parts sak.
         var metadataSak = søkersSak.or(() -> annenPartsSak).orElseThrow();
