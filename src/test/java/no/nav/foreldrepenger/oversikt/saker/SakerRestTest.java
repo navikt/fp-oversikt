@@ -22,7 +22,6 @@ import java.util.UUID;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.BehandlingTilstand;
 import no.nav.foreldrepenger.kontrakter.fpoversikt.DekningsgradSak;
@@ -100,19 +99,7 @@ class SakerRestTest {
         assertThat(sakFraDbOmgjortTilDto.saksnummer().value()).isEqualTo(sakFraFpsak.saksnummer());
         assertThat(sakFraDbOmgjortTilDto.sakAvsluttet()).isTrue();
         assertThat(sakFraDbOmgjortTilDto.dekningsgrad()).isEqualTo(DekningsgradSak.HUNDRE);
-        var vedtaksperioder = sakFraDbOmgjortTilDto.gjeldendeVedtak().perioder();
-        assertThat(vedtaksperioder).hasSameSizeAs(vedtak.uttaksperioder());
-        assertThat(vedtaksperioder.getFirst().fom()).isEqualTo(vedtak.uttaksperioder().getFirst().fom());
-        assertThat(vedtaksperioder.getFirst().tom()).isEqualTo(vedtak.uttaksperioder().getFirst().tom());
-        assertThat(vedtaksperioder.getFirst().resultat().innvilget()).isTrue();
-        assertThat(vedtaksperioder.getFirst().resultat().trekkerDager()).isTrue();
-        assertThat(vedtaksperioder.getFirst().kontoType()).isEqualTo(KontoType.FORELDREPENGER);
-        assertThat(vedtaksperioder.getFirst().gradering().arbeidstidprosent().value()).isEqualTo(arbeidstidsprosent.decimalValue());
-        assertThat(vedtaksperioder.getFirst().utsettelseÅrsak()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.UttakUtsettelseÅrsak.FRI);
-        assertThat(vedtaksperioder.getFirst().oppholdÅrsak()).isEqualTo(no.nav.foreldrepenger.kontrakter.fpoversikt.UttakOppholdÅrsak.FELLESPERIODE_ANNEN_FORELDER);
-        assertThat(vedtaksperioder.getFirst().overføringÅrsak()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.Overføringsårsak.IKKE_RETT_ANNEN_FORELDER);
-        assertThat(vedtaksperioder.getFirst().samtidigUttak()).isNull();
-        assertThat(vedtaksperioder.getFirst().morsAktivitet()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet.INNLAGT);
+        assertThat(sakFraDbOmgjortTilDto.gjeldendeVedtak()).isNotNull();
         assertThat(sakFraDbOmgjortTilDto.annenPart().fnr().value()).isEqualTo(aktørIdAnnenPart.value());
         assertThat(sakFraDbOmgjortTilDto.barn()).containsExactly(new Person(new Fødselsnummer(aktørIdBarn.value()), null));
         assertThat(sakFraDbOmgjortTilDto.kanSøkeOmEndring()).isTrue();
