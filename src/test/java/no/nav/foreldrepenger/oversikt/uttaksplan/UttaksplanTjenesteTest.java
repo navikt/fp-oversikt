@@ -49,11 +49,11 @@ import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.saker.Saker;
-import no.nav.foreldrepenger.oversikt.søknad.Søknad;
-import no.nav.foreldrepenger.oversikt.søknad.SøknadPeriode;
-import no.nav.foreldrepenger.oversikt.søknad.SøknadRepository;
+import no.nav.foreldrepenger.oversikt.søknadsuttaksplan.Søknadsuttaksplan;
+import no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriode;
+import no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanRepository;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
-import no.nav.foreldrepenger.oversikt.stub.SøknadRepositoryStub;
+import no.nav.foreldrepenger.oversikt.stub.SøknadsuttaksplanRepositoryStub;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 
@@ -132,7 +132,7 @@ class UttaksplanTjenesteTest {
         var tredjePart = AktørId.dummy();
         var barn = AktørId.dummy();
         var termindato = LocalDate.of(2026, 10, 1);
-        var søknadRepository = new SøknadRepositoryStub();
+        var søknadRepository = new SøknadsuttaksplanRepositoryStub();
         var tjeneste = tjeneste(søker, søknadRepository);
         var ukjentSak = tjeneste.hentFor(søker, annenPart, barn, termindato);
 
@@ -210,13 +210,13 @@ class UttaksplanTjenesteTest {
         var annenSak = sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(termindato.plusWeeks(10), termindato.plusWeeks(12), Konto.FEDREKVOTE));
         lagre(egenSak, annenSak);
-        var søknadRepository = new SøknadRepositoryStub();
-        var egenNyPeriode = nyPeriode(Søknad.Rolle.MOR, termindato.plusWeeks(2), termindato.plusWeeks(3),
-            SøknadPeriode.KontoType.MØDREKVOTE, null, null, null);
-        søknadRepository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR, List.of(egenNyPeriode)));
-        søknadRepository.lagre(annenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
-            List.of(nyPeriode(Søknad.Rolle.FAR_MEDMOR, termindato.plusWeeks(14), termindato.plusWeeks(15),
-                SøknadPeriode.KontoType.FEDREKVOTE, null, null, null))));
+        var søknadRepository = new SøknadsuttaksplanRepositoryStub();
+        var egenNyPeriode = nyPeriode(Søknadsuttaksplan.Rolle.MOR, termindato.plusWeeks(2), termindato.plusWeeks(3),
+            SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null);
+        søknadRepository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR, List.of(egenNyPeriode)));
+        søknadRepository.lagre(annenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
+            List.of(nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, termindato.plusWeeks(14), termindato.plusWeeks(15),
+                SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
 
         var plan = tjeneste(søker, søknadRepository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
 
@@ -242,16 +242,16 @@ class UttaksplanTjenesteTest {
         var annenPart = AktørId.dummy();
         var barn = AktørId.dummy();
         var termindato = LocalDate.of(2026, 10, 1);
-        var egenRolle = rolle == BrukerRolle.MOR ? Søknad.Rolle.MOR : Søknad.Rolle.FAR_MEDMOR;
-        var annenRolle = rolle == BrukerRolle.MOR ? Søknad.Rolle.FAR_MEDMOR : Søknad.Rolle.MOR;
-        var egenKonto = rolle == BrukerRolle.MOR ? SøknadPeriode.KontoType.MØDREKVOTE : SøknadPeriode.KontoType.FEDREKVOTE;
-        var annenKonto = rolle == BrukerRolle.MOR ? SøknadPeriode.KontoType.FEDREKVOTE : SøknadPeriode.KontoType.MØDREKVOTE;
+        var egenRolle = rolle == BrukerRolle.MOR ? Søknadsuttaksplan.Rolle.MOR : Søknadsuttaksplan.Rolle.FAR_MEDMOR;
+        var annenRolle = rolle == BrukerRolle.MOR ? Søknadsuttaksplan.Rolle.FAR_MEDMOR : Søknadsuttaksplan.Rolle.MOR;
+        var egenKonto = rolle == BrukerRolle.MOR ? SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE : SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE;
+        var annenKonto = rolle == BrukerRolle.MOR ? SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE : SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE;
         var egenPeriode = rolle == BrukerRolle.MOR ? Konto.MØDREKVOTE : Konto.FEDREKVOTE;
         var egenSak = sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, rolle,
             søknadsperiode(termindato, termindato.plusDays(4), egenPeriode));
         lagre(egenSak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
             egenRolle, List.of(
                 nyPeriode(egenRolle, termindato.plusWeeks(2), termindato.plusWeeks(2).plusDays(4), egenKonto, null, null, null),
                 nyPeriode(annenRolle, termindato.plusWeeks(4), termindato.plusWeeks(4).plusDays(4), annenKonto, null, null, null))));
@@ -280,10 +280,10 @@ class UttaksplanTjenesteTest {
         var annenSak = sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(termindato.plusWeeks(8), termindato.plusWeeks(8).plusDays(4), Konto.FEDREKVOTE));
         lagre(egenSak, annenSak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(annenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
-            List.of(nyPeriode(Søknad.Rolle.FAR_MEDMOR, termindato.plusWeeks(10), termindato.plusWeeks(11),
-                SøknadPeriode.KontoType.FEDREKVOTE, null, null, null))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(annenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
+            List.of(nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, termindato.plusWeeks(10), termindato.plusWeeks(11),
+                SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
 
@@ -302,11 +302,11 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(søker, null, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             søknadsperiode(legacyFom, legacyFom.plusDays(4), Konto.MØDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        var filtrertOverlappMedOpphold = new SøknadPeriode(LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 10), Søknad.Rolle.MOR, null,
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        var filtrertOverlappMedOpphold = new SøknadsuttaksplanPeriode(LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 10), Søknadsuttaksplan.Rolle.MOR, null,
             null, null, null, null, null, false, null, null, null);
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.MOR, List.of(filtrertOverlappMedOpphold)));
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.MOR, List.of(filtrertOverlappMedOpphold)));
 
         var plan = tjeneste(søker, repository).hentFor(søker, null, barn, termindato).orElseThrow();
 
@@ -326,7 +326,7 @@ class UttaksplanTjenesteTest {
         var vedtak = new FpVedtak(LocalDateTime.now(), List.of(vedtaksperiode), Dekningsgrad.HUNDRE, null, null, null);
         var sak = sak(søker, null, barn, mandag, 1, BrukerRolle.MOR, Set.of(vedtak), Set.of(søknad));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
+        var repository = new SøknadsuttaksplanRepositoryStub();
 
         var plan = tjeneste(søker, repository).hentFor(søker, null, barn, mandag).orElseThrow();
 
@@ -430,9 +430,9 @@ class UttaksplanTjenesteTest {
         var vedtaksutsettelse = vedtaksUtsettelse(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4));
         var sak = sakMedVedtak(søker, null, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR, vedtaksutsettelse);
         lagre(sak);
-        var søknadRepository = new SøknadRepositoryStub();
-        søknadRepository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR,
-            List.of(utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
+        var søknadRepository = new SøknadsuttaksplanRepositoryStub();
+        søknadRepository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR,
+            List.of(utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
 
         var plan = tjeneste(søker, søknadRepository).hentFor(søker, null, barn, mandag).orElseThrow();
 
@@ -454,9 +454,9 @@ class UttaksplanTjenesteTest {
         var tomLegacy = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), Set.of(), Dekningsgrad.HUNDRE, false);
         var sak = sak(søker, annenPart, barn, mandag, 1, BrukerRolle.MOR, Set.of(vedtak), Set.of(tomLegacy));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR,
-            List.of(utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR,
+            List.of(utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -475,7 +475,7 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(termindato.plusWeeks(2), termindato.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
+        var repository = new SøknadsuttaksplanRepositoryStub();
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
 
@@ -492,7 +492,7 @@ class UttaksplanTjenesteTest {
             legacyUtsettelse(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4))), Dekningsgrad.HUNDRE, false);
         var sak = sak(søker, null, barn, mandag, 1, BrukerRolle.MOR, Set.of(), Set.of(søknad));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
+        var repository = new SøknadsuttaksplanRepositoryStub();
 
         var plan = tjeneste(søker, repository).hentFor(søker, null, barn, mandag).orElseThrow();
 
@@ -516,12 +516,12 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(termindato, termindato.plusDays(4), Konto.FEDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        var aktiv = new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
-            List.of(nyPeriode(Søknad.Rolle.MOR, termindato.plusWeeks(2), termindato.plusWeeks(2).plusDays(4),
-                SøknadPeriode.KontoType.MØDREKVOTE, new java.math.BigDecimal("40"), SøknadPeriode.AktivitetType.ORDINÆRT_ARBEID, "org-1"),
-                nyPeriode(Søknad.Rolle.FAR_MEDMOR, termindato.plusWeeks(3), termindato.plusWeeks(3).plusDays(4),
-                    SøknadPeriode.KontoType.FEDREKVOTE, null, null, null)));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        var aktiv = new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
+            List.of(nyPeriode(Søknadsuttaksplan.Rolle.MOR, termindato.plusWeeks(2), termindato.plusWeeks(2).plusDays(4),
+                SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, new java.math.BigDecimal("40"), SøknadsuttaksplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "org-1"),
+                nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, termindato.plusWeeks(3), termindato.plusWeeks(3).plusDays(4),
+                    SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null)));
         repository.lagre(sak.saksnummer(), aktiv);
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
@@ -545,12 +545,12 @@ class UttaksplanTjenesteTest {
         var annenPartsVedtak = uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE);
         var sak = sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, annenPartsVedtak);
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.FAR_MEDMOR, List.of(
-                nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.FEDREKVOTE, null, null, null),
-                nyPeriode(Søknad.Rolle.MOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4),
-                    SøknadPeriode.KontoType.MØDREKVOTE, null, null, null))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.FAR_MEDMOR, List.of(
+                nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null),
+                nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4),
+                    SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -575,10 +575,10 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.UKJENT,
             søknadsperiode(termindato, termindato.plusDays(4), Konto.FEDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.FAR_MEDMOR, List.of(nyPeriode(Søknad.Rolle.MOR, termindato, termindato.plusDays(4),
-                SøknadPeriode.KontoType.MØDREKVOTE, null, null, null))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.FAR_MEDMOR, List.of(nyPeriode(Søknadsuttaksplan.Rolle.MOR, termindato, termindato.plusDays(4),
+                SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
 
         assertThatThrownBy(() -> tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato))
             .isInstanceOf(IllegalStateException.class)
@@ -599,13 +599,13 @@ class UttaksplanTjenesteTest {
             Prosent.ZERO, false, null, resultat);
         var sak = sakMedVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, vedtaksperiode);
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.MOR, List.of(
-                nyPeriode(Søknad.Rolle.MOR, termindato, termindato.plusDays(4), SøknadPeriode.KontoType.MØDREKVOTE,
-                    new java.math.BigDecimal("50"), SøknadPeriode.AktivitetType.ORDINÆRT_ARBEID, "other-org"),
-                nyPeriode(Søknad.Rolle.FAR_MEDMOR, termindato.plusWeeks(1), termindato.plusWeeks(1).plusDays(4),
-                    SøknadPeriode.KontoType.FEDREKVOTE, null, null, null))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.MOR, List.of(
+                nyPeriode(Søknadsuttaksplan.Rolle.MOR, termindato, termindato.plusDays(4), SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE,
+                    new java.math.BigDecimal("50"), SøknadsuttaksplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "other-org"),
+                nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, termindato.plusWeeks(1), termindato.plusWeeks(1).plusDays(4),
+                    SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
 
@@ -625,12 +625,12 @@ class UttaksplanTjenesteTest {
         var sak = sakMedVedtak(søker, null, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.MØDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.MOR, List.of(
-                nyPeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.MØDREKVOTE, null, null, null),
-                nyPeriode(Søknad.Rolle.MOR, mandag.plusDays(2), mandag.plusDays(6), SøknadPeriode.KontoType.FELLESPERIODE, null, null, null),
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusDays(8), mandag.plusDays(12)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.MOR, List.of(
+                nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null),
+                nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusDays(2), mandag.plusDays(6), SøknadsuttaksplanPeriode.KontoType.FELLESPERIODE, null, null, null),
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusDays(8), mandag.plusDays(12)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, null, barn, mandag).orElseThrow();
 
@@ -651,11 +651,11 @@ class UttaksplanTjenesteTest {
         var annenSak = sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             uttaksperiode(mandag.plusDays(10), mandag.plusDays(12), Konto.FEDREKVOTE));
         lagre(egenSak, annenSak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.MOR, List.of(
-                nyPeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.MØDREKVOTE, null, null, null),
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusDays(2), mandag.plusDays(14)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.MOR, List.of(
+                nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null),
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusDays(2), mandag.plusDays(14)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -673,10 +673,10 @@ class UttaksplanTjenesteTest {
         var sak = sakMedVedtak(søker, null, barn, lørdag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             uttaksperiode(lørdag, lørdag, Konto.MØDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.MOR, List.of(nyPeriode(Søknad.Rolle.MOR, lørdag.plusWeeks(2), lørdag.plusWeeks(2).plusDays(4),
-                SøknadPeriode.KontoType.MØDREKVOTE, null, null, null))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.MOR, List.of(nyPeriode(Søknadsuttaksplan.Rolle.MOR, lørdag.plusWeeks(2), lørdag.plusWeeks(2).plusDays(4),
+                SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, null, barn, lørdag).orElseThrow();
 
@@ -694,9 +694,9 @@ class UttaksplanTjenesteTest {
         var annenSak = sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             uttaksperiode(mandag.plusDays(8), mandag.plusDays(9), Konto.FEDREKVOTE));
         lagre(egenSak, annenSak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR,
-            List.of(utsettelsePeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(11)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR,
+            List.of(utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(11)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -743,22 +743,22 @@ class UttaksplanTjenesteTest {
         var repository = new RepositoryStub();
         repository.lagre(egenSak);
         repository.lagre(annenSak);
-        var søknadRepository = new SøknadRepositoryStub();
-        var perioder = new java.util.ArrayList<SøknadPeriode>();
-        perioder.add(nyPeriode(Søknad.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4),
-            SøknadPeriode.KontoType.MØDREKVOTE, null, null, null));
-        perioder.add(nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4),
-            SøknadPeriode.KontoType.FEDREKVOTE, null, null, null));
+        var søknadRepository = new SøknadsuttaksplanRepositoryStub();
+        var perioder = new java.util.ArrayList<SøknadsuttaksplanPeriode>();
+        perioder.add(nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4),
+            SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null));
+        perioder.add(nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4),
+            SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null));
         if (medUtsettelser) {
             perioder.addAll(List.of(
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(2).plusDays(2), mandag.plusWeeks(3).plusDays(1)),
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(4).plusDays(2), mandag.plusWeeks(5).plusDays(1)),
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(6).plusDays(1), mandag.plusWeeks(6).plusDays(3)),
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(7), mandag.plusWeeks(7).plusDays(4)),
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(10).plusDays(2), mandag.plusWeeks(11).plusDays(1)),
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(12).plusDays(2), mandag.plusWeeks(13).plusDays(1))));
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(2).plusDays(2), mandag.plusWeeks(3).plusDays(1)),
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(4).plusDays(2), mandag.plusWeeks(5).plusDays(1)),
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(6).plusDays(1), mandag.plusWeeks(6).plusDays(3)),
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(7), mandag.plusWeeks(7).plusDays(4)),
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(10).plusDays(2), mandag.plusWeeks(11).plusDays(1)),
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(12).plusDays(2), mandag.plusWeeks(13).plusDays(1))));
         }
-        søknadRepository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR, perioder));
+        søknadRepository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR, perioder));
 
         return tjeneste(søker, søknadRepository, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
     }
@@ -787,12 +787,12 @@ class UttaksplanTjenesteTest {
         var morsSak = sakUtenVedtak(mor, far, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             søknadsperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE));
         lagre(egenSak, morsSak);
-        var egenPeriode = nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4),
-            SøknadPeriode.KontoType.FEDREKVOTE, new java.math.BigDecimal("25"), SøknadPeriode.AktivitetType.ORDINÆRT_ARBEID, "far-org");
-        var morsPeriode = nyPeriode(Søknad.Rolle.MOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4),
-            SøknadPeriode.KontoType.MØDREKVOTE, new java.math.BigDecimal("50"), SøknadPeriode.AktivitetType.ORDINÆRT_ARBEID, "mor-org");
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
+        var egenPeriode = nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4),
+            SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, new java.math.BigDecimal("25"), SøknadsuttaksplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "far-org");
+        var morsPeriode = nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4),
+            SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, new java.math.BigDecimal("50"), SøknadsuttaksplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "mor-org");
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
             List.of(egenPeriode, morsPeriode)));
 
         var plan = tjeneste(far, repository).hentFor(far, mor, barn, mandag).orElseThrow();
@@ -819,15 +819,15 @@ class UttaksplanTjenesteTest {
         var annenPartsSak = sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(termindato.plusWeeks(7), termindato.plusWeeks(7).plusDays(4), Konto.FEDREKVOTE));
         lagre(egenSak, annenPartsSak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(annenPartsSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
-            List.of(nyPeriode(Søknad.Rolle.FAR_MEDMOR, termindato.plusWeeks(9), termindato.plusWeeks(10),
-                SøknadPeriode.KontoType.FEDREKVOTE, null, null, null))));
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.FAR_MEDMOR, List.of(
-                nyPeriode(Søknad.Rolle.FAR_MEDMOR, termindato, termindato.plusDays(4), SøknadPeriode.KontoType.FEDREKVOTE, null, null, null),
-                nyPeriode(Søknad.Rolle.MOR, termindato.plusWeeks(2), termindato.plusWeeks(2).plusDays(4),
-                    SøknadPeriode.KontoType.MØDREKVOTE, null, null, null))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(annenPartsSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
+            List.of(nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, termindato.plusWeeks(9), termindato.plusWeeks(10),
+                SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.FAR_MEDMOR, List.of(
+                nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, termindato, termindato.plusDays(4), SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null),
+                nyPeriode(Søknadsuttaksplan.Rolle.MOR, termindato.plusWeeks(2), termindato.plusWeeks(2).plusDays(4),
+                    SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
 
@@ -846,10 +846,10 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(søker, null, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             søknadsperiode(termindato, termindato.plusDays(4), Konto.MØDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.FAR_MEDMOR, List.of(nyPeriode(Søknad.Rolle.FAR_MEDMOR, termindato, termindato.plusDays(4),
-                SøknadPeriode.KontoType.FEDREKVOTE, null, null, null))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.FAR_MEDMOR, List.of(nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, termindato, termindato.plusDays(4),
+                SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, null, barn, termindato).orElseThrow();
 
@@ -877,9 +877,9 @@ class UttaksplanTjenesteTest {
         var sak = sakMedVedtak(søker, null, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             uttaksperiode(mandag.plusDays(2), mandag.plusDays(3), Konto.MØDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR,
-            List.of(utsettelsePeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(6)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR,
+            List.of(utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(6)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, null, barn, mandag).orElseThrow();
 
@@ -907,14 +907,14 @@ class UttaksplanTjenesteTest {
         var sakMedEøs = new SakFP0(egenSak.saksnummer(), søker, false, Set.of(vedtak), annenPart, egenSak.familieHendelse(), Set.of(),
             egenSak.søknader(), BrukerRolle.MOR, egenSak.fødteBarn(), new Rettigheter(false, false, false), false, LocalDateTime.now());
         lagre(sakMedEøs, annenSak);
-        var repository = new SøknadRepositoryStub();
+        var repository = new SøknadsuttaksplanRepositoryStub();
         var utsettelseFom = mandag;
         var utsettelseTom = mandag.plusDays(4);
-        repository.lagre(annenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
-            List.of(nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusWeeks(8), mandag.plusWeeks(9),
-                SøknadPeriode.KontoType.FEDREKVOTE, null, null, null))));
-        repository.lagre(sakMedEøs.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.MOR, List.of(utsettelsePeriode(Søknad.Rolle.MOR, utsettelseFom, utsettelseTom))));
+        repository.lagre(annenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
+            List.of(nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(8), mandag.plusWeeks(9),
+                SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
+        repository.lagre(sakMedEøs.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.MOR, List.of(utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, utsettelseFom, utsettelseTom))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -950,12 +950,12 @@ class UttaksplanTjenesteTest {
         var annenSak = sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             uttaksperiode(mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4), Konto.FEDREKVOTE));
         lagre(egenSak, annenSak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR, List.of(
-            nyPeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.MØDREKVOTE, null, null, null),
-            nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusWeeks(6), mandag.plusWeeks(6).plusDays(4),
-                SøknadPeriode.KontoType.FEDREKVOTE, null, null, null),
-            utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR, List.of(
+            nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null),
+            nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(6), mandag.plusWeeks(6).plusDays(4),
+                SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null),
+            utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -983,9 +983,9 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(mandag, mandag.plusDays(4), Konto.FEDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
-            List.of(utsettelsePeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
+            List.of(utsettelsePeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -1008,11 +1008,11 @@ class UttaksplanTjenesteTest {
         var annenSak = sakUtenVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE));
         lagre(egenSak, annenSak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR,
-            List.of(nyPeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.MØDREKVOTE, null, null, null))));
-        repository.lagre(annenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
-            List.of(utsettelsePeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR,
+            List.of(nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
+        repository.lagre(annenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
+            List.of(utsettelsePeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -1029,11 +1029,11 @@ class UttaksplanTjenesteTest {
         var egenSak = sakUtenVedtak(søker, annenPart, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(mandag, mandag.plusDays(4), Konto.FEDREKVOTE));
         lagre(egenSak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.FAR_MEDMOR,
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.FAR_MEDMOR,
             List.of(
-                nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.FEDREKVOTE, null, null, null),
-                utsettelsePeriode(Søknad.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
+                nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null),
+                utsettelsePeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
 
         var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
 
@@ -1069,11 +1069,11 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(søker, null, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             søknadsperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.MOR, List.of(
-                nyPeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.MØDREKVOTE, null, null, null),
-                nyPeriode(Søknad.Rolle.MOR, mandag.plusDays(2), mandag.plusDays(6), SøknadPeriode.KontoType.FELLESPERIODE, null, null, null))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.MOR, List.of(
+                nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null),
+                nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusDays(2), mandag.plusDays(6), SøknadsuttaksplanPeriode.KontoType.FELLESPERIODE, null, null, null))));
 
         assertThatThrownBy(() -> tjeneste(søker, repository).hentFor(søker, null, barn, mandag))
             .isInstanceOf(IllegalArgumentException.class)
@@ -1088,12 +1088,12 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(søker, null, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             søknadsperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE));
         lagre(sak);
-        var først = nyPeriode(Søknad.Rolle.MOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4),
-            SøknadPeriode.KontoType.FELLESPERIODE, null, null, null);
-        var sist = nyPeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.MØDREKVOTE, null, null, null);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"),
-            Søknad.Rolle.MOR, List.of(først, sist)));
+        var først = nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4),
+            SøknadsuttaksplanPeriode.KontoType.FELLESPERIODE, null, null, null);
+        var sist = nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null);
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"),
+            Søknadsuttaksplan.Rolle.MOR, List.of(først, sist)));
 
         var plan = tjeneste(søker, repository).hentFor(søker, null, barn, mandag).orElseThrow();
 
@@ -1107,17 +1107,17 @@ class UttaksplanTjenesteTest {
         var annenPart = AktørId.dummy();
         var barn = AktørId.dummy();
         var mandag = LocalDate.of(2026, 10, 5);
-        var egenRolle = rolle == BrukerRolle.MOR ? Søknad.Rolle.MOR : Søknad.Rolle.FAR_MEDMOR;
-        var annenRolle = rolle == BrukerRolle.MOR ? Søknad.Rolle.FAR_MEDMOR : Søknad.Rolle.MOR;
+        var egenRolle = rolle == BrukerRolle.MOR ? Søknadsuttaksplan.Rolle.MOR : Søknadsuttaksplan.Rolle.FAR_MEDMOR;
+        var annenRolle = rolle == BrukerRolle.MOR ? Søknadsuttaksplan.Rolle.FAR_MEDMOR : Søknadsuttaksplan.Rolle.MOR;
         var sak = sakUtenVedtak(søker, annenPart, barn, mandag, 1, Dekningsgrad.HUNDRE, rolle,
             søknadsperiode(mandag, mandag.plusDays(4), Konto.FELLESPERIODE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), egenRolle, List.of(
-            nyPeriode(egenRolle, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.FELLESPERIODE,
-                new java.math.BigDecimal("40"), SøknadPeriode.AktivitetType.ORDINÆRT_ARBEID, "egen-org"),
-            nyPeriode(annenRolle, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), SøknadPeriode.KontoType.FELLESPERIODE,
-                new java.math.BigDecimal("50"), SøknadPeriode.AktivitetType.ORDINÆRT_ARBEID, "annen-org"),
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), egenRolle, List.of(
+            nyPeriode(egenRolle, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.FELLESPERIODE,
+                new java.math.BigDecimal("40"), SøknadsuttaksplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "egen-org"),
+            nyPeriode(annenRolle, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), SøknadsuttaksplanPeriode.KontoType.FELLESPERIODE,
+                new java.math.BigDecimal("50"), SøknadsuttaksplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "annen-org"),
             utsettelsePeriode(egenRolle, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4)),
             utsettelsePeriode(annenRolle, mandag.plusWeeks(6), mandag.plusWeeks(6).plusDays(4)))));
         var personOppslag = spy(annenpartUbeskyttetAdresse());
@@ -1166,12 +1166,12 @@ class UttaksplanTjenesteTest {
         var sak = sakUtenVedtak(søker, saksident, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
             søknadsperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE));
         lagre(sak);
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR, List.of(
-            nyPeriode(Søknad.Rolle.MOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.MØDREKVOTE, null, null, null),
-            nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadPeriode.KontoType.FEDREKVOTE, null, null, null),
-            nyPeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusDays(2), mandag.plusDays(4), SøknadPeriode.KontoType.FEDREKVOTE, null, null, null),
-            utsettelsePeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(sak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR, List.of(
+            nyPeriode(Søknadsuttaksplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE, null, null, null),
+            nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null),
+            nyPeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusDays(2), mandag.plusDays(4), SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE, null, null, null),
+            utsettelsePeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
         var personOppslag = mock(PersonOppslagSystem.class);
         var fnr = new Fødselsnummer(annenPart.value());
         switch (tilfelle) {
@@ -1215,7 +1215,7 @@ class UttaksplanTjenesteTest {
         var personOppslag = mock(PersonOppslagSystem.class);
         var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
         var annenPartTjeneste = mock(AnnenPartSakTjeneste.class);
-        var repository = mock(SøknadRepository.class);
+        var repository = mock(SøknadsuttaksplanRepository.class);
         var tjeneste = new UttaksplanTjeneste(saker, annenPartTjeneste, repository, personOppslag);
         var feil = new IllegalStateException("PDL utilgjengelig");
         var fnr = new Fødselsnummer(annenPart.value());
@@ -1248,7 +1248,7 @@ class UttaksplanTjenesteTest {
                 uttaksperiode(mandag, mandag.plusDays(1), Konto.FEDREKVOTE)));
         var personOppslag = spy(annenpartUbeskyttetAdresse());
         var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
-        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), new SøknadRepositoryStub(), personOppslag);
+        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), new SøknadsuttaksplanRepositoryStub(), personOppslag);
         var før = tjeneste.hentFor(søker, annenPart, barn, mandag).orElseThrow();
         assertThat(før.perioder()).anyMatch(p -> medEøs ? p.annenPartEøs() != null : p.annenPart() != null);
         when(personOppslag.adresseBeskyttelse(new Fødselsnummer(annenPart.value())))
@@ -1280,7 +1280,7 @@ class UttaksplanTjenesteTest {
         lagre(sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, periode));
         var personOppslag = spy(annenpartUbeskyttetAdresse());
         var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
-        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), new SøknadRepositoryStub(), personOppslag);
+        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), new SøknadsuttaksplanRepositoryStub(), personOppslag);
         var fnr = new Fødselsnummer(annenPart.value());
         assertThat(tjeneste.hentFor(søker, annenPart, barn, mandag)).isPresent();
         var rekkefølge = inOrder(personOppslag, saker);
@@ -1314,7 +1314,7 @@ class UttaksplanTjenesteTest {
             Set.of(new FpSøknad(SøknadStatus.BEHANDLET, mottatt.plusDays(1), Set.of(), Dekningsgrad.HUNDRE, false)));
         lagre(gammelSak, nyereSak);
         var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), annenpartUbeskyttetAdresse()));
-        var repository = spy(new SøknadRepositoryStub());
+        var repository = spy(new SøknadsuttaksplanRepositoryStub());
         var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), repository, annenpartUbeskyttetAdresse());
 
         var kjentPlan = tjeneste.hentFor(gammelSak).orElseThrow();
@@ -1352,9 +1352,9 @@ class UttaksplanTjenesteTest {
         var egenSak = sak(søker, annenPart, barn, mandag, 1, BrukerRolle.MOR, Set.of(vedtak), Set.of(legacy));
         lagre(egenSak, sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE)));
-        var repository = new SøknadRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknad(Instant.parse("2026-09-01T12:00:00Z"), Søknad.Rolle.MOR,
-            List.of(utsettelsePeriode(Søknad.Rolle.FAR_MEDMOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4)))));
+        var repository = new SøknadsuttaksplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsuttaksplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsuttaksplan.Rolle.MOR,
+            List.of(utsettelsePeriode(Søknadsuttaksplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4)))));
         var personOppslag = spy(annenpartUbeskyttetAdresse());
         var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
         var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), repository, personOppslag);
@@ -1382,14 +1382,14 @@ class UttaksplanTjenesteTest {
     }
 
     private UttaksplanTjeneste tjeneste(AktørId søker) {
-        return tjeneste(søker, new SøknadRepositoryStub());
+        return tjeneste(søker, new SøknadsuttaksplanRepositoryStub());
     }
 
-    private UttaksplanTjeneste tjeneste(AktørId søker, SøknadRepository søknadRepository) {
+    private UttaksplanTjeneste tjeneste(AktørId søker, SøknadsuttaksplanRepository søknadRepository) {
         return tjeneste(søker, søknadRepository, sakRepository);
     }
 
-    private UttaksplanTjeneste tjeneste(AktørId søker, SøknadRepository søknadRepository, RepositoryStub repository) {
+    private UttaksplanTjeneste tjeneste(AktørId søker, SøknadsuttaksplanRepository søknadRepository, RepositoryStub repository) {
         var saker = new Saker(repository, myndigInnloggetBruker(søker), annenpartUbeskyttetAdresse());
         return new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), søknadRepository, annenpartUbeskyttetAdresse());
     }
@@ -1446,14 +1446,14 @@ class UttaksplanTjenesteTest {
             null, null, null, null, false, null);
     }
 
-    private static SøknadPeriode nyPeriode(Søknad.Rolle rolle, LocalDate fom, LocalDate tom, SøknadPeriode.KontoType konto,
-                                           java.math.BigDecimal gradering, SøknadPeriode.AktivitetType aktivitet, String arbeidsgiver) {
-        return new SøknadPeriode(fom, tom, rolle, konto, null, null, null, gradering, null, false, aktivitet, arbeidsgiver,
-            arbeidsgiver == null ? null : SøknadPeriode.ArbeidsgiverType.ORGANISASJON);
+    private static SøknadsuttaksplanPeriode nyPeriode(Søknadsuttaksplan.Rolle rolle, LocalDate fom, LocalDate tom, SøknadsuttaksplanPeriode.KontoType konto,
+                                           java.math.BigDecimal gradering, SøknadsuttaksplanPeriode.AktivitetType aktivitet, String arbeidsgiver) {
+        return new SøknadsuttaksplanPeriode(fom, tom, rolle, konto, null, null, null, gradering, null, false, aktivitet, arbeidsgiver,
+            arbeidsgiver == null ? null : SøknadsuttaksplanPeriode.ArbeidsgiverType.ORGANISASJON);
     }
 
-    private static SøknadPeriode utsettelsePeriode(Søknad.Rolle rolle, LocalDate fom, LocalDate tom) {
-        return new SøknadPeriode(fom, tom, rolle, null, SøknadPeriode.UtsettelseÅrsak.ARBEID, null, null,
+    private static SøknadsuttaksplanPeriode utsettelsePeriode(Søknadsuttaksplan.Rolle rolle, LocalDate fom, LocalDate tom) {
+        return new SøknadsuttaksplanPeriode(fom, tom, rolle, null, SøknadsuttaksplanPeriode.UtsettelseÅrsak.ARBEID, null, null,
             null, null, false, null, null, null);
     }
 

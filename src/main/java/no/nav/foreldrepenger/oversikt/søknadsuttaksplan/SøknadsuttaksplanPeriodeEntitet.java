@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.søknad;
+package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -16,19 +16,19 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
-@Entity(name = "soknad_periode")
-@Table(name = "soknad_periode")
-public class SøknadPeriodeEntitet {
+@Entity(name = "soknadsuttaksplan_periode")
+@Table(name = "soknadsuttaksplan_periode")
+public class SøknadsuttaksplanPeriodeEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SOKNAD_PERIODE")
-    @SequenceGenerator(name = "SEQ_SOKNAD_PERIODE", sequenceName = "SEQ_SOKNAD_PERIODE")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SOKNADSUTTAKSPLAN_PERIODE")
+    @SequenceGenerator(name = "SEQ_SOKNADSUTTAKSPLAN_PERIODE", sequenceName = "SEQ_SOKNADSUTTAKSPLAN_PERIODE")
     @Column(name = "id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "soknad_id", nullable = false)
-    private SøknadEntitet soknad;
+    @JoinColumn(name = "soknadsuttaksplan_id", nullable = false)
+    private SøknadsuttaksplanEntitet soknad;
 
     @Column(name = "fom", nullable = false)
     private LocalDate fom;
@@ -38,23 +38,23 @@ public class SøknadPeriodeEntitet {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rolle", nullable = false)
-    private Søknad.Rolle rolle;
+    private Søknadsuttaksplan.Rolle rolle;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "konto_type")
-    private SøknadPeriode.KontoType kontoType;
+    private SøknadsuttaksplanPeriode.KontoType kontoType;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "utsettelse_arsak")
-    private SøknadPeriode.UtsettelseÅrsak utsettelseÅrsak;
+    private SøknadsuttaksplanPeriode.UtsettelseÅrsak utsettelseÅrsak;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "overforing_arsak")
-    private SøknadPeriode.OverføringÅrsak overføringÅrsak;
+    private SøknadsuttaksplanPeriode.OverføringÅrsak overføringÅrsak;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "mors_aktivitet")
-    private SøknadPeriode.MorsAktivitet morsAktivitet;
+    private SøknadsuttaksplanPeriode.MorsAktivitet morsAktivitet;
 
     @Column(name = "gradering_arbeidstidprosent")
     private BigDecimal graderingArbeidstidprosent;
@@ -67,16 +67,16 @@ public class SøknadPeriodeEntitet {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aktivitet_type", length = 50)
-    private SøknadPeriode.AktivitetType aktivitetType;
+    private SøknadsuttaksplanPeriode.AktivitetType aktivitetType;
 
     @Column(name = "arbeidsgiver_id", length = 50)
     private String arbeidsgiverId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "arbeidsgiver_type", length = 50)
-    private SøknadPeriode.ArbeidsgiverType arbeidsgiverType;
+    private SøknadsuttaksplanPeriode.ArbeidsgiverType arbeidsgiverType;
 
-    SøknadPeriodeEntitet(SøknadEntitet soknad, SøknadPeriode periode) {
+    SøknadsuttaksplanPeriodeEntitet(SøknadsuttaksplanEntitet soknad, SøknadsuttaksplanPeriode periode) {
         this.soknad = soknad;
         this.fom = periode.fom();
         this.tom = periode.tom();
@@ -93,11 +93,11 @@ public class SøknadPeriodeEntitet {
         this.arbeidsgiverType = periode.arbeidsgiverType();
     }
 
-    protected SøknadPeriodeEntitet() {
+    protected SøknadsuttaksplanPeriodeEntitet() {
     }
 
-    SøknadPeriode map() {
-        return new SøknadPeriode(fom, tom, rolle, kontoType, utsettelseÅrsak, overføringÅrsak, morsAktivitet,
+    SøknadsuttaksplanPeriode map() {
+        return new SøknadsuttaksplanPeriode(fom, tom, rolle, kontoType, utsettelseÅrsak, overføringÅrsak, morsAktivitet,
             graderingArbeidstidprosent, samtidigUttaksprosent, flerbarnsdager, aktivitetType, arbeidsgiverId, arbeidsgiverType);
     }
 }

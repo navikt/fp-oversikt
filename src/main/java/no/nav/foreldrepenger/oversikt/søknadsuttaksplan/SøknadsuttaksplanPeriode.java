@@ -1,13 +1,13 @@
-package no.nav.foreldrepenger.oversikt.søknad;
+package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public record SøknadPeriode(
+public record SøknadsuttaksplanPeriode(
     LocalDate fom,
     LocalDate tom,
-    Søknad.Rolle rolle,
+    Søknadsuttaksplan.Rolle rolle,
     KontoType kontoType,
     UtsettelseÅrsak utsettelseÅrsak,
     OverføringÅrsak overføringÅrsak,
@@ -20,7 +20,7 @@ public record SøknadPeriode(
     ArbeidsgiverType arbeidsgiverType
 ) {
 
-    public SøknadPeriode {
+    public SøknadsuttaksplanPeriode {
         Objects.requireNonNull(fom, "fom kan ikke være null");
         Objects.requireNonNull(tom, "tom kan ikke være null");
         Objects.requireNonNull(rolle, "rolle kan ikke være null");
@@ -31,7 +31,7 @@ public record SøknadPeriode(
 
     @Override
     public String toString() {
-        return "SøknadPeriode[redacted]";
+        return "SøknadsuttaksplanPeriode[redacted]";
     }
 
     public enum KontoType {

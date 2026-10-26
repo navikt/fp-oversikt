@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.søknad;
+package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,7 +15,7 @@ import no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 
-class SøknadMapperTest {
+class SøknadsuttaksplanMapperTest {
 
     @Test
     void mapperNullableDataTilInternPeriode() {
@@ -23,11 +23,11 @@ class SøknadMapperTest {
             {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[
               {"fom":"2026-10-01","tom":"2026-10-10","søker":{"forelder":"MOR"}}
             ]}
-            """, SøknadRest.SøknadRequest.class);
+            """, SøknadsuttaksplanRest.SøknadsuttaksplanRequest.class);
 
-        var periode = SøknadMapper.tilPerioder(request.perioder()).getFirst();
+        var periode = SøknadsuttaksplanMapper.tilPerioder(request.perioder()).getFirst();
 
-        assertThat(periode).isInstanceOf(SøknadPeriode.class);
+        assertThat(periode).isInstanceOf(SøknadsuttaksplanPeriode.class);
         assertThat(periode.kontoType()).isNull();
         assertThat(periode.utsettelseÅrsak()).isNull();
         assertThat(periode.overføringÅrsak()).isNull();
@@ -48,17 +48,17 @@ class SøknadMapperTest {
                 "søker":{"forelder":"MOR","kontoType":"MØDREKVOTE"},
                 "annenPart":{"forelder":"FAR_MEDMOR","kontoType":"FEDREKVOTE"}}
             ]}
-            """, SøknadRest.SøknadRequest.class);
+            """, SøknadsuttaksplanRest.SøknadsuttaksplanRequest.class);
 
-        var perioder = SøknadMapper.tilPerioder(request.perioder());
+        var perioder = SøknadsuttaksplanMapper.tilPerioder(request.perioder());
 
-        assertThat(perioder).extracting(SøknadPeriode::rolle)
-            .containsExactly(Søknad.Rolle.MOR, Søknad.Rolle.FAR_MEDMOR);
+        assertThat(perioder).extracting(SøknadsuttaksplanPeriode::rolle)
+            .containsExactly(Søknadsuttaksplan.Rolle.MOR, Søknadsuttaksplan.Rolle.FAR_MEDMOR);
     }
 
     @ParameterizedTest(name = "mapper {0} enum {1} med samme navn")
     @MethodSource("alleEnumverdier")
-    void mapperAlleEnumverdier(String felt, String verdi, java.util.function.Function<SøknadPeriode, Enum<?>> uthent) {
+    void mapperAlleEnumverdier(String felt, String verdi, java.util.function.Function<SøknadsuttaksplanPeriode, Enum<?>> uthent) {
         var json = """
             {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[
               {"fom":"2026-10-01","tom":"2026-10-10","søker":{"forelder":"MOR","kontoType":"__konto__",
@@ -90,9 +90,9 @@ class SøknadMapperTest {
             default -> throw new IllegalArgumentException("Ukjent enum-felt " + felt);
         };
         json = json.replace("\"" + feltNavn + "\":\"" + defaultVerdi + "\"", "\"" + feltNavn + "\":\"" + verdi + "\"");
-        var request = DefaultJsonMapper.fromJson(json, SøknadRest.SøknadRequest.class);
+        var request = DefaultJsonMapper.fromJson(json, SøknadsuttaksplanRest.SøknadsuttaksplanRequest.class);
 
-        var periode = SøknadMapper.tilPerioder(request.perioder()).getFirst();
+        var periode = SøknadsuttaksplanMapper.tilPerioder(request.perioder()).getFirst();
 
         assertThat(uthent.apply(periode).name()).isEqualTo(verdi);
     }
@@ -100,19 +100,19 @@ class SøknadMapperTest {
     static Stream<Arguments> alleEnumverdier() {
         return Stream.concat(
             Stream.concat(
-                verdier("konto", KontoType.class, SøknadPeriode::kontoType),
-                verdier("utsettelse", FellesUttaksplanDto.UtsettelseÅrsak.class, SøknadPeriode::utsettelseÅrsak)),
+                verdier("konto", KontoType.class, SøknadsuttaksplanPeriode::kontoType),
+                verdier("utsettelse", FellesUttaksplanDto.UtsettelseÅrsak.class, SøknadsuttaksplanPeriode::utsettelseÅrsak)),
             Stream.concat(
                 Stream.concat(
-                    verdier("overføring", FellesUttaksplanDto.OverføringÅrsak.class, SøknadPeriode::overføringÅrsak),
-                    verdier("morsAktivitet", MorsAktivitet.class, SøknadPeriode::morsAktivitet)),
+                    verdier("overføring", FellesUttaksplanDto.OverføringÅrsak.class, SøknadsuttaksplanPeriode::overføringÅrsak),
+                    verdier("morsAktivitet", MorsAktivitet.class, SøknadsuttaksplanPeriode::morsAktivitet)),
                 Stream.concat(
-                    verdier("aktivitet", FellesUttaksplanDto.Aktivitet.AktivitetType.class, SøknadPeriode::aktivitetType),
-                    verdier("arbeidsgiver", FellesUttaksplanDto.Arbeidsgiver.ArbeidsgiverType.class, SøknadPeriode::arbeidsgiverType))));
+                    verdier("aktivitet", FellesUttaksplanDto.Aktivitet.AktivitetType.class, SøknadsuttaksplanPeriode::aktivitetType),
+                    verdier("arbeidsgiver", FellesUttaksplanDto.Arbeidsgiver.ArbeidsgiverType.class, SøknadsuttaksplanPeriode::arbeidsgiverType))));
     }
 
     private static Stream<Arguments> verdier(String felt, Class<? extends Enum<?>> enumKlasse,
-                                              java.util.function.Function<SøknadPeriode, Enum<?>> uthent) {
+                                              java.util.function.Function<SøknadsuttaksplanPeriode, Enum<?>> uthent) {
         return Arrays.stream(enumKlasse.getEnumConstants())
             .map(verdi -> Arguments.of(felt, verdi.name(), uthent));
     }

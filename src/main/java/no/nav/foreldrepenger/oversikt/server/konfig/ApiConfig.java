@@ -20,7 +20,7 @@ import no.nav.foreldrepenger.oversikt.oppslag.oversikt.OversiktPersonopplysninge
 import no.nav.foreldrepenger.oversikt.oppslag.svp.SvpPersonopplysningerRest;
 import no.nav.foreldrepenger.oversikt.saker.SakerRest;
 import no.nav.foreldrepenger.oversikt.server.konfig.swagger.TypegenereringFrontendOpenApiReader;
-import no.nav.foreldrepenger.oversikt.søknad.SøknadRest;
+import no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanRest;
 import no.nav.foreldrepenger.oversikt.tidslinje.TidslinjeRest;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanRest;
 import no.nav.vedtak.openapi.OpenApiUtils;
@@ -56,7 +56,7 @@ public class ApiConfig extends ResourceConfig {
             InntektsmeldingRest.class,
             OppgaveRest.class,
             SakerRest.class,
-            SøknadRest.class,
+            SøknadsuttaksplanRest.class,
             UttaksplanRest.class,
             ArbeidRest.class
         );
