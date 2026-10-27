@@ -18,13 +18,16 @@ import org.mockito.ArgumentCaptor;
 
 import jakarta.validation.Validation;
 import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.Path;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig;
+import no.nav.foreldrepenger.oversikt.server.konfig.BackendApiConfig;
 import no.nav.foreldrepenger.oversikt.stub.SøknadsplanRepositoryStub;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTjeneste;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
+import no.nav.vedtak.server.rest.AuthenticationFilter;
 import tools.jackson.databind.node.ObjectNode;
 
 class SøknadsplanRestTest {
@@ -166,8 +169,11 @@ class SøknadsplanRestTest {
     }
 
     @Test
-    void apiRegistrererSøknadsplanRest() {
-        assertThat(new ApiConfig().getClasses()).contains(SøknadsplanRest.class);
+    void søknadsplanRestRegistreresBareIBackendApi() {
+        assertThat(new ApiConfig().getClasses()).doesNotContain(SøknadsplanRest.class);
+        var backendKlasser = new BackendApiConfig().getClasses();
+        assertThat(backendKlasser).contains(AuthenticationFilter.class);
+        assertThat(backendKlasser.stream().filter(k -> k.isAnnotationPresent(Path.class))).containsExactly(SøknadsplanRest.class);
     }
 
     @ParameterizedTest
