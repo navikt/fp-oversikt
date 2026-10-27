@@ -59,7 +59,7 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
         var fpVedtak = gjeldendeVedtak.map(FpVedtak::tilDto).orElse(null);
 
         var annenPart = Optional.ofNullable(annenPartAktørId).flatMap(a -> mapPerson(personOppslagSystem, a));
-        var kanSøkeOmEndring = kanSøkeOmEndring();
+        var kanSøkeOmEndring = gjeldendeVedtak.stream().anyMatch(FpVedtak::kanSøkeOmEndring);
         var fh = familieHendelse() == null ? null : familieHendelse().tilDto();
 
         var åpenBehandling = søknadUnderBehandling().map(s -> new FpÅpenBehandling(BehandlingTilstandUtleder.utled(aksjonspunkt()))).orElse(null);
@@ -96,10 +96,6 @@ public record SakFP0(@JsonProperty("saksnummer") Saksnummer saksnummer,
     @Override
     public boolean oppgittAleneomsorg() {
         return rettigheter != null && rettigheter.aleneomsorg();
-    }
-
-    public boolean kanSøkeOmEndring() {
-        return gjeldendeVedtak().stream().anyMatch(FpVedtak::kanSøkeOmEndring);
     }
 
     @Override
