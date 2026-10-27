@@ -40,8 +40,14 @@ public class SøknadsplanTjeneste {
     public void lagre(Saksnummer saksnummer, Søknadsplan søknadsplan, SøknadType søknadType) {
         Objects.requireNonNull(søknadType, "søknadType må være satt");
         var aktiv = søknadsplanRepository.hentAktivFor(saksnummer);
-        if (aktiv.filter(a -> !a.mottattTidspunkt().isBefore(søknadsplan.mottattTidspunkt())).isPresent()) {
-            LOG.info("Ignorerer søknad som ikke er nyere enn aktiv søknad på saken");
+        var aktivMottatt = aktiv.map(Søknadsplan::mottattTidspunkt);
+        if (aktivMottatt.filter(søknadsplan.mottattTidspunkt()::equals).isPresent()) {
+            // Samme mottakstidspunkt betyr at samme søknad er sendt på nytt, f.eks. ved retry
+            LOG.info("Ignorerer søknad som allerede er lagret som aktiv søknad på saken");
+            return;
+        }
+        if (aktivMottatt.filter(søknadsplan.mottattTidspunkt()::isBefore).isPresent()) {
+            LOG.warn("Ignorerer søknad som er eldre enn aktiv søknad på saken");
             return;
         }
 
