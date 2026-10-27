@@ -259,7 +259,7 @@ public class UttaksplanTjeneste {
         if (søknad.rolle() == null) {
             throw ugyldigRolle();
         }
-        return søknad.rolle() == søknadRolle(rolle);
+        return UttaksplanMapper.mapRolle(søknad.rolle()) == rolle;
     }
 
     private static List<Planperiode> mapSøknad(Søknadsplan søknad) {
@@ -303,10 +303,6 @@ public class UttaksplanTjeneste {
 
     private static FellesUttaksplanDto.Rolle motsattRolle(FellesUttaksplanDto.Rolle rolle) {
         return rolle == FellesUttaksplanDto.Rolle.MOR ? FellesUttaksplanDto.Rolle.FAR_MEDMOR : FellesUttaksplanDto.Rolle.MOR;
-    }
-
-    private static Søknadsplan.Rolle søknadRolle(FellesUttaksplanDto.Rolle rolle) {
-        return rolle == FellesUttaksplanDto.Rolle.MOR ? Søknadsplan.Rolle.MOR : Søknadsplan.Rolle.FAR_MEDMOR;
     }
 
     private static IllegalStateException ugyldigRolle() {

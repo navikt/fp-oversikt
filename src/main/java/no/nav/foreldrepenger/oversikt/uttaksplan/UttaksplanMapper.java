@@ -172,7 +172,7 @@ final class UttaksplanMapper {
         };
     }
 
-    private static Rolle mapRolle(Søknadsplan.Rolle rolle) {
+    static Rolle mapRolle(Søknadsplan.Rolle rolle) {
         return switch (rolle) {
             case MOR -> Rolle.MOR;
             case FAR_MEDMOR -> Rolle.FAR_MEDMOR;
