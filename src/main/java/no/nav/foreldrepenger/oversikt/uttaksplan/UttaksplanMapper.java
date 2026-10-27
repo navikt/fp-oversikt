@@ -111,7 +111,6 @@ final class UttaksplanMapper {
             case ORDINÆRT_ARBEID -> Aktivitet.AktivitetType.ORDINÆRT_ARBEID;
             case SELVSTENDIG_NÆRINGSDRIVENDE -> Aktivitet.AktivitetType.SELVSTENDIG_NÆRINGSDRIVENDE;
             case FRILANS -> Aktivitet.AktivitetType.FRILANS;
-            case ANNET -> Aktivitet.AktivitetType.ANNET;
         }, arbeidsgiver, null);
     }
 

@@ -101,7 +101,8 @@ final class SøknadsplanMapper {
             case FRILANS -> SøknadsplanPeriode.AktivitetType.FRILANS;
             case ORDINÆRT_ARBEID -> SøknadsplanPeriode.AktivitetType.ORDINÆRT_ARBEID;
             case SELVSTENDIG_NÆRINGSDRIVENDE -> SøknadsplanPeriode.AktivitetType.SELVSTENDIG_NÆRINGSDRIVENDE;
-            case ANNET -> SøknadsplanPeriode.AktivitetType.ANNET;
+            // TODO: Frontend sender ANNET som plassholder når aktivitet ikke er oppgitt. Fjern når frontend sender null.
+            case ANNET -> null;
         };
     }
 

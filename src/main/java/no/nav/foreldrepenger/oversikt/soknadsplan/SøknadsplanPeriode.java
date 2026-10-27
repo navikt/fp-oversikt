@@ -74,8 +74,7 @@ public record SøknadsplanPeriode(
     public enum AktivitetType {
         FRILANS,
         ORDINÆRT_ARBEID,
-        SELVSTENDIG_NÆRINGSDRIVENDE,
-        ANNET
+        SELVSTENDIG_NÆRINGSDRIVENDE
     }
 
 }

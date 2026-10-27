@@ -108,7 +108,24 @@ class SøknadsplanMapperTest {
                 Stream.concat(
                     verdier("overføring", FellesUttaksplanDto.OverføringÅrsak.class, SøknadsplanPeriode::overføringÅrsak),
                     verdier("morsAktivitet", MorsAktivitet.class, SøknadsplanPeriode::morsAktivitet)),
-                 verdier("aktivitet", FellesUttaksplanDto.Aktivitet.AktivitetType.class, SøknadsplanPeriode::aktivitetType)));
+                 verdier("aktivitet", FellesUttaksplanDto.Aktivitet.AktivitetType.class, SøknadsplanPeriode::aktivitetType)
+                     .filter(a -> !"ANNET".equals(a.get()[1]))));
+    }
+
+    @Test
+    void lagrerIkkeAktivitetTypeAnnet() {
+        var request = DefaultJsonMapper.fromJson("""
+            {"saksnummer":"123456","mottattTidspunkt":"2026-09-01T12:00:00Z","rolle":"MOR","perioder":[
+              {"fom":"2026-10-01","tom":"2026-10-10",
+                "søker":{"forelder":"MOR","kontoType":"MØDREKVOTE"},
+                "annenPart":{"forelder":"FAR_MEDMOR","kontoType":"FEDREKVOTE","gradering":{"arbeidstidprosent":40,"aktivitet":{"type":"ANNET"}}}}
+            ]}
+            """, SøknadsplanRest.SøknadsplanRequest.class);
+
+        var annenPart = SøknadsplanMapper.tilPerioder(request.perioder()).get(1);
+
+        assertThat(annenPart.aktivitetType()).isNull();
+        assertThat(annenPart.graderingArbeidstidprosent()).isEqualByComparingTo("40");
     }
 
     @ParameterizedTest

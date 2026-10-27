@@ -109,7 +109,7 @@ class DBSøknadsplanRepositoryTest {
             periodeMedArbeidsgiver(Søknadsplan.Rolle.FAR_MEDMOR, SøknadsplanPeriode.AktivitetType.SELVSTENDIG_NÆRINGSDRIVENDE,
                 "00123456789"),
             periodeMedArbeidsgiver(Søknadsplan.Rolle.MOR, null, null),
-            periodeMedArbeidsgiver(Søknadsplan.Rolle.FAR_MEDMOR, SøknadsplanPeriode.AktivitetType.ANNET, "987654321"));
+            periodeMedArbeidsgiver(Søknadsplan.Rolle.FAR_MEDMOR, SøknadsplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "987654321"));
         var søknad = søknad(Instant.parse("2026-03-01T10:00:00Z"), perioder);
 
         repository.lagre(saksnummer, søknad);
