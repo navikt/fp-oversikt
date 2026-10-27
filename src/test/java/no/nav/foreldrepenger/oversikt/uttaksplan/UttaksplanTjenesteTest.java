@@ -1327,7 +1327,7 @@ class UttaksplanTjenesteTest {
     }
 
     @Test
-    void utenEgenSakKrevesUbeskyttetAdresseOgEntydigRelasjon() throws Exception {
+    void utenEgenSakKrevesUbeskyttetAdresse() throws Exception {
         var søker = AktørId.dummy();
         var annenPart = AktørId.dummy();
         var barn = AktørId.dummy();
@@ -1348,10 +1348,6 @@ class UttaksplanTjenesteTest {
         clearInvocations(saker);
         assertThat(tjeneste.hentFor(søker, annenPart, barn, mandag)).isEmpty();
         verify(saker, never()).hentSaker(annenPart);
-
-        when(personOppslag.adresseBeskyttelse(fnr)).thenReturn(new AdresseBeskyttelse(Set.of()));
-        lagre(sakMedVedtak(annenPart, søker, barn, mandag.plusDays(1), 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, periode));
-        assertThat(tjeneste.hentFor(søker, annenPart, barn, mandag)).isEmpty();
     }
 
     @Test

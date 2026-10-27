@@ -83,7 +83,7 @@ public class UttaksplanTjeneste {
                                                  Optional<ForeldrepengerSak> søkersSak) {
         var visAnnenPart = kanViseAnnenPart(annenPart, søkersSak);
         var annenPartsSak = visAnnenPart
-            ? annenPartsGjeldendeSak(søker, annenPart, barn, familiehendelse, søkersSak.isEmpty())
+            ? annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse)
             : Optional.<ForeldrepengerSak>empty();
 
         if (søkersSak.isEmpty() && annenPartsSak.isEmpty()) {
@@ -167,19 +167,6 @@ public class UttaksplanTjeneste {
         } catch (BrukerIkkeFunnetIPdlException e) {
             return false;
         }
-    }
-
-    private Optional<ForeldrepengerSak> annenPartsGjeldendeSak(AktørId søker, AktørId annenPart, AktørId barn,
-                                                              LocalDate familiehendelse, boolean kreverEntydigSak) {
-        if (kreverEntydigSak) {
-            var treff = foreldrepengesaker(annenPart).stream()
-                .filter(sak -> !sak.oppgittAleneomsorg())
-                .filter(sak -> søker.equals(sak.annenPartAktørId()))
-                .filter(sak -> gjelderSammeBarn(barn, familiehendelse, sak))
-                .toList();
-            return treff.size() == 1 ? Optional.of(treff.getFirst()) : Optional.empty();
-        }
-        return annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(søker, annenPart, barn, familiehendelse);
     }
 
     private static FellesUttaksplanDto.Rolle søkerRolle(Optional<ForeldrepengerSak> søkersSak,
