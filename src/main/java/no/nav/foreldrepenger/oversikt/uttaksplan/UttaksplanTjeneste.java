@@ -184,10 +184,13 @@ public class UttaksplanTjeneste {
 
     /**
      * Bare søkerens egen legacy-søknad brukes. Annen parts legacy-søknad brukes aldri.
+     * Uten vedtak brukes legacy-søknaden bare når den ikke er behandlet, slik som før søknadsplan ble innført.
+     * Med vedtak brukes den for å fylle hull med utsettelser.
      */
     // TODO: Fjern bruk av legacy-søknad når de fleste saker har vedtak eller søknad i søknadstabellen.
     private static List<Planperiode> legacySøknadsperioder(Optional<ForeldrepengerSak> søkersSak) {
         return søkersSak.flatMap(sak -> sak.sisteSøknad()
+                .filter(legacy -> sak.gjeldendeVedtak().isPresent() || !legacy.status().behandlet())
                 .map(legacy -> UttaksplanMapper.mapSøknadsperioder(legacy.perioder(), sak.brukerRolle())))
             .orElseGet(List::of)
             .stream().toList();

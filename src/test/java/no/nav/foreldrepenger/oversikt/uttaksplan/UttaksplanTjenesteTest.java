@@ -314,6 +314,22 @@ class UttaksplanTjenesteTest {
     }
 
     @Test
+    void behandletEgenLegacySøknadUtenVedtakVisesIkke() {
+        var søker = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), Set.of(
+            søknadsperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE),
+            legacyUtsettelse(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4))), Dekningsgrad.HUNDRE, false);
+        var sak = sak(søker, null, barn, mandag, 1, BrukerRolle.MOR, Set.of(), Set.of(søknad));
+        lagre(sak);
+
+        var plan = tjeneste(søker, new SøknadsplanRepositoryStub()).hentFor(søker, null, barn, mandag).orElseThrow();
+
+        assertThat(plan.perioder()).isEmpty();
+    }
+
+    @Test
     void behandletEgenLegacySøknadBidrarMedUtsettelseMenIkkeUttakNårVedtakFinnes() {
         var søker = AktørId.dummy();
         var barn = AktørId.dummy();
