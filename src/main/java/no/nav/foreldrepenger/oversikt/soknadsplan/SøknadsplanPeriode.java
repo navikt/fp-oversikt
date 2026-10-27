@@ -14,7 +14,7 @@ public record SøknadsplanPeriode(
     MorsAktivitet morsAktivitet,
     BigDecimal graderingArbeidstidprosent,
     BigDecimal samtidigUttaksprosent,
-    Boolean flerbarnsdager,
+    boolean flerbarnsdager,
     AktivitetType aktivitetType,
     String arbeidsgiverId
 ) {

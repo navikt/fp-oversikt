@@ -62,8 +62,8 @@ public class SøknadsplanPeriodeEntitet {
     @Column(name = "samtidig_uttaksprosent")
     private BigDecimal samtidigUttaksprosent;
 
-    @Column(name = "flerbarnsdager")
-    private Boolean flerbarnsdager;
+    @Column(name = "flerbarnsdager", nullable = false)
+    private boolean flerbarnsdager;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "aktivitet_type", length = 50)

@@ -48,7 +48,7 @@ class UttaksplanMapperLagretSøknadsplanTest {
     void beholderSamtidigUttakOgGraderingMedEksaktProsent() {
         var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG,
             SøknadsplanPeriode.KontoType.MØDREKVOTE, SøknadsplanPeriode.UtsettelseÅrsak.ARBEID, null, null,
-            new BigDecimal("12.3456789"), new BigDecimal("87.6543219"), null,
+            new BigDecimal("12.3456789"), new BigDecimal("87.6543219"), false,
             SøknadsplanPeriode.AktivitetType.SELVSTENDIG_NÆRINGSDRIVENDE, null);
 
         var uttak = UttaksplanMapper.mapLagredeSøknadsperioder(List.of(periode)).getFirst().uttak();
@@ -63,7 +63,7 @@ class UttaksplanMapperLagretSøknadsplanTest {
     @Test
     void nullableFelterForblirNull() {
         var periode = periode(Søknadsplan.Rolle.FAR_MEDMOR, MANDAG, MANDAG,
-            null, null, null, null, null, null, null, null, null);
+            null, null, null, null, null, null, false, null, null);
 
         var uttak = UttaksplanMapper.mapLagredeSøknadsperioder(List.of(periode)).getFirst().uttak();
 
@@ -79,10 +79,10 @@ class UttaksplanMapperLagretSøknadsplanTest {
     @Test
     void utelaterFriUtenMorsAktivitetOgBeholderFriMedAktivitet() {
         var friUten = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, null,
-            SøknadsplanPeriode.UtsettelseÅrsak.FRI, null, null, null, null, null, null, null);
+            SøknadsplanPeriode.UtsettelseÅrsak.FRI, null, null, null, null, false, null, null);
         var friMed = periode(Søknadsplan.Rolle.MOR, MANDAG.plusDays(1), MANDAG.plusDays(1), null,
             SøknadsplanPeriode.UtsettelseÅrsak.FRI, null, SøknadsplanPeriode.MorsAktivitet.ARBEID, null, null,
-            null, null, null);
+            false, null, null);
 
         var resultater = UttaksplanMapper.mapLagredeSøknadsperioder(List.of(friUten, friMed));
 
@@ -93,9 +93,9 @@ class UttaksplanMapperLagretSøknadsplanTest {
     @Test
     void justererDatoerTilVirkedagerOgUtelaterTomtIntervall() {
         var arbeidsuke = periode(Søknadsplan.Rolle.MOR, LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 12),
-            null, null, null, null, null, null, null, null, null);
+            null, null, null, null, null, null, false, null, null);
         var tomt = periode(Søknadsplan.Rolle.MOR, LocalDate.of(2026, 10, 10), LocalDate.of(2026, 10, 10),
-            null, null, null, null, null, null, null, null, null);
+            null, null, null, null, null, null, false, null, null);
 
         var resultater = UttaksplanMapper.mapLagredeSøknadsperioder(List.of(arbeidsuke, tomt));
 
@@ -107,26 +107,26 @@ class UttaksplanMapperLagretSøknadsplanTest {
     @Test
     void mapperAlleLagredeEnumverdier() {
         for (var konto : SøknadsplanPeriode.KontoType.values()) {
-            var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, konto, null, null, null, null, null, null, null, null);
+            var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, konto, null, null, null, null, null, false, null, null);
             assertThat(map(periode).kontoType().name()).isEqualTo(konto.name());
         }
         for (var utsettelse : SøknadsplanPeriode.UtsettelseÅrsak.values()) {
             var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, null, utsettelse, null,
                 utsettelse == SøknadsplanPeriode.UtsettelseÅrsak.FRI ? SøknadsplanPeriode.MorsAktivitet.ARBEID : null,
-                null, null, null, null, null);
+                null, null, false, null, null);
             assertThat(map(periode).utsettelseÅrsak().name()).isEqualTo(utsettelse.name());
         }
         for (var overføring : SøknadsplanPeriode.OverføringÅrsak.values()) {
-            var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, null, null, overføring, null, null, null, null, null, null);
+            var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, null, null, overføring, null, null, null, false, null, null);
             assertThat(map(periode).overføringÅrsak().name()).isEqualTo(overføring.name());
         }
         for (var aktivitet : SøknadsplanPeriode.AktivitetType.values()) {
             var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, null, null, null, null,
-                BigDecimal.ONE, null, null, aktivitet, null);
+                BigDecimal.ONE, null, false, aktivitet, null);
             assertThat(map(periode).gradering().aktivitet().type().name()).isEqualTo(aktivitet.name());
         }
         for (var morsAktivitet : SøknadsplanPeriode.MorsAktivitet.values()) {
-            var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, null, null, null, morsAktivitet, null, null, null, null, null);
+            var periode = periode(Søknadsplan.Rolle.MOR, MANDAG, MANDAG, null, null, null, morsAktivitet, null, null, false, null, null);
             assertThat(map(periode).morsAktivitet().name()).isEqualTo(morsAktivitet.name());
         }
     }
@@ -138,7 +138,7 @@ class UttaksplanMapperLagretSøknadsplanTest {
     private static SøknadsplanPeriode periode(Søknadsplan.Rolle rolle, LocalDate fom, LocalDate tom,
                                          SøknadsplanPeriode.KontoType kontoType, SøknadsplanPeriode.UtsettelseÅrsak utsettelseÅrsak,
                                          SøknadsplanPeriode.OverføringÅrsak overføringÅrsak, SøknadsplanPeriode.MorsAktivitet morsAktivitet,
-                                         BigDecimal gradering, BigDecimal samtidig, Boolean flerbarnsdager,
+                                         BigDecimal gradering, BigDecimal samtidig, boolean flerbarnsdager,
                                           SøknadsplanPeriode.AktivitetType aktivitet, String arbeidsgiverId) {
         return new SøknadsplanPeriode(fom, tom, rolle, kontoType, utsettelseÅrsak, overføringÅrsak, morsAktivitet,
             gradering, samtidig, flerbarnsdager, aktivitet, arbeidsgiverId);

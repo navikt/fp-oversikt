@@ -97,7 +97,7 @@ final class UttaksplanMapper {
         var samtidigUttak = periode.samtidigUttaksprosent() == null ? null : new SamtidigUttak(periode.samtidigUttaksprosent());
         return new UttakDto(mapRolle(periode.rolle()), mapKontoType(periode.kontoType()), mapUtsettelseÅrsak(periode.utsettelseÅrsak()),
             mapLagretOverføringÅrsak(periode.overføringÅrsak()), gradering, mapMorsAktivitet(periode.morsAktivitet()), samtidigUttak,
-            Boolean.TRUE.equals(periode.flerbarnsdager()), null);
+            periode.flerbarnsdager(), null);
     }
 
     private static Aktivitet mapLagretAktivitet(SøknadsplanPeriode periode) {
