@@ -74,20 +74,14 @@ public class UttaksplanTjeneste {
      * bare til å finne annen parts sak, aldri til å velge en annen sak for søkeren.
      */
     public Optional<FellesUttaksplanDto> hentFor(ForeldrepengerSak søkersSak) {
-        var familiehendelse = Optional.ofNullable(søkersSak.familieHendelse());
-        var dato = familiehendelse.map(FamilieHendelse::omsorgsovertakelse)
-            .or(() -> familiehendelse.map(FamilieHendelse::fødselsdato))
-            .or(() -> familiehendelse.map(FamilieHendelse::termindato))
-            .orElse(null);
+        var dato = gjeldendeDato(søkersSak.familieHendelse());
         var barn = søkersSak.fødteBarn() == null ? null : søkersSak.fødteBarn().stream().findFirst().orElse(null);
         return hentFor(søkersSak.aktørId(), søkersSak.annenPartAktørId(), barn, dato, Optional.of(søkersSak));
     }
 
     private Optional<FellesUttaksplanDto> hentFor(AktørId søker, AktørId annenPart, AktørId barn, LocalDate familiehendelse,
                                                  Optional<ForeldrepengerSak> søkersSak) {
-        var visAnnenPart = annenPart != null
-            && (søkersSak.isEmpty() || annenPart.equals(søkersSak.orElseThrow().annenPartAktørId()))
-            && harUbeskyttetAdresse(annenPart);
+        var visAnnenPart = kanViseAnnenPart(annenPart, søkersSak);
         var annenPartsSak = visAnnenPart
             ? annenPartsGjeldendeSak(søker, annenPart, barn, familiehendelse, søkersSak.isEmpty())
             : Optional.<ForeldrepengerSak>empty();
@@ -100,23 +94,7 @@ public class UttaksplanTjeneste {
         var søkerRolle = søkerRolle(søkersSak, annenPartsSak);
         var annenPartsRolle = motsattRolle(søkerRolle);
 
-        // Søkerens søknad når søkeren har sak, ellers annen parts søknad.
-        var søknad = aktivSøknad(søkersSak, annenPartsSak);
-        var forventetSøknadsrolle = søkersSak.isPresent() ? søkerRolle : annenPartsRolle;
-        List<Planperiode> søknadsperioder;
-        if (søknad.isEmpty()) {
-            søknadsperioder = legacySøknadsperioder(søkersSak);
-        } else if (harRolle(søknad.orElseThrow(), forventetSøknadsrolle)) { //I tilfelle sak har endret rolle etter søknaden ble sendt
-            søknadsperioder = mapSøknad(søknad.orElseThrow());
-        } else {
-            LOG.info("Ignorerer søknad i uttaksplan fordi søknadens rolle avviker fra sakens rolle. Bruker bare tilgjengelige vedtak.");
-            søknadsperioder = List.of();
-        }
-
-        // Skjerm også annen parts perioder som allerede er lagret på søkerens sak.
-        if (!visAnnenPart) {
-            søknadsperioder = søknadsperioder.stream().filter(p -> p.uttak().forelder() == søkerRolle).toList();
-        }
+        var søknadsperioder = søknadsperioder(søkersSak, annenPartsSak, søkerRolle, visAnnenPart);
         var søknadsutsettelser = søknadsperioder.stream()
             .filter(UttaksplanTjeneste::erUtsettelse)
             .toList();
@@ -131,6 +109,45 @@ public class UttaksplanTjeneste {
         var metadataSak = søkersSak.or(() -> annenPartsSak).orElseThrow();
         return Optional.of(lagPlan(metadataSak, søkerRolle, søkerPerioder, annenPartsPerioder, eøsPerioder,
             søknadsutsettelser));
+    }
+
+    /**
+     * Annen part vises bare når den er oppgitt, er den samme som er registrert på søkerens sak,
+     * og ikke har beskyttet adresse.
+     */
+    private boolean kanViseAnnenPart(AktørId annenPart, Optional<ForeldrepengerSak> søkersSak) {
+        if (annenPart == null) {
+            return false;
+        }
+        var sammeSomPåSøkersSak = søkersSak.map(sak -> annenPart.equals(sak.annenPartAktørId())).orElse(true);
+        return sammeSomPåSøkersSak && harUbeskyttetAdresse(annenPart);
+    }
+
+    /**
+     * Søkerens søknad når søkeren har sak, ellers annen parts søknad.
+     * Når annen part ikke skal vises, fjernes også annen parts perioder som er lagret på søkerens sak.
+     */
+    private List<Planperiode> søknadsperioder(Optional<ForeldrepengerSak> søkersSak, Optional<ForeldrepengerSak> annenPartsSak,
+                                              FellesUttaksplanDto.Rolle søkerRolle, boolean visAnnenPart) {
+        var perioder = alleSøknadsperioder(søkersSak, annenPartsSak, søkerRolle);
+        if (visAnnenPart) {
+            return perioder;
+        }
+        return perioder.stream().filter(p -> p.uttak().forelder() == søkerRolle).toList();
+    }
+
+    private List<Planperiode> alleSøknadsperioder(Optional<ForeldrepengerSak> søkersSak, Optional<ForeldrepengerSak> annenPartsSak,
+                                                  FellesUttaksplanDto.Rolle søkerRolle) {
+        var søknad = aktivSøknad(søkersSak, annenPartsSak);
+        if (søknad.isEmpty()) {
+            return legacySøknadsperioder(søkersSak);
+        }
+        var forventetSøknadsrolle = søkersSak.isPresent() ? søkerRolle : motsattRolle(søkerRolle);
+        if (!harRolle(søknad.orElseThrow(), forventetSøknadsrolle)) { // I tilfelle saken har endret rolle etter at søknaden ble sendt
+            LOG.info("Ignorerer søknad i uttaksplan fordi søknadens rolle avviker fra sakens rolle. Bruker bare tilgjengelige vedtak.");
+            return List.of();
+        }
+        return mapSøknad(søknad.orElseThrow());
     }
 
     private boolean harUbeskyttetAdresse(AktørId annenPart) {
@@ -192,8 +209,7 @@ public class UttaksplanTjeneste {
         return søkersSak.flatMap(sak -> sak.sisteSøknad()
                 .filter(legacy -> sak.gjeldendeVedtak().isPresent() || !legacy.status().behandlet())
                 .map(legacy -> UttaksplanMapper.mapSøknadsperioder(legacy.perioder(), sak.brukerRolle())))
-            .orElseGet(List::of)
-            .stream().toList();
+            .orElseGet(List::of);
     }
 
     private List<ForeldrepengerSak> foreldrepengesaker(AktørId aktørId) {
@@ -237,18 +253,27 @@ public class UttaksplanTjeneste {
         if (barn != null && sak.gjelderBarn(barn)) {
             return true;
         }
-        if (familiehendelse == null || sak.familieHendelse() == null) {
+        if (familiehendelse == null) {
             return false;
         }
-        var fh = sak.familieHendelse();
-        var gjeldende = Optional.ofNullable(fh.omsorgsovertakelse())
-            .or(() -> Optional.ofNullable(fh.fødselsdato()))
-            .or(() -> Optional.ofNullable(fh.termindato()))
-            .orElse(null);
+        var gjeldende = gjeldendeDato(sak.familieHendelse());
         if (gjeldende == null) {
             return false; // Sett i prod at dette har oppstått
         }
         return new LocalDateInterval(gjeldende.minusWeeks(5), gjeldende.plusWeeks(5)).contains(familiehendelse);
+    }
+
+    /**
+     * Omsorgsovertakelse, ellers fødselsdato, ellers termindato.
+     */
+    private static LocalDate gjeldendeDato(FamilieHendelse familieHendelse) {
+        if (familieHendelse == null) {
+            return null;
+        }
+        return Optional.ofNullable(familieHendelse.omsorgsovertakelse())
+            .or(() -> Optional.ofNullable(familieHendelse.fødselsdato()))
+            .or(() -> Optional.ofNullable(familieHendelse.termindato()))
+            .orElse(null);
     }
 
     private Optional<Søknadsplan> hentAktivSøknad(ForeldrepengerSak sak) {
@@ -309,15 +334,13 @@ public class UttaksplanTjeneste {
         return new IllegalStateException("Ugyldig rolle i uttaksplan");
     }
 
-    private static List<UttakPeriodeAnnenpartEøs> eøsPerioder(FpVedtak vedtak) {
-        return Stream.ofNullable(vedtak.annenpartEøsUttaksperioder()).flatMap(Collection::stream)
-                .sorted(Comparator.comparing(UttakPeriodeAnnenpartEøs::fom).thenComparing(UttakPeriodeAnnenpartEøs::tom)).toList();
-    }
-
     private static List<UttakPeriodeAnnenpartEøs> eøsPerioder(Optional<ForeldrepengerSak> søkersSak) {
         return søkersSak.flatMap(ForeldrepengerSak::gjeldendeVedtak)
-            .map(UttaksplanTjeneste::eøsPerioder)
-            .orElseGet(List::of);
+            .stream()
+            .flatMap(vedtak -> Stream.ofNullable(vedtak.annenpartEøsUttaksperioder()))
+            .flatMap(Collection::stream)
+            .sorted(Comparator.comparing(UttakPeriodeAnnenpartEøs::fom).thenComparing(UttakPeriodeAnnenpartEøs::tom))
+            .toList();
     }
 
     private static FellesUttaksplanDto lagPlan(ForeldrepengerSak metadataSak,
