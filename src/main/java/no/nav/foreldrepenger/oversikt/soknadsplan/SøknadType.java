@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
+package no.nav.foreldrepenger.oversikt.soknadsplan;
 
 public enum SøknadType {
     FØRSTEGANGSSØKNAD,

@@ -1,13 +1,13 @@
-package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
+package no.nav.foreldrepenger.oversikt.soknadsplan;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Objects;
 
-public record SøknadsuttaksplanPeriode(
+public record SøknadsplanPeriode(
     LocalDate fom,
     LocalDate tom,
-    Søknadsuttaksplan.Rolle rolle,
+    Søknadsplan.Rolle rolle,
     KontoType kontoType,
     UtsettelseÅrsak utsettelseÅrsak,
     OverføringÅrsak overføringÅrsak,
@@ -16,11 +16,10 @@ public record SøknadsuttaksplanPeriode(
     BigDecimal samtidigUttaksprosent,
     Boolean flerbarnsdager,
     AktivitetType aktivitetType,
-    String arbeidsgiverId,
-    ArbeidsgiverType arbeidsgiverType
+    String arbeidsgiverId
 ) {
 
-    public SøknadsuttaksplanPeriode {
+    public SøknadsplanPeriode {
         Objects.requireNonNull(fom, "fom kan ikke være null");
         Objects.requireNonNull(tom, "tom kan ikke være null");
         Objects.requireNonNull(rolle, "rolle kan ikke være null");
@@ -31,7 +30,7 @@ public record SøknadsuttaksplanPeriode(
 
     @Override
     public String toString() {
-        return "SøknadsuttaksplanPeriode[redacted]";
+        return "SøknadsplanPeriode[redacted]";
     }
 
     public enum KontoType {
@@ -79,8 +78,4 @@ public record SøknadsuttaksplanPeriode(
         ANNET
     }
 
-    public enum ArbeidsgiverType {
-        PRIVAT,
-        ORGANISASJON
-    }
 }

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
+package no.nav.foreldrepenger.oversikt.soknadsplan;
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -21,13 +21,13 @@ import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
-@Entity(name = "soknadsuttaksplan")
-@Table(name = "soknadsuttaksplan")
-public class SøknadsuttaksplanEntitet {
+@Entity(name = "soknadsplan")
+@Table(name = "soknadsplan")
+public class SøknadsplanEntitet {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SOKNADSUTTAKSPLAN")
-    @SequenceGenerator(name = "SEQ_SOKNADSUTTAKSPLAN", sequenceName = "SEQ_SOKNADSUTTAKSPLAN")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SOKNADSPLAN")
+    @SequenceGenerator(name = "SEQ_SOKNADSPLAN", sequenceName = "SEQ_SOKNADSPLAN")
     @Column(name = "id")
     private Long id;
 
@@ -40,28 +40,28 @@ public class SøknadsuttaksplanEntitet {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "rolle", nullable = false)
-    private Søknadsuttaksplan.Rolle rolle;
+    private Søknadsplan.Rolle rolle;
 
     @Column(name = "aktiv", nullable = false)
     private boolean aktiv;
 
     @OneToMany(mappedBy = "soknad", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
-    private List<SøknadsuttaksplanPeriodeEntitet> perioder = new ArrayList<>();
+    private List<SøknadsplanPeriodeEntitet> perioder = new ArrayList<>();
 
-    SøknadsuttaksplanEntitet(Saksnummer saksnummer, Søknadsuttaksplan søknad) {
+    SøknadsplanEntitet(Saksnummer saksnummer, Søknadsplan søknad) {
         this.saksnummer = saksnummer.value();
         this.mottattTidspunkt = søknad.mottattTidspunkt();
         this.rolle = søknad.rolle();
         this.aktiv = true;
         for (var periode : søknad.perioder()) {
-            perioder.add(new SøknadsuttaksplanPeriodeEntitet(this, periode));
+            perioder.add(new SøknadsplanPeriodeEntitet(this, periode));
         }
     }
 
-    protected SøknadsuttaksplanEntitet() {
+    protected SøknadsplanEntitet() {
     }
 
-    Søknadsuttaksplan map() {
-        return new Søknadsuttaksplan(mottattTidspunkt, rolle, perioder.stream().map(SøknadsuttaksplanPeriodeEntitet::map).toList());
+    Søknadsplan map() {
+        return new Søknadsplan(mottattTidspunkt, rolle, perioder.stream().map(SøknadsplanPeriodeEntitet::map).toList());
     }
 }

@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
+package no.nav.foreldrepenger.oversikt.soknadsplan;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -15,40 +15,40 @@ import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakPeriodeDto;
 
-@Path("/soknadsuttaksplan")
+@Path("/soknadsplan")
 @ApplicationScoped
 @Transactional
-public class SøknadsuttaksplanRest {
+public class SøknadsplanRest {
 
-    private SøknadsuttaksplanTjeneste søknadsuttaksplanTjeneste;
+    private SøknadsplanTjeneste søknadsplanTjeneste;
     private TilgangKontrollTjeneste tilgangKontroll;
 
     @Inject
-    public SøknadsuttaksplanRest(SøknadsuttaksplanTjeneste søknadsuttaksplanTjeneste, TilgangKontrollTjeneste tilgangKontroll) {
-        this.søknadsuttaksplanTjeneste = søknadsuttaksplanTjeneste;
+    public SøknadsplanRest(SøknadsplanTjeneste søknadsplanTjeneste, TilgangKontrollTjeneste tilgangKontroll) {
+        this.søknadsplanTjeneste = søknadsplanTjeneste;
         this.tilgangKontroll = tilgangKontroll;
     }
 
-    SøknadsuttaksplanRest() {
+    SøknadsplanRest() {
         // CDI
     }
 
     @POST
-    public void lagre(@Valid @NotNull SøknadsuttaksplanRequest request) {
+    public void lagre(@Valid @NotNull SøknadsplanRequest request) {
         tilgangKontroll.sjekkAtKallErFraSystem();
         var saksnummer = new no.nav.foreldrepenger.oversikt.domene.Saksnummer(request.saksnummer().value());
-        var perioder = SøknadsuttaksplanMapper.tilPerioder(request.perioder());
-        søknadsuttaksplanTjeneste.lagre(saksnummer, new Søknadsuttaksplan(request.mottattTidspunkt().toInstant(), request.rolle(), perioder), request.søknadType());
+        var perioder = SøknadsplanMapper.tilPerioder(request.perioder());
+        søknadsplanTjeneste.lagre(saksnummer, new Søknadsplan(request.mottattTidspunkt().toInstant(), request.rolle(), perioder), request.søknadType());
     }
 
-    public record SøknadsuttaksplanRequest(@Valid @NotNull Saksnummer saksnummer,
+    public record SøknadsplanRequest(@Valid @NotNull Saksnummer saksnummer,
                                @NotNull OffsetDateTime mottattTidspunkt,
-                               @Valid @NotNull Søknadsuttaksplan.Rolle rolle,
+                                @Valid @NotNull Søknadsplan.Rolle rolle,
                                @Valid @NotNull SøknadType søknadType,
                                @NotNull @Size(min = 1) List<@Valid @NotNull UttakPeriodeDto> perioder) {
         @Override
         public String toString() {
-            return "SøknadsuttaksplanRequest[skjermet]";
+            return "SøknadsplanRequest[skjermet]";
         }
     }
 }

@@ -31,8 +31,8 @@ import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
 import no.nav.foreldrepenger.oversikt.domene.fp.VirkedagJusterer;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
-import no.nav.foreldrepenger.oversikt.søknadsuttaksplan.Søknadsuttaksplan;
-import no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriode;
+import no.nav.foreldrepenger.oversikt.soknadsplan.Søknadsplan;
+import no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode;
 
 final class UttaksplanMapper {
 
@@ -82,7 +82,7 @@ final class UttaksplanMapper {
             .toList();
     }
 
-    static List<Planperiode> mapLagredeSøknadsperioder(Collection<SøknadsuttaksplanPeriode> perioder) {
+    static List<Planperiode> mapLagredeSøknadsperioder(Collection<SøknadsplanPeriode> perioder) {
         return Stream.ofNullable(perioder)
             .flatMap(Collection::stream)
             .filter(UttaksplanMapper::skalMedIPlan)
@@ -91,7 +91,7 @@ final class UttaksplanMapper {
             .toList();
     }
 
-    private static UttakDto mapUttak(SøknadsuttaksplanPeriode periode) {
+    private static UttakDto mapUttak(SøknadsplanPeriode periode) {
         var gradering = periode.graderingArbeidstidprosent() == null ? null
             : new Gradering(new Arbeidstidprosent(periode.graderingArbeidstidprosent()), mapLagretAktivitet(periode));
         var samtidigUttak = periode.samtidigUttaksprosent() == null ? null : new SamtidigUttak(periode.samtidigUttaksprosent());
@@ -100,16 +100,13 @@ final class UttaksplanMapper {
             Boolean.TRUE.equals(periode.flerbarnsdager()), null);
     }
 
-    private static Aktivitet mapLagretAktivitet(SøknadsuttaksplanPeriode periode) {
+    private static Aktivitet mapLagretAktivitet(SøknadsplanPeriode periode) {
         var aktivitetType = periode.aktivitetType();
         if (aktivitetType == null) {
             return null;
         }
-        var arbeidsgiver = periode.arbeidsgiverId() == null || periode.arbeidsgiverType() == null ? null
-            : new FellesUttaksplanDto.Arbeidsgiver(periode.arbeidsgiverId(), switch (periode.arbeidsgiverType()) {
-                case ORGANISASJON -> FellesUttaksplanDto.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON;
-                case PRIVAT -> FellesUttaksplanDto.Arbeidsgiver.ArbeidsgiverType.PRIVAT;
-            });
+        var arbeidsgiver = periode.arbeidsgiverId() == null ? null
+            : mapArbeidsgiver(new Arbeidsgiver(periode.arbeidsgiverId()));
         return new Aktivitet(switch (aktivitetType) {
             case ORDINÆRT_ARBEID -> Aktivitet.AktivitetType.ORDINÆRT_ARBEID;
             case SELVSTENDIG_NÆRINGSDRIVENDE -> Aktivitet.AktivitetType.SELVSTENDIG_NÆRINGSDRIVENDE;
@@ -118,7 +115,7 @@ final class UttaksplanMapper {
         }, arbeidsgiver, null);
     }
 
-    private static no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType mapKontoType(SøknadsuttaksplanPeriode.KontoType kontoType) {
+    private static no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType mapKontoType(SøknadsplanPeriode.KontoType kontoType) {
         if (kontoType == null) {
             return null;
         }
@@ -131,7 +128,7 @@ final class UttaksplanMapper {
         };
     }
 
-    private static no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet mapMorsAktivitet(SøknadsuttaksplanPeriode.MorsAktivitet aktivitet) {
+    private static no.nav.foreldrepenger.kontrakter.felles.kodeverk.MorsAktivitet mapMorsAktivitet(SøknadsplanPeriode.MorsAktivitet aktivitet) {
         if (aktivitet == null) {
             return null;
         }
@@ -148,7 +145,7 @@ final class UttaksplanMapper {
         };
     }
 
-    private static FellesUttaksplanDto.UtsettelseÅrsak mapUtsettelseÅrsak(SøknadsuttaksplanPeriode.UtsettelseÅrsak årsak) {
+    private static FellesUttaksplanDto.UtsettelseÅrsak mapUtsettelseÅrsak(SøknadsplanPeriode.UtsettelseÅrsak årsak) {
         if (årsak == null) {
             return null;
         }
@@ -164,7 +161,7 @@ final class UttaksplanMapper {
         };
     }
 
-    private static FellesUttaksplanDto.OverføringÅrsak mapLagretOverføringÅrsak(SøknadsuttaksplanPeriode.OverføringÅrsak årsak) {
+    private static FellesUttaksplanDto.OverføringÅrsak mapLagretOverføringÅrsak(SøknadsplanPeriode.OverføringÅrsak årsak) {
         if (årsak == null) {
             return null;
         }
@@ -176,14 +173,14 @@ final class UttaksplanMapper {
         };
     }
 
-    private static Rolle mapRolle(Søknadsuttaksplan.Rolle rolle) {
+    private static Rolle mapRolle(Søknadsplan.Rolle rolle) {
         return switch (rolle) {
             case MOR -> Rolle.MOR;
             case FAR_MEDMOR -> Rolle.FAR_MEDMOR;
         };
     }
 
-    private static boolean skalMedIPlan(SøknadsuttaksplanPeriode periode) {
+    private static boolean skalMedIPlan(SøknadsplanPeriode periode) {
         var utsettelse = periode.utsettelseÅrsak() == null ? null : switch (periode.utsettelseÅrsak()) {
             case HV_ØVELSE -> UtsettelseÅrsak.HV_ØVELSE;
             case ARBEID -> UtsettelseÅrsak.ARBEID;

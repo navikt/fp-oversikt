@@ -24,8 +24,8 @@ import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.saker.Saker;
-import no.nav.foreldrepenger.oversikt.søknadsuttaksplan.Søknadsuttaksplan;
-import no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanRepository;
+import no.nav.foreldrepenger.oversikt.soknadsplan.Søknadsplan;
+import no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanRepository;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
@@ -44,11 +44,11 @@ public class UttaksplanTjeneste {
 
     private Saker saker;
     private AnnenPartSakTjeneste annenPartSakTjeneste;
-    private SøknadsuttaksplanRepository søknadRepository;
+    private SøknadsplanRepository søknadRepository;
     private PersonOppslagSystem personOppslagSystem;
 
     @Inject
-    public UttaksplanTjeneste(Saker saker, AnnenPartSakTjeneste annenPartSakTjeneste, SøknadsuttaksplanRepository søknadRepository,
+    public UttaksplanTjeneste(Saker saker, AnnenPartSakTjeneste annenPartSakTjeneste, SøknadsplanRepository søknadRepository,
                              PersonOppslagSystem personOppslagSystem) {
         this.saker = saker;
         this.annenPartSakTjeneste = annenPartSakTjeneste;
@@ -178,7 +178,7 @@ public class UttaksplanTjeneste {
     /**
      * Annen parts søknad slås aldri opp når søkeren har egen sak.
      */
-    private Optional<Søknadsuttaksplan> aktivSøknad(Optional<ForeldrepengerSak> søkersSak, Optional<ForeldrepengerSak> annenPartsSak) {
+    private Optional<Søknadsplan> aktivSøknad(Optional<ForeldrepengerSak> søkersSak, Optional<ForeldrepengerSak> annenPartsSak) {
         return søkersSak.or(() -> annenPartsSak).flatMap(this::hentAktivSøknad);
     }
 
@@ -248,18 +248,18 @@ public class UttaksplanTjeneste {
         return new LocalDateInterval(gjeldende.minusWeeks(5), gjeldende.plusWeeks(5)).contains(familiehendelse);
     }
 
-    private Optional<Søknadsuttaksplan> hentAktivSøknad(ForeldrepengerSak sak) {
+    private Optional<Søknadsplan> hentAktivSøknad(ForeldrepengerSak sak) {
         return søknadRepository.hentAktivFor(sak.saksnummer());
     }
 
-    private static boolean harRolle(Søknadsuttaksplan søknad, FellesUttaksplanDto.Rolle rolle) {
+    private static boolean harRolle(Søknadsplan søknad, FellesUttaksplanDto.Rolle rolle) {
         if (søknad.rolle() == null) {
             throw ugyldigRolle();
         }
         return søknad.rolle() == søknadRolle(rolle);
     }
 
-    private static List<Planperiode> mapSøknad(Søknadsuttaksplan søknad) {
+    private static List<Planperiode> mapSøknad(Søknadsplan søknad) {
         return UttaksplanMapper.mapLagredeSøknadsperioder(søknad.perioder());
     }
 
@@ -302,8 +302,8 @@ public class UttaksplanTjeneste {
         return rolle == FellesUttaksplanDto.Rolle.MOR ? FellesUttaksplanDto.Rolle.FAR_MEDMOR : FellesUttaksplanDto.Rolle.MOR;
     }
 
-    private static Søknadsuttaksplan.Rolle søknadRolle(FellesUttaksplanDto.Rolle rolle) {
-        return rolle == FellesUttaksplanDto.Rolle.MOR ? Søknadsuttaksplan.Rolle.MOR : Søknadsuttaksplan.Rolle.FAR_MEDMOR;
+    private static Søknadsplan.Rolle søknadRolle(FellesUttaksplanDto.Rolle rolle) {
+        return rolle == FellesUttaksplanDto.Rolle.MOR ? Søknadsplan.Rolle.MOR : Søknadsplan.Rolle.FAR_MEDMOR;
     }
 
     private static IllegalStateException ugyldigRolle() {

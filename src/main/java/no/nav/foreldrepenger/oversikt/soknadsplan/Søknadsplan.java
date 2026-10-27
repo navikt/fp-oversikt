@@ -1,12 +1,12 @@
-package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
+package no.nav.foreldrepenger.oversikt.soknadsplan;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Objects;
 
-public record Søknadsuttaksplan(Instant mottattTidspunkt, Søknadsuttaksplan.Rolle rolle, List<SøknadsuttaksplanPeriode> perioder) {
+public record Søknadsplan(Instant mottattTidspunkt, Søknadsplan.Rolle rolle, List<SøknadsplanPeriode> perioder) {
 
-    public Søknadsuttaksplan {
+    public Søknadsplan {
         Objects.requireNonNull(mottattTidspunkt, "mottattTidspunkt kan ikke være null");
         Objects.requireNonNull(rolle, "rolle kan ikke være null");
         perioder = List.copyOf(Objects.requireNonNull(perioder, "perioder kan ikke være null"));
@@ -17,7 +17,7 @@ public record Søknadsuttaksplan(Instant mottattTidspunkt, Søknadsuttaksplan.Ro
 
     @Override
     public String toString() {
-        return "Søknadsuttaksplan[redacted]";
+        return "Søknadsplan[redacted]";
     }
 
     public enum Rolle {

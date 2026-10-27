@@ -1,15 +1,15 @@
-package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
+package no.nav.foreldrepenger.oversikt.soknadsplan;
 
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndigInnloggetBruker;
 import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.Søknadsuttaksplan.Rolle.FAR_MEDMOR;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.Søknadsuttaksplan.Rolle.MOR;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriode.KontoType.FELLESPERIODE;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPerioderTest.periode;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadType.ENDRINGSSØKNAD;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadType.FØRSTEGANGSSØKNAD;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.Søknadsplan.Rolle.FAR_MEDMOR;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.Søknadsplan.Rolle.MOR;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode.KontoType.FEDREKVOTE;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode.KontoType.FELLESPERIODE;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode.KontoType.MØDREKVOTE;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPerioderTest.periode;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadType.ENDRINGSSØKNAD;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadType.FØRSTEGANGSSØKNAD;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -60,10 +60,10 @@ import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
 import no.nav.foreldrepenger.oversikt.saker.Saker;
 import no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
-import no.nav.foreldrepenger.oversikt.stub.SøknadsuttaksplanRepositoryStub;
+import no.nav.foreldrepenger.oversikt.stub.SøknadsplanRepositoryStub;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTjeneste;
 
-class SøknadsuttaksplanTjenesteTest {
+class SøknadsplanTjenesteTest {
 
     private static final LocalDate DAG = LocalDate.of(2026, 11, 2);
     private static final Instant MOTTATT = Instant.parse("2026-10-01T10:00:00Z");
@@ -72,14 +72,14 @@ class SøknadsuttaksplanTjenesteTest {
     private final AktørId søker = AktørId.dummy();
     private final AktørId annenPart = AktørId.dummy();
     private final AktørId barn = AktørId.dummy();
-    private final SøknadsuttaksplanRepositoryStub søknadRepository = spy(new SøknadsuttaksplanRepositoryStub());
+    private final SøknadsplanRepositoryStub søknadRepository = spy(new SøknadsplanRepositoryStub());
     private final RepositoryStub sakRepository = spy(new RepositoryStub());
     private final DummyPersonOppslagSystemTest personOppslag = spy(annenpartUbeskyttetAdresse());
     private final Saker saker = new Saker(sakRepository, myndigInnloggetBruker(AktørId.dummy()), personOppslag);
     private final AnnenPartSakTjeneste annenPartSakTjeneste = spy(new AnnenPartSakTjeneste(saker));
     private final UttaksplanTjeneste uttaksplanTjeneste = spy(new UttaksplanTjeneste(saker, annenPartSakTjeneste,
         søknadRepository, personOppslag));
-    private final SøknadsuttaksplanTjeneste tjeneste = new SøknadsuttaksplanTjeneste(søknadRepository, sakRepository, uttaksplanTjeneste);
+    private final SøknadsplanTjeneste tjeneste = new SøknadsplanTjeneste(søknadRepository, sakRepository, uttaksplanTjeneste);
 
     @Test
     void førstegangssøknadErstatterAlleLagredePerioder() {
@@ -120,8 +120,8 @@ class SøknadsuttaksplanTjenesteTest {
         tjeneste.lagre(sak.saksnummer(), søknad(MOTTATT.plusSeconds(60), endring), ENDRINGSSØKNAD);
 
         assertThat(søknadRepository.hentAktivFor(sak.saksnummer())).contains(søknad(MOTTATT.plusSeconds(60),
-            new SøknadsuttaksplanPeriode(DAG, DAG.plusDays(9), MOR, MØDREKVOTE, null, null, null, null, new BigDecimal("50.00"), false, null, null, null),
-            new SøknadsuttaksplanPeriode(DAG, DAG.plusDays(9), FAR_MEDMOR, FEDREKVOTE, null, null, null, null, new BigDecimal("50.00"), false, null, null, null),
+            new SøknadsplanPeriode(DAG, DAG.plusDays(9), MOR, MØDREKVOTE, null, null, null, null, new BigDecimal("50.00"), false, null, null),
+            new SøknadsplanPeriode(DAG, DAG.plusDays(9), FAR_MEDMOR, FEDREKVOTE, null, null, null, null, new BigDecimal("50.00"), false, null, null),
             endring));
     }
 
@@ -318,8 +318,8 @@ class SøknadsuttaksplanTjenesteTest {
         assertThat(søknadRepository.hentAktivFor(saksnummer)).isEmpty();
     }
 
-    private static Søknadsuttaksplan søknad(Instant mottatt, SøknadsuttaksplanPeriode... perioder) {
-        return new Søknadsuttaksplan(mottatt, MOR, List.of(perioder));
+    private static Søknadsplan søknad(Instant mottatt, SøknadsplanPeriode... perioder) {
+        return new Søknadsplan(mottatt, MOR, List.of(perioder));
     }
 
     private SakFP0 lagreSak(AktørId eier, AktørId medforelder, Set<AktørId> barna, FamilieHendelse hendelse,

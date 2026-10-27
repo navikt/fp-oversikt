@@ -25,6 +25,6 @@ Planen bygges fra lagrede søknadsperioder og gjeldende vedtak, sett fra den inn
 5. **Skjerm og bygg tidslinjen.** `UttaksplanTjeneste.hentFor` skjuler annen parts uttak, utsettelser og EØS-perioder ved adressebeskyttelse, uavklart identitet eller avvik mellom request og sak. Dette gjelder også perioder fra søkerens egen søknad. Filtreringen skjer før normalisering av overlapp og samtidig uttak. Søknadsutsettelser fyller bare hull i tidslinjen.
 6. **Returner planen.** Periodene returneres med søker og annen part i hvert sitt felt, sammen med termindato, antall barn og dekningsgrad. Uten sak for noen av foreldrene returneres ingen plan.
 
-Lagringen ligger i `SøknadsuttaksplanTjeneste`. `UttaksplanRest`, `UttaksplanTjeneste` og `UttaksplanTidslinje` håndterer henting og oppbygging.
+Lagringen ligger i `SøknadsplanTjeneste`. `UttaksplanRest`, `UttaksplanTjeneste` og `UttaksplanTidslinje` håndterer henting og oppbygging.
 
 https://confluence.adeo.no/pages/viewpage.action?pageId=529061042

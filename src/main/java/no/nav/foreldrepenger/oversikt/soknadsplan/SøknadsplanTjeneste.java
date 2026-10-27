@@ -1,4 +1,4 @@
-package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
+package no.nav.foreldrepenger.oversikt.soknadsplan;
 
 import java.util.Objects;
 
@@ -13,22 +13,22 @@ import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTjeneste;
 
 @ApplicationScoped
-public class SøknadsuttaksplanTjeneste {
+public class SøknadsplanTjeneste {
 
-    private static final Logger LOG = LoggerFactory.getLogger(SøknadsuttaksplanTjeneste.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SøknadsplanTjeneste.class);
 
-    private SøknadsuttaksplanRepository søknadsuttaksplanRepository;
+    private SøknadsplanRepository søknadsplanRepository;
     private SakRepository sakRepository;
     private UttaksplanTjeneste uttaksplanTjeneste;
 
     @Inject
-    public SøknadsuttaksplanTjeneste(SøknadsuttaksplanRepository søknadsuttaksplanRepository, SakRepository sakRepository, UttaksplanTjeneste uttaksplanTjeneste) {
-        this.søknadsuttaksplanRepository = søknadsuttaksplanRepository;
+    public SøknadsplanTjeneste(SøknadsplanRepository søknadsplanRepository, SakRepository sakRepository, UttaksplanTjeneste uttaksplanTjeneste) {
+        this.søknadsplanRepository = søknadsplanRepository;
         this.sakRepository = sakRepository;
         this.uttaksplanTjeneste = uttaksplanTjeneste;
     }
 
-    SøknadsuttaksplanTjeneste() {
+    SøknadsplanTjeneste() {
         // CDI
     }
 
@@ -37,16 +37,16 @@ public class SøknadsuttaksplanTjeneste {
      * og slås sammen med felles uttaksplan. Avsender oppgir søknadstypen uavhengig av sakens vedtak.
      * Endringssøknader uten plangrunnlag ignoreres.
      */
-    public void lagre(Saksnummer saksnummer, Søknadsuttaksplan søknadsuttaksplan, SøknadType søknadType) {
+    public void lagre(Saksnummer saksnummer, Søknadsplan søknadsplan, SøknadType søknadType) {
         Objects.requireNonNull(søknadType, "søknadType må være satt");
-        var aktiv = søknadsuttaksplanRepository.hentAktivFor(saksnummer);
-        if (aktiv.filter(a -> !a.mottattTidspunkt().isBefore(søknadsuttaksplan.mottattTidspunkt())).isPresent()) {
+        var aktiv = søknadsplanRepository.hentAktivFor(saksnummer);
+        if (aktiv.filter(a -> !a.mottattTidspunkt().isBefore(søknadsplan.mottattTidspunkt())).isPresent()) {
             LOG.info("Ignorerer søknad som ikke er nyere enn aktiv søknad på saken");
             return;
         }
 
         if (søknadType == SøknadType.FØRSTEGANGSSØKNAD) {
-            søknadsuttaksplanRepository.lagre(saksnummer, søknadsuttaksplan);
+            søknadsplanRepository.lagre(saksnummer, søknadsplan);
             return;
         }
 
@@ -57,14 +57,14 @@ public class SøknadsuttaksplanTjeneste {
         }
 
         var grunnlag = uttaksplanTjeneste.hentFor(fpSak)
-            .map(plan -> SøknadsuttaksplanMapper.tilPerioder(plan.perioder()))
+            .map(plan -> SøknadsplanMapper.tilPerioder(plan.perioder()))
             .filter(perioder -> !perioder.isEmpty());
         if (grunnlag.isEmpty()) {
             LOG.info("Lagrer ikke endringssøknad fordi saken mangler plangrunnlag");
             return;
         }
 
-        var perioder = SøknadsuttaksplanPerioder.medEksisterendeFørEndringsdato(grunnlag.orElseThrow(), søknadsuttaksplan.perioder());
-        søknadsuttaksplanRepository.lagre(saksnummer, new Søknadsuttaksplan(søknadsuttaksplan.mottattTidspunkt(), søknadsuttaksplan.rolle(), perioder));
+        var perioder = SøknadsplanPerioder.medEksisterendeFørEndringsdato(grunnlag.orElseThrow(), søknadsplan.perioder());
+        søknadsplanRepository.lagre(saksnummer, new Søknadsplan(søknadsplan.mottattTidspunkt(), søknadsplan.rolle(), perioder));
     }
 }

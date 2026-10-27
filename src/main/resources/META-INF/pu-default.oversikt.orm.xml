@@ -9,14 +9,14 @@
     <sequence-generator name="SEQ_TILBAKEKREVING" allocation-size="50" sequence-name="SEQ_TILBAKEKREVING" />
     <sequence-generator name="SEQ_MANGLENDE_VEDLEGG" allocation-size="50" sequence-name="SEQ_MANGLENDE_VEDLEGG" />
     <sequence-generator name="SEQ_INNTEKTSMELDINGER" allocation-size="50" sequence-name="SEQ_INNTEKTSMELDINGER" />
-    <sequence-generator name="SEQ_SOKNADSUTTAKSPLAN" allocation-size="50" sequence-name="SEQ_SOKNADSUTTAKSPLAN"/>
-    <sequence-generator name="SEQ_SOKNADSUTTAKSPLAN_PERIODE" allocation-size="50" sequence-name="SEQ_SOKNADSUTTAKSPLAN_PERIODE"/>
+    <sequence-generator name="SEQ_SOKNADSPLAN" allocation-size="50" sequence-name="SEQ_SOKNADSPLAN"/>
+    <sequence-generator name="SEQ_SOKNADSPLAN_PERIODE" allocation-size="50" sequence-name="SEQ_SOKNADSPLAN_PERIODE"/>
     <entity class="no.nav.foreldrepenger.oversikt.domene.SakEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.tilbakekreving.TilbakekrevingEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.vedlegg.manglende.ManglendeVedleggEntitet" />
     <entity class="no.nav.foreldrepenger.oversikt.domene.inntektsmeldinger.InntektsmeldingerEntitet" />
-    <entity class="no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanEntitet"/>
-    <entity class="no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriodeEntitet"/>
+    <entity class="no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanEntitet"/>
+    <entity class="no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriodeEntitet"/>
     <entity class="no.nav.foreldrepenger.oversikt.oppgave.OppgaveEntitet" />
 
 </entity-mappings>

@@ -1,10 +1,10 @@
-package no.nav.foreldrepenger.oversikt.søknadsuttaksplan;
+package no.nav.foreldrepenger.oversikt.soknadsplan;
 
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.Søknadsuttaksplan.Rolle.FAR_MEDMOR;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.Søknadsuttaksplan.Rolle.MOR;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriode.KontoType.FEDREKVOTE;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriode.KontoType.FELLESPERIODE;
-import static no.nav.foreldrepenger.oversikt.søknadsuttaksplan.SøknadsuttaksplanPeriode.KontoType.MØDREKVOTE;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.Søknadsplan.Rolle.FAR_MEDMOR;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.Søknadsplan.Rolle.MOR;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode.KontoType.FEDREKVOTE;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode.KontoType.FELLESPERIODE;
+import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode.KontoType.MØDREKVOTE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
@@ -13,7 +13,7 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
-class SøknadsuttaksplanPerioderTest {
+class SøknadsplanPerioderTest {
 
     private static final LocalDate DAG = LocalDate.of(2026, 11, 2);
 
@@ -22,7 +22,7 @@ class SøknadsuttaksplanPerioderTest {
         var gradert = periode(MOR, DAG, DAG.plusDays(20), FELLESPERIODE, new BigDecimal("50"));
         var ny = periode(MOR, DAG.plusDays(10), DAG.plusDays(15), MØDREKVOTE, null);
 
-        var resultat = SøknadsuttaksplanPerioder.medEksisterendeFørEndringsdato(List.of(gradert), List.of(ny));
+        var resultat = SøknadsplanPerioder.medEksisterendeFørEndringsdato(List.of(gradert), List.of(ny));
 
         assertThat(resultat).containsExactly(
             periode(MOR, DAG, DAG.plusDays(9), FELLESPERIODE, new BigDecimal("50")),
@@ -35,7 +35,7 @@ class SøknadsuttaksplanPerioderTest {
         var andre = periode(MOR, DAG.plusDays(5), DAG.plusDays(9), FELLESPERIODE, null);
         var ny = periode(MOR, DAG.plusDays(5), DAG.plusDays(7), MØDREKVOTE, null);
 
-        assertThat(SøknadsuttaksplanPerioder.medEksisterendeFørEndringsdato(List.of(første, andre), List.of(ny))).containsExactly(første, ny);
+        assertThat(SøknadsplanPerioder.medEksisterendeFørEndringsdato(List.of(første, andre), List.of(ny))).containsExactly(første, ny);
     }
 
     @Test
@@ -43,7 +43,7 @@ class SøknadsuttaksplanPerioderTest {
         var gammel = periode(MOR, DAG, DAG.plusDays(4), MØDREKVOTE, null);
         var ny = periode(MOR, DAG.plusDays(20), DAG.plusDays(24), FELLESPERIODE, null);
 
-        assertThat(SøknadsuttaksplanPerioder.medEksisterendeFørEndringsdato(List.of(gammel), List.of(ny))).containsExactly(gammel, ny);
+        assertThat(SøknadsplanPerioder.medEksisterendeFørEndringsdato(List.of(gammel), List.of(ny))).containsExactly(gammel, ny);
     }
 
     @Test
@@ -53,7 +53,7 @@ class SøknadsuttaksplanPerioderTest {
         var morSenere = periode(MOR, DAG.plusDays(20), DAG.plusDays(29), FELLESPERIODE, null);
         var nyMor = periode(MOR, DAG.plusDays(5), DAG.plusDays(9), FELLESPERIODE, null);
 
-        var resultat = SøknadsuttaksplanPerioder.medEksisterendeFørEndringsdato(List.of(morFør, farEtter, morSenere), List.of(nyMor));
+        var resultat = SøknadsplanPerioder.medEksisterendeFørEndringsdato(List.of(morFør, farEtter, morSenere), List.of(nyMor));
 
         assertThat(resultat).containsExactly(periode(MOR, DAG, DAG.plusDays(4), MØDREKVOTE, null), nyMor);
     }
@@ -64,7 +64,7 @@ class SøknadsuttaksplanPerioderTest {
         var far = periode(FAR_MEDMOR, DAG, DAG.plusDays(9), FEDREKVOTE, null);
         var nyFar = periode(FAR_MEDMOR, DAG.plusDays(5), DAG.plusDays(14), FEDREKVOTE, null);
 
-        var resultat = SøknadsuttaksplanPerioder.medEksisterendeFørEndringsdato(List.of(mor, far), List.of(nyFar));
+        var resultat = SøknadsplanPerioder.medEksisterendeFørEndringsdato(List.of(mor, far), List.of(nyFar));
 
         assertThat(resultat).containsExactly(
             periode(MOR, DAG, DAG.plusDays(4), MØDREKVOTE, null),
@@ -74,14 +74,14 @@ class SøknadsuttaksplanPerioderTest {
 
     @Test
     void utsettelseSomKuttesBeholderÅrsak() {
-        var utsettelse = new SøknadsuttaksplanPeriode(DAG, DAG.plusDays(9), MOR, null, SøknadsuttaksplanPeriode.UtsettelseÅrsak.ARBEID,
-            null, null, null, null, false, null, null, null);
+        var utsettelse = new SøknadsplanPeriode(DAG, DAG.plusDays(9), MOR, null, SøknadsplanPeriode.UtsettelseÅrsak.ARBEID,
+            null, null, null, null, false, null, null);
         var ny = periode(MOR, DAG.plusDays(3), DAG.plusDays(9), MØDREKVOTE, null);
 
-        var resultat = SøknadsuttaksplanPerioder.medEksisterendeFørEndringsdato(List.of(utsettelse), List.of(ny));
+        var resultat = SøknadsplanPerioder.medEksisterendeFørEndringsdato(List.of(utsettelse), List.of(ny));
 
         assertThat(resultat.getFirst().tom()).isEqualTo(DAG.plusDays(2));
-        assertThat(resultat.getFirst().utsettelseÅrsak()).isEqualTo(SøknadsuttaksplanPeriode.UtsettelseÅrsak.ARBEID);
+        assertThat(resultat.getFirst().utsettelseÅrsak()).isEqualTo(SøknadsplanPeriode.UtsettelseÅrsak.ARBEID);
     }
 
     @Test
@@ -90,11 +90,11 @@ class SøknadsuttaksplanPerioderTest {
         var gammel = periode(MOR, DAG, DAG.plusDays(19), MØDREKVOTE, null);
         var ny = periode(MOR, DAG.plusDays(15), DAG.plusDays(19), FELLESPERIODE, null);
 
-        assertThat(SøknadsuttaksplanPerioder.medEksisterendeFørEndringsdato(List.of(gammel), List.of(ny)))
+        assertThat(SøknadsplanPerioder.medEksisterendeFørEndringsdato(List.of(gammel), List.of(ny)))
             .containsExactly(periode(MOR, DAG, DAG.plusDays(14), MØDREKVOTE, null), ny);
     }
 
-    static SøknadsuttaksplanPeriode periode(Søknadsuttaksplan.Rolle rolle, LocalDate fom, LocalDate tom, SøknadsuttaksplanPeriode.KontoType konto, BigDecimal gradering) {
-        return new SøknadsuttaksplanPeriode(fom, tom, rolle, konto, null, null, null, gradering, null, false, null, null, null);
+    static SøknadsplanPeriode periode(Søknadsplan.Rolle rolle, LocalDate fom, LocalDate tom, SøknadsplanPeriode.KontoType konto, BigDecimal gradering) {
+        return new SøknadsplanPeriode(fom, tom, rolle, konto, null, null, null, gradering, null, false, null, null);
     }
 }
