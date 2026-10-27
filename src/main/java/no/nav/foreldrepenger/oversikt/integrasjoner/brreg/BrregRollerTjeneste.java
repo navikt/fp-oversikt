@@ -70,6 +70,20 @@ public class BrregRollerTjeneste {
         return finnSelvstendigNæringFraBrreg(fødselsnummer);
     }
 
+    public void testBrregIntegrasjonIProduksjon(Fødselsnummer fødselsnummer) {
+        if (!ENV.isProd()) {
+            return;
+        }
+        try {
+            var resultat = finnSelvstendigNæringFraBrreg(fødselsnummer);
+            LOG.info("Testkall mot Brreg for selvstendig næring var vellykket. Antall resultater: {}", resultat.size());
+            SECURE_LOG.info("Testkall mot Brreg for selvstendig næring. Resultat: {}", DefaultJsonMapper.toJson(resultat));
+        } catch (RuntimeException e) {
+            LOG.warn("Testkall mot Brreg for selvstendig næring feilet. Feiltype: {}", e.getClass().getSimpleName());
+            SECURE_LOG.warn("Testkall mot Brreg for selvstendig næring feilet for fødselsnummer {}.", fødselsnummer.value(), e);
+        }
+    }
+
     private List<BrregSelvstendigNæring> finnSelvstendigNæringFraBrreg(Fødselsnummer fødselsnummer) {
         return hentRollerForPersonFraBrreg(fødselsnummer).stream()
             .map(this::finnSelvstendigNæring)
