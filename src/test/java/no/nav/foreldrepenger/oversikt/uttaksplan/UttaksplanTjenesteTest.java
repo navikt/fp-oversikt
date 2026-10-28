@@ -18,7 +18,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -26,7 +25,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
-import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
+import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
@@ -55,7 +54,7 @@ import no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanRepository;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 import no.nav.foreldrepenger.oversikt.stub.SøknadsplanRepositoryStub;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
-import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
+import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 
 class UttaksplanTjenesteTest {
 
@@ -102,6 +101,28 @@ class UttaksplanTjenesteTest {
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.annenPart().gradering().aktivitet()).isNull();
+        });
+    }
+
+    @Test
+    void skalMappeGraderingMedAnnenAktivitetTilUtenAktivitet() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        var aktivitet = new Uttaksperiode.UttaksperiodeAktivitet(new UttakAktivitet(UttakAktivitet.Type.ANNET, null, null),
+            Konto.FELLESPERIODE, new Trekkdager(5), new Prosent(40));
+        var resultat = new Uttaksperiode.Resultat(Uttaksperiode.Resultat.Type.INNVILGET_GRADERING, Uttaksperiode.Resultat.Årsak.ANNET,
+            Set.of(aktivitet), false);
+        var uttaksperiode = new Uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(7), null, null, null, Prosent.ZERO, false, null,
+            resultat);
+        lagre(sakMedVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR, uttaksperiode));
+
+        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+
+        assertThat(plan.perioder()).singleElement().satisfies(periode -> {
+            assertThat(periode.søker().gradering()).isNotNull();
+            assertThat(periode.søker().gradering().aktivitet()).isNull();
         });
     }
 
