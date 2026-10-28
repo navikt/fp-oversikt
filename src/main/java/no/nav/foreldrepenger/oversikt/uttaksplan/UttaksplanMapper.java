@@ -134,7 +134,7 @@ final class UttaksplanMapper {
     }
 
     private static Aktivitet mapAktivitet(UttakAktivitet aktivitet) {
-        if (aktivitet == null) {
+        if (aktivitet == null || aktivitet.type() == UttakAktivitet.Type.ANNET) {
             return null;
         }
         var arbeidsgiver = aktivitet.arbeidsgiver() == null ? null : mapArbeidsgiver(aktivitet.arbeidsgiver());
@@ -155,7 +155,7 @@ final class UttaksplanMapper {
             case ORDINÆRT_ARBEID -> Aktivitet.AktivitetType.ORDINÆRT_ARBEID;
             case SELVSTENDIG_NÆRINGSDRIVENDE -> Aktivitet.AktivitetType.SELVSTENDIG_NÆRINGSDRIVENDE;
             case FRILANS -> Aktivitet.AktivitetType.FRILANS;
-            case ANNET -> Aktivitet.AktivitetType.ANNET;
+            case ANNET -> throw new IllegalArgumentException("ANNET skal mappes til null aktivitet");
         };
     }
 
