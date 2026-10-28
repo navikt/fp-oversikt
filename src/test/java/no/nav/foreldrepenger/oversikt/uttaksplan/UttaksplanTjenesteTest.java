@@ -81,6 +81,28 @@ class UttaksplanTjenesteTest {
     }
 
     @Test
+    void skalMappeGraderingMedAnnenAktivitetTilUtenAktivitet(EntityManager entityManager) {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        var aktivitet = new Uttaksperiode.UttaksperiodeAktivitet(new UttakAktivitet(UttakAktivitet.Type.ANNET, null, null),
+            Konto.FELLESPERIODE, new Trekkdager(5), new Prosent(40));
+        var resultat = new Uttaksperiode.Resultat(Uttaksperiode.Resultat.Type.INNVILGET_GRADERING, Uttaksperiode.Resultat.Årsak.ANNET,
+            Set.of(aktivitet), false);
+        var uttaksperiode = new Uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(7), null, null, null, Prosent.ZERO, false, null,
+            resultat);
+        lagre(entityManager, sakMedVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR, uttaksperiode));
+
+        var plan = tjeneste(entityManager, søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+
+        assertThat(plan.perioder()).singleElement().satisfies(periode -> {
+            assertThat(periode.søker().gradering()).isNotNull();
+            assertThat(periode.søker().gradering().aktivitet()).isNull();
+        });
+    }
+
+    @Test
     void skalIkkeReturnereAnnenPartsPerioderNårAnnenPartIkkeHarOppgittSøker(EntityManager entityManager) {
         var søker = AktørId.dummy();
         var annenPart = AktørId.dummy();
