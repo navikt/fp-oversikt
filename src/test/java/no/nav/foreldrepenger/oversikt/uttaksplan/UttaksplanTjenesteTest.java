@@ -4,28 +4,17 @@ import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndi
 import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.annenpartUbeskyttetAdresse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.clearInvocations;
-import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
-import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.Arbeidsgiver;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
@@ -45,15 +34,12 @@ import no.nav.foreldrepenger.oversikt.domene.fp.UttakAktivitet;
 import no.nav.foreldrepenger.oversikt.domene.fp.UttakPeriodeAnnenpartEøs;
 import no.nav.foreldrepenger.oversikt.domene.fp.Uttaksperiode;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
-import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
-import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.foreldrepenger.oversikt.saker.Saker;
 import no.nav.foreldrepenger.oversikt.soknadsplan.Søknadsplan;
 import no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode;
 import no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanRepository;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 import no.nav.foreldrepenger.oversikt.stub.SøknadsplanRepositoryStub;
-import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 
 class UttaksplanTjenesteTest {
@@ -74,7 +60,7 @@ class UttaksplanTjenesteTest {
         lagre(sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR, søkersPeriode),
             sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, annenPartsPeriode));
 
-        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.fom()).isEqualTo(søkersPeriode.fom());
@@ -97,7 +83,7 @@ class UttaksplanTjenesteTest {
             resultat);
         lagre(sakMedVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, uttaksperiode));
 
-        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.annenPart().gradering().aktivitet()).isNull();
@@ -118,7 +104,7 @@ class UttaksplanTjenesteTest {
             resultat);
         lagre(sakMedVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR, uttaksperiode));
 
-        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.søker().gradering()).isNotNull();
@@ -138,7 +124,7 @@ class UttaksplanTjenesteTest {
         lagre(sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR, søkersPeriode),
             sakMedVedtak(annenPart, tredjePart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, annenPartsPeriode));
 
-        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.søker()).isNotNull();
@@ -155,11 +141,11 @@ class UttaksplanTjenesteTest {
         var termindato = LocalDate.of(2026, 10, 1);
         var søknadRepository = new SøknadsplanRepositoryStub();
         var tjeneste = tjeneste(søker, søknadRepository);
-        var ukjentSak = tjeneste.hentFor(søker, annenPart, barn, termindato);
+        var ukjentSak = tjeneste.hentFor(søker, verifisert(annenPart), barn, termindato);
 
         lagre(sakUtenVedtak(annenPart, tredjePart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
             søknadsperiode(termindato, termindato.plusWeeks(2), Konto.FEDREKVOTE)));
-        var manglendeRelasjon = tjeneste.hentFor(søker, annenPart, barn, termindato);
+        var manglendeRelasjon = tjeneste.hentFor(søker, verifisert(annenPart), barn, termindato);
         var skjermetAnnenPart = tjeneste.hentFor(søker, null, barn, termindato);
 
         assertThat(ukjentSak).isEmpty();
@@ -179,7 +165,7 @@ class UttaksplanTjenesteTest {
             sakUtenVedtak(annenPart, søker, barn, annenPartsTermindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
                 søknadsperiode(annenPartsTermindato, annenPartsTermindato.plusWeeks(2), Konto.FEDREKVOTE)));
 
-        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, søkersTermindato).orElseThrow();
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, søkersTermindato).orElseThrow();
 
         assertThat(plan.termindato()).isEqualTo(søkersTermindato);
         assertThat(plan.antallBarn()).isEqualTo(2);
@@ -195,7 +181,7 @@ class UttaksplanTjenesteTest {
         lagre(sakUtenVedtak(annenPart, søker, barn, termindato, 2, Dekningsgrad.ÅTTI, BrukerRolle.FAR,
             søknadsperiode(termindato, termindato.plusWeeks(2), Konto.FEDREKVOTE)));
 
-        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.termindato()).isEqualTo(termindato);
         assertThat(plan.antallBarn()).isEqualTo(2);
@@ -239,7 +225,7 @@ class UttaksplanTjenesteTest {
             List.of(nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, termindato.plusWeeks(14), termindato.plusWeeks(15),
                 SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
 
-        var plan = tjeneste(søker, søknadRepository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker, søknadRepository).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.fom()).isEqualTo(termindato.plusWeeks(2));
@@ -278,7 +264,7 @@ class UttaksplanTjenesteTest {
                 nyPeriode(annenRolle, termindato.plusWeeks(4), termindato.plusWeeks(4).plusDays(4), annenKonto, null, null, null))));
         var tjeneste = tjeneste(søker, repository);
 
-        var plan = tjeneste.hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste.hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).hasSize(2);
         assertThat(plan.perioder()).filteredOn(p -> p.søker() != null).singleElement().satisfies(p -> {
@@ -306,7 +292,7 @@ class UttaksplanTjenesteTest {
             List.of(nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, termindato.plusWeeks(10), termindato.plusWeeks(11),
                 SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.søker()).isNotNull();
@@ -393,7 +379,7 @@ class UttaksplanTjenesteTest {
             sak(søker, annenPart, barn, mandag, 1, BrukerRolle.MOR, Set.of(søkersVedtak), Set.of(tomLegacy)),
             sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, annenPartsUttak));
 
-        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).anySatisfy(p -> {
             assertThat(p.fom()).isEqualTo(mandag.plusWeeks(2).plusDays(2));
@@ -495,7 +481,7 @@ class UttaksplanTjenesteTest {
         repository.lagre(sak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR,
             List.of(utsettelsePeriode(Søknadsplan.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(p -> {
             assertThat(p.søker()).isNull();
@@ -514,7 +500,7 @@ class UttaksplanTjenesteTest {
         lagre(sak);
         var repository = new SøknadsplanRepositoryStub();
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).isEmpty();
     }
@@ -561,7 +547,7 @@ class UttaksplanTjenesteTest {
                     SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null)));
         repository.lagre(sak.saksnummer(), aktiv);
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).hasSize(2);
         assertThat(plan.perioder()).filteredOn(periode -> periode.søker() != null).singleElement().satisfies(periode -> {
@@ -589,7 +575,7 @@ class UttaksplanTjenesteTest {
                 nyPeriode(Søknadsplan.Rolle.MOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4),
                     SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).hasSize(2);
         assertThat(plan.perioder()).anySatisfy(p -> {
@@ -616,7 +602,7 @@ class UttaksplanTjenesteTest {
         var annenPartsSøknad = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now().minusDays(1), Set.of(), Dekningsgrad.HUNDRE, false);
         lagre(sak(annenPart, søker, barn, mandag, 1, BrukerRolle.FAR, Set.of(annenPartsVedtak), Set.of(annenPartsSøknad)));
 
-        var plan = tjeneste(søker).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).noneMatch(p -> p.annenPartEøs() != null);
     }
@@ -635,7 +621,7 @@ class UttaksplanTjenesteTest {
             Søknadsplan.Rolle.FAR_MEDMOR, List.of(nyPeriode(Søknadsplan.Rolle.MOR, termindato, termindato.plusDays(4),
                 SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
 
-        assertThatThrownBy(() -> tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato))
+        assertThatThrownBy(() -> tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, termindato))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Ugyldig rolle i uttaksplan");
     }
@@ -662,7 +648,7 @@ class UttaksplanTjenesteTest {
                 nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, termindato.plusWeeks(1), termindato.plusWeeks(1).plusDays(4),
                     SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.fom()).isEqualTo(vedtaksperiode.fom());
@@ -712,7 +698,7 @@ class UttaksplanTjenesteTest {
                 nyPeriode(Søknadsplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null),
                 utsettelsePeriode(Søknadsplan.Rolle.MOR, mandag.plusDays(2), mandag.plusDays(14)))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).anySatisfy(p -> assertThat(p.fom()).isEqualTo(mandag));
         assertThat(plan.perioder()).filteredOn(p -> p.søker() != null && p.søker().utsettelseÅrsak() != null)
@@ -753,7 +739,7 @@ class UttaksplanTjenesteTest {
         repository.lagre(egenSak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR,
             List.of(utsettelsePeriode(Søknadsplan.Rolle.MOR, mandag, mandag.plusDays(11)))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).extracting(p -> p.fom()).containsExactly(
             mandag, mandag.plusDays(2), mandag.plusDays(4), mandag.plusDays(8), mandag.plusDays(10));
@@ -815,7 +801,7 @@ class UttaksplanTjenesteTest {
         }
         søknadRepository.lagre(egenSak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR, perioder));
 
-        return tjeneste(søker, søknadRepository, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        return tjeneste(søker, søknadRepository, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
     }
 
     private static List<Uttaksdag> uttaksdager(FellesUttaksplanDto plan) {
@@ -850,7 +836,7 @@ class UttaksplanTjenesteTest {
         repository.lagre(egenSak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.FAR_MEDMOR,
             List.of(egenPeriode, morsPeriode)));
 
-        var plan = tjeneste(far, repository).hentFor(far, mor, barn, mandag).orElseThrow();
+        var plan = tjeneste(far, repository).hentFor(far, verifisert(mor), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).filteredOn(p -> p.søker() != null).singleElement().satisfies(p -> {
             assertThat(p.søker().gradering().aktivitet().arbeidsgiver().id()).isEqualTo("far-org");
@@ -884,7 +870,7 @@ class UttaksplanTjenesteTest {
                 nyPeriode(Søknadsplan.Rolle.MOR, termindato.plusWeeks(2), termindato.plusWeeks(2).plusDays(4),
                     SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, termindato).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(periode -> {
             assertThat(periode.fom()).isEqualTo(vedtaksperiode.fom());
@@ -971,7 +957,7 @@ class UttaksplanTjenesteTest {
         repository.lagre(sakMedEøs.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"),
             Søknadsplan.Rolle.MOR, List.of(utsettelsePeriode(Søknadsplan.Rolle.MOR, utsettelseFom, utsettelseTom))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).anySatisfy(periode -> {
             assertThat(periode.fom()).isEqualTo(utsettelseFom);
@@ -1012,7 +998,7 @@ class UttaksplanTjenesteTest {
                 SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null),
             utsettelsePeriode(Søknadsplan.Rolle.MOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4)))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).hasSize(3);
         assertThat(plan.perioder()).noneMatch(p -> p.fom().equals(mandag) || p.fom().equals(mandag.plusWeeks(6)));
@@ -1042,7 +1028,7 @@ class UttaksplanTjenesteTest {
         repository.lagre(sak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.FAR_MEDMOR,
             List.of(utsettelsePeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).singleElement().satisfies(p -> {
             assertThat(p.fom()).isEqualTo(mandag.plusWeeks(2));
@@ -1069,7 +1055,7 @@ class UttaksplanTjenesteTest {
         repository.lagre(annenSak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.FAR_MEDMOR,
             List.of(utsettelsePeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4)))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).anySatisfy(p -> assertThat(p.søker()).isNotNull());
         assertThat(plan.perioder()).noneMatch(p -> p.annenPart() != null && p.annenPart().utsettelseÅrsak() != null);
@@ -1090,7 +1076,7 @@ class UttaksplanTjenesteTest {
                 nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null),
                 utsettelsePeriode(Søknadsplan.Rolle.MOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
 
-        var plan = tjeneste(søker, repository).hentFor(søker, annenPart, barn, mandag).orElseThrow();
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
 
         assertThat(plan.perioder()).filteredOn(p -> p.fom().equals(mandag.plusWeeks(2))).singleElement().satisfies(p -> {
             assertThat(p.søker()).isNull();
@@ -1111,7 +1097,7 @@ class UttaksplanTjenesteTest {
             sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
                 søknadsperiode(termindato, termindato.plusDays(4), Konto.MØDREKVOTE)));
 
-        assertThatThrownBy(() -> tjeneste(søker).hentFor(søker, annenPart, barn, termindato))
+        assertThatThrownBy(() -> tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Ugyldig rolle i uttaksplan");
     }
@@ -1155,303 +1141,109 @@ class UttaksplanTjenesteTest {
         assertThat(plan.perioder()).extracting(p -> p.fom()).containsExactly(mandag, mandag.plusWeeks(3));
     }
 
-    @ParameterizedTest
-    @EnumSource(value = BrukerRolle.class, names = {"MOR", "FAR", "MEDMOR"})
-    void senereAdressebeskyttelseSkjulerLagredePerioderForAnnenRolle(BrukerRolle rolle) throws Exception {
-        var søker = AktørId.dummy();
-        var annenPart = AktørId.dummy();
-        var barn = AktørId.dummy();
-        var mandag = LocalDate.of(2026, 10, 5);
-        var egenRolle = rolle == BrukerRolle.MOR ? Søknadsplan.Rolle.MOR : Søknadsplan.Rolle.FAR_MEDMOR;
-        var annenRolle = rolle == BrukerRolle.MOR ? Søknadsplan.Rolle.FAR_MEDMOR : Søknadsplan.Rolle.MOR;
-        var sak = sakUtenVedtak(søker, annenPart, barn, mandag, 1, Dekningsgrad.HUNDRE, rolle,
-            søknadsperiode(mandag, mandag.plusDays(4), Konto.FELLESPERIODE));
-        lagre(sak);
-        var repository = new SøknadsplanRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), egenRolle, List.of(
-            nyPeriode(egenRolle, mandag, mandag.plusDays(4), SøknadsplanPeriode.KontoType.FELLESPERIODE,
-                new java.math.BigDecimal("40"), SøknadsplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "egen-org"),
-            nyPeriode(annenRolle, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), SøknadsplanPeriode.KontoType.FELLESPERIODE,
-                new java.math.BigDecimal("50"), SøknadsplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "annen-org"),
-            utsettelsePeriode(egenRolle, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4)),
-            utsettelsePeriode(annenRolle, mandag.plusWeeks(6), mandag.plusWeeks(6).plusDays(4)))));
-        var personOppslag = spy(annenpartUbeskyttetAdresse());
-        var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
-        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), repository, personOppslag);
-        var fnr = new Fødselsnummer(annenPart.value());
-
-        var før = tjeneste.hentFor(søker, annenPart, barn, mandag).orElseThrow();
-        assertThat(før.perioder()).hasSize(4);
-        assertThat(før.perioder()).filteredOn(p -> p.annenPart() != null && p.annenPart().gradering() != null)
-            .singleElement().satisfies(p -> assertThat(p.annenPart().gradering().aktivitet()).isNull());
-        var rekkefølge = inOrder(personOppslag, saker);
-        rekkefølge.verify(personOppslag).fødselsnummer(annenPart);
-        rekkefølge.verify(personOppslag).adresseBeskyttelse(fnr);
-        rekkefølge.verify(saker).hentSaker(annenPart);
-
-        when(personOppslag.adresseBeskyttelse(fnr)).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
-        clearInvocations(saker);
-        var etter = tjeneste.hentFor(søker, annenPart, barn, mandag).orElseThrow();
-
-        assertThat(etter.perioder()).containsExactlyElementsOf(før.perioder().stream().filter(p -> p.søker() != null).toList());
-        assertThat(etter.perioder()).allSatisfy(p -> {
-            assertThat(p.annenPart()).isNull();
-            assertThat(p.annenPartEøs()).isNull();
-        });
-        verify(saker, never()).hentSaker(annenPart);
-    }
-
-    private enum UavklartAnnenPart {
-        MANGLENDE_REQUEST, MISMATCH, MANGLENDE_SAKSIDENT, UKJENT_IDENT, NULL_FØDSELSNUMMER, UKJENT_ADRESSE, NULL_ADRESSE
-    }
+    private enum SkjultAnnenPart { IKKE_OPPGITT, ANNEN_ENN_PÅ_SAKEN }
 
     @ParameterizedTest
-    @EnumSource(UavklartAnnenPart.class)
-    void uavklartIdentitetSkjulerAlleLagredeAnnenpartsperioderFørNormalisering(UavklartAnnenPart tilfelle) throws Exception {
+    @EnumSource(SkjultAnnenPart.class)
+    void skjultAnnenPartViserAnnenPartsPerioderFraSøkersEgenSøknadsplan(SkjultAnnenPart tilfelle) {
         var søker = AktørId.dummy();
         var annenPart = AktørId.dummy();
         var barn = AktørId.dummy();
         var mandag = LocalDate.of(2026, 10, 5);
-        var saksident = tilfelle == UavklartAnnenPart.MANGLENDE_SAKSIDENT ? null : annenPart;
-        var requestIdent = switch (tilfelle) {
-            case MANGLENDE_REQUEST -> null;
-            case MISMATCH -> AktørId.dummy();
-            default -> annenPart;
-        };
-        var eøs = new UttakPeriodeAnnenpartEøs(mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4), Konto.FEDREKVOTE,
-            new java.math.BigDecimal("5"));
-        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(uttaksperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE)),
-            Dekningsgrad.HUNDRE, List.of(eøs), null, null);
-        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now().minusDays(1), Set.of(), Dekningsgrad.HUNDRE, false);
-        var sak = sak(søker, saksident, barn, mandag, 1, BrukerRolle.MOR, Set.of(vedtak), Set.of(søknad));
-        lagre(sak);
-        var repository = new SøknadsplanRepositoryStub();
-        repository.lagre(sak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR, List.of(
-            nyPeriode(Søknadsplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null),
-            nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag, mandag.plusDays(4), SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null),
-            nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag.plusDays(2), mandag.plusDays(4), SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null),
-            utsettelsePeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4)))));
-        var personOppslag = mock(PersonOppslagSystem.class);
-        var fnr = new Fødselsnummer(annenPart.value());
-        switch (tilfelle) {
-            case UKJENT_IDENT -> when(personOppslag.fødselsnummer(annenPart)).thenThrow(new NoSuchElementException());
-            case UKJENT_ADRESSE -> {
-                when(personOppslag.fødselsnummer(annenPart)).thenReturn(fnr);
-                when(personOppslag.adresseBeskyttelse(fnr)).thenThrow(new BrukerIkkeFunnetIPdlException());
-            }
-            case NULL_ADRESSE -> when(personOppslag.fødselsnummer(annenPart)).thenReturn(fnr);
-            default -> { }
-        }
-        var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
-        var annenPartTjeneste = mock(AnnenPartSakTjeneste.class);
-        var tjeneste = new UttaksplanTjeneste(saker, annenPartTjeneste, repository, personOppslag);
-
-        var plan = tjeneste.hentFor(søker, requestIdent, barn, mandag).orElseThrow();
-
-        assertThat(plan.perioder()).hasSize(2);
-        assertThat(plan.perioder()).anySatisfy(p -> {
-            assertThat(p.fom()).isEqualTo(mandag);
-            assertThat(p.tom()).isEqualTo(mandag.plusDays(4));
-            assertThat(p.søker()).isNotNull();
-            assertThat(p.annenPart()).isNull();
-        });
-        assertThat(plan.perioder()).anySatisfy(p -> {
-            assertThat(p.fom()).isEqualTo(eøs.fom());
-            assertThat(p.annenPart()).isNull();
-            assertThat(p.annenPartEøs()).isNotNull();
-        });
-        assertThat(plan.perioder()).allSatisfy(p -> assertThat(p.annenPart()).isNull());
-        verifyNoInteractions(annenPartTjeneste);
-        verify(saker, never()).hentSaker(annenPart);
-        if (tilfelle == UavklartAnnenPart.MANGLENDE_REQUEST || tilfelle == UavklartAnnenPart.MISMATCH
-            || tilfelle == UavklartAnnenPart.MANGLENDE_SAKSIDENT) {
-            verifyNoInteractions(personOppslag);
-        }
-    }
-
-    @Test
-    void tekniskePdlFeilPropageresFørAnnenPartsSakHentes() throws Exception {
-        var søker = AktørId.dummy();
-        var annenPart = AktørId.dummy();
-        var barn = AktørId.dummy();
-        var mandag = LocalDate.of(2026, 10, 5);
-        var eøs = new UttakPeriodeAnnenpartEøs(mandag.plusWeeks(3), mandag.plusWeeks(3).plusDays(4), Konto.FEDREKVOTE,
-            new java.math.BigDecimal("5"));
-        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(uttaksperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE)),
-            Dekningsgrad.HUNDRE, List.of(eøs), null, null);
-        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now().minusDays(1), Set.of(), Dekningsgrad.HUNDRE, false);
-        lagre(sak(søker, annenPart, barn, mandag, 1, BrukerRolle.MOR, Set.of(vedtak), Set.of(søknad)));
-        var personOppslag = mock(PersonOppslagSystem.class);
-        var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
-        var annenPartTjeneste = mock(AnnenPartSakTjeneste.class);
-        var repository = mock(SøknadsplanRepository.class);
-        var tjeneste = new UttaksplanTjeneste(saker, annenPartTjeneste, repository, personOppslag);
-        var feil = new IllegalStateException("PDL utilgjengelig");
-        var fnr = new Fødselsnummer(annenPart.value());
-        when(personOppslag.fødselsnummer(annenPart)).thenReturn(fnr);
-        when(personOppslag.adresseBeskyttelse(fnr)).thenThrow(feil);
-
-        assertThatThrownBy(() -> tjeneste.hentFor(søker, annenPart, barn, mandag)).isSameAs(feil);
-        when(personOppslag.fødselsnummer(annenPart)).thenThrow(feil);
-        assertThatThrownBy(() -> tjeneste.hentFor(søker, annenPart, barn, mandag)).isSameAs(feil);
-
-        verifyNoInteractions(annenPartTjeneste, repository);
-        verify(saker, never()).hentSaker(annenPart);
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void skjermingBeholderEøsMenFjernerAnnenPartsuttakFørDeKanKlippeEgenLegacyUtsettelse(boolean medEøs) throws Exception {
-        var søker = AktørId.dummy();
-        var annenPart = AktørId.dummy();
-        var barn = AktørId.dummy();
-        var mandag = LocalDate.of(2026, 10, 5);
-        var egetUttak = uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.MØDREKVOTE);
-        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(egetUttak), Dekningsgrad.HUNDRE,
-            medEøs ? List.of(new UttakPeriodeAnnenpartEøs(mandag.plusDays(2), mandag.plusDays(3), Konto.FEDREKVOTE,
-                new java.math.BigDecimal("2"))) : List.of(), null, null);
-        var legacy = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), Set.of(
-            legacyUtsettelse(mandag, mandag.plusDays(4))), Dekningsgrad.HUNDRE, false);
-        lagre(sak(søker, annenPart, barn, mandag, 1, BrukerRolle.MOR, Set.of(vedtak), Set.of(legacy)),
-            sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
-                uttaksperiode(mandag, mandag.plusDays(1), Konto.FEDREKVOTE)));
-        var personOppslag = spy(annenpartUbeskyttetAdresse());
-        var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
-        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), new SøknadsplanRepositoryStub(), personOppslag);
-        var før = tjeneste.hentFor(søker, annenPart, barn, mandag).orElseThrow();
-        assertThat(før.perioder()).anyMatch(p -> medEøs ? p.annenPartEøs() != null : p.annenPart() != null);
-        when(personOppslag.adresseBeskyttelse(new Fødselsnummer(annenPart.value())))
-            .thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
-        clearInvocations(saker);
-
-        var etter = tjeneste.hentFor(søker, annenPart, barn, mandag).orElseThrow();
-
-        assertThat(etter.perioder()).allSatisfy(p -> {
-            assertThat(p.annenPart()).isNull();
-        });
-        assertThat(etter.perioder()).filteredOn(p -> p.annenPartEøs() != null).hasSize(medEøs ? 1 : 0);
-        assertThat(etter.perioder()).noneMatch(p -> p.annenPart() != null);
-        assertThat(etter.perioder()).anySatisfy(p -> {
-            assertThat(p.fom()).isEqualTo(mandag);
-            assertThat(p.tom()).isEqualTo(medEøs ? mandag.plusDays(1) : mandag.plusDays(4));
-            assertThat(p.søker().utsettelseÅrsak()).isNotNull();
-        });
-        if (medEøs) {
-            assertThat(etter.perioder()).anySatisfy(p -> {
-                assertThat(p.fom()).isEqualTo(mandag.plusDays(4));
-                assertThat(p.tom()).isEqualTo(mandag.plusDays(4));
-                assertThat(p.søker().utsettelseÅrsak()).isNotNull();
-            });
-        }
-        assertThat(etter.perioder()).anySatisfy(p -> assertThat(p).isEqualTo(før.perioder().getLast()));
-        verify(saker, never()).hentSaker(annenPart);
-    }
-
-    @Test
-    void utenEgenSakKrevesUbeskyttetAdresse() throws Exception {
-        var søker = AktørId.dummy();
-        var annenPart = AktørId.dummy();
-        var barn = AktørId.dummy();
-        var mandag = LocalDate.of(2026, 10, 5);
-        var periode = uttaksperiode(mandag, mandag.plusDays(4), Konto.FEDREKVOTE);
-        lagre(sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, periode));
-        var personOppslag = spy(annenpartUbeskyttetAdresse());
-        var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
-        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), new SøknadsplanRepositoryStub(), personOppslag);
-        var fnr = new Fødselsnummer(annenPart.value());
-        assertThat(tjeneste.hentFor(søker, annenPart, barn, mandag)).isPresent();
-        var rekkefølge = inOrder(personOppslag, saker);
-        rekkefølge.verify(personOppslag).fødselsnummer(annenPart);
-        rekkefølge.verify(personOppslag).adresseBeskyttelse(fnr);
-        rekkefølge.verify(saker).hentSaker(annenPart);
-
-        when(personOppslag.adresseBeskyttelse(fnr)).thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
-        clearInvocations(saker);
-        assertThat(tjeneste.hentFor(søker, annenPart, barn, mandag)).isEmpty();
-        verify(saker, never()).hentSaker(annenPart);
-    }
-
-    @Test
-    void kjentSakLåsesMensFrontendFortsattVelgerNyesteMatch() {
-        var søker = AktørId.dummy();
-        var barn = AktørId.dummy();
-        var mandag = LocalDate.of(2026, 10, 5);
-        var mottatt = LocalDateTime.of(2026, 9, 1, 12, 0);
-        var gammelPeriode = uttaksperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE);
-        var nyerePeriode = uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FELLESPERIODE);
-        var gammelSak = sak(søker, null, barn, mandag, 1, BrukerRolle.MOR,
-            Set.of(new FpVedtak(mottatt, List.of(gammelPeriode), Dekningsgrad.HUNDRE, null, null, null)),
-            Set.of(new FpSøknad(SøknadStatus.BEHANDLET, mottatt, Set.of(), Dekningsgrad.HUNDRE, false)));
-        var nyereSak = sak(søker, null, barn, mandag.plusDays(7), 1, BrukerRolle.MOR,
-            Set.of(new FpVedtak(mottatt.plusDays(1), List.of(nyerePeriode), Dekningsgrad.HUNDRE, null, null, null)),
-            Set.of(new FpSøknad(SøknadStatus.BEHANDLET, mottatt.plusDays(1), Set.of(), Dekningsgrad.HUNDRE, false)));
-        lagre(gammelSak, nyereSak);
-        var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), annenpartUbeskyttetAdresse()));
-        var repository = spy(new SøknadsplanRepositoryStub());
-        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), repository, annenpartUbeskyttetAdresse());
-
-        var kjentPlan = tjeneste.hentFor(gammelSak).orElseThrow();
-
-        assertThat(kjentPlan.perioder()).singleElement().satisfies(p -> {
-            assertThat(p.fom()).isEqualTo(gammelPeriode.fom());
-            assertThat(p.tom()).isEqualTo(gammelPeriode.tom());
-            assertThat(p.søker().kontoType()).isEqualTo(Konto.MØDREKVOTE.tilDto());
-        });
-        verifyNoInteractions(saker);
-        verify(repository).hentAktivFor(gammelSak.saksnummer());
-        verify(repository, never()).hentAktivFor(nyereSak.saksnummer());
-
-        var frontendPlan = tjeneste.hentFor(søker, null, barn, mandag).orElseThrow();
-
-        assertThat(frontendPlan.perioder()).singleElement().satisfies(p -> {
-            assertThat(p.fom()).isEqualTo(nyerePeriode.fom());
-            assertThat(p.tom()).isEqualTo(nyerePeriode.tom());
-            assertThat(p.søker().kontoType()).isEqualTo(Konto.FELLESPERIODE.tilDto());
-        });
-    }
-
-    @ParameterizedTest
-    @ValueSource(booleans = {false, true})
-    void kjentSakBeholderEøsOgSkjulerLagretAnnenpartsVedtak(boolean medEøs) throws Exception {
-        var søker = AktørId.dummy();
-        var annenPart = AktørId.dummy();
-        var barn = AktørId.dummy();
-        var mandag = LocalDate.of(2026, 10, 5);
-        var egetUttak = uttaksperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE);
-        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(egetUttak), Dekningsgrad.HUNDRE,
-            medEøs ? List.of(new UttakPeriodeAnnenpartEøs(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4),
-                Konto.FEDREKVOTE, new java.math.BigDecimal("5"))) : List.of(), null, null);
-        var legacy = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(), Set.of(), Dekningsgrad.HUNDRE, false);
-        var egenSak = sak(søker, annenPart, barn, mandag, 1, BrukerRolle.MOR, Set.of(vedtak), Set.of(legacy));
+        var egenSak = sakMedVedtak(søker, annenPart, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+            uttaksperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE));
+        // Annen parts vedtak skal ikke brukes når annen part er skjult
         lagre(egenSak, sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
-            uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE)));
+            uttaksperiode(mandag.plusWeeks(8), mandag.plusWeeks(8).plusDays(4), Konto.FEDREKVOTE)));
         var repository = new SøknadsplanRepositoryStub();
-        repository.lagre(egenSak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR,
-            List.of(utsettelsePeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4)))));
-        var personOppslag = spy(annenpartUbeskyttetAdresse());
-        var saker = spy(new Saker(sakRepository, myndigInnloggetBruker(søker), personOppslag));
-        var tjeneste = new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), repository, personOppslag);
+        repository.lagre(egenSak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR, List.of(
+            nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), SøknadsplanPeriode.KontoType.FEDREKVOTE,
+                new java.math.BigDecimal("50"), SøknadsplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "annen-org"),
+            utsettelsePeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(4), mandag.plusWeeks(4).plusDays(4)))));
+        var requestIdent = tilfelle == SkjultAnnenPart.IKKE_OPPGITT ? null : AktørId.dummy();
 
-        var før = tjeneste.hentFor(egenSak).orElseThrow();
-        assertThat(før).isEqualTo(tjeneste.hentFor(søker, annenPart, barn, mandag).orElseThrow());
-        assertThat(før.perioder()).anyMatch(p -> medEøs ? p.annenPartEøs() != null : p.annenPart() != null);
-        assertThat(før.perioder()).anyMatch(p -> p.annenPart() != null && p.annenPart().utsettelseÅrsak() != null);
-        when(personOppslag.adresseBeskyttelse(new Fødselsnummer(annenPart.value())))
-            .thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
-        clearInvocations(saker);
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(requestIdent), barn, mandag).orElseThrow();
 
-        var etter = tjeneste.hentFor(egenSak).orElseThrow();
+        assertThat(plan.perioder()).extracting(FellesUttaksplanDto.UttakPeriodeDto::fom)
+            .containsExactly(mandag, mandag.plusWeeks(2), mandag.plusWeeks(4));
+        assertThat(plan.perioder().get(1).annenPart().kontoType()).isEqualTo(Konto.FEDREKVOTE.tilDto());
+        assertThat(plan.perioder().get(1).annenPart().gradering().aktivitet()).isNull();
+        assertThat(plan.perioder().get(2).annenPart().utsettelseÅrsak()).isNotNull();
+    }
 
-        verifyNoInteractions(saker);
-        assertThat(etter.perioder()).filteredOn(p -> p.søker() != null).singleElement().satisfies(p -> {
-            assertThat(p.fom()).isEqualTo(mandag);
-            assertThat(p.tom()).isEqualTo(mandag.plusDays(4));
-            assertThat(p.søker()).isNotNull();
-        });
-        assertThat(etter.perioder()).allSatisfy(p -> assertThat(p.annenPart()).isNull());
-        assertThat(etter.perioder()).filteredOn(p -> p.annenPartEøs() != null).hasSize(medEøs ? 1 : 0);
-        assertThat(etter).isEqualTo(tjeneste.hentFor(søker, annenPart, barn, mandag).orElseThrow());
-        verify(saker, never()).hentSaker(annenPart);
+    @Test
+    void synligAnnenPartsVedtakVinnerOverSøkersSøknadsplan() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        var egenSak = sakMedVedtak(søker, annenPart, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+            uttaksperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE));
+        lagre(egenSak, sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+            uttaksperiode(mandag.plusWeeks(8), mandag.plusWeeks(8).plusDays(4), Konto.FEDREKVOTE)));
+        var repository = new SøknadsplanRepositoryStub();
+        repository.lagre(egenSak.saksnummer(), new Søknadsplan(Instant.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR, List.of(
+            nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), SøknadsplanPeriode.KontoType.FEDREKVOTE,
+                null, null, null))));
+
+        var plan = tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, mandag).orElseThrow();
+
+        assertThat(plan.perioder()).extracting(FellesUttaksplanDto.UttakPeriodeDto::fom).containsExactly(mandag, mandag.plusWeeks(8));
+    }
+
+    @Test
+    void skjultOgIkkeOppgittAnnenPartGirSammePlan() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        lagre(sakMedVedtak(søker, annenPart, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+                uttaksperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE)),
+            sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+                uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE)));
+        var tjeneste = tjeneste(søker);
+
+        var ikkeOppgitt = tjeneste.hentFor(søker, null, barn, mandag);
+        var annenEnnPåSaken = tjeneste.hentFor(søker, verifisert(AktørId.dummy()), barn, mandag);
+
+        assertThat(annenEnnPåSaken).isEqualTo(ikkeOppgitt);
+        assertThat(ikkeOppgitt.orElseThrow().perioder()).allSatisfy(p -> assertThat(p.annenPart()).isNull());
+    }
+
+    @Test
+    void skjultAnnenPartBeholderEøsFraEgetVedtak() {
+        var søker = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        var eøs = new UttakPeriodeAnnenpartEøs(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE,
+            new java.math.BigDecimal("5"));
+        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(uttaksperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE)),
+            Dekningsgrad.HUNDRE, List.of(eøs), null, null);
+        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now().minusDays(1), Set.of(), Dekningsgrad.HUNDRE, false);
+        lagre(sak(søker, null, barn, mandag, 1, BrukerRolle.MOR, Set.of(vedtak), Set.of(søknad)));
+
+        var plan = tjeneste(søker).hentFor(søker, null, barn, mandag).orElseThrow();
+
+        assertThat(plan.perioder()).filteredOn(p -> p.annenPartEøs() != null).singleElement()
+            .satisfies(p -> assertThat(p.fom()).isEqualTo(eøs.fom()));
+    }
+
+    @Test
+    void utenEgenSakOgUtenVerifisertAnnenPartGirIngenPlan() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        lagre(sakMedVedtak(annenPart, søker, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+            uttaksperiode(mandag, mandag.plusDays(4), Konto.FEDREKVOTE)));
+        var tjeneste = tjeneste(søker);
+
+        assertThat(tjeneste.hentFor(søker, verifisert(annenPart), barn, mandag)).isPresent();
+        assertThat(tjeneste.hentFor(søker, null, barn, mandag)).isEmpty();
+    }
+
+    private static VerifisertAnnenPart verifisert(AktørId annenPart) {
+        return annenPart == null ? null : new VerifisertAnnenPart(annenPart);
     }
 
     private UttaksplanTjeneste tjeneste(AktørId søker) {
@@ -1464,7 +1256,7 @@ class UttaksplanTjenesteTest {
 
     private UttaksplanTjeneste tjeneste(AktørId søker, SøknadsplanRepository søknadRepository, RepositoryStub repository) {
         var saker = new Saker(repository, myndigInnloggetBruker(søker), annenpartUbeskyttetAdresse());
-        return new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), søknadRepository, annenpartUbeskyttetAdresse());
+        return new UttaksplanTjeneste(saker, new AnnenPartSakTjeneste(saker), søknadRepository);
     }
 
     private void lagre(SakFP0... saker) {
