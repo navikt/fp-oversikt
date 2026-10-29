@@ -56,13 +56,12 @@ public class SøknadsplanRest {
             LOG.info("Lagring av søknadsplan er deaktivert i dette miljøet");
             return;
         }
-        søknadsplanTjeneste.lagre(saksnummer, new Søknadsplan(request.mottattTidspunkt().toInstant(), request.rolle(), perioder), request.søknadType());
+        søknadsplanTjeneste.lagre(saksnummer, new Søknadsplan(request.mottattTidspunkt().toInstant(), request.rolle(), perioder));
     }
 
     public record SøknadsplanRequest(@Valid @NotNull Saksnummer saksnummer,
                                @NotNull OffsetDateTime mottattTidspunkt,
                                 @Valid @NotNull Søknadsplan.Rolle rolle,
-                               @Valid @NotNull SøknadType søknadType,
                                @NotNull @Size(min = 1) List<@Valid @NotNull UttakPeriodeDto> perioder) {
         @Override
         public String toString() {

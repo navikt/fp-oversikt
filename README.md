@@ -18,7 +18,7 @@ Backend tjenester for saksoversikt for foreldrepenger
 
 Planen bygges fra lagrede søknadsperioder og gjeldende vedtak, sett fra den innloggede søkerens side.
 
-1. **Lagre søknadsplanen.** `fp-soknad` sender perioder og eksplisitt `søknadType`. En førstegangssøknad erstatter hele søknadsplanen. Endringssøknader får periodene før første innsendte `fom` fra fellesplanen for saken. Perioder som krysser datoen kappes, og innsendte perioder erstatter resten. Manglende eller tomt grunnlag, inkludert EØS-only, gir ingen lagring. Innsendinger som ikke er nyere enn aktiv søknad, ignoreres.
+1. **Lagre søknadsplanen.** `fp-soknad` sender hele planen for både førstegangssøknad og endringssøknad, og den erstatter aktiv søknadsplan på saken. Innsendinger som ikke er nyere enn aktiv søknad, ignoreres.
 2. **Finn sakene for barnet.** Ved henting kontrolleres tilgang, og sakene matches på barn eller familiehendelse. Annen parts sak brukes bare når koblingen til søkeren er gyldig. Ved flere treff velges saken med nyeste søknad. Skjermet eller ukjent annen part utelates fra saksoppslaget.
 3. **Velg søknadsgrunnlag.** Søkerens aktive søknad brukes når søkeren har sak, ellers annen parts aktive søknad. Søknaden kan inneholde perioder for begge foreldre. Uten aktiv søknad brukes søkerens egen legacy-søknad som reserve, aldri annen parts legacy-søknad. Uten vedtak brukes legacy-søknaden bare når den ikke er behandlet.
 4. **Prioriter vedtak.** For hver forelder brukes gjeldende vedtak fremfor søknadsuttak. Uten vedtak brukes uttak fra søknadsgrunnlaget. Arbeidsgiveropplysninger fjernes fra annen parts gradering.

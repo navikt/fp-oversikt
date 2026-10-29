@@ -13,18 +13,15 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 
 import jakarta.validation.Validation;
 import jakarta.ws.rs.BadRequestException;
 import jakarta.ws.rs.Path;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Saksnummer;
-import no.nav.foreldrepenger.oversikt.domene.SakRepository;
 import no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig;
 import no.nav.foreldrepenger.oversikt.server.konfig.BackendApiConfig;
 import no.nav.foreldrepenger.oversikt.stub.SøknadsplanRepositoryStub;
-import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTjeneste;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.vedtak.mapper.json.DefaultJsonMapper;
 import no.nav.vedtak.server.rest.AuthenticationFilter;
@@ -48,7 +45,7 @@ class SøknadsplanRestTest {
     void deaktivertLagringSjekkerTilgangMenLagrerIkke() {
         var repository = mock(SøknadsplanRepository.class);
         var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
-        var request = parseRequest(validRequest(SøknadType.FØRSTEGANGSSØKNAD));
+        var request = parseRequest(validRequest());
 
         new SøknadsplanRest(tjeneste(repository), tilgang, false).lagre(request);
 
@@ -60,7 +57,7 @@ class SøknadsplanRestTest {
     void lagrerFellesUttaksplanDtoTilInternSøknad() {
         var repository = mock(SøknadsplanRepository.class);
         var mottatt = OffsetDateTime.parse("2026-09-01T12:00:00+02:00");
-        var request = parseRequest(validRequest(SøknadType.FØRSTEGANGSSØKNAD));
+        var request = parseRequest(validRequest());
 
         new SøknadsplanRest(tjeneste(repository), mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class)).lagre(request);
 
@@ -97,7 +94,7 @@ class SøknadsplanRestTest {
             new FellesUttaksplanDto.Gradering(new FellesUttaksplanDto.Arbeidstidprosent(new BigDecimal("25")), farsAktivitet),
             null, null, false, null);
         var request = new SøknadsplanRest.SøknadsplanRequest(new Saksnummer("123456"), OffsetDateTime.parse("2026-09-01T12:00:00Z"),
-            Søknadsplan.Rolle.FAR_MEDMOR, SøknadType.FØRSTEGANGSSØKNAD, List.of(
+            Søknadsplan.Rolle.FAR_MEDMOR, List.of(
                 new FellesUttaksplanDto.UttakPeriodeDto(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 10), mor, null, null),
                 new FellesUttaksplanDto.UttakPeriodeDto(LocalDate.of(2026, 10, 11), LocalDate.of(2026, 10, 20), null, far, null)));
         ObjectNode json = DefaultJsonMapper.getJsonMapper().valueToTree(request);
@@ -139,9 +136,9 @@ class SøknadsplanRestTest {
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             var validator = factory.getValidator();
             var utenPerioder = new SøknadsplanRest.SøknadsplanRequest(new Saksnummer("123456"),
-                OffsetDateTime.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR, SøknadType.FØRSTEGANGSSØKNAD, List.of());
+                OffsetDateTime.parse("2026-09-01T12:00:00Z"), Søknadsplan.Rolle.MOR, List.of());
             var manglendeRolle = new SøknadsplanRest.SøknadsplanRequest(new Saksnummer("123456"), OffsetDateTime.parse("2026-09-01T12:00:00Z"),
-                null, SøknadType.FØRSTEGANGSSØKNAD, List.of());
+                null, List.of());
             var json = validRequestJson();
             ((ObjectNode) json.at("/perioder/0/søker")).remove("forelder");
             var manglendeNestedRolle = parseRequest(json);
@@ -158,7 +155,7 @@ class SøknadsplanRestTest {
         assertThatThrownBy(() -> parseRequest(utenOffset))
             .isInstanceOf(RuntimeException.class);
         var tomListe = new SøknadsplanRest.SøknadsplanRequest(new Saksnummer("123456"), OffsetDateTime.parse("2026-09-01T12:00:00Z"),
-            Søknadsplan.Rolle.MOR, SøknadType.FØRSTEGANGSSØKNAD, List.of());
+            Søknadsplan.Rolle.MOR, List.of());
         try (var factory = Validation.buildDefaultValidatorFactory()) {
             assertThat(factory.getValidator().validate(parseRequest(tomListe))).isNotEmpty();
         }
@@ -173,7 +170,7 @@ class SøknadsplanRestTest {
         var repository = mock(SøknadsplanRepository.class);
         var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
         var request = new SøknadsplanRest.SøknadsplanRequest(new Saksnummer("123456"), OffsetDateTime.parse("2026-09-01T12:00:00Z"),
-            Søknadsplan.Rolle.MOR, SøknadType.FØRSTEGANGSSØKNAD, List.of());
+            Søknadsplan.Rolle.MOR, List.of());
         assertThatThrownBy(() -> new SøknadsplanRest(tjeneste(repository), tilgang).lagre(parseRequest(request)))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("perioder kan ikke være tom");
@@ -188,34 +185,10 @@ class SøknadsplanRestTest {
         assertThat(backendKlasser.stream().filter(k -> k.isAnnotationPresent(Path.class))).containsExactly(SøknadsplanRest.class);
     }
 
-    @ParameterizedTest
-    @EnumSource(SøknadType.class)
-    void søknadstypeFraJsonStyrerLagringUtenTidligereSøknad(SøknadType søknadType) {
-        var request = parseRequest(validRequest(søknadType));
-        var repository = new SøknadsplanRepositoryStub();
-        var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
-
-        new SøknadsplanRest(tjeneste(repository), tilgang).lagre(request);
-
-        assertThat(request.søknadType()).isEqualTo(søknadType);
-        assertThat(repository.hentAktivFor(new no.nav.foreldrepenger.oversikt.domene.Saksnummer("123456")).isPresent())
-            .isEqualTo(søknadType == SøknadType.FØRSTEGANGSSØKNAD);
-    }
-
     @Test
-    void kreverSøknadstypeOgAvviserUkjentVerdi() {
-        var json = validRequestJson();
-        json.remove("søknadType");
-        var utenType = parseRequest(json);
-        var nullType = parseRequest(json.putNull("søknadType"));
-        try (var factory = Validation.buildDefaultValidatorFactory()) {
-            for (var request : List.of(utenType, nullType)) {
-                assertThat(factory.getValidator().validate(request))
-                    .extracting(v -> v.getPropertyPath().toString()).containsExactly("søknadType");
-            }
-        }
-        assertThatThrownBy(() -> parseRequest(json.put("søknadType", "UKJENT")))
-            .isInstanceOf(RuntimeException.class);
+    void ignorererUkjenteFelterSomSøknadType() {
+        var request = parseRequest(validRequestJson().put("søknadType", "ENDRINGSSØKNAD"));
+        assertThat(request.perioder()).hasSize(1);
     }
 
     @Test
@@ -224,7 +197,7 @@ class SøknadsplanRestTest {
         var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
         var rest = new SøknadsplanRest(tjeneste(repository), tilgang);
         var saksnummer = new no.nav.foreldrepenger.oversikt.domene.Saksnummer("123456");
-        rest.lagre(validRequest(SøknadType.FØRSTEGANGSSØKNAD));
+        rest.lagre(validRequest());
         var opprinnelig = repository.hentAktivFor(saksnummer).orElseThrow();
         var json = validRequestJson().put("mottattTidspunkt", "2026-09-02T12:00:00Z");
         var perioder = (tools.jackson.databind.node.ArrayNode) json.get("perioder");
@@ -241,7 +214,7 @@ class SøknadsplanRestTest {
     }
 
     private static SøknadsplanTjeneste tjeneste(SøknadsplanRepository repository) {
-        return new SøknadsplanTjeneste(repository, mock(SakRepository.class), mock(UttaksplanTjeneste.class));
+        return new SøknadsplanTjeneste(repository);
     }
 
     private static SøknadsplanRest.SøknadsplanRequest parseRequest(String json) {
@@ -253,10 +226,10 @@ class SøknadsplanRestTest {
     }
 
     private static ObjectNode validRequestJson() {
-        return DefaultJsonMapper.getJsonMapper().valueToTree(validRequest(SøknadType.FØRSTEGANGSSØKNAD));
+        return DefaultJsonMapper.getJsonMapper().valueToTree(validRequest());
     }
 
-    private static SøknadsplanRest.SøknadsplanRequest validRequest(SøknadType søknadType) {
+    private static SøknadsplanRest.SøknadsplanRequest validRequest() {
         var arbeidsgiver = new FellesUttaksplanDto.Arbeidsgiver("000000001",
             FellesUttaksplanDto.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON);
         var aktivitet = new FellesUttaksplanDto.Aktivitet(FellesUttaksplanDto.Aktivitet.AktivitetType.ORDINÆRT_ARBEID, arbeidsgiver, null);
@@ -268,6 +241,6 @@ class SøknadsplanRestTest {
             new FellesUttaksplanDto.SamtidigUttak(new BigDecimal("20.5")), true, null);
         var periode = new FellesUttaksplanDto.UttakPeriodeDto(LocalDate.of(2026, 10, 1), LocalDate.of(2026, 10, 10), uttak, null, null);
         return new SøknadsplanRest.SøknadsplanRequest(new Saksnummer("123456"), OffsetDateTime.parse("2026-09-01T12:00:00+02:00"),
-            Søknadsplan.Rolle.FAR_MEDMOR, søknadType, List.of(periode));
+            Søknadsplan.Rolle.FAR_MEDMOR, List.of(periode));
     }
 }
