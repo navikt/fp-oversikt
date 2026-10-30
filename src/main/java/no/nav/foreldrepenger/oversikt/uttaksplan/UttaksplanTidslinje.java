@@ -45,7 +45,11 @@ public final class UttaksplanTidslinje {
     static LocalDateTimeline<UttakPeriodeDto> fyllHullMedUtsettelser(LocalDateTimeline<UttakPeriodeDto> plan,
                                                                      List<Planperiode> utsettelser,
                                                                      Rolle søkerRolle) {
-        var utsettelserIHull = tilTimeline(utsettelser)
+        // Én tidslinje per forelder, slik at utsettelser for begge på samme dager ikke kaster. Ved overlapp
+        // beholdes søkerens utsettelse, som i UtsettelseOverlappNormalisering.
+        var søkersUtsettelser = tilTimeline(utsettelser.stream().filter(p -> p.uttak().forelder() == søkerRolle).toList());
+        var annenPartsUtsettelser = tilTimeline(utsettelser.stream().filter(p -> p.uttak().forelder() != søkerRolle).toList());
+        var utsettelserIHull = søkersUtsettelser.union(annenPartsUtsettelser, StandardCombinators::coalesceLeftHandSide)
             .map(segment -> {
                 var uttak = segment.getValue();
                 var erSøker = uttak.forelder() == søkerRolle;

@@ -744,6 +744,21 @@ class UttaksplanTidslinjeTest {
         return UttaksplanMapper.mapVedtaksperioder(List.of(perioder), rolle);
     }
 
+    @Test
+    void fyllHullMedUtsettelserBeholderSøkersUtsettelseNårBeggeHarUtsettelseSammeDager() {
+        var morsUtsettelse = planUtsettelse(MANDAG, MANDAG.plusDays(4));
+        var farsUtsettelse = new Planperiode(MANDAG.plusDays(2), MANDAG.plusDays(8), new FellesUttaksplanDto.UttakDto(
+            FellesUttaksplanDto.Rolle.FAR_MEDMOR, null, FellesUttaksplanDto.UtsettelseÅrsak.FERIE, null, null, null, null,
+            false, null));
+
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(LocalDateTimeline.empty(), List.of(morsUtsettelse, farsUtsettelse),
+            FellesUttaksplanDto.Rolle.MOR);
+
+        assertThat(perioder(fylt)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(4), morsUtsettelse.uttak(), null, null),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(7), MANDAG.plusDays(8), null, farsUtsettelse.uttak(), null));
+    }
+
     private static Planperiode planUtsettelse(LocalDate fom, LocalDate tom) {
         return new Planperiode(fom, tom, new FellesUttaksplanDto.UttakDto(FellesUttaksplanDto.Rolle.MOR, null,
             FellesUttaksplanDto.UtsettelseÅrsak.ARBEID, null, null, null, null, false, null));
