@@ -224,6 +224,36 @@ class AnnenPartSakTjenesteTest {
         assertThat(annenPartSak).isEmpty();
     }
 
+    @Test
+    void velger_sak_med_nyeste_søknad_ved_flere_treff_på_samme_barn() {
+        var repository = new RepositoryStub();
+        var aktørIdAnnenPart = AktørId.dummy();
+        var aktørIdSøker = AktørId.dummy();
+        var aktørIdBarn = AktørId.dummy();
+        var mottatt = LocalDateTime.of(2026, 9, 1, 12, 0);
+        var eldre = sakForBarnMedSøknad(aktørIdAnnenPart, aktørIdSøker, aktørIdBarn, Set.of(søknad(mottatt)));
+        var nyere = sakForBarnMedSøknad(aktørIdAnnenPart, aktørIdSøker, aktørIdBarn, Set.of(søknad(mottatt.plusDays(1))));
+        var utenSøknad = sakForBarnMedSøknad(aktørIdAnnenPart, aktørIdSøker, aktørIdBarn, Set.of());
+        repository.lagre(eldre);
+        repository.lagre(nyere);
+        repository.lagre(utenSøknad);
+        var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
+
+        var annenPartSak = tjeneste.annenPartGjeldendeSakOppgittSøker(aktørIdSøker, aktørIdAnnenPart, aktørIdBarn, null);
+
+        assertThat(annenPartSak).map(SakFP0.class::cast).map(SakFP0::saksnummer).contains(nyere.saksnummer());
+    }
+
+    private static FpSøknad søknad(LocalDateTime mottatt) {
+        return new FpSøknad(SøknadStatus.BEHANDLET, mottatt, Set.of(), Dekningsgrad.HUNDRE, false);
+    }
+
+    private static SakFP0 sakForBarnMedSøknad(AktørId aktørId, AktørId annenPartAktørId, AktørId aktørIdBarn, Set<FpSøknad> søknader) {
+        return new SakFP0(Saksnummer.dummy(), aktørId, false, Set.of(), annenPartAktørId,
+            new FamilieHendelse(null, LocalDate.of(2026, 10, 1), 1, null), Set.of(), søknader, BrukerRolle.MOR, Set.of(aktørIdBarn),
+            new Rettigheter(false, false, false), false, now());
+    }
+
     private static SakFP0 sakMedVedtak(AktørId aktørId,
                                        AktørId annenPartAktørId,
                                        AktørId aktørIdBarn,

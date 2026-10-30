@@ -357,6 +357,144 @@ class UttaksplanTidslinjeTest {
     }
 
     @Test
+    void skalFjerneSøkersUtsettelseInnenforEøsOgBevareTrekkdager() {
+        var utsettelse = new Planperiode(MANDAG.plusDays(2), MANDAG.plusDays(2),
+            new FellesUttaksplanDto.UttakDto(FellesUttaksplanDto.Rolle.MOR, null,
+                FellesUttaksplanDto.UtsettelseÅrsak.ARBEID, null, null, null, null, false, null));
+        var eøs = eøsPeriode(MANDAG, MANDAG.plusDays(4), Konto.FEDREKVOTE, 5);
+
+        var plan = UttaksplanTidslinje.normaliser(List.of(utsettelse), List.of(), List.of(eøs));
+
+        var eøsPerioder = perioder(plan).stream().filter(p -> p.annenPartEøs() != null).toList();
+        assertThat(eøsPerioder).singleElement().satisfies(periode -> {
+            assertThat(periode.fom()).isEqualTo(MANDAG);
+            assertThat(periode.tom()).isEqualTo(MANDAG.plusDays(4));
+        });
+        assertThat(perioder(plan)).noneMatch(p -> p.søker() != null);
+        var totalTrekkdager = eøsPerioder.stream().map(p -> p.annenPartEøs().trekkdager().verdi()).reduce(BigDecimal.ZERO, BigDecimal::add);
+        assertThat(totalTrekkdager).isEqualByComparingTo(BigDecimal.valueOf(5));
+    }
+
+    @Test
+    void skalKlippeSøkersUtsettelseVedEøsIntervallerUtenÅJustereDatoer() {
+        var tom = MANDAG.plusDays(11);
+        var søker = List.of(planUtsettelse(MANDAG, tom));
+        var eøs = List.of(
+            eøsPeriode(MANDAG.plusDays(3), MANDAG.plusDays(4), Konto.FEDREKVOTE, 2),
+            eøsPeriode(MANDAG.plusDays(5), MANDAG.plusDays(6), Konto.FEDREKVOTE, 2),
+            eøsPeriode(MANDAG.plusDays(10), MANDAG.plusDays(10), Konto.FELLESPERIODE, 1));
+
+        var plan = UttaksplanTidslinje.normaliser(søker, List.of(), eøs);
+
+        assertThat(perioder(plan)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(2), søker.getFirst().uttak(), null, null),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(3), MANDAG.plusDays(6), null, null,
+                new FellesUttaksplanDto.EøsUttakDto(KontoType.FEDREKVOTE, new FellesUttaksplanDto.EøsUttakDto.Trekkdager(BigDecimal.valueOf(4)))),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(7), MANDAG.plusDays(9), søker.getFirst().uttak(), null, null),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(10), MANDAG.plusDays(10), null, null,
+                new FellesUttaksplanDto.EøsUttakDto(KontoType.FELLESPERIODE, new FellesUttaksplanDto.EøsUttakDto.Trekkdager(BigDecimal.ONE))),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(11), tom, søker.getFirst().uttak(), null, null));
+        assertThat(plan.stream().map(segment -> segment.getValue()).filter(p -> p.annenPartEøs() != null)
+            .map(p -> p.annenPartEøs().trekkdager().verdi()).reduce(BigDecimal.ZERO, BigDecimal::add))
+            .isEqualByComparingTo(BigDecimal.valueOf(5));
+    }
+
+    @Test
+    void fyllHullMedUtsettelserLeggerBareTilHullOgLarEksisterendeSegmenterStåUrørt() {
+        var uttak = uttak(BrukerRolle.MOR, periode(MANDAG.plusDays(2), MANDAG.plusDays(3), Konto.MØDREKVOTE));
+        var plan = UttaksplanTidslinje.normaliser(uttak, List.of(), List.of());
+        var utsettelse = planUtsettelse(MANDAG, MANDAG.plusDays(6));
+
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse), FellesUttaksplanDto.Rolle.MOR);
+
+        assertThat(perioder(fylt)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(1), utsettelse.uttak(), null, null),
+            plan.stream().findFirst().orElseThrow().getValue(),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(4), MANDAG.plusDays(4), utsettelse.uttak(), null, null));
+    }
+
+    @Test
+    void fyllHullMedUtsettelserJustererHelgOgKomprimererNaboer() {
+        var utsettelse = planUtsettelse(MANDAG, MANDAG.plusDays(4));
+        var nesteLikeUtsettelse = planUtsettelse(MANDAG.plusDays(7), MANDAG.plusDays(11));
+
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(LocalDateTimeline.empty(), List.of(utsettelse, nesteLikeUtsettelse),
+            FellesUttaksplanDto.Rolle.MOR);
+
+        assertThat(perioder(fylt)).singleElement().satisfies(p -> {
+            assertThat(p.fom()).isEqualTo(MANDAG);
+            assertThat(p.tom()).isEqualTo(MANDAG.plusDays(11));
+            assertThat(p.søker()).isEqualTo(utsettelse.uttak());
+        });
+    }
+
+    @Test
+    void fyllHullMedUtsettelserLarEøsSegmentUrørt() {
+        var eøs = eøsPeriode(MANDAG.plusDays(2), MANDAG.plusDays(3), Konto.FEDREKVOTE, 2);
+        var plan = UttaksplanTidslinje.normaliser(List.of(), List.of(), List.of(eøs));
+        var eksisterendeEøsSegment = plan.stream().findFirst().orElseThrow();
+        var utsettelse = planUtsettelse(MANDAG, MANDAG.plusDays(4));
+
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse), FellesUttaksplanDto.Rolle.MOR);
+
+        assertThat(fylt.stream().filter(s -> s.getValue().annenPartEøs() != null).toList()).containsExactly(eksisterendeEøsSegment);
+        assertThat(fylt.stream().map(LocalDateSegment::getValue).filter(p -> p.søker() != null))
+            .allSatisfy(p -> assertThat(p.søker().utsettelseÅrsak()).isNotNull());
+        assertThat(fylt.stream().map(LocalDateSegment::getValue).filter(p -> p.annenPartEøs() != null)
+            .map(p -> p.annenPartEøs().trekkdager().verdi()).reduce(BigDecimal.ZERO, BigDecimal::add))
+            .isEqualByComparingTo(BigDecimal.valueOf(2));
+    }
+
+    @Test
+    void fyllHullMedUtsettelserDelerIkkeEøsSegmentNårUtsettelsenStarterInniDet() {
+        var eøs = eøsPeriode(MANDAG, MANDAG.plusDays(4), Konto.FEDREKVOTE, 5);
+        var plan = UttaksplanTidslinje.normaliser(List.of(), List.of(), List.of(eøs));
+        var eksisterendeEøsSegment = plan.stream().findFirst().orElseThrow();
+        var utsettelse = planUtsettelse(MANDAG.plusDays(2), MANDAG.plusDays(11));
+
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(plan, List.of(utsettelse), FellesUttaksplanDto.Rolle.MOR);
+
+        assertThat(fylt.stream().filter(s -> s.getValue().annenPartEøs() != null).toList()).containsExactly(eksisterendeEøsSegment);
+        assertThat(perioder(fylt)).filteredOn(p -> p.søker() != null).singleElement().satisfies(p -> {
+            assertThat(p.fom()).isEqualTo(MANDAG.plusDays(7));
+            assertThat(p.tom()).isEqualTo(MANDAG.plusDays(11));
+        });
+    }
+
+    @Test
+    void skalFjerneUtsettelseVedEøsSomDekkerHeleUtsettelsenEllerBerørerEndepunkt() {
+        var tom = MANDAG.plusDays(4);
+        var utsettelse = List.of(planUtsettelse(MANDAG, tom));
+        var heltEøs = UttaksplanTidslinje.normaliser(utsettelse, List.of(), List.of(eøsPeriode(MANDAG, tom, Konto.FEDREKVOTE, 5)));
+        var bareSisteDagEøs = UttaksplanTidslinje.normaliser(utsettelse, List.of(),
+            List.of(eøsPeriode(tom, tom.plusDays(2), Konto.FEDREKVOTE, 3)));
+        var bareFørsteDagEøs = UttaksplanTidslinje.normaliser(utsettelse, List.of(),
+            List.of(eøsPeriode(MANDAG.minusDays(2), MANDAG, Konto.FEDREKVOTE, 3)));
+
+        assertThat(perioder(heltEøs)).singleElement().satisfies(p -> {
+            assertThat(p.søker()).isNull();
+            assertThat(p.annenPartEøs()).isNotNull();
+        });
+        assertThat(perioder(bareSisteDagEøs)).extracting(p -> p.fom()).containsExactly(MANDAG, tom);
+        assertThat(perioder(bareFørsteDagEøs)).extracting(p -> p.fom()).containsExactly(MANDAG.minusDays(2), MANDAG.plusDays(1));
+    }
+
+    @Test
+    void skalBeholdeSøkersUtsettelseUtenOverlappMedEøs() {
+        var utsettelseTom = MANDAG.plusDays(4);
+        var søker = List.of(planUtsettelse(MANDAG, utsettelseTom));
+
+        var plan = UttaksplanTidslinje.normaliser(søker, List.of(),
+            List.of(eøsPeriode(MANDAG.plusDays(5), MANDAG.plusDays(6), Konto.FEDREKVOTE, 2)));
+
+        assertThat(perioder(plan)).anySatisfy(p -> {
+            assertThat(p.fom()).isEqualTo(MANDAG);
+            assertThat(p.tom()).isEqualTo(utsettelseTom);
+            assertThat(p.søker().utsettelseÅrsak()).isNotNull();
+        });
+    }
+
+    @Test
     void skalBeholdeEøsPeriodenUrørtNårIngenOverlapper() {
         var eøs = eøsPeriode(MANDAG, MANDAG.plusDays(4), Konto.FEDREKVOTE, 5);
 
@@ -604,6 +742,26 @@ class UttaksplanTidslinjeTest {
 
     private static List<Planperiode> uttak(BrukerRolle rolle, Uttaksperiode... perioder) {
         return UttaksplanMapper.mapVedtaksperioder(List.of(perioder), rolle);
+    }
+
+    @Test
+    void fyllHullMedUtsettelserBeholderSøkersUtsettelseNårBeggeHarUtsettelseSammeDager() {
+        var morsUtsettelse = planUtsettelse(MANDAG, MANDAG.plusDays(4));
+        var farsUtsettelse = new Planperiode(MANDAG.plusDays(2), MANDAG.plusDays(8), new FellesUttaksplanDto.UttakDto(
+            FellesUttaksplanDto.Rolle.FAR_MEDMOR, null, FellesUttaksplanDto.UtsettelseÅrsak.FERIE, null, null, null, null,
+            false, null));
+
+        var fylt = UttaksplanTidslinje.fyllHullMedUtsettelser(LocalDateTimeline.empty(), List.of(morsUtsettelse, farsUtsettelse),
+            FellesUttaksplanDto.Rolle.MOR);
+
+        assertThat(perioder(fylt)).containsExactly(
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(4), morsUtsettelse.uttak(), null, null),
+            new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(7), MANDAG.plusDays(8), null, farsUtsettelse.uttak(), null));
+    }
+
+    private static Planperiode planUtsettelse(LocalDate fom, LocalDate tom) {
+        return new Planperiode(fom, tom, new FellesUttaksplanDto.UttakDto(FellesUttaksplanDto.Rolle.MOR, null,
+            FellesUttaksplanDto.UtsettelseÅrsak.ARBEID, null, null, null, null, false, null));
     }
 
     private static Uttaksperiode periode(LocalDate fom, LocalDate tom, Konto konto) {

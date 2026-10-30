@@ -14,4 +14,17 @@
 
 Backend tjenester for saksoversikt for foreldrepenger
 
+## Felles uttaksplan
+
+Planen bygges fra lagrede søknadsperioder og gjeldende vedtak, sett fra den innloggede søkerens side.
+
+1. **Lagre søknadsplanen.** `fp-soknad` sender hele planen for både førstegangssøknad og endringssøknad, og den erstatter aktiv søknadsplan på saken. Innsendinger som ikke er nyere enn aktiv søknad, ignoreres.
+2. **Finn sakene for barnet.** Ved henting kontrolleres tilgang, og sakene matches på barn eller familiehendelse. Annen parts sak brukes bare når koblingen til søkeren er gyldig. Ved flere treff velges saken med nyeste søknad. Skjermet eller ukjent annen part utelates fra saksoppslaget.
+3. **Velg søknadsgrunnlag.** Søkerens aktive søknad brukes når søkeren har sak, ellers annen parts aktive søknad. Søknaden kan inneholde perioder for begge foreldre. Uten aktiv søknad brukes søkerens egen legacy-søknad som reserve, aldri annen parts legacy-søknad. Uten vedtak brukes legacy-søknaden bare når den ikke er behandlet.
+4. **Prioriter vedtak.** For hver forelder brukes gjeldende vedtak fremfor søknadsuttak. Uten vedtak brukes uttak fra søknadsgrunnlaget. Arbeidsgiveropplysninger fjernes fra annen parts gradering.
+5. **Skjerm og bygg tidslinjen.** `UttaksplanRest` sjekker adressebeskyttelse og sender annen part videre som `VerifisertAnnenPart`. Ved beskyttet adresse eller ukjent identitet sendes ingen annen part. `UttaksplanTjeneste.hentFor` henter bare annen parts sak når annen part er verifisert og er den samme som på søkerens sak. Annen parts perioder fra søkerens egen søknadsplan vises alltid, fordi søkeren har sendt dem inn selv. EØS-perioder kommer fra søkerens eget vedtak. Søknadsutsettelser fyller bare hull i tidslinjen.
+6. **Returner planen.** Periodene returneres med søker og annen part i hvert sitt felt, sammen med termindato, antall barn og dekningsgrad. Uten sak for noen av foreldrene returneres ingen plan.
+
+Lagringen ligger i `SøknadsplanTjeneste`. `UttaksplanRest`, `UttaksplanTjeneste` og `UttaksplanTidslinje` håndterer henting og oppbygging.
+
 https://confluence.adeo.no/pages/viewpage.action?pageId=529061042

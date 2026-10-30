@@ -4,6 +4,7 @@ import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig;
+import no.nav.foreldrepenger.oversikt.server.konfig.BackendApiConfig;
 import no.nav.foreldrepenger.oversikt.server.konfig.ForvaltningApiConfig;
 import no.nav.foreldrepenger.oversikt.server.konfig.InternalApiConfig;
 import no.nav.vedtak.felles.jpa.NamingStandard;
@@ -63,6 +64,7 @@ public class JettyServer {
             .addEventListener(new DataSourceShutdownListener(DataSourceHolder::close))
             .registerRestApp(InternalApiConfig.API_URI, InternalApiConfig.class)
             .registerRestApp(ApiConfig.API_URI, ApiConfig.class)
+            .registerRestApp(BackendApiConfig.API_URI, BackendApiConfig.class)
             .registerRestApp(ForvaltningApiConfig.API_URI, ForvaltningApiConfig.class)
             .build();
         server.start();

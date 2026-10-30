@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.saker;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +14,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
+import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTjeneste;
 
 @ApplicationScoped
@@ -57,11 +59,8 @@ public class AnnenPartSakTjeneste {
                 + " Velger sak med siste søknad. Saksnummer {}.", saksnummer);
         }
         return annenPartsSaker.stream()
-            .max((o1, o2) -> {
-                var mt2 = o2.sisteSøknad().orElseThrow().mottattTidspunkt();
-                var mt1 = o1.sisteSøknad().orElseThrow().mottattTidspunkt();
-                return mt2.compareTo(mt1);
-            });
+            .max(Comparator.comparing((ForeldrepengerSak sak) -> sak.sisteSøknad().map(FpSøknad::mottattTidspunkt).orElse(null),
+                Comparator.nullsFirst(Comparator.naturalOrder())));
     }
 
     private List<ForeldrepengerSak> sakerMedAnnenpartLikSøker(AktørId søker, Set<ForeldrepengerSak> saker, AktørId barn, LocalDate familiehendelse) {

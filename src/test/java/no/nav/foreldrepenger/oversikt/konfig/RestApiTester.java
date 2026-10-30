@@ -7,10 +7,12 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
 import jakarta.ws.rs.Path;
 import no.nav.foreldrepenger.oversikt.server.konfig.ApiConfig;
+import no.nav.foreldrepenger.oversikt.server.konfig.BackendApiConfig;
 
 class RestApiTester {
 
@@ -30,9 +32,8 @@ class RestApiTester {
 
 
     static Collection<Class<?>> finnAlleRestTjenester() {
-        var config = new ApiConfig();
-        return config.getClasses()
-            .stream()
+        return Stream.of(new ApiConfig(), new BackendApiConfig())
+            .flatMap(config -> config.getClasses().stream())
             .filter(c -> c.getAnnotation(Path.class) != null)
             .filter(c -> !UNNTATT.contains(c))
             .collect(Collectors.toList());
