@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
-import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
@@ -191,27 +190,18 @@ public class UttaksplanTjeneste {
         if (barn != null && sak.gjelderBarn(barn)) {
             return true;
         }
-        if (familiehendelse == null) {
+        if (familiehendelse == null || sak.familieHendelse() == null) {
             return false;
         }
-        var gjeldende = gjeldendeDato(sak.familieHendelse());
+        var fh = sak.familieHendelse();
+        var gjeldende = Optional.ofNullable(fh.omsorgsovertakelse())
+            .or(() -> Optional.ofNullable(fh.fødselsdato()))
+            .or(() -> Optional.ofNullable(fh.termindato()))
+            .orElse(null);
         if (gjeldende == null) {
             return false; // Sett i prod at dette har oppstått
         }
         return new LocalDateInterval(gjeldende.minusWeeks(5), gjeldende.plusWeeks(5)).contains(familiehendelse);
-    }
-
-    /**
-     * Omsorgsovertakelse, ellers fødselsdato, ellers termindato.
-     */
-    private static LocalDate gjeldendeDato(FamilieHendelse familieHendelse) {
-        if (familieHendelse == null) {
-            return null;
-        }
-        return Optional.ofNullable(familieHendelse.omsorgsovertakelse())
-            .or(() -> Optional.ofNullable(familieHendelse.fødselsdato()))
-            .or(() -> Optional.ofNullable(familieHendelse.termindato()))
-            .orElse(null);
     }
 
     private Optional<Søknadsplan> hentAktivSøknad(ForeldrepengerSak sak) {

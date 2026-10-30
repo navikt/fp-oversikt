@@ -2,7 +2,6 @@ package no.nav.foreldrepenger.oversikt.stub;
 
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
@@ -31,11 +30,6 @@ public class RepositoryStub implements SakRepository {
 
     @Override
     public Sak hentFor(Saksnummer saksnummer) {
-        return finnFor(saksnummer).orElseThrow();
-    }
-
-    @Override
-    public Optional<Sak> finnFor(Saksnummer saksnummer) {
-        return sakList.stream().filter(s -> s.saksnummer().equals(saksnummer)).findFirst();
+        return sakList.stream().filter(s -> s.saksnummer().equals(saksnummer)).findFirst().orElseThrow();
     }
 }
