@@ -27,7 +27,7 @@
         <fp-tidsserie.version>2.8.0</fp-tidsserie.version>
         <mittnav-varsler.version>2.2.0</mittnav-varsler.version>
         <teamdokumenthandtering-avro-schemas.version>2.0.0</teamdokumenthandtering-avro-schemas.version>
-        <fpsoknad-kontrakt.version>1.0.13</fpsoknad-kontrakt.version>
+        <fpsoknad-kontrakt.version>1.0.14</fpsoknad-kontrakt.version>
     </properties>
 
     <dependencyManagement>

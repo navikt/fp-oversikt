@@ -12,7 +12,6 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
 import org.mockito.ArgumentCaptor;
 
 import jakarta.validation.Validation;
@@ -85,7 +84,7 @@ class SøknadsplanRestTest {
     @Test
     void ignorererResultatOgArbeidsgivernavnMenBeholderGraderingForBeggeRoller() {
         var morsAktivitet = new FellesUttaksplanDto.Aktivitet(FellesUttaksplanDto.Aktivitet.AktivitetType.FRILANS, null, "ikke lagre");
-        var farsAktivitet = new FellesUttaksplanDto.Aktivitet(FellesUttaksplanDto.Aktivitet.AktivitetType.ANNET,
+        var farsAktivitet = new FellesUttaksplanDto.Aktivitet(FellesUttaksplanDto.Aktivitet.AktivitetType.ORDINÆRT_ARBEID,
             new FellesUttaksplanDto.Arbeidsgiver("000000001", FellesUttaksplanDto.Arbeidsgiver.ArbeidsgiverType.ORGANISASJON), null);
         var mor = new FellesUttaksplanDto.UttakDto(FellesUttaksplanDto.Rolle.MOR, null, null, null,
             new FellesUttaksplanDto.Gradering(new FellesUttaksplanDto.Arbeidstidprosent(new BigDecimal("50")), morsAktivitet),

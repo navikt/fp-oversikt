@@ -97,24 +97,11 @@ class SøknadsplanMapperTest {
     }
 
     @ParameterizedTest
-    @EnumSource(value = AktivitetType.class, names = "ANNET", mode = EnumSource.Mode.EXCLUDE)
+    @EnumSource(value = AktivitetType.class)
     void mapperAktivitetType(AktivitetType type) {
         var periode = map(søker(uttak(Rolle.MOR, null, null, null, gradering(type, null), null)));
 
         assertThat(periode.aktivitetType().name()).isEqualTo(type.name());
-    }
-
-    @Test
-    void lagrerIkkeAktivitetTypeAnnetForNoenRolle() {
-        var mor = uttak(Rolle.MOR, null, null, null, gradering(AktivitetType.ANNET, null), null);
-        var far = uttak(Rolle.FAR_MEDMOR, null, null, null, gradering(AktivitetType.ANNET, null), null);
-
-        var perioder = SøknadsplanMapper.tilPerioder(List.of(new UttakPeriodeDto(FOM, TOM, mor, far, null)));
-
-        assertThat(perioder).hasSize(2).allSatisfy(periode -> {
-            assertThat(periode.aktivitetType()).isNull();
-            assertThat(periode.graderingArbeidstidprosent()).isEqualByComparingTo("50");
-        });
     }
 
     @ParameterizedTest
