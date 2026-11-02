@@ -120,6 +120,21 @@ class DBSøknadsplanRepositoryTest {
         assertThat(perioder.get(0).toString()).doesNotContain(arbeidsgiverId);
     }
 
+    @Test
+    void henterPerioderSortertPåFomOgTom(EntityManager entityManager) {
+        var saksnummer = Saksnummer.dummy();
+        var repository = new DBSøknadsplanRepository(entityManager);
+        var senest = periode(20, false);
+        var tidligst = periode(1, false);
+        var midten = periode(10, false);
+
+        repository.lagre(saksnummer, søknad(Instant.parse("2026-05-02T10:00:00Z"), List.of(senest, tidligst, midten)));
+        entityManager.clear();
+
+        assertThat(repository.hentAktivFor(saksnummer)).get()
+            .satisfies(plan -> assertThat(plan.perioder()).containsExactly(tidligst, midten, senest));
+    }
+
     private static void assertSøknadUtenPeriodelisteorden(java.util.Optional<Søknadsplan> faktisk, Søknadsplan forventet) {
         assertThat(faktisk).get().satisfies(gjenhentet -> {
             assertThat(gjenhentet.mottattTidspunkt()).isEqualTo(forventet.mottattTidspunkt());

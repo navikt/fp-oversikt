@@ -17,7 +17,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.SequenceGenerator;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
@@ -27,7 +27,6 @@ public class SøknadsplanEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SOKNADSPLAN")
-    @SequenceGenerator(name = "SEQ_SOKNADSPLAN", sequenceName = "SEQ_SOKNADSPLAN")
     @Column(name = "id")
     private Long id;
 
@@ -46,6 +45,7 @@ public class SøknadsplanEntitet {
     private boolean aktiv;
 
     @OneToMany(mappedBy = "soknad", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OrderBy("fom, tom")
     private List<SøknadsplanPeriodeEntitet> perioder = new ArrayList<>();
 
     SøknadsplanEntitet(Saksnummer saksnummer, Søknadsplan søknad) {
@@ -59,6 +59,10 @@ public class SøknadsplanEntitet {
     }
 
     protected SøknadsplanEntitet() {
+    }
+
+    void deaktiver() {
+        this.aktiv = false;
     }
 
     Søknadsplan map() {

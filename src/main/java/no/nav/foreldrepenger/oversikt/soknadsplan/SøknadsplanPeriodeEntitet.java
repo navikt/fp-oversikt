@@ -13,7 +13,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity(name = "soknadsplan_periode")
@@ -22,7 +21,6 @@ public class SøknadsplanPeriodeEntitet {
 
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "SEQ_SOKNADSPLAN_PERIODE")
-    @SequenceGenerator(name = "SEQ_SOKNADSPLAN_PERIODE", sequenceName = "SEQ_SOKNADSPLAN_PERIODE")
     @Column(name = "id")
     private Long id;
 
