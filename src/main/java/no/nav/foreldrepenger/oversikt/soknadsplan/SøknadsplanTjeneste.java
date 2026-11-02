@@ -30,11 +30,11 @@ public class SøknadsplanTjeneste {
         var aktivMottatt = søknadsplanRepository.hentAktivFor(saksnummer).map(Søknadsplan::mottattTidspunkt);
         if (aktivMottatt.filter(søknadsplan.mottattTidspunkt()::equals).isPresent()) {
             // Samme mottakstidspunkt betyr at samme søknad er sendt på nytt, f.eks. ved retry
-            LOG.info("Ignorerer søknad som allerede er lagret som aktiv søknad på saken");
+            LOG.info("Ignorerer søknad for sak {} som allerede er lagret som aktiv søknad", saksnummer.value());
             return;
         }
         if (aktivMottatt.filter(søknadsplan.mottattTidspunkt()::isBefore).isPresent()) {
-            LOG.warn("Ignorerer søknad som er eldre enn aktiv søknad på saken");
+            LOG.warn("Ignorerer søknad for sak {} som er eldre enn aktiv søknad", saksnummer.value());
             return;
         }
         søknadsplanRepository.lagre(saksnummer, søknadsplan);
