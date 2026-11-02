@@ -161,6 +161,21 @@ class SøknadsplanRestTest {
     }
 
     @Test
+    void avviserFlerePerioderEnnFpsoknadTillater() {
+        var periode = validRequest().perioder().getFirst();
+        try (var factory = Validation.buildDefaultValidatorFactory()) {
+            var validator = factory.getValidator();
+            assertThat(validator.validate(requestMedAntallPerioder(periode, SøknadsplanRest.MAKS_ANTALL_PERIODER))).isEmpty();
+            assertThat(validator.validate(requestMedAntallPerioder(periode, SøknadsplanRest.MAKS_ANTALL_PERIODER + 1))).isNotEmpty();
+        }
+    }
+
+    private static SøknadsplanRest.SøknadsplanRequest requestMedAntallPerioder(FellesUttaksplanDto.UttakPeriodeDto periode, int antall) {
+        return new SøknadsplanRest.SøknadsplanRequest(new Saksnummer("123456"), OffsetDateTime.parse("2026-09-01T12:00:00Z"),
+            Søknadsplan.Rolle.MOR, java.util.Collections.nCopies(antall, periode));
+    }
+
+    @Test
     void avviserTomPeriodelisteIDomenetOgLagrerIkkeTomRequest() {
         assertThatThrownBy(() -> new Søknadsplan(OffsetDateTime.parse("2026-09-01T12:00:00Z").toInstant(), Søknadsplan.Rolle.MOR, List.of()))
             .isInstanceOf(IllegalArgumentException.class)

@@ -15,7 +15,6 @@ import org.junit.jupiter.api.parallel.Execution;
 import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
@@ -99,49 +98,33 @@ class TilgangKontrollTjenesteTest {
         assertThatCode(() -> tilgangkontroll.tilgangssjekkMyndighetsalder()).doesNotThrowAnyException();
     }
 
-    @Test
-    void fpsoknadISammeClusterOgNamespaceErPreautorisert() {
-        KontekstHolder.setKontekst(systemkontekst(FPSOKNAD_DEV));
-
-        assertThatCode(() -> systemtilgang(false).sjekkAtKallErFraSystem()).doesNotThrowAnyException();
-    }
-
     @ParameterizedTest
-    @NullAndEmptySource
     @ValueSource(strings = {
+        "dev-gcp:teamforeldrepenger:fpsoknad",
         "dev-gcp:teamforeldrepenger:fpsak",
-        "dev-gcp:annet-namespace:fpsoknad",
-        "prod-gcp:teamforeldrepenger:fpsoknad",
-        "dev-gcp:teamforeldrepenger:fpsoknad-ekstra",
         "vtp:teamforeldrepenger:vtp"
     })
-    void andreSystemklienterAvvises(String uid) {
+    void systemklienterGodtas(String uid) {
         KontekstHolder.setKontekst(systemkontekst(uid));
 
-        assertThatThrownBy(() -> systemtilgang(false).sjekkAtKallErFraSystem())
-            .isExactlyInstanceOf(OversiktManglerTilgangException.class)
-            .extracting("feilkode").isEqualTo(LokalFeilKode.IKKE_TILGANG.name());
-    }
-
-    @Test
-    void vtpGodtarAlleSystemklienter() {
-        KontekstHolder.setKontekst(systemkontekst("vtp:teamforeldrepenger:vtp"));
-
-        assertThatCode(() -> systemtilgang(true).sjekkAtKallErFraSystem()).doesNotThrowAnyException();
+        assertThatCode(() -> tilgangkontroll.sjekkAtKallErFraSystem()).doesNotThrowAnyException();
     }
 
     @ParameterizedTest
-    @EnumSource(value = IdentType.class, names = {"EksternBruker", "InternBruker"})
-    void brukerkontekstAvvisesSelvOmAlleSystemklienterGodtas(IdentType identType) {
+    @EnumSource(value = IdentType.class, names = {"Systemressurs"}, mode = EnumSource.Mode.EXCLUDE)
+    void andreIdenttyperAvvises(IdentType identType) {
         KontekstHolder.setKontekst(RequestKontekst.forRequest(FPSOKNAD_DEV, "srvfpsoknad", identType, null, null, Set.of()));
 
-        assertThatThrownBy(() -> systemtilgang(true).sjekkAtKallErFraSystem())
+        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystem())
             .isExactlyInstanceOf(OversiktManglerTilgangException.class)
             .extracting("feilkode").isEqualTo(LokalFeilKode.IKKE_TILGANG_IKKE_SYSTEM.name());
     }
 
-    private TilgangKontrollTjeneste systemtilgang(boolean godtaAlleSystemklienter) {
-        return new TilgangKontrollTjeneste(sakRepository, innloggetBruker, FPSOKNAD_DEV, godtaAlleSystemklienter);
+    @Test
+    void manglendeKontekstAvvises() {
+        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystem())
+            .isExactlyInstanceOf(OversiktManglerTilgangException.class)
+            .extracting("feilkode").isEqualTo(LokalFeilKode.IKKE_TILGANG_IKKE_SYSTEM.name());
     }
 
     private static RequestKontekst systemkontekst(String uid) {

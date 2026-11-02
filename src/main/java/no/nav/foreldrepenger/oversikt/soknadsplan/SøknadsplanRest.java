@@ -25,6 +25,8 @@ import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUtt
 public class SøknadsplanRest {
 
     private static final Logger LOG = LoggerFactory.getLogger(SøknadsplanRest.class);
+    // Samme grense som fpsoknad validerer søknaden mot (UttaksperioderValidering.MAKS_ANTALL_PERIODER_TOTALT)
+    static final int MAKS_ANTALL_PERIODER = 400;
 
     private SøknadsplanTjeneste søknadsplanTjeneste;
     private TilgangKontrollTjeneste tilgangKontroll;
@@ -46,6 +48,10 @@ public class SøknadsplanRest {
         // CDI
     }
 
+    /**
+     * Alle systemklienter i accessPolicy.inbound får skrive søknadsplan. Saksnummer kontrolleres ikke mot bruker,
+     * så kalleren må hente saksnummeret fra FPSAK og ikke fra sluttbruker. fpsoknad gjør dette i DestinasjonsRuter.
+     */
     @POST
     public void lagre(@Valid @NotNull SøknadsplanRequest request) {
         tilgangKontroll.sjekkAtKallErFraSystem();
@@ -62,7 +68,7 @@ public class SøknadsplanRest {
     public record SøknadsplanRequest(@Valid @NotNull Saksnummer saksnummer,
                                @NotNull OffsetDateTime mottattTidspunkt,
                                 @Valid @NotNull Søknadsplan.Rolle rolle,
-                               @NotNull @Size(min = 1) List<@Valid @NotNull UttakPeriodeDto> perioder) {
+                               @NotNull @Size(min = 1, max = MAKS_ANTALL_PERIODER) List<@Valid @NotNull UttakPeriodeDto> perioder) {
         @Override
         public String toString() {
             return "SøknadsplanRequest[skjermet]";
