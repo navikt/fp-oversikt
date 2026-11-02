@@ -11,11 +11,8 @@ import java.util.Set;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
@@ -26,10 +23,9 @@ import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
 import no.nav.vedtak.sikkerhet.kontekst.RequestKontekst;
 
-@Execution(ExecutionMode.SAME_THREAD)
 class TilgangKontrollTjenesteTest {
 
-    private static final String FPSOKNAD_DEV = "dev-gcp:teamforeldrepenger:fpsoknad";
+    private static final String SYSTEMKLIENT = "dev-gcp:teamforeldrepenger:klient";
 
     private SakRepository sakRepository;
     private InnloggetBruker innloggetBruker;
@@ -98,14 +94,9 @@ class TilgangKontrollTjenesteTest {
         assertThatCode(() -> tilgangkontroll.tilgangssjekkMyndighetsalder()).doesNotThrowAnyException();
     }
 
-    @ParameterizedTest
-    @ValueSource(strings = {
-        "dev-gcp:teamforeldrepenger:fpsoknad",
-        "dev-gcp:teamforeldrepenger:fpsak",
-        "vtp:teamforeldrepenger:vtp"
-    })
-    void systemklienterGodtas(String uid) {
-        KontekstHolder.setKontekst(systemkontekst(uid));
+    @Test
+    void systemkallGodtas() {
+        KontekstHolder.setKontekst(kontekst(IdentType.Systemressurs));
 
         assertThatCode(() -> tilgangkontroll.sjekkAtKallErFraSystem()).doesNotThrowAnyException();
     }
@@ -113,7 +104,7 @@ class TilgangKontrollTjenesteTest {
     @ParameterizedTest
     @EnumSource(value = IdentType.class, names = {"Systemressurs"}, mode = EnumSource.Mode.EXCLUDE)
     void andreIdenttyperAvvises(IdentType identType) {
-        KontekstHolder.setKontekst(RequestKontekst.forRequest(FPSOKNAD_DEV, "srvfpsoknad", identType, null, null, Set.of()));
+        KontekstHolder.setKontekst(kontekst(identType));
 
         assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystem())
             .isExactlyInstanceOf(OversiktManglerTilgangException.class)
@@ -127,7 +118,7 @@ class TilgangKontrollTjenesteTest {
             .extracting("feilkode").isEqualTo(LokalFeilKode.IKKE_TILGANG_IKKE_SYSTEM.name());
     }
 
-    private static RequestKontekst systemkontekst(String uid) {
-        return RequestKontekst.forRequest(uid, "srvklient", IdentType.Systemressurs, null, null, Set.of());
+    private static RequestKontekst kontekst(IdentType identType) {
+        return RequestKontekst.forRequest(SYSTEMKLIENT, "srvklient", identType, null, null, Set.of());
     }
 }

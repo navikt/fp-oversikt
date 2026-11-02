@@ -12,15 +12,12 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.parallel.Execution;
-import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import jakarta.persistence.EntityManager;
 import no.nav.foreldrepenger.oversikt.JpaExtension;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 @ExtendWith(JpaExtension.class)
-@Execution(ExecutionMode.SAME_THREAD)
 class DBSøknadsplanRepositoryTest {
 
     @Test
