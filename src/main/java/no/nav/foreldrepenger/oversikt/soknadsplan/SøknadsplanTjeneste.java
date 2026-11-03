@@ -34,7 +34,9 @@ public class SøknadsplanTjeneste {
             return;
         }
         if (aktivMottatt.filter(søknadsplan.mottattTidspunkt()::isBefore).isPresent()) {
-            LOG.warn("Ignorerer søknad for sak {} som er eldre enn aktiv søknad", saksnummer.value());
+            // Mottatt tidspunkt er lokal tid. Når klokka stilles tilbake til vintertid, kan en ny søknad derfor se eldre ut
+            // enn en søknad sendt i timen før. Det er akseptert. Neste søknad retter planen.
+            LOG.warn("Ignorerer søknad for sak {} som er eldre enn aktiv søknad. Kan skyldes overgang til vintertid", saksnummer.value());
             return;
         }
         søknadsplanRepository.lagre(saksnummer, søknadsplan);
