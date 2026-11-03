@@ -45,6 +45,18 @@ public class TilgangKontrollTjeneste {
         }
     }
 
+    /**
+     * Godtar alle systemklienter (Azure client credentials). Azure utsteder bare slike tokens til apper som er
+     * preautorisert i accessPolicy.inbound, så preautorisering er allerede kontrollert når tokenet er gyldig.
+     * Sluttbrukerkall (TokenX, OBO) har annen IdentType og avvises.
+     */
+    public void sjekkAtKallErFraSystem() {
+        var kontekst = KontekstHolder.getKontekst();
+        if (kontekst == null || !IdentType.Systemressurs.equals(kontekst.getIdentType())) {
+            throw new OversiktManglerTilgangException(LokalFeilKode.IKKE_TILGANG_IKKE_SYSTEM);
+        }
+    }
+
     public void sjekkAtKallErFraBorger() {
         var kontekst = KontekstHolder.getKontekst();
         if (erBorger(kontekst)) {

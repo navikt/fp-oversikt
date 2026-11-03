@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.uttaksplan;
 
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.EøsUttakDto;
+import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.Rolle;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakDto;
 import static no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto.UttakPeriodeDto;
 
@@ -13,6 +14,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.VirkedagJusterer;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 import no.nav.fpsak.tidsserie.LocalDateTimeline;
+import no.nav.fpsak.tidsserie.StandardCombinators;
 
 public final class UttaksplanTidslinje {
 
@@ -36,8 +38,37 @@ public final class UttaksplanTidslinje {
         return normaliserAnnenPartNorsk(annenPart, søkerTimeline);
     }
 
+    /**
+     * Legger søknadsutsettelser bare på dager som ikke allerede har et segment i planen.
+     * Utsettelsen plasseres i søkers eller annen parts felt ut fra forelderrollen.
+     */
+    static LocalDateTimeline<UttakPeriodeDto> fyllHullMedUtsettelser(LocalDateTimeline<UttakPeriodeDto> plan,
+                                                                     List<Planperiode> utsettelser,
+                                                                     Rolle søkerRolle) {
+        // Én tidslinje per forelder, slik at utsettelser for begge på samme dager ikke kaster. Ved overlapp
+        // beholdes søkerens utsettelse, som i UtsettelseOverlappNormalisering.
+        var søkersUtsettelser = tilTimeline(utsettelser.stream().filter(p -> p.uttak().forelder() == søkerRolle).toList());
+        var annenPartsUtsettelser = tilTimeline(utsettelser.stream().filter(p -> p.uttak().forelder() != søkerRolle).toList());
+        var utsettelserIHull = søkersUtsettelser.union(annenPartsUtsettelser, StandardCombinators::coalesceLeftHandSide)
+            .map(segment -> {
+                var uttak = segment.getValue();
+                var erSøker = uttak.forelder() == søkerRolle;
+                return List.of(nyttSegment(segment.getLocalDateInterval(), erSøker ? uttak : null, erSøker ? null : uttak, null));
+            })
+            // Klipp før union, ellers deler union planens segmenter. Delte EØS-segmenter slås ikke sammen
+            // igjen, og trekkdagene ville blitt kopiert til hver del.
+            .disjoint(plan)
+            .map(UttaksplanTidslinje::justerForHelg);
+
+        return plan.union(utsettelserIHull, StandardCombinators::coalesceLeftHandSide)
+            .compress(LocalDateInterval::abutsWorkdays, (venstre, høyre) ->
+                    venstre.annenPartEøs() == null && høyre.annenPartEøs() == null && harLikUttaksinformasjon(venstre, høyre),
+                (intervall, venstre, _) -> nyttSegment(intervall, venstre.getValue().søker(), venstre.getValue().annenPart(), null));
+    }
+
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartNorsk(List<Planperiode> annenPart,
                                                                                LocalDateTimeline<UttakDto> søkerTimeline) {
+        // Uttak prioriteres over utsettelse. Overlappende uttak håndteres deretter etter reglene for samtidig uttak.
         var annenPartTimeline = tilTimeline(annenPart);
         return søkerTimeline.union(annenPartTimeline, (intervall, søkerSegment, annenPartSegment) -> {
                 var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
@@ -72,14 +103,25 @@ public final class UttaksplanTidslinje {
      */
     private static LocalDateTimeline<UttakPeriodeDto> normaliserAnnenPartEøs(List<UttakPeriodeAnnenpartEøs> annenPartsEøsPerioder,
                                                                              LocalDateTimeline<UttakDto> søkerTimeline) {
+        // Søkerens uttak prioriteres over EØS-uttak. EØS-uttak prioriteres over søkerens utsettelser.
         var eøsTimeline = tilEøsTimeline(annenPartsEøsPerioder);
-        return søkerTimeline.union(eøsTimeline, (intervall, søkerSegment, eøsSegment) -> {
+        var søkerUtenUtsettelserInnenforEøs = fjernSøkersUtsettelseInnenforEøs(søkerTimeline, eøsTimeline);
+        return søkerUtenUtsettelserInnenforEøs.union(eøsTimeline, (intervall, søkerSegment, eøsSegment) -> {
             var søkerUttak = søkerSegment == null ? null : søkerSegment.getValue();
             var eøsUttak = eøsSegment == null ? null : eøsSegment.getValue();
             var normalisert = UtsettelseOverlappNormalisering.normaliser(søkerUttak, null, eøsUttak);
             return nyttSegment(intervall, normalisert.søker(), null,
                 normalisert.søker() == null ? normalisert.annenPartEøs() : null);
         }).compress(LocalDateInterval::abutsWorkdays, UttaksplanTidslinje::harLikEøsUttaksinformasjon, UttaksplanTidslinje::slåSammenEøsSegmenter);
+    }
+
+    private static LocalDateTimeline<UttakDto> fjernSøkersUtsettelseInnenforEøs(LocalDateTimeline<UttakDto> søkerTimeline,
+                                                                              LocalDateTimeline<EøsUttakDto> eøsTimeline) {
+        // EØS-uttak prioriteres over utsettelser. Fjern overlapp før unionen, ellers kan en utsettelse
+        // splitte EØS-perioden og kopiere hele trekkdagstallet til hvert segment. Søkerens uttak beholdes urørt.
+        var uttak = søkerTimeline.filterValue(verdi -> verdi.utsettelseÅrsak() == null);
+        var utsettelserUtenEøs = søkerTimeline.filterValue(verdi -> verdi.utsettelseÅrsak() != null).disjoint(eøsTimeline);
+        return uttak.union(utsettelserUtenEøs, StandardCombinators::coalesceLeftHandSide);
     }
 
     private static LocalDateSegment<UttakPeriodeDto> nyttSegment(LocalDateInterval intervall,

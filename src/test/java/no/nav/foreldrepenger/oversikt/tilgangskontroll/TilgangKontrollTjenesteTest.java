@@ -6,8 +6,13 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Set;
+
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.SakRepository;
@@ -16,8 +21,11 @@ import no.nav.foreldrepenger.oversikt.saker.InnloggetBruker;
 import no.nav.vedtak.sikkerhet.kontekst.IdentType;
 import no.nav.vedtak.sikkerhet.kontekst.Kontekst;
 import no.nav.vedtak.sikkerhet.kontekst.KontekstHolder;
+import no.nav.vedtak.sikkerhet.kontekst.RequestKontekst;
 
 class TilgangKontrollTjenesteTest {
+
+    private static final String SYSTEMKLIENT = "dev-gcp:teamforeldrepenger:klient";
 
     private SakRepository sakRepository;
     private InnloggetBruker innloggetBruker;
@@ -25,9 +33,15 @@ class TilgangKontrollTjenesteTest {
 
     @BeforeEach
     void setUp() {
+        KontekstHolder.fjernKontekst();
         sakRepository = mock(SakRepository.class);
         innloggetBruker = mock(InnloggetBruker.class);
         tilgangkontroll = new TilgangKontrollTjeneste(sakRepository, innloggetBruker);
+    }
+
+    @AfterEach
+    void tearDown() {
+        KontekstHolder.fjernKontekst();
     }
 
     @Test
@@ -78,5 +92,33 @@ class TilgangKontrollTjenesteTest {
     void tilgangHvisMynding() {
         when(innloggetBruker.erMyndig()).thenReturn(true);
         assertThatCode(() -> tilgangkontroll.tilgangssjekkMyndighetsalder()).doesNotThrowAnyException();
+    }
+
+    @Test
+    void systemkallGodtas() {
+        KontekstHolder.setKontekst(kontekst(IdentType.Systemressurs));
+
+        assertThatCode(() -> tilgangkontroll.sjekkAtKallErFraSystem()).doesNotThrowAnyException();
+    }
+
+    @ParameterizedTest
+    @EnumSource(value = IdentType.class, names = {"Systemressurs"}, mode = EnumSource.Mode.EXCLUDE)
+    void andreIdenttyperAvvises(IdentType identType) {
+        KontekstHolder.setKontekst(kontekst(identType));
+
+        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystem())
+            .isExactlyInstanceOf(OversiktManglerTilgangException.class)
+            .extracting("feilkode").isEqualTo(LokalFeilKode.IKKE_TILGANG_IKKE_SYSTEM.name());
+    }
+
+    @Test
+    void manglendeKontekstAvvises() {
+        assertThatThrownBy(() -> tilgangkontroll.sjekkAtKallErFraSystem())
+            .isExactlyInstanceOf(OversiktManglerTilgangException.class)
+            .extracting("feilkode").isEqualTo(LokalFeilKode.IKKE_TILGANG_IKKE_SYSTEM.name());
+    }
+
+    private static RequestKontekst kontekst(IdentType identType) {
+        return RequestKontekst.forRequest(SYSTEMKLIENT, "srvklient", identType, null, null, Set.of());
     }
 }

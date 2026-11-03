@@ -1,6 +1,7 @@
 package no.nav.foreldrepenger.oversikt.uttaksplan;
 
 import java.time.LocalDate;
+import java.util.NoSuchElementException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,11 +65,11 @@ public class UttaksplanRest {
         validerBarnIdentifikator(request.barnIdentifikator());
 
         var søkerAktørId = innloggetBruker.aktørId();
-        var annenPartAktørId = annenPartAktørId(request);
+        var annenPart = verifisertAnnenPart(request.annenPartFødselsnummer());
         var barnAktørId = request.barnIdentifikator().fødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnIdentifikator()
                                                                                                                    .fødselsnummer());
 
-        var uttaksplan = uttaksplanTjeneste.hentFor(søkerAktørId, annenPartAktørId, barnAktørId, request.barnIdentifikator().familiehendelse());
+        var uttaksplan = uttaksplanTjeneste.hentFor(søkerAktørId, annenPart, barnAktørId, request.barnIdentifikator().familiehendelse());
         LOG.info("Returnerer felles uttaksplan med {} perioder", uttaksplan.map(u -> u.perioder().size()).orElse(0));
         return uttaksplan.orElse(null);
     }
@@ -84,22 +85,34 @@ public class UttaksplanRest {
     }
 
     /**
-     * Returnerer null når annen part er skjermet eller ukjent. Planen bygges da uten annen part.
+     * Annen part brukes bare når identen er kjent og adressen ikke er beskyttet. Ukjent ident, ukjent person
+     * i PDL og beskyttet adresse gir samme resultat, slik at responsen ikke avslører adressebeskyttelse.
+     * Tekniske feil mot PDL propagerer.
      */
-    private AktørId annenPartAktørId(FellesUttaksplanRequest request) {
-        if (request.annenPartFødselsnummer() == null) {
+    private VerifisertAnnenPart verifisertAnnenPart(Fødselsnummer annenPartFnr) {
+        if (annenPartFnr == null) {
             return null;
         }
+        AktørId aktørId;
         try {
-            var adresseBeskyttelse = personOppslagSystem.adresseBeskyttelse(request.annenPartFødselsnummer());
-            if (adresseBeskyttelse.harBeskyttetAdresse()) {
-                return null;
-            }
-        } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.info("Finner ikke adressebeskyttelse for annen part. Bygger uttaksplan uten annen part", e);
+            aktørId = personOppslagSystem.aktørId(annenPartFnr);
+        } catch (NoSuchElementException e) {
+            LOG.info("Finner ikke ident for annen part. Bygger uttaksplan uten annen part");
             return null;
         }
-        return personOppslagSystem.aktørId(request.annenPartFødselsnummer());
+        if (aktørId == null || !harUbeskyttetAdresse(annenPartFnr)) {
+            return null;
+        }
+        return new VerifisertAnnenPart(aktørId);
+    }
+
+    private boolean harUbeskyttetAdresse(Fødselsnummer fnr) {
+        try {
+            var beskyttelse = personOppslagSystem.adresseBeskyttelse(fnr);
+            return beskyttelse != null && !beskyttelse.harBeskyttetAdresse();
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            return false;
+        }
     }
 
     public record FellesUttaksplanRequest(@NotNull @Valid BarnIdentifikator barnIdentifikator, @Valid Fødselsnummer annenPartFødselsnummer) {
