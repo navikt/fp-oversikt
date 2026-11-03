@@ -1,6 +1,6 @@
 package no.nav.foreldrepenger.oversikt.soknadsplan;
 
-import java.time.OffsetDateTime;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -62,11 +62,11 @@ public class SøknadsplanRest {
             LOG.info("Lagring av søknadsplan er deaktivert i dette miljøet");
             return;
         }
-        søknadsplanTjeneste.lagre(saksnummer, new Søknadsplan(request.mottattTidspunkt().toInstant(), request.rolle(), perioder));
+        søknadsplanTjeneste.lagre(saksnummer, new Søknadsplan(request.mottattTidspunkt(), request.rolle(), perioder));
     }
 
     public record SøknadsplanRequest(@Valid @NotNull Saksnummer saksnummer,
-                               @NotNull OffsetDateTime mottattTidspunkt,
+                               @NotNull LocalDateTime mottattTidspunkt,
                                 @Valid @NotNull Søknadsplan.Rolle rolle,
                                @NotNull @Size(min = 1, max = MAKS_ANTALL_PERIODER) List<@Valid @NotNull UttakPeriodeDto> perioder) {
         @Override

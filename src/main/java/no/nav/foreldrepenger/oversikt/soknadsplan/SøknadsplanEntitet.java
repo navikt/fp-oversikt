@@ -1,11 +1,9 @@
 package no.nav.foreldrepenger.oversikt.soknadsplan;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -19,6 +17,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 
 @Entity(name = "soknadsplan")
@@ -30,13 +29,15 @@ public class SøknadsplanEntitet {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
     @Column(name = "saksnummer", nullable = false)
     private String saksnummer;
 
-    @JdbcTypeCode(SqlTypes.TIMESTAMP_UTC)
+    @NotNull
     @Column(name = "mottatt_tidspunkt", nullable = false)
-    private Instant mottattTidspunkt;
+    private LocalDateTime mottattTidspunkt;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "rolle", nullable = false)
     private Søknadsplan.Rolle rolle;

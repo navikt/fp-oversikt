@@ -1,10 +1,10 @@
 package no.nav.foreldrepenger.oversikt.soknadsplan;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
-public record Søknadsplan(Instant mottattTidspunkt, Søknadsplan.Rolle rolle, List<SøknadsplanPeriode> perioder) {
+public record Søknadsplan(LocalDateTime mottattTidspunkt, Søknadsplan.Rolle rolle, List<SøknadsplanPeriode> perioder) {
 
     public Søknadsplan {
         Objects.requireNonNull(mottattTidspunkt, "mottattTidspunkt kan ikke være null");

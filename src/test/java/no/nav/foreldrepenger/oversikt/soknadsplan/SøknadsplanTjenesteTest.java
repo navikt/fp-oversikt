@@ -6,7 +6,7 @@ import static no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode.Kon
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -18,7 +18,7 @@ import no.nav.foreldrepenger.oversikt.stub.SøknadsplanRepositoryStub;
 class SøknadsplanTjenesteTest {
 
     private static final LocalDate DAG = LocalDate.of(2026, 11, 2);
-    private static final Instant MOTTATT = Instant.parse("2026-10-01T10:00:00Z");
+    private static final LocalDateTime MOTTATT = LocalDateTime.parse("2026-10-01T10:00:00");
 
     private final SøknadsplanRepositoryStub søknadRepository = new SøknadsplanRepositoryStub();
     private final SøknadsplanTjeneste tjeneste = new SøknadsplanTjeneste(søknadRepository);
@@ -56,7 +56,7 @@ class SøknadsplanTjenesteTest {
         assertThat(søknadRepository.hentAktivFor(saksnummer)).containsSame(aktiv);
     }
 
-    private static Søknadsplan søknad(Instant mottatt, SøknadsplanPeriode... perioder) {
+    private static Søknadsplan søknad(LocalDateTime mottatt, SøknadsplanPeriode... perioder) {
         return new Søknadsplan(mottatt, MOR, List.of(perioder));
     }
 

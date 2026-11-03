@@ -14,6 +14,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity(name = "soknadsplan_periode")
 @Table(name = "soknadsplan_periode")
@@ -24,16 +25,20 @@ public class SøknadsplanPeriodeEntitet {
     @Column(name = "id")
     private Long id;
 
+    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "soknadsplan_id", nullable = false)
     private SøknadsplanEntitet soknad;
 
+    @NotNull
     @Column(name = "fom", nullable = false)
     private LocalDate fom;
 
+    @NotNull
     @Column(name = "tom", nullable = false)
     private LocalDate tom;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     @Column(name = "rolle", nullable = false)
     private Søknadsplan.Rolle rolle;

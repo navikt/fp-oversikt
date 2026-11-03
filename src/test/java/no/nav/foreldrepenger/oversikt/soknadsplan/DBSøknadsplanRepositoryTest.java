@@ -3,10 +3,8 @@ package no.nav.foreldrepenger.oversikt.soknadsplan;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,7 +22,7 @@ class DBSøknadsplanRepositoryTest {
     void lagrerOgHenterAlleEnumverdierProsentverdierOgPeriodeliste(EntityManager entityManager) {
         var saksnummer = Saksnummer.dummy();
         var perioder = alleEnumverdier();
-        var søknad = new Søknadsplan(Instant.parse("2026-03-29T01:30:00.123456Z"), Søknadsplan.Rolle.FAR_MEDMOR, perioder);
+        var søknad = new Søknadsplan(LocalDateTime.parse("2026-03-29T01:30:00.123"), Søknadsplan.Rolle.FAR_MEDMOR, perioder);
         var repository = new DBSøknadsplanRepository(entityManager);
 
         repository.lagre(saksnummer, søknad);
@@ -41,10 +39,10 @@ class DBSøknadsplanRepositoryTest {
         var saksnummer = Saksnummer.dummy();
         var annenSak = Saksnummer.dummy();
         var repository = new DBSøknadsplanRepository(entityManager);
-        var historisk = søknad(Instant.parse("2026-05-02T10:00:00Z"), List.of(periode(1, true)));
-        var aktivPåAnnenSak = søknad(Instant.parse("2026-05-03T10:00:00Z"), List.of(periode(2, Boolean.FALSE)));
-        var nyereFørst = søknad(Instant.parse("2026-05-10T10:00:00Z"), List.of(periode(3, false), periode(4, true)));
-        var eldreSendtSenere = søknad(Instant.parse("2026-05-01T10:00:00Z"), List.of(periode(5, Boolean.FALSE)));
+        var historisk = søknad(LocalDateTime.parse("2026-05-02T10:00:00"), List.of(periode(1, true)));
+        var aktivPåAnnenSak = søknad(LocalDateTime.parse("2026-05-03T10:00:00"), List.of(periode(2, Boolean.FALSE)));
+        var nyereFørst = søknad(LocalDateTime.parse("2026-05-10T10:00:00"), List.of(periode(3, false), periode(4, true)));
+        var eldreSendtSenere = søknad(LocalDateTime.parse("2026-05-01T10:00:00"), List.of(periode(5, Boolean.FALSE)));
 
         repository.lagre(saksnummer, historisk);
         repository.lagre(annenSak, aktivPåAnnenSak);
@@ -65,17 +63,17 @@ class DBSøknadsplanRepositoryTest {
     }
 
     @Test
-    void lagrerOgRunderInstantGjennomPostgres(EntityManager entityManager) {
+    void lagrerOgRunderTidspunktGjennomPostgres(EntityManager entityManager) {
         var saksnummer = Saksnummer.dummy();
         var repository = new DBSøknadsplanRepository(entityManager);
-        var dstOvergang = OffsetDateTime.of(2026, 3, 29, 3, 30, 0, 987654000, ZoneOffset.ofHours(2)).toInstant();
-        var søknad = søknad(dstOvergang, List.of(periode(1, true)));
+        var mottatt = LocalDateTime.of(2026, 3, 29, 3, 30, 0, 987_000_000);
+        var søknad = søknad(mottatt, List.of(periode(1, true)));
 
         repository.lagre(saksnummer, søknad);
         entityManager.clear();
 
         assertSøknadUtenPeriodelisteorden(repository.hentAktivFor(saksnummer), søknad);
-        assertThat(repository.hentAktivFor(saksnummer).orElseThrow().mottattTidspunkt()).isEqualTo(dstOvergang);
+        assertThat(repository.hentAktivFor(saksnummer).orElseThrow().mottattTidspunkt()).isEqualTo(mottatt);
         assertThat(antall(entityManager, "select count(*) from soknadsplan_periode p join soknadsplan s on s.id = p.soknadsplan_id where s.saksnummer = ?", saksnummer.value()))
             .isEqualTo(1L);
     }
@@ -88,7 +86,7 @@ class DBSøknadsplanRepositoryTest {
         var samtidigUttaksprosent = new BigDecimal("999.99");
         var periode = new SøknadsplanPeriode(LocalDate.of(2026, 3, 1), LocalDate.of(2026, 3, 2), Søknadsplan.Rolle.MOR,
             SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null, gradering, samtidigUttaksprosent, false, null, null);
-        var søknad = søknad(Instant.parse("2026-03-01T10:00:00Z"), List.of(periode));
+        var søknad = søknad(LocalDateTime.parse("2026-03-01T10:00:00"), List.of(periode));
 
         repository.lagre(saksnummer, søknad);
         entityManager.clear();
@@ -107,7 +105,7 @@ class DBSøknadsplanRepositoryTest {
                 "00123456789"),
             periodeMedArbeidsgiver(Søknadsplan.Rolle.MOR, null, null),
             periodeMedArbeidsgiver(Søknadsplan.Rolle.FAR_MEDMOR, SøknadsplanPeriode.AktivitetType.ORDINÆRT_ARBEID, "987654321"));
-        var søknad = søknad(Instant.parse("2026-03-01T10:00:00Z"), perioder);
+        var søknad = søknad(LocalDateTime.parse("2026-03-01T10:00:00"), perioder);
 
         repository.lagre(saksnummer, søknad);
         entityManager.clear();
@@ -125,7 +123,7 @@ class DBSøknadsplanRepositoryTest {
         var tidligst = periode(1, false);
         var midten = periode(10, false);
 
-        repository.lagre(saksnummer, søknad(Instant.parse("2026-05-02T10:00:00Z"), List.of(senest, tidligst, midten)));
+        repository.lagre(saksnummer, søknad(LocalDateTime.parse("2026-05-02T10:00:00"), List.of(senest, tidligst, midten)));
         entityManager.clear();
 
         assertThat(repository.hentAktivFor(saksnummer)).get()
@@ -144,7 +142,7 @@ class DBSøknadsplanRepositoryTest {
         return ((Number) entityManager.createNativeQuery(sql).setParameter(1, saksnummer).getSingleResult()).longValue();
     }
 
-    private static Søknadsplan søknad(Instant tidspunkt, List<SøknadsplanPeriode> perioder) {
+    private static Søknadsplan søknad(LocalDateTime tidspunkt, List<SøknadsplanPeriode> perioder) {
         return new Søknadsplan(tidspunkt, Søknadsplan.Rolle.MOR, perioder);
     }
 
