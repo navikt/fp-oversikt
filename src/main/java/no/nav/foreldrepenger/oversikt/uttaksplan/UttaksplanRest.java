@@ -70,7 +70,8 @@ public class UttaksplanRest {
                                                                                                                    .fødselsnummer());
 
         var uttaksplan = uttaksplanTjeneste.hentFor(søkerAktørId, annenPart, barnAktørId, request.barnIdentifikator().familiehendelse());
-        LOG.info("Returnerer felles uttaksplan med {} perioder", uttaksplan.map(u -> u.perioder().size()).orElse(0));
+        LOG.info("Returnerer felles uttaksplan med {} perioder, annen part redigerbar: {}", uttaksplan.map(u -> u.perioder().size()).orElse(0),
+            uttaksplan.map(FellesUttaksplanDto::annenPartRedigerbar).orElse(null));
         return uttaksplan.orElse(null);
     }
 

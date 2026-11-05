@@ -86,8 +86,11 @@ public class UttaksplanTjeneste {
 
         // Metadata utledes fra søkerens sak når den finnes, ellers fra annen parts sak.
         var metadataSak = søkersSak.or(() -> annenPartsSak).orElseThrow();
-        return Optional.of(lagPlan(metadataSak, søkerRolle, søkerPerioder, annenPartsPerioder, eøsPerioder,
-            søknadsutsettelser));
+        var familieHendelse = metadataSak.familieHendelse();
+        var annenPartRedigerbar = annenPartsSak.isEmpty(); //Saker uten søknad eller henlagte er allerede filtrert bort
+        return Optional.of(new FellesUttaksplanDto(familieHendelse == null ? null : familieHendelse.termindato(),
+            familieHendelse == null ? null : familieHendelse.antallBarn(), UttaksplanMapper.mapDekningsgrad(metadataSak.dekningsgrad()),
+            perioder(søkerRolle, søkerPerioder, annenPartsPerioder, eøsPerioder, søknadsutsettelser), annenPartRedigerbar));
     }
 
     /**
@@ -271,18 +274,14 @@ public class UttaksplanTjeneste {
             .toList();
     }
 
-    private static FellesUttaksplanDto lagPlan(ForeldrepengerSak metadataSak,
-                                               FellesUttaksplanDto.Rolle søkerRolle,
-                                               List<Planperiode> søkerPerioder,
-                                               List<Planperiode> annenPartsPerioder,
-                                               List<UttakPeriodeAnnenpartEøs> eøsPerioder,
-                                               List<Planperiode> søknadsutsettelser) {
-        var familieHendelse = metadataSak.familieHendelse();
+    private static List<FellesUttaksplanDto.UttakPeriodeDto> perioder(FellesUttaksplanDto.Rolle søkerRolle,
+                                                 List<Planperiode> søkerPerioder,
+                                                 List<Planperiode> annenPartsPerioder,
+                                                 List<UttakPeriodeAnnenpartEøs> eøsPerioder,
+                                                 List<Planperiode> søknadsutsettelser) {
         var tidslinje = UttaksplanTidslinje.normaliser(søkerPerioder, annenPartsPerioder, eøsPerioder);
         var utfyltTidslinje = UttaksplanTidslinje.fyllHullMedUtsettelser(tidslinje, søknadsutsettelser, søkerRolle);
-        var perioder = utfyltTidslinje.stream().map(LocalDateSegment::getValue).toList();
-        return new FellesUttaksplanDto(familieHendelse == null ? null : familieHendelse.termindato(),
-            familieHendelse == null ? null : familieHendelse.antallBarn(), UttaksplanMapper.mapDekningsgrad(metadataSak.dekningsgrad()), perioder);
+        return utfyltTidslinje.stream().map(LocalDateSegment::getValue).toList();
     }
 
 }

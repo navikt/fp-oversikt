@@ -1242,6 +1242,117 @@ class UttaksplanTjenesteTest {
         assertThat(tjeneste.hentFor(søker, null, barn, mandag)).isEmpty();
     }
 
+    @Test
+    void annenPartIkkeRedigerbarNårAnnenPartHarSøknadUtenVedtak() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+                søknadsperiode(termindato, termindato.plusWeeks(2), Konto.MØDREKVOTE)),
+            sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+                søknadsperiode(termindato.plusWeeks(6), termindato.plusWeeks(8), Konto.FEDREKVOTE)));
+
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
+
+        assertThat(plan.annenPartRedigerbar()).isFalse();
+    }
+
+    @Test
+    void annenPartIkkeRedigerbarNårAnnenPartHarVedtak() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+                søknadsperiode(termindato, termindato.plusWeeks(2), Konto.MØDREKVOTE)),
+            sakMedVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+                uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(8), Konto.FEDREKVOTE)));
+
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
+
+        assertThat(plan.annenPartRedigerbar()).isFalse();
+    }
+
+    @Test
+    void annenPartRedigerbarNårAnnenPartsSakErHenlagt() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now(),
+            Set.of(søknadsperiode(termindato.plusWeeks(6), termindato.plusWeeks(8), Konto.FEDREKVOTE)), Dekningsgrad.HUNDRE, false);
+        var henlagt = new SakFP0(Saksnummer.dummy(), annenPart, true, Set.of(), søker, new FamilieHendelse(null, termindato, 1, null),
+            Set.of(), Set.of(søknad), BrukerRolle.FAR, Set.of(barn), new Rettigheter(false, false, false), false, LocalDateTime.now());
+        lagre(sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+            søknadsperiode(termindato, termindato.plusWeeks(2), Konto.MØDREKVOTE)), henlagt);
+
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
+
+        assertThat(plan.annenPartRedigerbar()).isTrue();
+    }
+
+    @Test
+    void annenPartRedigerbarNårAnnenPartManglerSak() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+            søknadsperiode(termindato, termindato.plusWeeks(2), Konto.MØDREKVOTE)));
+
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
+
+        assertThat(plan.annenPartRedigerbar()).isTrue();
+    }
+
+    @Test
+    void annenPartRedigerbarNårAnnenPartIkkeErVerifisert() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+                søknadsperiode(termindato, termindato.plusWeeks(2), Konto.MØDREKVOTE)),
+            sakMedVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+                uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(8), Konto.FEDREKVOTE)));
+
+        var plan = tjeneste(søker).hentFor(søker, null, barn, termindato).orElseThrow();
+
+        assertThat(plan.annenPartRedigerbar()).isTrue();
+    }
+
+    @Test
+    void annenPartRedigerbarNårAnnenPartIkkeErRegistrertPåSøkersSak() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var tredjePart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(sakUtenVedtak(søker, tredjePart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+                søknadsperiode(termindato, termindato.plusWeeks(2), Konto.MØDREKVOTE)),
+            sakMedVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+                uttaksperiode(termindato.plusWeeks(6), termindato.plusWeeks(8), Konto.FEDREKVOTE)));
+
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
+
+        assertThat(plan.annenPartRedigerbar()).isTrue();
+    }
+
+    @Test
+    void annenPartIkkeRedigerbarNårSøkerManglerSakOgAnnenPartHarSøkt() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+            søknadsperiode(termindato.plusWeeks(6), termindato.plusWeeks(8), Konto.FEDREKVOTE)));
+
+        var plan = tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato).orElseThrow();
+
+        assertThat(plan.annenPartRedigerbar()).isFalse();
+    }
+
     private static VerifisertAnnenPart verifisert(AktørId annenPart) {
         return annenPart == null ? null : new VerifisertAnnenPart(annenPart);
     }
