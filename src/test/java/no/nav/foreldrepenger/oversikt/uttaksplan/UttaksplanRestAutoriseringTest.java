@@ -134,7 +134,7 @@ class UttaksplanRestAutoriseringTest {
     }
 
     private static class RegistrerendeTjeneste extends UttaksplanTjeneste {
-        static final FellesUttaksplanDto PLAN = new FellesUttaksplanDto(FAMILIEHENDELSE, 1, FellesUttaksplanDto.Dekningsgrad.HUNDRE, List.of());
+        static final FellesUttaksplanDto PLAN = new FellesUttaksplanDto(FAMILIEHENDELSE, 1, FellesUttaksplanDto.Dekningsgrad.HUNDRE, List.of(), true);
         final List<Kall> kall = new ArrayList<>();
 
         @Override
