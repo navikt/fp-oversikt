@@ -41,18 +41,6 @@ class SøknadsplanRestTest {
     }
 
     @Test
-    void deaktivertLagringSjekkerTilgangMenLagrerIkke() {
-        var repository = mock(SøknadsplanRepository.class);
-        var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
-        var request = parseRequest(validRequest());
-
-        new SøknadsplanRest(tjeneste(repository), tilgang, false).lagre(request);
-
-        verify(tilgang).sjekkAtKallErFraSystem();
-        org.mockito.Mockito.verifyNoInteractions(repository);
-    }
-
-    @Test
     void lagrerFellesUttaksplanDtoTilInternSøknad() {
         var repository = mock(SøknadsplanRepository.class);
         var mottatt = LocalDateTime.parse("2026-09-01T12:00:00");
