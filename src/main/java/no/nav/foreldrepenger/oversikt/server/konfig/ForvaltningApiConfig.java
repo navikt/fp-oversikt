@@ -6,14 +6,14 @@ import java.util.Set;
 
 import org.glassfish.jersey.server.ResourceConfig;
 
-import io.swagger.v3.jaxrs2.integration.resources.OpenApiResource;
+import io.swagger.v3.rest.integration.resources.OpenApiResource;
 import jakarta.ws.rs.ApplicationPath;
 import no.nav.foreldrepenger.konfig.Environment;
 import no.nav.foreldrepenger.oversikt.drift.ManuellOppdateringAvSakDriftTjeneste;
 import no.nav.vedtak.felles.prosesstask.rest.ProsessTaskRestTjeneste;
 import no.nav.vedtak.openapi.OpenApiUtils;
-import no.nav.vedtak.server.rest.ForvaltningAuthorizationFilter;
 import no.nav.vedtak.server.rest.AuthenticationFilter;
+import no.nav.vedtak.server.rest.ForvaltningAuthorizationFilter;
 import no.nav.vedtak.server.rest.FpRestJacksonFeature;
 
 @ApplicationPath(ForvaltningApiConfig.API_URI)
