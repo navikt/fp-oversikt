@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 
@@ -78,9 +79,29 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
     }
 
     private boolean annenpartHarIkkeSakMedOppgittBarnOgSøker(AktørId innloggetBrukerAktørid, ArbeidRest.MorArbeidRequest request) {
-        var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
-        var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
+        // Ukjent ident i PDL behandles som en kjent person uten treff i sakene,
+        // slik at responsen ikke avslører om identen finnes i PDL.
+        // Forsvar i dybden: ArbeidRest returnerer allerede før dette kallet når annen part er ukjent i PDL.
+        AktørId annenPartAktørId;
+        try {
+            annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            LOG.info("AKTIVTETSKRAV: Finner ikke ident for annen part");
+            return true; // Ukjent annen part kan ikke ha sak
+        }
+        var barnAktørId = aktørIdEllerNull(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
         return annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(innloggetBrukerAktørid, annenPartAktørId, barnAktørId, familieHendelse).isEmpty();
+    }
+
+    private AktørId aktørIdEllerNull(Fødselsnummer fnr) {
+        if (fnr == null) {
+            return null;
+        }
+        try {
+            return personOppslagSystem.aktørId(fnr);
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            return null;
+        }
     }
 }

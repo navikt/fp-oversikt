@@ -1,7 +1,6 @@
 package no.nav.foreldrepenger.oversikt.uttaksplan;
 
 import java.time.LocalDate;
-import java.util.NoSuchElementException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,8 +65,7 @@ public class UttaksplanRest {
 
         var søkerAktørId = innloggetBruker.aktørId();
         var annenPart = verifisertAnnenPart(request.annenPartFødselsnummer());
-        var barnAktørId = request.barnIdentifikator().fødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnIdentifikator()
-                                                                                                                   .fødselsnummer());
+        var barnAktørId = barnAktørId(request.barnIdentifikator().fødselsnummer());
 
         var uttaksplan = uttaksplanTjeneste.hentFor(søkerAktørId, annenPart, barnAktørId, request.barnIdentifikator().familiehendelse());
         LOG.info("Returnerer felles uttaksplan med {} perioder, annen part redigerbar: {}", uttaksplan.map(u -> u.perioder().size()).orElse(0),
@@ -97,14 +95,30 @@ public class UttaksplanRest {
         AktørId aktørId;
         try {
             aktørId = personOppslagSystem.aktørId(annenPartFnr);
-        } catch (NoSuchElementException e) {
+        } catch (BrukerIkkeFunnetIPdlException e) {
             LOG.info("Finner ikke ident for annen part. Bygger uttaksplan uten annen part");
             return null;
         }
-        if (aktørId == null || !harUbeskyttetAdresse(annenPartFnr)) {
+        if (!harUbeskyttetAdresse(annenPartFnr)) {
             return null;
         }
         return new VerifisertAnnenPart(aktørId);
+    }
+
+    /**
+     * Ukjent barn i PDL behandles som barn som ikke er oppgitt. Da matches saken på familiehendelse, akkurat som for et
+     * kjent barn som ikke finnes i saken, slik at responsen ikke avslører om identen finnes i PDL.
+     */
+    private AktørId barnAktørId(Fødselsnummer barnFnr) {
+        if (barnFnr == null) {
+            return null;
+        }
+        try {
+            return personOppslagSystem.aktørId(barnFnr);
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            LOG.info("Finner ikke ident for barn. Matcher kun på familiehendelse");
+            return null;
+        }
     }
 
     private boolean harUbeskyttetAdresse(Fødselsnummer fnr) {

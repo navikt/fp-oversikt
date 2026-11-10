@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.arbeid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +26,7 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,6 +110,74 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
         var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
 
         // Assert
+        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
+        assertThat(krevesDokumentasjonForAktivitetskravArbeid).isTrue();
+    }
+
+    @Test
+    void ukjent_barn_i_pdl_gir_samme_svar_som_barn_uten_relasjon_til_foreldrene() throws BrukerIkkeFunnetIPdlException {
+        // Arrange
+        when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenReturn(AktørId.dummy());
+        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
+
+        // Act
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+
+        // Assert: ukjent barn slås opp som ikke oppgitt barn
+        verify(annenPartSakTjeneste).annenPartGjeldendeSakOppgittSøker(any(), any(), isNull(), any());
+        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
+        assertThat(krevesDokumentasjonForAktivitetskravArbeid).isTrue();
+    }
+
+    @Test
+    void ukjent_barn_gir_samme_svar_som_kjent_barn_når_annen_parts_sak_treffer_på_familiehendelse() throws BrukerIkkeFunnetIPdlException {
+        // Arrange: annen parts sak matcher på familiehendelse uansett om barnet er kjent eller ikke
+        when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenReturn(AktørId.dummy());
+        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
+        when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(false);
+        when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(false);
+
+        // Act
+        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenReturn(AktørId.dummy());
+        var kjentBarn = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        var ukjentBarn = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+
+        // Assert
+        assertThat(ukjentBarn).isEqualTo(kjentBarn).isFalse();
+        verify(annenPartSakTjeneste).annenPartGjeldendeSakOppgittSøker(any(), any(), isNull(), any());
+    }
+
+    @Test
+    void ukjent_barn_gir_samme_svar_som_kjent_barn_uten_sak_og_relasjon() throws BrukerIkkeFunnetIPdlException {
+        // Arrange: barnHarDisseForeldrene gir false både for kjent barn uten relasjon og for ukjent barn (se PdlKlientSystemTest)
+        when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenReturn(AktørId.dummy());
+        when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
+        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.empty());
+
+        // Act
+        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenReturn(AktørId.dummy());
+        var kjentBarnUtenSak = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        var ukjentBarn = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+
+        // Assert
+        assertThat(ukjentBarn).isEqualTo(kjentBarnUtenSak).isTrue();
+        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
+    }
+
+    @Test
+    void ukjent_annen_part_i_pdl_gir_samme_svar_som_annen_part_uten_sak() throws BrukerIkkeFunnetIPdlException {
+        // Arrange
+        when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
+
+        // Act
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+
+        // Assert
+        verify(annenPartSakTjeneste, never()).annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any());
         verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
         assertThat(krevesDokumentasjonForAktivitetskravArbeid).isTrue();
     }

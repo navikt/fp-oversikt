@@ -7,7 +7,10 @@ import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.tilgangskontroll.AdresseBeskyttelse;
 
 public interface PersonOppslagSystem {
-    AktørId aktørId(Fødselsnummer fnr);
+    /**
+     * @throws BrukerIkkeFunnetIPdlException når identen er ukjent i PDL. Tekniske feil mot PDL kastes som unchecked unntak.
+     */
+    AktørId aktørId(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException;
 
     Fødselsnummer fødselsnummer(AktørId aktørId);
 
