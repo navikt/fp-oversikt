@@ -159,7 +159,6 @@ class RestApiOppdragInputValideringDtoTest extends RestApiTester {
             return;
         }
 
-        var klasseLocation = codeSource.getLocation();
         for (var subklasse : finnAlleJsonSubTypeClasses(klasse)) {
             validerRekursivt(besøkteKlasser, subklasse, forrigeKlasse);
         }

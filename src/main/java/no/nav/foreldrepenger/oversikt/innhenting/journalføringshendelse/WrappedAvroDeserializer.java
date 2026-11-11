@@ -24,6 +24,7 @@ public class WrappedAvroDeserializer<T extends SpecificRecord> implements Deseri
         this.inner = new KafkaAvroDeserializer(client);
     }
 
+    @Override
     public void configure(Map<String, ?> deserializerConfig, boolean isDeserializerForRecordKeys) {
         this.inner.configure(deserializerConfig, isDeserializerForRecordKeys);
     }
@@ -32,11 +33,13 @@ public class WrappedAvroDeserializer<T extends SpecificRecord> implements Deseri
         return this.deserialize(topic, (Headers)null, bytes);
     }
 
+    @Override
     @SuppressWarnings("unchecked")
     public T deserialize(String topic, Headers headers, byte[] bytes) {
         return (T) this.inner.deserialize(topic, headers, bytes);
     }
 
+    @Override
     public void close() {
         this.inner.close();
     }

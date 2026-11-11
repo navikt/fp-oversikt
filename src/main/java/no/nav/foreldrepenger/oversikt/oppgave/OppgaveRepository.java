@@ -42,7 +42,6 @@ class OppgaveRepository {
         var entitet = hentOppgave(oppgaveId);
         entitet.setOpprettetTidspunkt(status.opprettetTidspunkt());
         entitet.setAvsluttetTidspunkt(status.avsluttetTidspunkt());
-        entityManager.merge(entitet);
         entityManager.flush();
     }
 

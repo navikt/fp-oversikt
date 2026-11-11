@@ -34,7 +34,6 @@ public class DBManglendeVedleggRepository implements ManglendeVedleggRepository 
             entityManager.persist(new ManglendeVedleggEntitet(saksnummer, manglendeVedlegg));
         } else {
             eksisterendeManglendeVedlegg.get().setJson(manglendeVedlegg);
-            entityManager.merge(eksisterendeManglendeVedlegg.get());
         }
         entityManager.flush();
     }

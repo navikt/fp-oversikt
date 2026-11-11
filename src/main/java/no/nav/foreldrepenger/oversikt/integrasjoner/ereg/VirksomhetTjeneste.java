@@ -48,7 +48,7 @@ public class VirksomhetTjeneste {
     private String hentOrganisasjonRest(String orgNummer) {
         try {
             return eregRestKlient.hentOrganisasjonNavn(orgNummer);
-        } catch (Exception e) {
+        } catch (Exception _) {
             return null;
         }
 

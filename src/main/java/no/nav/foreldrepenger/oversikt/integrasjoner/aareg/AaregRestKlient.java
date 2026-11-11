@@ -53,7 +53,7 @@ public class AaregRestKlient {
                 .header(NavHeaders.HEADER_NAV_PERSONIDENT, ident);
             var result = sender.send(request, ArbeidsforholdRS[].class);
             return Arrays.asList(result);
-        } catch (IllegalArgumentException|UriBuilderException e) {
+        } catch (IllegalArgumentException|UriBuilderException _) {
             throw new IllegalArgumentException("Utviklerfeil syntax-exception for finnArbeidsforholdForArbeidstaker");
         }
     }

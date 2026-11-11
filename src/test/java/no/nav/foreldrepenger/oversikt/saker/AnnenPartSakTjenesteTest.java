@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.FamilieHendelse;
 import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
+import no.nav.foreldrepenger.oversikt.domene.fp.ForeldrepengerSak;
 import no.nav.foreldrepenger.oversikt.domene.SøknadStatus;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.Dekningsgrad;
@@ -82,7 +83,7 @@ class AnnenPartSakTjenesteTest {
         var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
         var annenPartSak = tjeneste.annenPartGjeldendeSakOppgittSøker(aktørIdSøker, aktørIdAnnenPart, null, omsorgsovertakelse);
 
-        assertThat(annenPartSak).map(sak -> sak.saksnummer()).contains(annenPartsSak.saksnummer());
+        assertThat(annenPartSak).map(ForeldrepengerSak::saksnummer).contains(annenPartsSak.saksnummer());
     }
 
     @Test
@@ -178,7 +179,7 @@ class AnnenPartSakTjenesteTest {
         var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
         var annenPartSak = tjeneste.annenPartGjeldendeSakOppgittSøker(aktørIdSøker, aktørIdAnnenPart, null, termindato.plusWeeks(1));
 
-        assertThat(annenPartSak).map(sak -> sak.saksnummer()).contains(annenPartsSak.saksnummer());
+        assertThat(annenPartSak).map(ForeldrepengerSak::saksnummer).contains(annenPartsSak.saksnummer());
     }
 
     @Test
@@ -207,7 +208,7 @@ class AnnenPartSakTjenesteTest {
         var tjeneste = new AnnenPartSakTjeneste(new Saker(repository, myndigInnloggetBruker(), annenpartUbeskyttetAdresse()));
         var annenPartSak = tjeneste.annenPartGjeldendeSakOppgittSøker(aktørIdSøker, aktørIdAnnenPart, null, fødselsdatoAnnenpart.plusWeeks(2));
 
-        assertThat(annenPartSak).map(sak -> sak.saksnummer()).contains(annenPartsSak.saksnummer());
+        assertThat(annenPartSak).map(ForeldrepengerSak::saksnummer).contains(annenPartsSak.saksnummer());
     }
 
     @Test

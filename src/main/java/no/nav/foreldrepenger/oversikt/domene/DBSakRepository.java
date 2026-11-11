@@ -28,7 +28,6 @@ public class DBSakRepository implements SakRepository {
             entityManager.persist(new SakEntitet(sak));
         } else {
             eksisterendeSak.get().setJson(sak);
-            entityManager.merge(eksisterendeSak.get());
         }
         entityManager.flush();
     }
