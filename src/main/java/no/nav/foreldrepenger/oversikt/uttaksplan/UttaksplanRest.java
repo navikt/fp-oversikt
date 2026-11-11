@@ -95,7 +95,7 @@ public class UttaksplanRest {
         AktørId aktørId;
         try {
             aktørId = personOppslagSystem.aktørId(annenPartFnr);
-        } catch (BrukerIkkeFunnetIPdlException e) {
+        } catch (BrukerIkkeFunnetIPdlException _) {
             LOG.warn("Fnr for annen part finnes ikke i PDL. Bygger uttaksplan uten annen part");
             return null;
         }
@@ -115,7 +115,7 @@ public class UttaksplanRest {
         }
         try {
             return personOppslagSystem.aktørId(barnFnr);
-        } catch (BrukerIkkeFunnetIPdlException e) {
+        } catch (BrukerIkkeFunnetIPdlException _) {
             LOG.warn("Fnr for barn finnes ikke i PDL. Matcher kun på familiehendelse");
             return null;
         }
@@ -125,7 +125,7 @@ public class UttaksplanRest {
         try {
             var beskyttelse = personOppslagSystem.adresseBeskyttelse(fnr);
             return beskyttelse != null && !beskyttelse.harBeskyttetAdresse();
-        } catch (BrukerIkkeFunnetIPdlException e) {
+        } catch (BrukerIkkeFunnetIPdlException _) {
             return false;
         }
     }

@@ -85,7 +85,7 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         AktørId annenPartAktørId;
         try {
             annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
-        } catch (BrukerIkkeFunnetIPdlException e) {
+        } catch (BrukerIkkeFunnetIPdlException _) {
             LOG.warn("AKTIVITETSKRAV: Fnr for annen part finnes ikke i PDL");
             return true; // Ukjent annen part kan ikke ha sak
         }
@@ -100,7 +100,7 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         }
         try {
             return personOppslagSystem.aktørId(fnr);
-        } catch (BrukerIkkeFunnetIPdlException e) {
+        } catch (BrukerIkkeFunnetIPdlException _) {
             LOG.warn("AKTIVITETSKRAV: Fnr for barn finnes ikke i PDL. Matcher kun på familiehendelse");
             return null;
         }

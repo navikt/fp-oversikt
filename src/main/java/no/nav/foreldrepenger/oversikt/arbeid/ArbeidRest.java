@@ -72,7 +72,7 @@ public class ArbeidRest {
             if (adresseBeskyttelse.harBeskyttetAdresse()) {
                 return true;
             }
-        } catch (BrukerIkkeFunnetIPdlException e) {
+        } catch (BrukerIkkeFunnetIPdlException _) {
             LOG.warn("Fnr for annen part finnes ikke i PDL. Søker må derfor dokumentere mors arbeid");
             return true;
         }

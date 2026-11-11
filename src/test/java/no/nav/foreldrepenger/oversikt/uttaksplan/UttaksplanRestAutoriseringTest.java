@@ -56,7 +56,10 @@ class UttaksplanRestAutoriseringTest {
     void uautentisertKallSkalIkkeKunneHenteUttaksplan() {
         KontekstHolder.fjernKontekst();
 
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedAnnenPart()))
+        var rest = rest(myndigInnloggetBruker());
+        var request = requestMedAnnenPart();
+
+        assertThatThrownBy(() -> rest.hent(request))
             .isExactlyInstanceOf(OversiktManglerTilgangException.class);
         assertThat(tjeneste.kall).isEmpty();
         verifyNoInteractions(personOppslag);
@@ -66,7 +69,10 @@ class UttaksplanRestAutoriseringTest {
     void ansattSkalIkkeKunneHenteUttaksplan() {
         innloggetSaksbehandlerUtenDrift();
 
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedAnnenPart()))
+        var rest = rest(myndigInnloggetBruker());
+        var request = requestMedAnnenPart();
+
+        assertThatThrownBy(() -> rest.hent(request))
             .isExactlyInstanceOf(OversiktManglerTilgangException.class);
         assertThat(tjeneste.kall).isEmpty();
         verifyNoInteractions(personOppslag);
@@ -76,7 +82,10 @@ class UttaksplanRestAutoriseringTest {
     void umyndigBorgerSkalIkkeKunneHenteUttaksplan() {
         innloggetBorger();
 
-        assertThatThrownBy(() -> rest(umyndigInnloggetBruker()).hent(requestMedAnnenPart()))
+        var rest = rest(umyndigInnloggetBruker());
+        var request = requestMedAnnenPart();
+
+        assertThatThrownBy(() -> rest.hent(request))
             .isInstanceOf(OversiktManglerTilgangException.class)
             .extracting(e -> ((OversiktManglerTilgangException) e).getFeilkode())
             .isEqualTo(LokalFeilKode.IKKE_TILGANG_UMYNDIG.name());
@@ -108,7 +117,7 @@ class UttaksplanRestAutoriseringTest {
             case UKJENT_VED_AKTØRID_OPPSLAG -> when(personOppslag.aktørId(ANNEN_PART_FNR)).thenThrow(new BrukerIkkeFunnetIPdlException());
             case UKJENT_VED_ADRESSEOPPSLAG -> when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenThrow(new BrukerIkkeFunnetIPdlException());
             case MANGLENDE_ADRESSEBESKYTTELSE -> when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenReturn(null);
-            case IKKE_OPPGITT -> { }
+            case IKKE_OPPGITT -> { /* standardoppsett fra @BeforeEach */ }
         }
         var request = tilfelle == SkjultAnnenPart.IKKE_OPPGITT ? requestUtenAnnenPart() : requestMedAnnenPart();
 
@@ -124,7 +133,10 @@ class UttaksplanRestAutoriseringTest {
         var feil = new IllegalStateException("PDL utilgjengelig");
         when(personOppslag.aktørId(ANNEN_PART_FNR)).thenThrow(feil);
 
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedAnnenPart())).isSameAs(feil);
+        var rest = rest(myndigInnloggetBruker());
+        var request = requestMedAnnenPart();
+
+        assertThatThrownBy(() -> rest.hent(request)).isSameAs(feil);
         assertThat(tjeneste.kall).isEmpty();
     }
 
@@ -134,7 +146,10 @@ class UttaksplanRestAutoriseringTest {
         var feil = new IllegalStateException("PDL utilgjengelig");
         when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenThrow(feil);
 
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedAnnenPart())).isSameAs(feil);
+        var rest = rest(myndigInnloggetBruker());
+        var request = requestMedAnnenPart();
+
+        assertThatThrownBy(() -> rest.hent(request)).isSameAs(feil);
         assertThat(tjeneste.kall).isEmpty();
     }
 
