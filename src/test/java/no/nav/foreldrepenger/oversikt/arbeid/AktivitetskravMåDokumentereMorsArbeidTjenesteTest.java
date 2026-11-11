@@ -131,40 +131,21 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
     }
 
     @Test
-    void ukjent_barn_gir_samme_svar_som_kjent_barn_når_annen_parts_sak_treffer_på_familiehendelse() throws BrukerIkkeFunnetIPdlException {
-        // Arrange: annen parts sak matcher på familiehendelse uansett om barnet er kjent eller ikke
+    void ukjent_barn_slås_opp_som_ikke_oppgitt_barn_og_annen_parts_sak_kan_treffe_på_familiehendelse() throws BrukerIkkeFunnetIPdlException {
+        // Arrange
         when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenReturn(AktørId.dummy());
-        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.of(dummySak()));
+        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), isNull(), any())).thenReturn(Optional.of(dummySak()));
         when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(false);
         when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(false);
 
         // Act
-        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenReturn(AktørId.dummy());
-        var kjentBarn = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
-        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenThrow(new BrukerIkkeFunnetIPdlException());
-        var ukjentBarn = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
 
-        // Assert
-        assertThat(ukjentBarn).isEqualTo(kjentBarn).isFalse();
+        // Assert: barnets aktørId sendes som null, og sak funnet på familiehendelse gir videre sjekk av arbeid
         verify(annenPartSakTjeneste).annenPartGjeldendeSakOppgittSøker(any(), any(), isNull(), any());
-    }
-
-    @Test
-    void ukjent_barn_gir_samme_svar_som_kjent_barn_uten_sak_og_relasjon() throws BrukerIkkeFunnetIPdlException {
-        // Arrange: barnHarDisseForeldrene gir false både for kjent barn uten relasjon og for ukjent barn (se PdlKlientSystemTest)
-        when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenReturn(AktørId.dummy());
-        when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
-        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any())).thenReturn(Optional.empty());
-
-        // Act
-        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenReturn(AktørId.dummy());
-        var kjentBarnUtenSak = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
-        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenThrow(new BrukerIkkeFunnetIPdlException());
-        var ukjentBarn = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
-
-        // Assert
-        assertThat(ukjentBarn).isEqualTo(kjentBarnUtenSak).isTrue();
-        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
+        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste).krevesDokumentasjonForAktivitetskravArbeid(any());
+        assertThat(krevesDokumentasjonForAktivitetskravArbeid).isFalse();
     }
 
     @Test

@@ -6,6 +6,9 @@ import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.myndi
 import static no.nav.foreldrepenger.oversikt.stub.DummyInnloggetTestbruker.umyndigInnloggetBruker;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -13,6 +16,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -35,42 +39,49 @@ class UttaksplanRestAutoriseringTest {
     private static final Fødselsnummer ANNEN_PART_FNR = new Fødselsnummer("12345678901");
     private static final AktørId ANNEN_PART = new AktørId("1234567890123");
     private static final Fødselsnummer BARN_FNR = new Fødselsnummer("01012612345");
+    private static final AktørId BARN = new AktørId("9876543210987");
+    private static final AdresseBeskyttelse UGRADERT = new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.UGRADERT));
 
     private final RegistrerendeTjeneste tjeneste = new RegistrerendeTjeneste();
+    private final PersonOppslagSystem personOppslag = mock(PersonOppslagSystem.class);
+
+    @BeforeEach
+    void kjentUgradertAnnenPartOgBarn() throws BrukerIkkeFunnetIPdlException {
+        when(personOppslag.aktørId(ANNEN_PART_FNR)).thenReturn(ANNEN_PART);
+        when(personOppslag.aktørId(BARN_FNR)).thenReturn(BARN);
+        when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenReturn(UGRADERT);
+    }
 
     @Test
     void uautentisertKallSkalIkkeKunneHenteUttaksplan() {
         KontekstHolder.fjernKontekst();
-        var personOppslag = PersonOppslagStub.ugradert();
 
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker(), personOppslag).hent(requestMedAnnenPart()))
+        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedAnnenPart()))
             .isExactlyInstanceOf(OversiktManglerTilgangException.class);
         assertThat(tjeneste.kall).isEmpty();
-        assertThat(personOppslag.antallOppslag).isZero();
+        verifyNoInteractions(personOppslag);
     }
 
     @Test
     void ansattSkalIkkeKunneHenteUttaksplan() {
         innloggetSaksbehandlerUtenDrift();
-        var personOppslag = PersonOppslagStub.ugradert();
 
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker(), personOppslag).hent(requestMedAnnenPart()))
+        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedAnnenPart()))
             .isExactlyInstanceOf(OversiktManglerTilgangException.class);
         assertThat(tjeneste.kall).isEmpty();
-        assertThat(personOppslag.antallOppslag).isZero();
+        verifyNoInteractions(personOppslag);
     }
 
     @Test
     void umyndigBorgerSkalIkkeKunneHenteUttaksplan() {
         innloggetBorger();
-        var personOppslag = PersonOppslagStub.ugradert();
 
-        assertThatThrownBy(() -> rest(umyndigInnloggetBruker(), personOppslag).hent(requestMedAnnenPart()))
+        assertThatThrownBy(() -> rest(umyndigInnloggetBruker()).hent(requestMedAnnenPart()))
             .isInstanceOf(OversiktManglerTilgangException.class)
             .extracting(e -> ((OversiktManglerTilgangException) e).getFeilkode())
             .isEqualTo(LokalFeilKode.IKKE_TILGANG_UMYNDIG.name());
         assertThat(tjeneste.kall).isEmpty();
-        assertThat(personOppslag.antallOppslag).isZero();
+        verifyNoInteractions(personOppslag);
     }
 
     @Test
@@ -78,82 +89,94 @@ class UttaksplanRestAutoriseringTest {
         innloggetBorger();
         var søker = AktørId.dummy();
 
-        var plan = rest(myndigInnloggetBruker(søker), PersonOppslagStub.ugradert()).hent(requestMedAnnenPart());
+        var plan = rest(myndigInnloggetBruker(søker)).hent(requestMedAnnenPart());
 
         assertThat(plan).isSameAs(RegistrerendeTjeneste.PLAN);
-        assertThat(tjeneste.kall).containsExactly(new Kall(søker, new VerifisertAnnenPart(ANNEN_PART)));
+        assertThat(tjeneste.kall).containsExactly(new Kall(søker, new VerifisertAnnenPart(ANNEN_PART), null));
     }
 
-    private enum SkjultAnnenPart { BESKYTTET, UKJENT_IDENT, UKJENT_I_PDL, MANGLENDE_ADRESSEBESKYTTELSE, IKKE_OPPGITT }
+    private enum SkjultAnnenPart { BESKYTTET, UKJENT_VED_AKTØRID_OPPSLAG, UKJENT_VED_ADRESSEOPPSLAG, MANGLENDE_ADRESSEBESKYTTELSE, IKKE_OPPGITT }
 
     @ParameterizedTest
     @EnumSource(SkjultAnnenPart.class)
-    void skjultAnnenPartSendesSomIkkeOppgittTilTjenesten(SkjultAnnenPart tilfelle) {
+    void skjultAnnenPartSendesSomIkkeOppgittTilTjenesten(SkjultAnnenPart tilfelle) throws BrukerIkkeFunnetIPdlException {
         innloggetBorger();
         var søker = AktørId.dummy();
-        var personOppslag = switch (tilfelle) {
-            case BESKYTTET -> PersonOppslagStub.medAdresse(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
-            case UKJENT_IDENT -> PersonOppslagStub.medIdentfeil(new BrukerIkkeFunnetIPdlException());
-            case UKJENT_I_PDL -> PersonOppslagStub.medAdressefeil(new BrukerIkkeFunnetIPdlException());
-            case MANGLENDE_ADRESSEBESKYTTELSE -> PersonOppslagStub.medAdresse(null);
-            case IKKE_OPPGITT -> PersonOppslagStub.ugradert();
-        };
+        switch (tilfelle) {
+            case BESKYTTET -> when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR))
+                .thenReturn(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.GRADERT)));
+            case UKJENT_VED_AKTØRID_OPPSLAG -> when(personOppslag.aktørId(ANNEN_PART_FNR)).thenThrow(new BrukerIkkeFunnetIPdlException());
+            case UKJENT_VED_ADRESSEOPPSLAG -> when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenThrow(new BrukerIkkeFunnetIPdlException());
+            case MANGLENDE_ADRESSEBESKYTTELSE -> when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenReturn(null);
+            case IKKE_OPPGITT -> { }
+        }
         var request = tilfelle == SkjultAnnenPart.IKKE_OPPGITT ? requestUtenAnnenPart() : requestMedAnnenPart();
 
-        var plan = rest(myndigInnloggetBruker(søker), personOppslag).hent(request);
+        var plan = rest(myndigInnloggetBruker(søker)).hent(request);
 
         assertThat(plan).isSameAs(RegistrerendeTjeneste.PLAN);
-        assertThat(tjeneste.kall).containsExactly(new Kall(søker, null));
+        assertThat(tjeneste.kall).containsExactly(new Kall(søker, null, null));
     }
 
     @Test
-    void tekniskPdlFeilPropagererUtenTjenestekall() {
+    void tekniskPdlFeilVedAktørIdOppslagPropagererUtenTjenestekall() throws BrukerIkkeFunnetIPdlException {
         innloggetBorger();
         var feil = new IllegalStateException("PDL utilgjengelig");
+        when(personOppslag.aktørId(ANNEN_PART_FNR)).thenThrow(feil);
 
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker(), PersonOppslagStub.medIdentfeil(feil)).hent(requestMedAnnenPart()))
-            .isSameAs(feil);
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker(), PersonOppslagStub.medAdressefeil(feil)).hent(requestMedAnnenPart()))
-            .isSameAs(feil);
+        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedAnnenPart())).isSameAs(feil);
         assertThat(tjeneste.kall).isEmpty();
     }
 
     @Test
-    void ukjentBarnIPdlGirSammeSvarSomKjentBarnUtenSak() {
+    void tekniskPdlFeilVedAdresseoppslagPropagererUtenTjenestekall() throws BrukerIkkeFunnetIPdlException {
+        innloggetBorger();
+        var feil = new IllegalStateException("PDL utilgjengelig");
+        when(personOppslag.adresseBeskyttelse(ANNEN_PART_FNR)).thenThrow(feil);
+
+        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedAnnenPart())).isSameAs(feil);
+        assertThat(tjeneste.kall).isEmpty();
+    }
+
+    @Test
+    void ukjentBarnIPdlGirSammeSvarSomKjentBarnUtenSak() throws BrukerIkkeFunnetIPdlException {
         innloggetBorger();
         tjeneste.utenSak = true;
 
-        var kjentBarnUtenSak = rest(myndigInnloggetBruker(), PersonOppslagStub.ugradert()).hent(requestMedBarnFnr());
-        var ukjentBarn = rest(myndigInnloggetBruker(), PersonOppslagStub.medUkjentBarn()).hent(requestMedBarnFnr());
+        var kjentBarnUtenSak = rest(myndigInnloggetBruker()).hent(requestMedBarnFnr());
+        when(personOppslag.aktørId(BARN_FNR)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        var ukjentBarn = rest(myndigInnloggetBruker()).hent(requestMedBarnFnr());
 
         assertThat(kjentBarnUtenSak).isNull();
         assertThat(ukjentBarn).isNull();
-        assertThat(tjeneste.kall).hasSize(2);
+        assertThat(tjeneste.kall).extracting(Kall::barn).containsExactly(BARN, null);
     }
 
     @Test
-    void ukjentBarnIPdlGirSammeSvarSomKjentBarnNårFamiliehendelseTrefferSøkersSak() {
+    void ukjentBarnIPdlGirSammeSvarSomKjentBarnNårFamiliehendelseTrefferSøkersSak() throws BrukerIkkeFunnetIPdlException {
         innloggetBorger();
         var request = new UttaksplanRest.FellesUttaksplanRequest(new UttaksplanRest.BarnIdentifikator(BARN_FNR, FAMILIEHENDELSE), null);
 
-        var kjentBarn = rest(myndigInnloggetBruker(), PersonOppslagStub.ugradert()).hent(request);
-        var ukjentBarn = rest(myndigInnloggetBruker(), PersonOppslagStub.medUkjentBarn()).hent(request);
+        var kjentBarn = rest(myndigInnloggetBruker()).hent(request);
+        when(personOppslag.aktørId(BARN_FNR)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        var ukjentBarn = rest(myndigInnloggetBruker()).hent(request);
 
         assertThat(kjentBarn).isEqualTo(RegistrerendeTjeneste.PLAN);
         assertThat(ukjentBarn).isEqualTo(kjentBarn);
+        assertThat(tjeneste.kall).extracting(Kall::barn).containsExactly(BARN, null);
     }
 
     @Test
-    void tekniskPdlFeilForBarnPropagerer() {
+    void tekniskPdlFeilForBarnPropagerer() throws BrukerIkkeFunnetIPdlException {
         innloggetBorger();
         var feil = new IllegalStateException("PDL utilgjengelig");
+        when(personOppslag.aktørId(BARN_FNR)).thenThrow(feil);
 
-        assertThatThrownBy(() -> rest(myndigInnloggetBruker(), PersonOppslagStub.medIdentfeil(feil)).hent(requestMedBarnFnr()))
-            .isSameAs(feil);
+        assertThatThrownBy(() -> rest(myndigInnloggetBruker()).hent(requestMedBarnFnr())).isSameAs(feil);
         assertThat(tjeneste.kall).isEmpty();
     }
 
-    private UttaksplanRest rest(InnloggetBruker innloggetBruker, PersonOppslagSystem personOppslag) {
+    private UttaksplanRest rest(InnloggetBruker innloggetBruker) {
         return new UttaksplanRest(tjeneste, new TilgangKontrollTjeneste(null, innloggetBruker), innloggetBruker, personOppslag);
     }
 
@@ -169,7 +192,7 @@ class UttaksplanRestAutoriseringTest {
         return new UttaksplanRest.FellesUttaksplanRequest(new UttaksplanRest.BarnIdentifikator(null, FAMILIEHENDELSE), null);
     }
 
-    private record Kall(AktørId søker, VerifisertAnnenPart annenPart) {
+    private record Kall(AktørId søker, VerifisertAnnenPart annenPart, AktørId barn) {
     }
 
     private static class RegistrerendeTjeneste extends UttaksplanTjeneste {
@@ -179,86 +202,8 @@ class UttaksplanRestAutoriseringTest {
 
         @Override
         public Optional<FellesUttaksplanDto> hentFor(AktørId søker, VerifisertAnnenPart annenPart, AktørId barn, LocalDate familiehendelse) {
-            kall.add(new Kall(søker, annenPart));
+            kall.add(new Kall(søker, annenPart, barn));
             return utenSak ? Optional.empty() : Optional.of(PLAN);
-        }
-    }
-
-    private static final class PersonOppslagStub implements PersonOppslagSystem {
-        private final Exception identfeil;
-        private final Exception adressefeil;
-        private final AdresseBeskyttelse adresse;
-        private boolean ukjentBarn;
-        int antallOppslag;
-
-        private PersonOppslagStub(Exception identfeil, Exception adressefeil, AdresseBeskyttelse adresse) {
-            this.identfeil = identfeil;
-            this.adressefeil = adressefeil;
-            this.adresse = adresse;
-        }
-
-        static PersonOppslagStub ugradert() {
-            return medAdresse(new AdresseBeskyttelse(Set.of(AdresseBeskyttelse.Gradering.UGRADERT)));
-        }
-
-        static PersonOppslagStub medUkjentBarn() {
-            var stub = ugradert();
-            stub.ukjentBarn = true;
-            return stub;
-        }
-
-        static PersonOppslagStub medAdresse(AdresseBeskyttelse adresse) {
-            return new PersonOppslagStub(null, null, adresse);
-        }
-
-        static PersonOppslagStub medIdentfeil(Exception feil) {
-            return new PersonOppslagStub(feil, null, null);
-        }
-
-        static PersonOppslagStub medAdressefeil(Exception feil) {
-            return new PersonOppslagStub(null, feil, null);
-        }
-
-        @Override
-        public AktørId aktørId(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException {
-            antallOppslag++;
-            switch (identfeil) {
-                case null -> { }
-                case BrukerIkkeFunnetIPdlException e -> throw e;
-                case RuntimeException e -> throw e;
-                default -> throw new IllegalArgumentException("Ugyldig identfeil i stub", identfeil);
-            }
-            if (ukjentBarn && BARN_FNR.equals(fnr)) {
-                throw new BrukerIkkeFunnetIPdlException();
-            }
-            return ANNEN_PART_FNR.equals(fnr) ? ANNEN_PART : new AktørId(fnr.value());
-        }
-
-        @Override
-        public Fødselsnummer fødselsnummer(AktørId aktørId) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public AdresseBeskyttelse adresseBeskyttelse(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException {
-            antallOppslag++;
-            if (adressefeil instanceof BrukerIkkeFunnetIPdlException e) {
-                throw e;
-            }
-            if (adressefeil instanceof RuntimeException e) {
-                throw e;
-            }
-            return adresse;
-        }
-
-        @Override
-        public String navn(String ident) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public boolean barnHarDisseForeldrene(Fødselsnummer barn, Fødselsnummer mor, Fødselsnummer annenForelder) {
-            throw new UnsupportedOperationException();
         }
     }
 }
