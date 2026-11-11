@@ -80,10 +80,10 @@ class ArbeidRestTest {
     void uautentisertKallSkalIkkeSlåOppIPdl() {
         KontekstHolder.fjernKontekst();
 
-        var rest = rest(myndigInnloggetBruker());
+        var arbeidRest = rest(myndigInnloggetBruker());
         var request = request();
 
-        assertThatThrownBy(() -> rest.trengerDokumentereMorsArbeid(request))
+        assertThatThrownBy(() -> arbeidRest.trengerDokumentereMorsArbeid(request))
             .isExactlyInstanceOf(OversiktManglerTilgangException.class);
         verifyNoInteractions(personOppslagSystem);
     }
@@ -92,20 +92,20 @@ class ArbeidRestTest {
     void ansattSkalIkkeSlåOppIPdl() {
         innloggetSaksbehandlerUtenDrift();
 
-        var rest = rest(myndigInnloggetBruker());
+        var arbeidRest = rest(myndigInnloggetBruker());
         var request = request();
 
-        assertThatThrownBy(() -> rest.trengerDokumentereMorsArbeid(request))
+        assertThatThrownBy(() -> arbeidRest.trengerDokumentereMorsArbeid(request))
             .isExactlyInstanceOf(OversiktManglerTilgangException.class);
         verifyNoInteractions(personOppslagSystem);
     }
 
     @Test
     void umyndigBorgerSkalIkkeSlåOppIPdl() {
-        var rest = rest(umyndigInnloggetBruker());
+        var arbeidRest = rest(umyndigInnloggetBruker());
         var request = request();
 
-        assertThatThrownBy(() -> rest.trengerDokumentereMorsArbeid(request))
+        assertThatThrownBy(() -> arbeidRest.trengerDokumentereMorsArbeid(request))
             .isInstanceOf(OversiktManglerTilgangException.class)
             .extracting(e -> ((OversiktManglerTilgangException) e).getFeilkode())
             .isEqualTo(LokalFeilKode.IKKE_TILGANG_UMYNDIG.name());
