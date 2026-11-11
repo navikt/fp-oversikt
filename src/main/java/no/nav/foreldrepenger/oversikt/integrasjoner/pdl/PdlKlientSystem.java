@@ -52,13 +52,17 @@ public class PdlKlientSystem extends AbstractPersonKlient implements PersonOppsl
     }
 
     @Override
-    public AktørId aktørId(Fødselsnummer fnr) {
-        return Optional.ofNullable(FNR_AKTØR.get(fnr.value()))
-            .orElseGet(() -> {
-                var aktørId = new AktørId(hentAktørIdForPersonIdent(fnr.value()).orElseThrow());
-                FNR_AKTØR.put(fnr.value(), aktørId);
-                return aktørId;
-            });
+    public AktørId aktørId(Fødselsnummer fnr) throws BrukerIkkeFunnetIPdlException {
+        var cached = FNR_AKTØR.get(fnr.value());
+        if (cached != null) {
+            return cached;
+        }
+        // ignoreNotFound: ukjent ident gir tom Optional i stedet for PdlException, slik at kallere kan skille det fra tekniske feil.
+        var aktørId = hentAktørIdForPersonIdent(fnr.value(), true)
+            .map(AktørId::new)
+            .orElseThrow(BrukerIkkeFunnetIPdlException::new);
+        FNR_AKTØR.put(fnr.value(), aktørId);
+        return aktørId;
     }
 
     @Override

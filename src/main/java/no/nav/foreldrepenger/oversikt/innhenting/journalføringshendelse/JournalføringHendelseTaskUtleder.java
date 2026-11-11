@@ -22,6 +22,7 @@ import no.nav.foreldrepenger.oversikt.arkiv.EnkelJournalpost;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.domene.YtelseType;
 import no.nav.foreldrepenger.oversikt.oppgave.MinSideBeskjedVedMottattSøknadTask;
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.vedtak.felles.prosesstask.api.ProsessTaskData;
 
@@ -112,7 +113,11 @@ public class JournalføringHendelseTaskUtleder {
         if (EnkelJournalpost.Bruker.Type.AKTØRID.equals(bruker.type())) {
             return new AktørId(bruker.ident());
         }
-        return personOppslagSystem.aktørId(new Fødselsnummer(bruker.ident()));
+        try {
+            return personOppslagSystem.aktørId(new Fødselsnummer(bruker.ident()));
+        } catch (BrukerIkkeFunnetIPdlException e) {
+            throw new IllegalStateException("Finner ikke aktørId i PDL for bruker på journalpost", e);
+        }
     }
 
     private static YtelseType gjelderYtelse(DokumentTypeHistoriske dokumentType) {

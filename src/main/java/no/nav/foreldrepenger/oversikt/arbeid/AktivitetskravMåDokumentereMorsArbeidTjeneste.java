@@ -8,6 +8,7 @@ import jakarta.inject.Inject;
 import no.nav.foreldrepenger.kontrakter.felles.typer.Fødselsnummer;
 import no.nav.foreldrepenger.oversikt.domene.AktørId;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
 
@@ -40,26 +41,26 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         // Tilfelle bare far rett - der kan vi ikke vente at mor har en sak. Dersom mor har engangsstønad så har hun ikke oppgitt far/medmor
         if (annenpartHarIkkeSakMedOppgittBarnOgSøker(søkersAktørid, request)) {
             if (request.barnFødselsnummer() == null) {
-                LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak knyttet til søker/barn og vi kan ikke slå opp barnet for å sjekke relasjon");
+                LOG.info("AKTIVITETSKRAV: Annenpart har ikke sak knyttet til søker/barn og vi kan ikke slå opp barnet for å sjekke relasjon");
                 return true;
             }
             if (!personOppslagSystem.barnHarDisseForeldrene(request.barnFødselsnummer(), request.annenPartFødselsnummer(), søkersFnr)) {
-                LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder både søker og barn, men barn har ikke relasjon til en eller begge av forelderene");
+                LOG.info("AKTIVITETSKRAV: Annenpart har ikke sak som gjelder både søker og barn, men barn har ikke relasjon til en eller begge av forelderene");
                 return true;
             }
-            LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak men barnet er relatert til både søker og annenpart");
+            LOG.info("AKTIVITETSKRAV: Annenpart har ikke sak men barnet er relatert til både søker og annenpart");
         }
 
         if (kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(request.annenPartFødselsnummer())) {
-            LOG.info("AKTIVTETSKRAV: Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
+            LOG.info("AKTIVITETSKRAV: Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
             return true;
         }
 
         var krevesDokumentasjonForAktivitetskravArbeid = krevesDokumentasjonForAktivitetskravArbeid(request);
         if (krevesDokumentasjonForAktivitetskravArbeid) {
-            LOG.info("AKTIVTETSKRAV: Mor har ikke arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
+            LOG.info("AKTIVITETSKRAV: Mor har ikke arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
         } else {
-            LOG.info("AKTIVTETSKRAV: Mor har arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
+            LOG.info("AKTIVITETSKRAV: Mor har arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
         }
         return krevesDokumentasjonForAktivitetskravArbeid;
     }
@@ -78,9 +79,30 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
     }
 
     private boolean annenpartHarIkkeSakMedOppgittBarnOgSøker(AktørId innloggetBrukerAktørid, ArbeidRest.MorArbeidRequest request) {
-        var annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
-        var barnAktørId = request.barnFødselsnummer() == null ? null : personOppslagSystem.aktørId(request.barnFødselsnummer());
+        // Ukjent ident i PDL behandles som en kjent person uten treff i sakene,
+        // slik at responsen ikke avslører om identen finnes i PDL.
+        // Forsvar i dybden: ArbeidRest returnerer allerede før dette kallet når annen part er ukjent i PDL.
+        AktørId annenPartAktørId;
+        try {
+            annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
+        } catch (BrukerIkkeFunnetIPdlException _) {
+            LOG.warn("AKTIVITETSKRAV: Fnr for annen part finnes ikke i PDL");
+            return true; // Ukjent annen part kan ikke ha sak
+        }
+        var barnAktørId = aktørIdEllerNull(request.barnFødselsnummer());
         var familieHendelse = request.familiehendelse();
         return annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(innloggetBrukerAktørid, annenPartAktørId, barnAktørId, familieHendelse).isEmpty();
+    }
+
+    private AktørId aktørIdEllerNull(Fødselsnummer fnr) {
+        if (fnr == null) {
+            return null;
+        }
+        try {
+            return personOppslagSystem.aktørId(fnr);
+        } catch (BrukerIkkeFunnetIPdlException _) {
+            LOG.warn("AKTIVITETSKRAV: Fnr for barn finnes ikke i PDL. Matcher kun på familiehendelse");
+            return null;
+        }
     }
 }

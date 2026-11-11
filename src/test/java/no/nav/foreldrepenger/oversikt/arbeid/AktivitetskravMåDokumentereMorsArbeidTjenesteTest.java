@@ -2,6 +2,7 @@ package no.nav.foreldrepenger.oversikt.arbeid;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -25,6 +26,7 @@ import no.nav.foreldrepenger.oversikt.domene.Saksnummer;
 import no.nav.foreldrepenger.oversikt.domene.fp.BrukerRolle;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.saker.AnnenPartSakTjeneste;
+import no.nav.foreldrepenger.oversikt.saker.BrukerIkkeFunnetIPdlException;
 import no.nav.foreldrepenger.oversikt.saker.PersonOppslagSystem;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,6 +110,55 @@ class AktivitetskravMåDokumentereMorsArbeidTjenesteTest {
         var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
 
         // Assert
+        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
+        assertThat(krevesDokumentasjonForAktivitetskravArbeid).isTrue();
+    }
+
+    @Test
+    void ukjent_barn_i_pdl_gir_samme_svar_som_barn_uten_relasjon_til_foreldrene() throws BrukerIkkeFunnetIPdlException {
+        // Arrange
+        when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenReturn(AktørId.dummy());
+        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
+
+        // Act
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+
+        // Assert: ukjent barn slås opp som ikke oppgitt barn
+        verify(annenPartSakTjeneste).annenPartGjeldendeSakOppgittSøker(any(), any(), isNull(), any());
+        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
+        assertThat(krevesDokumentasjonForAktivitetskravArbeid).isTrue();
+    }
+
+    @Test
+    void ukjent_barn_slås_opp_som_ikke_oppgitt_barn_og_annen_parts_sak_kan_treffe_på_familiehendelse() throws BrukerIkkeFunnetIPdlException {
+        // Arrange
+        when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenReturn(AktørId.dummy());
+        when(personOppslagSystem.aktørId(DUMMY_FNR_BARN)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        when(annenPartSakTjeneste.annenPartGjeldendeSakOppgittSøker(any(), any(), isNull(), any())).thenReturn(Optional.of(dummySak()));
+        when(kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(any())).thenReturn(false);
+        when(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste.krevesDokumentasjonForAktivitetskravArbeid(any())).thenReturn(false);
+
+        // Act
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+
+        // Assert: barnets aktørId sendes som null, og sak funnet på familiehendelse gir videre sjekk av arbeid
+        verify(annenPartSakTjeneste).annenPartGjeldendeSakOppgittSøker(any(), any(), isNull(), any());
+        verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste).krevesDokumentasjonForAktivitetskravArbeid(any());
+        assertThat(krevesDokumentasjonForAktivitetskravArbeid).isFalse();
+    }
+
+    @Test
+    void ukjent_annen_part_i_pdl_gir_samme_svar_som_annen_part_uten_sak() throws BrukerIkkeFunnetIPdlException {
+        // Arrange
+        when(personOppslagSystem.aktørId(DUMMY_FNR_ANNENPART)).thenThrow(new BrukerIkkeFunnetIPdlException());
+        when(personOppslagSystem.barnHarDisseForeldrene(any(), any(), any())).thenReturn(false);
+
+        // Act
+        var krevesDokumentasjonForAktivitetskravArbeid = aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(DUMMY_FNR_SØKER, AktørId.dummy(), dummyRequestUttak());
+
+        // Assert
+        verify(annenPartSakTjeneste, never()).annenPartGjeldendeSakOppgittSøker(any(), any(), any(), any());
         verify(aktivitetskravArbeidDokumentasjonsKravArbeidsforholdTjeneste, never()).krevesDokumentasjonForAktivitetskravArbeid(any());
         assertThat(krevesDokumentasjonForAktivitetskravArbeid).isTrue();
     }
