@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import io.swagger.v3.rest.integration.resources.OpenApiResource;
@@ -36,6 +35,6 @@ class RestApiTester {
             .flatMap(config -> config.getClasses().stream())
             .filter(c -> c.getAnnotation(Path.class) != null)
             .filter(c -> !UNNTATT.contains(c))
-            .collect(Collectors.toList());
+            .toList();
     }
 }

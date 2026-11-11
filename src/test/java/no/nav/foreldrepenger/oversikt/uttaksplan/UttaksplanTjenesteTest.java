@@ -5,7 +5,6 @@ import static no.nav.foreldrepenger.oversikt.stub.DummyPersonOppslagSystemTest.a
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -621,7 +620,11 @@ class UttaksplanTjenesteTest {
             Søknadsplan.Rolle.FAR_MEDMOR, List.of(nyPeriode(Søknadsplan.Rolle.MOR, termindato, termindato.plusDays(4),
                 SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
 
-        assertThatThrownBy(() -> tjeneste(søker, repository).hentFor(søker, verifisert(annenPart), barn, termindato))
+        var uttaksplanTjeneste = tjeneste(søker, repository);
+
+        var verifisertAnnenPart = verifisert(annenPart);
+
+        assertThatThrownBy(() -> uttaksplanTjeneste.hentFor(søker, verifisertAnnenPart, barn, termindato))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Ugyldig rolle i uttaksplan");
     }
@@ -905,7 +908,9 @@ class UttaksplanTjenesteTest {
         lagre(sakUtenVedtak(søker, null, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.UKJENT,
             søknadsperiode(termindato, termindato.plusDays(4), Konto.MØDREKVOTE)));
 
-        assertThatThrownBy(() -> tjeneste(søker).hentFor(søker, null, barn, termindato))
+        var uttaksplanTjeneste = tjeneste(søker);
+
+        assertThatThrownBy(() -> uttaksplanTjeneste.hentFor(søker, null, barn, termindato))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Ugyldig rolle i uttaksplan");
     }
@@ -1097,7 +1102,11 @@ class UttaksplanTjenesteTest {
             sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
                 søknadsperiode(termindato, termindato.plusDays(4), Konto.MØDREKVOTE)));
 
-        assertThatThrownBy(() -> tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato))
+        var uttaksplanTjeneste = tjeneste(søker);
+
+        var verifisertAnnenPart = verifisert(annenPart);
+
+        assertThatThrownBy(() -> uttaksplanTjeneste.hentFor(søker, verifisertAnnenPart, barn, termindato))
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Ugyldig rolle i uttaksplan");
     }
@@ -1116,7 +1125,9 @@ class UttaksplanTjenesteTest {
                 nyPeriode(Søknadsplan.Rolle.MOR, mandag, mandag.plusDays(4), SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null),
                 nyPeriode(Søknadsplan.Rolle.MOR, mandag.plusDays(2), mandag.plusDays(6), SøknadsplanPeriode.KontoType.FELLESPERIODE, null, null, null))));
 
-        assertThatThrownBy(() -> tjeneste(søker, repository).hentFor(søker, null, barn, mandag))
+        var uttaksplanTjeneste = tjeneste(søker, repository);
+
+        assertThatThrownBy(() -> uttaksplanTjeneste.hentFor(søker, null, barn, mandag))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("Overlapp ikke tillat uten overlapCombinator");
     }

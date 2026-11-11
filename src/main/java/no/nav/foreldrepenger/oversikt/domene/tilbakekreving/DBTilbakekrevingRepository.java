@@ -37,7 +37,6 @@ public class DBTilbakekrevingRepository implements TilbakekrevingRepository {
             entityManager.persist(new TilbakekrevingEntitet(tilbakekreving));
         } else {
             eksisterende.get().setJson(tilbakekreving);
-            entityManager.merge(eksisterende.get());
         }
         entityManager.flush();
     }

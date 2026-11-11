@@ -113,7 +113,7 @@ public class SafSystemTjeneste {
     private static Optional<DokumentTypeHistoriske> tilDokumentTypeFraTilleggsopplysninger(String dokumentType) {
         try {
             return Optional.of(DokumentTypeHistoriske.valueOf(dokumentType));
-        } catch (Exception e) {
+        } catch (Exception _) {
             LOG.info("Ukjent/urelevant dokumentTypeId fra SAF tilleggsopplysninger: {}", dokumentType);
             return Optional.empty();
         }
@@ -122,7 +122,7 @@ public class SafSystemTjeneste {
     private static Optional<DokumentTypeHistoriske> utledFraTittel(String tittel) {
         try {
             return Optional.of(DokumentTypeHistoriske.fraTittel(tittel));
-        } catch (Exception e) {
+        } catch (Exception _) {
             LOG.info("Klarte ikke utlede dokumentTypeId fra SAF tittel: {}", tittel);
             return Optional.empty();
         }

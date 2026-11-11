@@ -394,7 +394,7 @@ class UttaksplanTidslinjeTest {
             new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(10), MANDAG.plusDays(10), null, null,
                 new FellesUttaksplanDto.EøsUttakDto(KontoType.FELLESPERIODE, new FellesUttaksplanDto.EøsUttakDto.Trekkdager(BigDecimal.ONE))),
             new FellesUttaksplanDto.UttakPeriodeDto(MANDAG.plusDays(11), tom, søker.getFirst().uttak(), null, null));
-        assertThat(plan.stream().map(segment -> segment.getValue()).filter(p -> p.annenPartEøs() != null)
+        assertThat(plan.stream().map(LocalDateSegment::getValue).filter(p -> p.annenPartEøs() != null)
             .map(p -> p.annenPartEøs().trekkdager().verdi()).reduce(BigDecimal.ZERO, BigDecimal::add))
             .isEqualByComparingTo(BigDecimal.valueOf(5));
     }

@@ -72,7 +72,7 @@ public record EnkelJournalpostSelvbetjening(String tittel,
         UKJENT("UKJENT"),
         URELEVANT("URELEVANT");
 
-        private String kode;
+        private final String kode;
 
         Brevkode(String kode) {
             this.kode = kode;

@@ -104,7 +104,7 @@ public class JournalføringHendelseTaskUtleder {
     private static UUID kanalreferanseTilUuid(String kanalreferanse) {
         try {
             return UUID.fromString(kanalreferanse);
-        } catch (NullPointerException | IllegalArgumentException ex) {
+        } catch (NullPointerException | IllegalArgumentException _) {
             return UUID.randomUUID();
         }
     }

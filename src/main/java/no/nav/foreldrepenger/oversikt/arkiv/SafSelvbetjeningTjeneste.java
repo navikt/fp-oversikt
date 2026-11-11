@@ -166,7 +166,7 @@ public class SafSelvbetjeningTjeneste {
     private static EnkelJournalpostSelvbetjening.Brevkode tilBrevKode(String brevkode) {
         try {
             return EnkelJournalpostSelvbetjening.Brevkode.fraKode(brevkode);
-        } catch (Exception e) {
+        } catch (Exception _) {
             LOG.info("Ukjent brevkode {}", brevkode);
             return EnkelJournalpostSelvbetjening.Brevkode.UKJENT;
         }
@@ -201,7 +201,7 @@ public class SafSelvbetjeningTjeneste {
     private static Optional<DokumentTypeHistoriske> utledFraTittel(String tittel) {
         try {
             return Optional.of(DokumentTypeHistoriske.fraTittel(tittel));
-        } catch (Exception e) {
+        } catch (Exception _) {
             LOG.info("Klarte ikke utlede dokumentTypeId fra SAF tittel: {}", tittel);
             return Optional.empty();
         }

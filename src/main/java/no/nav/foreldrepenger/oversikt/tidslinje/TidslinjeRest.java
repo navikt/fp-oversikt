@@ -65,28 +65,25 @@ public class TidslinjeRest {
     private static void tidslinjeKonsistensSjekk(List<TidslinjeHendelseDto> tidslinjeHendelseDto) {
         try {
             for (var innslag : tidslinjeHendelseDto) {
-                if (FØRSTEGANGSSØKNAD.equals(innslag.tidslinjeHendelseType())) {
-                    if (finnesHendelseTypeTidligereITidslinjen(VEDTAK, innslag, tidslinjeHendelseDto)) {
-                        LOG.info("Det finnes vedtak uten førstegangssøknad: {}", tidslinjeHendelseDto);
-                    }
+                if (FØRSTEGANGSSØKNAD.equals(innslag.tidslinjeHendelseType())
+                    && finnesHendelseTypeTidligereITidslinjen(VEDTAK, innslag, tidslinjeHendelseDto)) {
+                    LOG.info("Det finnes vedtak uten førstegangssøknad: {}", tidslinjeHendelseDto);
                 }
 
-                if (FØRSTEGANGSSØKNAD_NY.equals(innslag.tidslinjeHendelseType())) {
-                    if (!finnesHendelseTypeTidligereITidslinjen(FØRSTEGANGSSØKNAD, innslag, tidslinjeHendelseDto)) {
-                        LOG.info("Det finnes ingen førstegangssøknad før ny førstegangssøknad: {}", tidslinjeHendelseDto);
-                    }
+                if (FØRSTEGANGSSØKNAD_NY.equals(innslag.tidslinjeHendelseType())
+                    && !finnesHendelseTypeTidligereITidslinjen(FØRSTEGANGSSØKNAD, innslag, tidslinjeHendelseDto)) {
+                    LOG.info("Det finnes ingen førstegangssøknad før ny førstegangssøknad: {}", tidslinjeHendelseDto);
                 }
 
-                if (ETTERSENDING.equals(innslag.tidslinjeHendelseType())) {
-                    if (!finnesHendelseTypeTidligereITidslinjen(FØRSTEGANGSSØKNAD, innslag, tidslinjeHendelseDto)) {
-                        LOG.info("Det finnes ikke søknad før ettersendelse: {}", tidslinjeHendelseDto);
-                    }
+                if (ETTERSENDING.equals(innslag.tidslinjeHendelseType())
+                    && !finnesHendelseTypeTidligereITidslinjen(FØRSTEGANGSSØKNAD, innslag, tidslinjeHendelseDto)) {
+                    LOG.info("Det finnes ikke søknad før ettersendelse: {}", tidslinjeHendelseDto);
                 }
 
-                if (ENDRINGSSØKNAD.equals(innslag.tidslinjeHendelseType())) {
-                    if (!finnesHendelseTypeTidligereITidslinjen(FØRSTEGANGSSØKNAD, innslag, tidslinjeHendelseDto) || !finnesHendelseTypeTidligereITidslinjen(VEDTAK, innslag, tidslinjeHendelseDto)) {
-                        LOG.info("Det finnes ikke førstegangssøknad og/eller vedtak før endringssøknad: {}", tidslinjeHendelseDto);
-                    }
+                if (ENDRINGSSØKNAD.equals(innslag.tidslinjeHendelseType())
+                    && (!finnesHendelseTypeTidligereITidslinjen(FØRSTEGANGSSØKNAD, innslag, tidslinjeHendelseDto)
+                        || !finnesHendelseTypeTidligereITidslinjen(VEDTAK, innslag, tidslinjeHendelseDto))) {
+                    LOG.info("Det finnes ikke førstegangssøknad og/eller vedtak før endringssøknad: {}", tidslinjeHendelseDto);
                 }
             }
         } catch (Exception e) {

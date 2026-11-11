@@ -35,7 +35,6 @@ public class DBInntektsmeldingerRepository implements InntektsmeldingerRepositor
             entityManager.persist(new InntektsmeldingerEntitet(saksnummer, inntektsmeldinger));
         } else {
             eksisterende.get().setJson(inntektsmeldinger);
-            entityManager.merge(eksisterende.get());
         }
         entityManager.flush();
     }

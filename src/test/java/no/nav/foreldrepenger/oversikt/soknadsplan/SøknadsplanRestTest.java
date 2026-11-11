@@ -3,6 +3,7 @@ package no.nav.foreldrepenger.oversikt.soknadsplan;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -32,7 +33,7 @@ class SøknadsplanRestTest {
     void tilgangsavslagStopperFørMappingOgLagring() {
         var repository = mock(SøknadsplanRepository.class);
         var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
-        org.mockito.Mockito.doThrow(new no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException(
+        doThrow(new no.nav.foreldrepenger.oversikt.tilgangskontroll.OversiktManglerTilgangException(
             no.nav.foreldrepenger.oversikt.tilgangskontroll.LokalFeilKode.IKKE_TILGANG)).when(tilgang).sjekkAtKallErFraSystem();
 
         assertThatThrownBy(() -> new SøknadsplanRest(tjeneste(repository), tilgang).lagre(null))
@@ -162,7 +163,9 @@ class SøknadsplanRestTest {
 
     @Test
     void avviserTomPeriodelisteIDomenetOgLagrerIkkeTomRequest() {
-        assertThatThrownBy(() -> new Søknadsplan(LocalDateTime.parse("2026-09-01T12:00:00"), Søknadsplan.Rolle.MOR, List.of()))
+        var mottatt = LocalDateTime.parse("2026-09-01T12:00:00");
+        var tommePerioder = List.<SøknadsplanPeriode>of();
+        assertThatThrownBy(() -> new Søknadsplan(mottatt, Søknadsplan.Rolle.MOR, tommePerioder))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("perioder kan ikke være tom");
 
@@ -170,7 +173,9 @@ class SøknadsplanRestTest {
         var tilgang = mock(no.nav.foreldrepenger.oversikt.tilgangskontroll.TilgangKontrollTjeneste.class);
         var request = new SøknadsplanRest.SøknadsplanRequest(new Saksnummer("123456"), LocalDateTime.parse("2026-09-01T12:00:00"),
             Søknadsplan.Rolle.MOR, List.of());
-        assertThatThrownBy(() -> new SøknadsplanRest(tjeneste(repository), tilgang).lagre(parseRequest(request)))
+        var rest = new SøknadsplanRest(tjeneste(repository), tilgang);
+        var parsedRequest = parseRequest(request);
+        assertThatThrownBy(() -> rest.lagre(parsedRequest))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessage("perioder kan ikke være tom");
         org.mockito.Mockito.verifyNoInteractions(repository);
@@ -204,7 +209,8 @@ class SøknadsplanRestTest {
         ((ObjectNode) ugyldigPeriode.at("/søker/gradering/aktivitet/arbeidsgiver")).put("id", "ugyldig-id");
         perioder.add(ugyldigPeriode);
 
-        assertThatThrownBy(() -> rest.lagre(parseRequest(json)))
+        var ugyldigRequest = parseRequest(json);
+        assertThatThrownBy(() -> rest.lagre(ugyldigRequest))
             .isInstanceOf(BadRequestException.class)
             .hasMessage("Arbeidsgiver-ID må bestå av 9 eller 11 sifre")
             .hasNoCause();

@@ -109,7 +109,7 @@ final class SøknadsplanMapper {
             return null;
         }
         var id = arbeidsgiver.id();
-        if (id == null || !id.matches("[0-9]{9}|[0-9]{11}")) {
+        if (id == null || !id.matches("\\d{9}|\\d{11}")) {
             throw new BadRequestException("Arbeidsgiver-ID må bestå av 9 eller 11 sifre");
         }
         return id;
