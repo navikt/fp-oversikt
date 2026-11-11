@@ -73,7 +73,7 @@ public class ArbeidRest {
                 return true;
             }
         } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.info("Klarer ikke å finne adressebeskyttelse for annen part, person ikke funnet i pdl. Søker må derfor dokumentere mors arbeid", e);
+            LOG.warn("Fnr for annen part finnes ikke i PDL. Søker må derfor dokumentere mors arbeid");
             return true;
         }
         return aktivitetskravMåDokumentereMorsArbeidTjeneste.krevesDokumentasjonForAktivitetskravArbeid(innloggetBruker.fødselsnummer(), innloggetBruker.aktørId(), request);

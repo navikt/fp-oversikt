@@ -96,7 +96,7 @@ public class UttaksplanRest {
         try {
             aktørId = personOppslagSystem.aktørId(annenPartFnr);
         } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.info("Finner ikke ident for annen part. Bygger uttaksplan uten annen part");
+            LOG.warn("Fnr for annen part finnes ikke i PDL. Bygger uttaksplan uten annen part");
             return null;
         }
         if (!harUbeskyttetAdresse(annenPartFnr)) {
@@ -116,7 +116,7 @@ public class UttaksplanRest {
         try {
             return personOppslagSystem.aktørId(barnFnr);
         } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.info("Finner ikke ident for barn. Matcher kun på familiehendelse");
+            LOG.warn("Fnr for barn finnes ikke i PDL. Matcher kun på familiehendelse");
             return null;
         }
     }
