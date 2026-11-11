@@ -41,26 +41,26 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         // Tilfelle bare far rett - der kan vi ikke vente at mor har en sak. Dersom mor har engangsstønad så har hun ikke oppgitt far/medmor
         if (annenpartHarIkkeSakMedOppgittBarnOgSøker(søkersAktørid, request)) {
             if (request.barnFødselsnummer() == null) {
-                LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak knyttet til søker/barn og vi kan ikke slå opp barnet for å sjekke relasjon");
+                LOG.info("AKTIVITETSKRAV: Annenpart har ikke sak knyttet til søker/barn og vi kan ikke slå opp barnet for å sjekke relasjon");
                 return true;
             }
             if (!personOppslagSystem.barnHarDisseForeldrene(request.barnFødselsnummer(), request.annenPartFødselsnummer(), søkersFnr)) {
-                LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak som gjelder både søker og barn, men barn har ikke relasjon til en eller begge av forelderene");
+                LOG.info("AKTIVITETSKRAV: Annenpart har ikke sak som gjelder både søker og barn, men barn har ikke relasjon til en eller begge av forelderene");
                 return true;
             }
-            LOG.info("AKTIVTETSKRAV: Annenpart har ikke sak men barnet er relatert til både søker og annenpart");
+            LOG.info("AKTIVITETSKRAV: Annenpart har ikke sak men barnet er relatert til både søker og annenpart");
         }
 
         if (kontaktInformasjonTjeneste.harReservertSegEllerKanIkkeVarsles(request.annenPartFødselsnummer())) {
-            LOG.info("AKTIVTETSKRAV: Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
+            LOG.info("AKTIVITETSKRAV: Mor er reservert eller kan ikke varsles. Søker må derfor dokumentere mors arbeid.");
             return true;
         }
 
         var krevesDokumentasjonForAktivitetskravArbeid = krevesDokumentasjonForAktivitetskravArbeid(request);
         if (krevesDokumentasjonForAktivitetskravArbeid) {
-            LOG.info("AKTIVTETSKRAV: Mor har ikke arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
+            LOG.info("AKTIVITETSKRAV: Mor har ikke arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
         } else {
-            LOG.info("AKTIVTETSKRAV: Mor har arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
+            LOG.info("AKTIVITETSKRAV: Mor har arbeidsforhold som dekker aktivitetskravet for oppgitte perioder");
         }
         return krevesDokumentasjonForAktivitetskravArbeid;
     }
@@ -86,7 +86,7 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         try {
             annenPartAktørId = personOppslagSystem.aktørId(request.annenPartFødselsnummer());
         } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.warn("AKTIVTETSKRAV: Fnr for annen part finnes ikke i PDL");
+            LOG.warn("AKTIVITETSKRAV: Fnr for annen part finnes ikke i PDL");
             return true; // Ukjent annen part kan ikke ha sak
         }
         var barnAktørId = aktørIdEllerNull(request.barnFødselsnummer());
@@ -101,7 +101,7 @@ public class AktivitetskravMåDokumentereMorsArbeidTjeneste {
         try {
             return personOppslagSystem.aktørId(fnr);
         } catch (BrukerIkkeFunnetIPdlException e) {
-            LOG.warn("AKTIVTETSKRAV: Fnr for barn finnes ikke i PDL. Matcher kun på familiehendelse");
+            LOG.warn("AKTIVITETSKRAV: Fnr for barn finnes ikke i PDL. Matcher kun på familiehendelse");
             return null;
         }
     }
