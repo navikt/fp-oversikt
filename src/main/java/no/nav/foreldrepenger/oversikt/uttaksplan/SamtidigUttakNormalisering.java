@@ -16,6 +16,9 @@ final class SamtidigUttakNormalisering {
         if (annenPart == null) {
             return new NormalisertUttak(søker, null);
         }
+        if (!okkupererTid(søker)) {
+            return new NormalisertUttak(søker, utenHelSamtidigUttak(annenPart));
+        }
         if (søker.samtidigUttak() == null && annenPart.samtidigUttak() != null) {
             søker = medSamtidigUttak(søker);
         } else if (annenPart.samtidigUttak() == null && søker.samtidigUttak() != null) {

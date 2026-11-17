@@ -262,6 +262,22 @@ class UttaksplanTidslinjeTest {
             new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(4), søker.getFirst().uttak(), annenPart.getFirst().uttak(), null));
     }
 
+    // Søkers avslåtte periode uten trekkdager er ikke uttak. Annen parts 100 % samtidig uttak er da ikke samtidig med noe,
+    // og søkers periode skal ikke få lagt til samtidig uttak. Se SamtidigUttakNormaliseringTest.
+    @Test
+    void skalFjerneAnnenPartsHundreProsentSamtidigUttakNårSøkersPeriodeErAvslåttUtenTrekkdager() {
+        var resultat = new Uttaksperiode.Resultat(Uttaksperiode.Resultat.Type.AVSLÅTT, Uttaksperiode.Resultat.Årsak.ANNET, Set.of(), false);
+        var søker = uttak(BrukerRolle.MOR, new Uttaksperiode(MANDAG, MANDAG.plusDays(4), null, null, null, Prosent.ZERO, false, null, resultat));
+        var annenPart = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(4), Konto.FEDREKVOTE, 100));
+
+        var periode = perioder(UttaksplanTidslinje.normaliser(søker, annenPart, List.of())).getFirst();
+
+        assertThat(periode.søker()).isEqualTo(søker.getFirst().uttak());
+        assertThat(periode.søker().samtidigUttak()).isNull();
+        assertThat(periode.annenPart().kontoType()).isEqualTo(KontoType.FEDREKVOTE);
+        assertThat(periode.annenPart().samtidigUttak()).isNull();
+    }
+
     @Test
     void skalSetteHundreProsentPåUgradertPartNårBareMotpartenHarSamtidigUttak() {
         var søker = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(4), Konto.MØDREKVOTE, 100));
