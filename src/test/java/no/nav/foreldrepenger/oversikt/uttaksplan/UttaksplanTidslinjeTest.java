@@ -274,6 +274,38 @@ class UttaksplanTidslinjeTest {
         assertThat(overlapp.annenPart().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
     }
 
+    // Begge har vedtak. Far har én uke samtidig uttak, mens mor har søkt to uker. Før normaliseringen ble begge ukene
+    // vist som «begge» i fars søknad, og kortet far ned perioden, ble mors andre uke «Uten foreldrepenger».
+    @Test
+    void skalFjerneAnnenPartsHundreProsentSamtidigUttakDerSøkerIkkeHarUttak() {
+        var søker = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(4), Konto.FEDREKVOTE, 100));
+        var annenPart = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(11), Konto.MØDREKVOTE, 100));
+
+        var plan = perioder(UttaksplanTidslinje.normaliser(søker, annenPart, List.of()));
+
+        assertThat(plan).hasSize(2);
+        var førsteUke = plan.get(0);
+        assertThat(førsteUke.tom()).isEqualTo(MANDAG.plusDays(4));
+        assertThat(førsteUke.søker().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
+        assertThat(førsteUke.annenPart().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
+        var andreUke = plan.get(1);
+        assertThat(andreUke.fom()).isEqualTo(MANDAG.plusDays(7));
+        assertThat(andreUke.søker()).isNull();
+        assertThat(andreUke.annenPart().kontoType()).isEqualTo(KontoType.MØDREKVOTE);
+        assertThat(andreUke.annenPart().samtidigUttak()).isNull();
+    }
+
+    // Far har samtidig uttak rundt fødsel, men vi ser ikke mors perioder. Se SamtidigUttakNormaliseringTest for hvorfor
+    // søkers egne perioder ikke endres.
+    @Test
+    void skalBeholdeSøkersHundreProsentSamtidigUttakUtenAnnenPart() {
+        var søker = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(9), Konto.FEDREKVOTE, 100));
+
+        var plan = perioder(UttaksplanTidslinje.normaliser(søker, List.of(), List.of()));
+
+        assertThat(plan.getFirst().søker().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
+    }
+
     @Test
     void skalPrioritereNorskUttakOverUtsettelseOgSøkerNårBeggeHarUtsettelse() {
         var søker = uttak(BrukerRolle.MOR, utsettelse(MANDAG, MANDAG.plusDays(4)));
