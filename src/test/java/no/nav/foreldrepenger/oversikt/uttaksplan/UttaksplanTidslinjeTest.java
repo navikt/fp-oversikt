@@ -262,6 +262,22 @@ class UttaksplanTidslinjeTest {
             new FellesUttaksplanDto.UttakPeriodeDto(MANDAG, MANDAG.plusDays(4), søker.getFirst().uttak(), annenPart.getFirst().uttak(), null));
     }
 
+    // Søkers avslåtte periode uten trekkdager er ikke uttak. Annen parts 100 % samtidig uttak er da ikke samtidig med noe,
+    // og søkers periode skal ikke få lagt til samtidig uttak. Se SamtidigUttakNormaliseringTest.
+    @Test
+    void skalFjerneAnnenPartsHundreProsentSamtidigUttakNårSøkersPeriodeErAvslåttUtenTrekkdager() {
+        var resultat = new Uttaksperiode.Resultat(Uttaksperiode.Resultat.Type.AVSLÅTT, Uttaksperiode.Resultat.Årsak.ANNET, Set.of(), false);
+        var søker = uttak(BrukerRolle.MOR, new Uttaksperiode(MANDAG, MANDAG.plusDays(4), null, null, null, Prosent.ZERO, false, null, resultat));
+        var annenPart = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(4), Konto.FEDREKVOTE, 100));
+
+        var periode = perioder(UttaksplanTidslinje.normaliser(søker, annenPart, List.of())).getFirst();
+
+        assertThat(periode.søker()).isEqualTo(søker.getFirst().uttak());
+        assertThat(periode.søker().samtidigUttak()).isNull();
+        assertThat(periode.annenPart().kontoType()).isEqualTo(KontoType.FEDREKVOTE);
+        assertThat(periode.annenPart().samtidigUttak()).isNull();
+    }
+
     @Test
     void skalSetteHundreProsentPåUgradertPartNårBareMotpartenHarSamtidigUttak() {
         var søker = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(4), Konto.MØDREKVOTE, 100));
@@ -272,6 +288,38 @@ class UttaksplanTidslinjeTest {
         var overlapp = perioder(plan).getFirst();
         assertThat(overlapp.søker().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
         assertThat(overlapp.annenPart().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
+    }
+
+    // Begge har vedtak. Far har én uke samtidig uttak, mens mor har søkt to uker. Før normaliseringen ble begge ukene
+    // vist som «begge» i fars søknad, og kortet far ned perioden, ble mors andre uke «Uten foreldrepenger».
+    @Test
+    void skalFjerneAnnenPartsHundreProsentSamtidigUttakDerSøkerIkkeHarUttak() {
+        var søker = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(4), Konto.FEDREKVOTE, 100));
+        var annenPart = uttak(BrukerRolle.MOR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(11), Konto.MØDREKVOTE, 100));
+
+        var plan = perioder(UttaksplanTidslinje.normaliser(søker, annenPart, List.of()));
+
+        assertThat(plan).hasSize(2);
+        var førsteUke = plan.get(0);
+        assertThat(førsteUke.tom()).isEqualTo(MANDAG.plusDays(4));
+        assertThat(førsteUke.søker().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
+        assertThat(førsteUke.annenPart().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
+        var andreUke = plan.get(1);
+        assertThat(andreUke.fom()).isEqualTo(MANDAG.plusDays(7));
+        assertThat(andreUke.søker()).isNull();
+        assertThat(andreUke.annenPart().kontoType()).isEqualTo(KontoType.MØDREKVOTE);
+        assertThat(andreUke.annenPart().samtidigUttak()).isNull();
+    }
+
+    // Far har samtidig uttak rundt fødsel, men vi ser ikke mors perioder. Se SamtidigUttakNormaliseringTest for hvorfor
+    // søkers egne perioder ikke endres.
+    @Test
+    void skalBeholdeSøkersHundreProsentSamtidigUttakUtenAnnenPart() {
+        var søker = uttak(BrukerRolle.FAR, periodeMedSamtidigUttak(MANDAG, MANDAG.plusDays(9), Konto.FEDREKVOTE, 100));
+
+        var plan = perioder(UttaksplanTidslinje.normaliser(søker, List.of(), List.of()));
+
+        assertThat(plan.getFirst().søker().samtidigUttak().value()).isEqualByComparingTo(BigDecimal.valueOf(100));
     }
 
     @Test

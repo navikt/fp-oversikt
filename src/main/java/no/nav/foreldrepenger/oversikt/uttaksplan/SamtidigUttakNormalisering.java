@@ -10,8 +10,14 @@ final class SamtidigUttakNormalisering {
     }
 
     static NormalisertUttak normaliser(FellesUttaksplanDto.UttakDto søker, FellesUttaksplanDto.UttakDto annenPart) {
-        if (søker == null || annenPart == null) {
-            return new NormalisertUttak(søker, annenPart);
+        if (søker == null) {
+            return new NormalisertUttak(null, utenHelSamtidigUttak(annenPart));
+        }
+        if (annenPart == null) {
+            return new NormalisertUttak(søker, null);
+        }
+        if (!okkupererTid(søker)) {
+            return new NormalisertUttak(søker, utenHelSamtidigUttak(annenPart));
         }
         if (søker.samtidigUttak() == null && annenPart.samtidigUttak() != null) {
             søker = medSamtidigUttak(søker);
@@ -30,6 +36,14 @@ final class SamtidigUttakNormalisering {
     private static boolean okkupererTid(FellesUttaksplanDto.UttakDto uttak) {
         var resultat = uttak.resultat();
         return resultat == null || resultat.innvilget() || resultat.trekkerDager();
+    }
+
+    private static FellesUttaksplanDto.UttakDto utenHelSamtidigUttak(FellesUttaksplanDto.UttakDto uttak) {
+        if (uttak == null || uttak.samtidigUttak() == null || uttak.samtidigUttak().value().compareTo(BigDecimal.valueOf(100)) < 0) {
+            return uttak;
+        }
+        return new FellesUttaksplanDto.UttakDto(uttak.forelder(), uttak.kontoType(), uttak.utsettelseÅrsak(), uttak.overføringÅrsak(),
+            uttak.gradering(), uttak.morsAktivitet(), null, uttak.flerbarnsdager(), uttak.resultat());
     }
 
     private static FellesUttaksplanDto.UttakDto medSamtidigUttak(FellesUttaksplanDto.UttakDto uttak) {
