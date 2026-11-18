@@ -78,6 +78,11 @@ public class UttaksplanTjeneste {
             .toList();
 
         var søkerPerioder = vedtakEllerSøknadsuttak(søkersSak, søknadsperioder, søkerRolle);
+        if (søkersSak.isEmpty()) {
+            // Søkerens perioder kommer da fra annen parts søknad og er bare et forslag. Uttak som er klart for gammelt
+            // til å bli innvilget, vises ikke. Filteret har bevisst slakk i forhold til fpsak, se SøknadsfristFilter.
+            søkerPerioder = SøknadsfristFilter.fjernUttakFørFrist(søkerPerioder, LocalDate.now());
+        }
         // Når annen part ikke vises, er annenPartsSak tom, og annen parts perioder kommer bare fra søkerens egen søknadsplan.
         var annenPartsPerioder = AnnenPartGraderingFilter.fjernArbeidsgivere(
             vedtakEllerSøknadsuttak(annenPartsSak, søknadsperioder, annenPartsRolle));
