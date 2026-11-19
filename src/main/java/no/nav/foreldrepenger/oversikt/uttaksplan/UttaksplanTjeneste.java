@@ -22,6 +22,7 @@ import no.nav.foreldrepenger.oversikt.saker.Saker;
 import no.nav.foreldrepenger.oversikt.soknadsplan.Søknadsplan;
 import no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanRepository;
 import no.nav.foreldrepenger.oversikt.uttaksplan.UttaksplanTidslinje.Planperiode;
+import no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 import no.nav.fpsak.tidsserie.LocalDateInterval;
 import no.nav.fpsak.tidsserie.LocalDateSegment;
@@ -32,6 +33,7 @@ import no.nav.fpsak.tidsserie.LocalDateSegment;
  * Adressekontrollen for annen part gjøres av kalleren og uttrykkes med {@link VerifisertAnnenPart}.
  * Tjenesten eier relasjonskravet: annen part må være den samme som er registrert på søkerens sak.
  * Annen parts perioder som søkeren selv har sendt inn i sin søknadsplan, vises alltid.
+ * Når begge er far og bare den ene har mødrekvote, vises han som MOR og den andre som FAR_MEDMOR. Ellers vises søkeren som FAR_MEDMOR og den andre som MOR.
  */
 @ApplicationScoped
 public class UttaksplanTjeneste {
@@ -119,7 +121,9 @@ public class UttaksplanTjeneste {
         if (søknad.isEmpty()) {
             return legacySøknadsperioder(søkersSak);
         }
-        var forventetSøknadsrolle = søkersSak.isPresent() ? søkerRolle : motsattRolle(søkerRolle);
+        var forventetSøknadsrolle = søkersSak.or(() -> annenPartsSak)
+            .map(sak -> dtoRolle(sak.brukerRolle()))
+            .orElseThrow();
         if (!harRolle(søknad.orElseThrow(), forventetSøknadsrolle)) { // I tilfelle saken har endret rolle etter at søknaden ble sendt
             LOG.info("Ignorerer søknad i uttaksplan fordi søknadens rolle avviker fra sakens rolle. Bruker bare tilgjengelige vedtak.");
             return List.of();
@@ -132,10 +136,30 @@ public class UttaksplanTjeneste {
         var rolle = søkersSak.map(sak -> dtoRolle(sak.brukerRolle())).orElseGet(() -> annenPartsSak
             .map(sak -> motsattRolle(dtoRolle(sak.brukerRolle()))).orElseThrow());
         if (annenPartsSak.map(sak -> dtoRolle(sak.brukerRolle()) == rolle).orElse(false)) {
+            if (søkersSak.orElseThrow().brukerRolle() == BrukerRolle.FAR && annenPartsSak.orElseThrow().brukerRolle() == BrukerRolle.FAR) {
+                return harEgenMødrekvote(søkersSak.orElseThrow()) && !harEgenMødrekvote(annenPartsSak.orElseThrow())
+                    ? FellesUttaksplanDto.Rolle.MOR
+                    : FellesUttaksplanDto.Rolle.FAR_MEDMOR;
+            }
             throw new IllegalStateException(String.format("Ugyldig rolle i uttaksplan. Søker og annen part har samme rolle %s. Søkers saksnummer %s, annen parts saksnummer %s",
                 rolle, søkersSak.orElseThrow().saksnummer().value(), annenPartsSak.orElseThrow().saksnummer().value()));
         }
         return rolle;
+    }
+
+    private static boolean harEgenMødrekvote(ForeldrepengerSak sak) {
+        return sak.gjeldendeVedtak()
+            .map(vedtak -> UttaksplanMapper.mapVedtaksperioder(vedtak.perioder(), sak.brukerRolle()))
+            .map(UttaksplanTjeneste::harMødrekvote)
+            .orElseGet(() -> sak.sisteSøknad()
+                .map(søknad -> UttaksplanMapper.mapSøknadsperioder(søknad.perioder(), sak.brukerRolle()))
+                .map(UttaksplanTjeneste::harMødrekvote)
+                .orElse(false));
+    }
+
+    private static boolean harMødrekvote(List<Planperiode> perioder) {
+        return perioder.stream()
+            .anyMatch(periode -> periode.uttak().kontoType() == KontoType.MØDREKVOTE && periode.uttak().overføringÅrsak() == null);
     }
 
     /**
@@ -228,10 +252,23 @@ public class UttaksplanTjeneste {
         return UttaksplanMapper.mapLagredeSøknadsperioder(søknad.perioder());
     }
 
-    private static List<Planperiode> mapVedtaksperioder(FpVedtak vedtak, ForeldrepengerSak sak) {
+    private static List<Planperiode> mapVedtaksperioder(FpVedtak vedtak, ForeldrepengerSak sak, FellesUttaksplanDto.Rolle rolle) {
         return UttaksplanMapper.mapVedtaksperioder(vedtak.perioder(), sak.brukerRolle()).stream()
+            .map(periode -> medForelder(periode, rolle))
             .sorted(Comparator.comparing(Planperiode::fom).thenComparing(Planperiode::tom))
             .toList();
+    }
+
+    private static Planperiode medForelder(Planperiode periode, FellesUttaksplanDto.Rolle rolle) {
+        var uttak = periode.uttak();
+        if (uttak.forelder() == rolle) {
+            return periode;
+        }
+        // Ved far og far har begge sakene rollen FAR, men faren med mødrekvote vises som MOR.
+        // Vedtaksperiodene får derfor rollen i planen i stedet for sakens rolle. Kvoten endres ikke.
+        var nyttUttak = new FellesUttaksplanDto.UttakDto(rolle, uttak.kontoType(), uttak.utsettelseÅrsak(), uttak.overføringÅrsak(),
+            uttak.gradering(), uttak.morsAktivitet(), uttak.samtidigUttak(), uttak.flerbarnsdager(), uttak.resultat());
+        return new Planperiode(periode.fom(), periode.tom(), nyttUttak);
     }
 
     private static List<Planperiode> vedtakEllerSøknadsuttak(Optional<ForeldrepengerSak> sak,
@@ -239,7 +276,7 @@ public class UttaksplanTjeneste {
                                                              FellesUttaksplanDto.Rolle rolle) {
         var vedtak = sak.flatMap(ForeldrepengerSak::gjeldendeVedtak);
         if (vedtak.isPresent()) {
-            return mapVedtaksperioder(vedtak.orElseThrow(), sak.orElseThrow());
+            return mapVedtaksperioder(vedtak.orElseThrow(), sak.orElseThrow(), rolle);
         }
         return søknadsperioder.stream()
             .filter(p -> p.uttak().forelder() == rolle && erUttak(p))
