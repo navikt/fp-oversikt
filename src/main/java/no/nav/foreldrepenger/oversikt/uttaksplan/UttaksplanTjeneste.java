@@ -132,7 +132,8 @@ public class UttaksplanTjeneste {
         var rolle = søkersSak.map(sak -> dtoRolle(sak.brukerRolle())).orElseGet(() -> annenPartsSak
             .map(sak -> motsattRolle(dtoRolle(sak.brukerRolle()))).orElseThrow());
         if (annenPartsSak.map(sak -> dtoRolle(sak.brukerRolle()) == rolle).orElse(false)) {
-            throw ugyldigRolle();
+            throw new IllegalStateException(String.format("Ugyldig rolle i uttaksplan. Søker og annen part har samme rolle %s. Søkers saksnummer %s, annen parts saksnummer %s",
+                rolle, søkersSak.orElseThrow().saksnummer().value(), annenPartsSak.orElseThrow().saksnummer().value()));
         }
         return rolle;
     }
