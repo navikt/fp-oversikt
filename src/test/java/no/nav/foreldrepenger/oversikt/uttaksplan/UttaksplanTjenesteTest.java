@@ -1253,11 +1253,11 @@ class UttaksplanTjenesteTest {
         var annenPart = AktørId.dummy();
         var barn = AktørId.dummy();
         var termindato = LocalDate.of(2026, 10, 1);
-        lagre(
-            sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
-                søknadsperiode(termindato, termindato.plusDays(4), Konto.MØDREKVOTE)),
-            sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
-                søknadsperiode(termindato, termindato.plusDays(4), Konto.MØDREKVOTE)));
+        var søkersSak = sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+            søknadsperiode(termindato, termindato.plusDays(4), Konto.MØDREKVOTE));
+        var annenPartsSak = sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+            søknadsperiode(termindato, termindato.plusDays(4), Konto.MØDREKVOTE));
+        lagre(søkersSak, annenPartsSak);
 
         var uttaksplanTjeneste = tjeneste(søker);
 
@@ -1265,7 +1265,8 @@ class UttaksplanTjenesteTest {
 
         assertThatThrownBy(() -> uttaksplanTjeneste.hentFor(søker, verifisertAnnenPart, barn, termindato))
             .isInstanceOf(IllegalStateException.class)
-            .hasMessage("Ugyldig rolle i uttaksplan");
+            .hasMessage("Ugyldig rolle i uttaksplan. Søker og annen part har samme rolle MOR. Søkers saksnummer %s, annen parts saksnummer %s",
+                søkersSak.saksnummer().value(), annenPartsSak.saksnummer().value());
     }
 
     @Test
