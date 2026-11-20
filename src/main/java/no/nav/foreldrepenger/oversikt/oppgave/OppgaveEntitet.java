@@ -11,6 +11,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 @Entity(name = "oppgave")
 @Table(name = "oppgave")
@@ -19,14 +20,17 @@ class OppgaveEntitet {
     @Id
     private UUID id;
 
-    @Column(name = "saksnummer", nullable = false, updatable = false)
+    // TODO (anyone): migrer til not null i DB og sett nullable = false her. Se fp-inntektsmelding / migrering for inspirasjon
+    @Column(name = "saksnummer", updatable = false)
     private String saksnummer;
 
+    @NotNull
     @Column(name = "type", nullable = false, updatable = false)
     @Enumerated(EnumType.STRING)
     private OppgaveType type;
 
-    @Column(name = "opprettet_tid")
+    @NotNull
+    @Column(name = "opprettet_tid", nullable = false)
     private LocalDateTime opprettetTidspunkt;
 
     @Column(name = "avsluttet_tid")
