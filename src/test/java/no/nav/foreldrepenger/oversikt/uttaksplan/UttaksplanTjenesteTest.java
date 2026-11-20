@@ -28,6 +28,7 @@ import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknad;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpSøknadsperiode;
 import no.nav.foreldrepenger.oversikt.domene.fp.FpVedtak;
 import no.nav.foreldrepenger.oversikt.domene.fp.Konto;
+import no.nav.foreldrepenger.oversikt.domene.fp.OverføringÅrsak;
 import no.nav.foreldrepenger.oversikt.domene.fp.Rettigheter;
 import no.nav.foreldrepenger.oversikt.domene.fp.SakFP0;
 import no.nav.foreldrepenger.oversikt.domene.fp.Trekkdager;
@@ -41,6 +42,7 @@ import no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanPeriode;
 import no.nav.foreldrepenger.oversikt.soknadsplan.SøknadsplanRepository;
 import no.nav.foreldrepenger.oversikt.stub.RepositoryStub;
 import no.nav.foreldrepenger.oversikt.stub.SøknadsplanRepositoryStub;
+import no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType;
 import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUttaksplanDto;
 
 class UttaksplanTjenesteTest {
@@ -1267,6 +1269,169 @@ class UttaksplanTjenesteTest {
             .isInstanceOf(IllegalStateException.class)
             .hasMessage("Ugyldig rolle i uttaksplan. Søker og annen part har samme rolle MOR. Søkers saksnummer %s, annen parts saksnummer %s",
                 søkersSak.saksnummer().value(), annenPartsSak.saksnummer().value());
+    }
+
+    @Test
+    void morOgFarFarsVedtaksperioderBeholderRolleOgKvote() {
+        var mor = AktørId.dummy();
+        var far = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        var farsUttak = uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FEDREKVOTE);
+        lagre(sakUtenVedtak(mor, far, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+                søknadsperiode(mandag, mandag.plusDays(4), Konto.MØDREKVOTE)),
+            sakMedVedtak(far, mor, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, farsUttak));
+
+        var plan = tjeneste(mor).hentFor(mor, verifisert(far), barn, mandag).orElseThrow();
+
+        assertThat(plan.perioder()).filteredOn(p -> p.fom().equals(farsUttak.fom())).singleElement().satisfies(p -> {
+            assertThat(p.annenPart().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.FAR_MEDMOR);
+            assertThat(p.annenPart().kontoType()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType.FEDREKVOTE);
+            assertThat(p.søker()).isNull();
+        });
+    }
+
+    private enum FarVedtakstilfelle {
+        INGEN_VEDTAK(false, false),
+        BARE_FAR_A(true, false),
+        BARE_FAR_B(false, true),
+        BEGGE_VEDTAK(true, true);
+
+        private final boolean farAHarVedtak;
+        private final boolean farBHarVedtak;
+
+        FarVedtakstilfelle(boolean farAHarVedtak, boolean farBHarVedtak) {
+            this.farAHarVedtak = farAHarVedtak;
+            this.farBHarVedtak = farBHarVedtak;
+        }
+    }
+
+    @ParameterizedTest
+    @EnumSource(FarVedtakstilfelle.class)
+    void farOgFarFarenMedMødrekvoteVisesSomMorSettFraBeggeSider(FarVedtakstilfelle tilfelle) {
+        var farA = AktørId.dummy();
+        var farB = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+        var periodeA = uttaksperiode(mandag, mandag.plusDays(4), Konto.FEDREKVOTE);
+        var periodeB = uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.MØDREKVOTE);
+        var sakA = tilfelle.farAHarVedtak
+            ? sakMedVedtak(farA, farB, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, periodeA)
+            : sakUtenVedtak(farA, farB, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+                søknadsperiode(periodeA.fom(), periodeA.tom(), Konto.FEDREKVOTE));
+        var sakB = tilfelle.farBHarVedtak
+            ? sakMedVedtak(farB, farA, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, periodeB)
+            : sakUtenVedtak(farB, farA, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+                søknadsperiode(periodeB.fom(), periodeB.tom(), Konto.MØDREKVOTE));
+        lagre(sakA, sakB);
+        var repository = new SøknadsplanRepositoryStub();
+        repository.lagre(sakA.saksnummer(), new Søknadsplan(LocalDateTime.now(), Søknadsplan.Rolle.FAR_MEDMOR, List.of(
+            nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, periodeA.fom(), periodeA.tom(), SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null),
+            nyPeriode(Søknadsplan.Rolle.MOR, periodeB.fom(), periodeB.tom(), SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
+        repository.lagre(sakB.saksnummer(), new Søknadsplan(LocalDateTime.now(), Søknadsplan.Rolle.FAR_MEDMOR, List.of(
+            nyPeriode(Søknadsplan.Rolle.MOR, periodeB.fom(), periodeB.tom(), SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null),
+            nyPeriode(Søknadsplan.Rolle.FAR_MEDMOR, periodeA.fom(), periodeA.tom(), SøknadsplanPeriode.KontoType.FEDREKVOTE, null, null, null))));
+
+        var planSettAvFarA = tjeneste(farA, repository).hentFor(farA, verifisert(farB), barn, mandag).orElseThrow();
+        var planSettAvFarB = tjeneste(farB, repository).hentFor(farB, verifisert(farA), barn, mandag).orElseThrow();
+
+        assertFarplanMedRoller(planSettAvFarA, periodeA.fom(), FellesUttaksplanDto.Rolle.FAR_MEDMOR, KontoType.FEDREKVOTE,
+            periodeB.fom(), FellesUttaksplanDto.Rolle.MOR, KontoType.MØDREKVOTE);
+        assertFarplanMedRoller(planSettAvFarB, periodeB.fom(), FellesUttaksplanDto.Rolle.MOR, KontoType.MØDREKVOTE,
+            periodeA.fom(), FellesUttaksplanDto.Rolle.FAR_MEDMOR, KontoType.FEDREKVOTE);
+    }
+
+    private static void assertFarplanMedRoller(FellesUttaksplanDto plan,
+                                               LocalDate egenPeriodeFom,
+                                               FellesUttaksplanDto.Rolle egenRolle,
+                                               KontoType egenKvote,
+                                               LocalDate annenPartsPeriodeFom,
+                                               FellesUttaksplanDto.Rolle annenPartsRolle,
+                                               KontoType annenPartsKvote) {
+        assertThat(plan.perioder()).hasSize(2);
+        assertThat(plan.perioder()).filteredOn(p -> p.fom().equals(egenPeriodeFom)).singleElement().satisfies(p -> {
+            assertThat(p.søker()).isNotNull();
+            assertThat(p.søker().forelder()).isEqualTo(egenRolle);
+            assertThat(p.søker().kontoType()).isEqualTo(egenKvote);
+            assertThat(p.annenPart()).isNull();
+        });
+        assertThat(plan.perioder()).filteredOn(p -> p.fom().equals(annenPartsPeriodeFom)).singleElement().satisfies(p -> {
+            assertThat(p.annenPart()).isNotNull();
+            assertThat(p.annenPart().forelder()).isEqualTo(annenPartsRolle);
+            assertThat(p.annenPart().kontoType()).isEqualTo(annenPartsKvote);
+            assertThat(p.søker()).isNull();
+        });
+    }
+
+    @Test
+    void farOgFarUtenMødrekvoteViserSøkerenSomFarMedmorSettFraBeggeSider() {
+        var farA = AktørId.dummy();
+        var farB = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        var periodeA = uttaksperiode(mandag, mandag.plusDays(4), Konto.FELLESPERIODE);
+        var periodeB = uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), Konto.FELLESPERIODE);
+        lagre(sakMedVedtak(farA, farB, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, periodeA),
+            sakMedVedtak(farB, farA, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, periodeB));
+
+        var planSettAvFarA = tjeneste(farA).hentFor(farA, verifisert(farB), barn, mandag).orElseThrow();
+        var planSettAvFarB = tjeneste(farB).hentFor(farB, verifisert(farA), barn, mandag).orElseThrow();
+
+        assertFarplanMedRoller(planSettAvFarA, periodeA.fom(), FellesUttaksplanDto.Rolle.FAR_MEDMOR, KontoType.FELLESPERIODE,
+            periodeB.fom(), FellesUttaksplanDto.Rolle.MOR, KontoType.FELLESPERIODE);
+        assertFarplanMedRoller(planSettAvFarB, periodeB.fom(), FellesUttaksplanDto.Rolle.FAR_MEDMOR, KontoType.FELLESPERIODE,
+            periodeA.fom(), FellesUttaksplanDto.Rolle.MOR, KontoType.FELLESPERIODE);
+    }
+
+    @Test
+    void morUtenEgenSakBeholderRollenSelvOmFarHarOverførtMødrekvote() {
+        var mor = AktørId.dummy();
+        var far = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var mandag = LocalDate.of(2026, 10, 5);
+        var aktivitet = new Uttaksperiode.UttaksperiodeAktivitet(new UttakAktivitet(UttakAktivitet.Type.FRILANS, null, null),
+            Konto.MØDREKVOTE, new Trekkdager(5), Prosent.ZERO);
+        var resultat = new Uttaksperiode.Resultat(Uttaksperiode.Resultat.Type.INNVILGET, Uttaksperiode.Resultat.Årsak.ANNET,
+            Set.of(aktivitet), false);
+        var overførtMødrekvote = new Uttaksperiode(mandag.plusWeeks(2), mandag.plusWeeks(2).plusDays(4), null, null,
+            OverføringÅrsak.SYKDOM_ANNEN_FORELDER, Prosent.ZERO, false, null, resultat);
+        var farsSak = sakMedVedtak(far, mor, barn, mandag, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR, overførtMødrekvote);
+        lagre(farsSak);
+        var morsPeriodeFom = mandag.plusWeeks(4);
+        var repository = new SøknadsplanRepositoryStub();
+        repository.lagre(farsSak.saksnummer(), new Søknadsplan(LocalDateTime.now(), Søknadsplan.Rolle.FAR_MEDMOR,
+            List.of(nyPeriode(Søknadsplan.Rolle.MOR, morsPeriodeFom, morsPeriodeFom.plusDays(4),
+                SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null, null))));
+
+        var plan = tjeneste(mor, repository).hentFor(mor, verifisert(far), barn, mandag).orElseThrow();
+
+        assertThat(plan.perioder()).filteredOn(periode -> periode.fom().equals(overførtMødrekvote.fom())).singleElement().satisfies(periode -> {
+            assertThat(periode.annenPart().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.FAR_MEDMOR);
+            assertThat(periode.annenPart().kontoType()).isEqualTo(KontoType.MØDREKVOTE);
+            assertThat(periode.annenPart().overføringÅrsak()).isNotNull();
+            assertThat(periode.søker()).isNull();
+        });
+        assertThat(plan.perioder()).filteredOn(periode -> periode.fom().equals(morsPeriodeFom)).singleElement().satisfies(periode -> {
+            assertThat(periode.søker().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.MOR);
+            assertThat(periode.søker().kontoType()).isEqualTo(KontoType.MØDREKVOTE);
+            assertThat(periode.annenPart()).isNull();
+        });
+    }
+
+    @Test
+    void farOgMedmorMedSammeDtoRolleFeilerLukket() {
+        var søker = AktørId.dummy();
+        var annenPart = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termindato = LocalDate.of(2026, 10, 1);
+        lagre(sakUtenVedtak(søker, annenPart, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.FAR,
+                søknadsperiode(termindato, termindato.plusDays(4), Konto.FEDREKVOTE)),
+            sakUtenVedtak(annenPart, søker, barn, termindato, 1, Dekningsgrad.HUNDRE, BrukerRolle.MEDMOR,
+                søknadsperiode(termindato, termindato.plusDays(4), Konto.FEDREKVOTE)));
+
+        assertThatThrownBy(() -> tjeneste(søker).hentFor(søker, verifisert(annenPart), barn, termindato))
+            .isInstanceOf(IllegalStateException.class)
+            .hasMessageStartingWith("Ugyldig rolle i uttaksplan");
     }
 
     @Test
