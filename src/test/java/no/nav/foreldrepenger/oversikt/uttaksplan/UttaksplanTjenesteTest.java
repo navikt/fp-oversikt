@@ -681,7 +681,7 @@ class UttaksplanTjenesteTest {
     }
 
     @Test
-    void farSomIkkeHarSøktFårSamtidigUttakFraFødselSomMorOppgaInnenforFristen() {
+    void farSomIkkeHarSøktFårIkkeSamtidigUttakFraFødselSomMorOppgaInnenforFristen() {
         var far = AktørId.dummy();
         var mor = AktørId.dummy();
         var barn = AktørId.dummy();
@@ -690,11 +690,171 @@ class UttaksplanTjenesteTest {
 
         var plan = tjeneste(far, søknader).hentFor(far, verifisert(mor), barn, fødsel).orElseThrow();
 
+        // Søknadsfrontend spør far om uttak ved fødsel og legger inn ukene selv
+        assertThat(plan.perioder()).allSatisfy(p -> assertThat(p.søker()).isNull());
         assertThat(plan.perioder()).filteredOn(p -> p.fom().equals(fødsel)).singleElement().satisfies(p -> {
-            assertThat(p.søker().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.FAR_MEDMOR);
-            assertThat(p.søker().kontoType()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType.FEDREKVOTE);
+            assertThat(p.tom()).isEqualTo(fødsel.plusWeeks(15).minusDays(3));
             assertThat(p.annenPart().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.MOR);
+            assertThat(p.annenPart().samtidigUttak()).isNull();
         });
+    }
+
+    @Test
+    void farSomIkkeHarSøktFårIkkeMorsForslagPåTerminNårBarnetErFødtTreUkerFør() {
+        var far = AktørId.dummy();
+        var mor = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var fødsel = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+        var termin = fødsel.plusWeeks(3);
+        var morsSak = morsSakMedVedtakEtterFødselshendelse(mor, far, barn, fødsel, termin);
+        var søknader = morsSøknadMedSamtidigUttakForFarFraTermin(morsSak, termin);
+
+        var plan = tjeneste(far, søknader).hentFor(far, verifisert(mor), barn, fødsel).orElseThrow();
+
+        assertThat(plan.perioder()).allSatisfy(p -> {
+            assertThat(p.søker()).isNull();
+            assertThat(p.annenPart().samtidigUttak()).isNull();
+        });
+        assertThat(plan.annenPartRedigerbar()).isFalse();
+    }
+
+    @Test
+    void farSomIkkeHarSøktBeholderSamtidigUttakSenereIMorsForslag() {
+        var far = AktørId.dummy();
+        var mor = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var fødsel = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+        var termin = fødsel.plusWeeks(3);
+        var morsSak = morsSakMedVedtakEtterFødselshendelse(mor, far, barn, fødsel, termin);
+        var senereFom = termin.plusWeeks(10);
+        var senereTom = senereFom.plusDays(11);
+        var søknader = new SøknadsplanRepositoryStub();
+        søknader.lagre(morsSak.saksnummer(), new Søknadsplan(fødsel.atStartOfDay(), Søknadsplan.Rolle.MOR, List.of(
+            samtidigUttak(Søknadsplan.Rolle.FAR_MEDMOR, senereFom, senereTom, SøknadsplanPeriode.KontoType.FEDREKVOTE))));
+
+        var plan = tjeneste(far, søknader).hentFor(far, verifisert(mor), barn, fødsel).orElseThrow();
+
+        assertThat(plan.perioder()).filteredOn(p -> p.søker() != null).singleElement().satisfies(p -> {
+            assertThat(p.fom()).isEqualTo(senereFom);
+            assertThat(p.tom()).isEqualTo(senereTom);
+            assertThat(p.søker().kontoType()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType.FEDREKVOTE);
+        });
+    }
+
+    @Test
+    void morSerIkkeFarsForslagPåTerminNårBarnetErFødtTreUkerFør() {
+        var far = AktørId.dummy();
+        var mor = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var fødsel = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+        var termin = fødsel.plusWeeks(3);
+        var morsSak = morsSakMedVedtakEtterFødselshendelse(mor, far, barn, fødsel, termin);
+        var søknader = morsSøknadMedSamtidigUttakForFarFraTermin(morsSak, termin);
+
+        var plan = tjeneste(mor, søknader).hentFor(mor, verifisert(far), barn, fødsel).orElseThrow();
+
+        assertThat(plan.perioder()).allSatisfy(p -> {
+            assertThat(p.annenPart()).isNull();
+            assertThat(p.søker().samtidigUttak()).isNull();
+        });
+    }
+
+    @Test
+    void morSerFarsForslagPåTerminFørFødselen() {
+        var far = AktørId.dummy();
+        var mor = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var termin = LocalDate.now().plusWeeks(3).with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+        var morsSak = sakUtenVedtak(mor, far, barn, termin, 1, Dekningsgrad.HUNDRE, BrukerRolle.MOR,
+            søknadsperiode(termin, termin.plusDays(4), Konto.MØDREKVOTE));
+        lagre(morsSak);
+        var søknader = morsSøknadMedSamtidigUttakForFarFraTermin(morsSak, termin);
+
+        var plan = tjeneste(mor, søknader).hentFor(mor, verifisert(far), barn, termin).orElseThrow();
+
+        assertThat(plan.perioder()).filteredOn(p -> p.annenPart() != null).singleElement().satisfies(p -> {
+            assertThat(p.fom()).isEqualTo(termin);
+            assertThat(p.annenPart().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.FAR_MEDMOR);
+            assertThat(p.annenPart().kontoType()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType.FEDREKVOTE);
+        });
+    }
+
+    @Test
+    void morUtenVedtakSerFarsForslagISineUkerMedSamtidigUttakEtterFødsel() {
+        var far = AktørId.dummy();
+        var mor = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var fødsel = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+        var termin = fødsel.plusWeeks(3);
+        var søknad = new FpSøknad(SøknadStatus.MOTTATT, LocalDateTime.now().minusDays(1),
+            Set.of(søknadsperiode(termin, termin.plusDays(4), Konto.MØDREKVOTE)), Dekningsgrad.HUNDRE, false);
+        var morsSak = sak(mor, far, barn, new FamilieHendelse(fødsel, termin, 1, null), BrukerRolle.MOR, Set.of(), Set.of(søknad));
+        lagre(morsSak);
+        var søknader = morsSøknadMedSamtidigUttakForFarFraTermin(morsSak, termin);
+
+        var plan = tjeneste(mor, søknader).hentFor(mor, verifisert(far), barn, fødsel).orElseThrow();
+
+        assertFarsForslagISammeUkerSomMorsSamtidigeUttak(plan, termin);
+    }
+
+    @Test
+    void morMedVedtakSerFarsForslagFlyttetTilSineUkerMedSamtidigUttakVedFødsel() {
+        var far = AktørId.dummy();
+        var mor = AktørId.dummy();
+        var barn = AktørId.dummy();
+        var fødsel = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.MONDAY));
+        var termin = fødsel.plusWeeks(3);
+        var samtidig = uttaksperiode(fødsel, fødsel.plusDays(11), Konto.MØDREKVOTE);
+        var samtidigFraFødsel = new Uttaksperiode(samtidig.fom(), samtidig.tom(), null, null, null,
+            new Prosent(java.math.BigDecimal.valueOf(100)), false, null, samtidig.resultat());
+        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(samtidigFraFødsel,
+            uttaksperiode(fødsel.plusWeeks(2), fødsel.plusWeeks(15).minusDays(3), Konto.MØDREKVOTE)), Dekningsgrad.HUNDRE, null, null, null);
+        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now().minusDays(1), Set.of(), Dekningsgrad.HUNDRE, false);
+        var morsSak = sak(mor, far, barn, new FamilieHendelse(fødsel, termin, 1, null), BrukerRolle.MOR, Set.of(vedtak), Set.of(søknad));
+        lagre(morsSak);
+        var søknader = morsSøknadMedSamtidigUttakForFarFraTermin(morsSak, termin);
+
+        var plan = tjeneste(mor, søknader).hentFor(mor, verifisert(far), barn, fødsel).orElseThrow();
+
+        assertFarsForslagISammeUkerSomMorsSamtidigeUttak(plan, fødsel);
+    }
+
+    private static void assertFarsForslagISammeUkerSomMorsSamtidigeUttak(FellesUttaksplanDto plan, LocalDate fom) {
+        assertThat(plan.perioder()).filteredOn(p -> p.annenPart() != null).singleElement().satisfies(p -> {
+            assertThat(p.fom()).isEqualTo(fom);
+            assertThat(p.tom()).isEqualTo(fom.plusDays(11));
+            assertThat(p.annenPart().forelder()).isEqualTo(FellesUttaksplanDto.Rolle.FAR_MEDMOR);
+            assertThat(p.annenPart().kontoType()).isEqualTo(no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType.FEDREKVOTE);
+            assertThat(p.søker().samtidigUttak()).isNotNull();
+        });
+        assertThat(plan.perioder()).filteredOn(p -> p.søker().samtidigUttak() != null).singleElement()
+            .satisfies(p -> assertThat(p.fom()).isEqualTo(fom));
+    }
+
+    /**
+     * Mor har vedtak med mødrekvote fra fødsel, og saken har både fødselsdato og termindato.
+     */
+    private SakFP0 morsSakMedVedtakEtterFødselshendelse(AktørId mor, AktørId far, AktørId barn, LocalDate fødsel, LocalDate termin) {
+        var vedtak = new FpVedtak(LocalDateTime.now(), List.of(uttaksperiode(fødsel, termin.plusWeeks(12), Konto.MØDREKVOTE)),
+            Dekningsgrad.HUNDRE, null, null, null);
+        var søknad = new FpSøknad(SøknadStatus.BEHANDLET, LocalDateTime.now().minusDays(1), Set.of(), Dekningsgrad.HUNDRE, false);
+        var sak = sak(mor, far, barn, new FamilieHendelse(fødsel, termin, 1, null), BrukerRolle.MOR, Set.of(vedtak), Set.of(søknad));
+        lagre(sak);
+        return sak;
+    }
+
+    /**
+     * Mor og far har to uker samtidig uttak fra termin, slik søknadsfrontend lager det, og deretter mors mødrekvote.
+     */
+    private static SøknadsplanRepositoryStub morsSøknadMedSamtidigUttakForFarFraTermin(SakFP0 morsSak, LocalDate termin) {
+        var toUkerFraTermin = termin.plusDays(11);
+        var repository = new SøknadsplanRepositoryStub();
+        repository.lagre(morsSak.saksnummer(), new Søknadsplan(termin.minusWeeks(4).atStartOfDay(), Søknadsplan.Rolle.MOR, List.of(
+            samtidigUttak(Søknadsplan.Rolle.MOR, termin, toUkerFraTermin, SøknadsplanPeriode.KontoType.MØDREKVOTE),
+            samtidigUttak(Søknadsplan.Rolle.FAR_MEDMOR, termin, toUkerFraTermin, SøknadsplanPeriode.KontoType.FEDREKVOTE),
+            nyPeriode(Søknadsplan.Rolle.MOR, termin.plusWeeks(2), termin.plusWeeks(12), SøknadsplanPeriode.KontoType.MØDREKVOTE, null, null,
+                null))));
+        return repository;
     }
 
     @Test
@@ -1743,7 +1903,17 @@ class UttaksplanTjenesteTest {
                               BrukerRolle rolle,
                               Set<FpVedtak> vedtak,
                               Set<FpSøknad> søknader) {
-        return new SakFP0(Saksnummer.dummy(), aktørId, false, vedtak, annenPart, new FamilieHendelse(null, termindato, antallBarn, null), Set.of(),
+        return sak(aktørId, annenPart, barn, new FamilieHendelse(null, termindato, antallBarn, null), rolle, vedtak, søknader);
+    }
+
+    private static SakFP0 sak(AktørId aktørId,
+                              AktørId annenPart,
+                              AktørId barn,
+                              FamilieHendelse familieHendelse,
+                              BrukerRolle rolle,
+                              Set<FpVedtak> vedtak,
+                              Set<FpSøknad> søknader) {
+        return new SakFP0(Saksnummer.dummy(), aktørId, false, vedtak, annenPart, familieHendelse, Set.of(),
             søknader, rolle, Set.of(barn), new Rettigheter(false, false, false), false, LocalDateTime.now());
     }
 
