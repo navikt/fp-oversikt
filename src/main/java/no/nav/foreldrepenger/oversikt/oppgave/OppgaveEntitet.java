@@ -20,6 +20,7 @@ class OppgaveEntitet {
     @Id
     private UUID id;
 
+    // TODO (anyone): migrer til not null i DB og sett nullable = false her. Se fp-inntektsmelding / migrering for inspirasjon
     @Column(name = "saksnummer", updatable = false)
     private String saksnummer;
 
