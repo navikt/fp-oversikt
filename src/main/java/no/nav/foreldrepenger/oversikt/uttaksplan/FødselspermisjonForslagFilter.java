@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import no.nav.foreldrepenger.kontrakter.felles.kodeverk.KontoType;
@@ -21,6 +23,7 @@ import no.nav.foreldrepenger.soknad.kontrakt.foreldrepenger.uttaksplan.FellesUtt
 final class FødselspermisjonForslagFilter {
 
     private static final BigDecimal HELT_SAMTIDIG_UTTAK = BigDecimal.valueOf(100);
+    private static final Set<DayOfWeek> HELG = EnumSet.of(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY);
 
     private FødselspermisjonForslagFilter() {
     }
@@ -96,7 +99,7 @@ final class FødselspermisjonForslagFilter {
 
     private static long uttaksdager(Planperiode periode) {
         return periode.fom().datesUntil(periode.tom().plusDays(1))
-            .filter(dato -> dato.getDayOfWeek() != DayOfWeek.SATURDAY && dato.getDayOfWeek() != DayOfWeek.SUNDAY)
+            .filter(dato -> !HELG.contains(dato.getDayOfWeek()))
             .count();
     }
 }

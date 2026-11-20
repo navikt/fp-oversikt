@@ -753,7 +753,7 @@ class UttaksplanTjenesteTest {
 
         var plan = tjeneste(mor, søknader).hentFor(mor, verifisert(far), barn, fødsel).orElseThrow();
 
-        assertThat(plan.perioder()).allSatisfy(p -> {
+        assertThat(plan.perioder()).isNotEmpty().allSatisfy(p -> {
             assertThat(p.annenPart()).isNull();
             assertThat(p.søker().samtidigUttak()).isNull();
         });
