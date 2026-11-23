@@ -73,6 +73,12 @@ public class UttaksplanTjeneste {
 
         var søkerRolle = søkerRolle(søkersSak, annenPartsSak);
         var annenPartsRolle = motsattRolle(søkerRolle);
+        // Metadata utledes fra søkerens sak når den finnes, ellers fra annen parts sak.
+        var metadataSak = søkersSak.or(() -> annenPartsSak).orElseThrow();
+        var familieHendelse = metadataSak.familieHendelse();
+        // Forslag om uttak ved fødsel gjelder ikke far og far
+        var morOgFarMedmor = Stream.of(søkersSak, annenPartsSak).flatMap(Optional::stream)
+            .anyMatch(sak -> sak.brukerRolle() == BrukerRolle.MOR);
 
         var søknadsperioder = søknadsperioder(søkersSak, annenPartsSak, søkerRolle);
         var søknadsutsettelser = søknadsperioder.stream()
@@ -84,16 +90,22 @@ public class UttaksplanTjeneste {
             // Søkerens perioder kommer da fra annen parts søknad og er bare et forslag. Uttak som er klart for gammelt
             // til å bli innvilget, vises ikke. Filteret har bevisst slakk i forhold til fpsak, se SøknadsfristFilter.
             søkerPerioder = SøknadsfristFilter.fjernUttakFørFrist(søkerPerioder, LocalDate.now());
+            if (morOgFarMedmor && søkerRolle == FellesUttaksplanDto.Rolle.FAR_MEDMOR) {
+                // Søknadsfrontend spør far om uttak ved fødsel og legger inn ukene selv
+                søkerPerioder = FødselspermisjonForslagFilter.fjernForslagFraTermin(søkerPerioder, familieHendelse);
+            }
         }
         // Når annen part ikke vises, er annenPartsSak tom, og annen parts perioder kommer bare fra søkerens egen søknadsplan.
-        var annenPartsPerioder = AnnenPartGraderingFilter.fjernArbeidsgivere(
-            vedtakEllerSøknadsuttak(annenPartsSak, søknadsperioder, annenPartsRolle));
+        var annenPartsUttak = vedtakEllerSøknadsuttak(annenPartsSak, søknadsperioder, annenPartsRolle);
+        var annenPartHarVedtak = annenPartsSak.flatMap(ForeldrepengerSak::gjeldendeVedtak).isPresent();
+        if (morOgFarMedmor && søkersSak.isPresent() && annenPartsRolle == FellesUttaksplanDto.Rolle.FAR_MEDMOR && !annenPartHarVedtak) {
+            // Uten vedtak kommer fars perioder fra mors søknadsplan
+            annenPartsUttak = FødselspermisjonForslagFilter.flyttForslagTilMorsSamtidigeUttak(annenPartsUttak, søkerPerioder, familieHendelse);
+        }
+        var annenPartsPerioder = AnnenPartGraderingFilter.fjernArbeidsgivere(annenPartsUttak);
         // EØS-perioder kommer fra søkerens eget vedtak.
         var eøsPerioder = eøsPerioder(søkersSak);
 
-        // Metadata utledes fra søkerens sak når den finnes, ellers fra annen parts sak.
-        var metadataSak = søkersSak.or(() -> annenPartsSak).orElseThrow();
-        var familieHendelse = metadataSak.familieHendelse();
         var annenPartRedigerbar = annenPartsSak.isEmpty(); //Saker uten søknad eller henlagte er allerede filtrert bort
         return Optional.of(new FellesUttaksplanDto(familieHendelse == null ? null : familieHendelse.termindato(),
             familieHendelse == null ? null : familieHendelse.antallBarn(), UttaksplanMapper.mapDekningsgrad(metadataSak.dekningsgrad()),
